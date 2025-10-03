@@ -1,0 +1,180 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgres"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum BookingType {
+  HOTEL
+  FLIGHT
+  TRAIN
+}
+
+model User {
+  id                String    @id @default(cuid())
+  email             String?   @unique
+  phone             String?   @unique
+  password          String
+  role              UserRole  @default(USER)
+  firstName         String?
+  lastName          String?
+  nationalId        String?   @unique
+  address           String?
+  postalCode        String?
+  city              String?
+  province          String?
+  dateOfBirth       DateTime?
+  emailVerified     Boolean   @default(false)
+  phoneVerified     Boolean   @default(false)
+  resetToken        String?
+  resetTokenExpiry  DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  bookings          Booking[]
+  posts             Post[]
+  
+  @@index([email])
+  @@index([phone])
+}
+
+model Post {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  excerpt     String
+  content     String   @db.Text
+  coverImage  String
+  category    String
+  tags        String[]
+  published   Boolean  @default(false)
+  featured    Boolean  @default(false)
+  views       Int      @default(0)
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([slug])
+  @@index([published])
+  @@index([featured])
+  @@index([category])
+}
+
+model Booking {
+  id              String        @id @default(cuid())
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type            BookingType
+  status          BookingStatus @default(PENDING)
+  
+  // Common fields
+  bookingCode     String        @unique
+  totalPrice      Float
+  currency        String        @default("IRR")
+  
+  // Hotel specific
+  hotelId         String?
+  hotelName       String?
+  roomType        String?
+  checkIn         DateTime?
+  checkOut        DateTime?
+  guests          Int?
+  
+  // Flight specific
+  flightId        String?
+  flightNumber    String?
+  airline         String?
+  origin          String?
+  destination     String?
+  departureTime   DateTime?
+  arrivalTime     DateTime?
+  passengers      Int?
+  class           String?
+  
+  // Train specific
+  trainId         String?
+  trainNumber     String?
+  trainOrigin     String?
+  trainDestination String?
+  departureDate   DateTime?
+  arrivalDate     DateTime?
+  trainPassengers Int?
+  wagonType       String?
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  @@index([userId])
+  @@index([bookingCode])
+  @@index([type])
+  @@index([status])
+}
+
+model Hotel {
+  id          String   @id @default(cuid())
+  name        String
+  city        String
+  address     String
+  rating      Float
+  stars       Int
+  image       String
+  price       Float
+  amenities   String[]
+  description String   @db.Text
+  available   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([city])
+  @@index([available])
+}
+
+model Flight {
+  id            String   @id @default(cuid())
+  flightNumber  String   @unique
+  airline       String
+  origin        String
+  destination   String
+  departureTime DateTime
+  arrivalTime   DateTime
+  price         Float
+  available     Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([origin, destination])
+  @@index([available])
+}
+
+model Train {
+  id            String   @id @default(cuid())
+  trainNumber   String   @unique
+  origin        String
+  destination   String
+  departureTime DateTime
+  arrivalTime   DateTime
+  price         Float
+  wagonType     String
+  available     Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([origin, destination])
+  @@index([available])
+}
