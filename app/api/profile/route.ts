@@ -13,24 +13,19 @@ export async function GET() {
 
     const user = await prisma.user.findUnique({
       where: { id: session.userId },
-      select: {
-        id: true,
-        email: true,
-        phone: true,
-        firstName: true,
-        lastName: true,
-        nationalId: true,
-        address: true,
-        postalCode: true,
-        city: true,
-        province: true,
-        dateOfBirth: true,
-      },
+      include: {
+        panelUser: true,
+        createdPanels: {
+          where: {
+            adminId: session.userId
+          }
+        }
+      }
     })
 
     return NextResponse.json({ user })
   } catch (error: any) {
-    console.error("[v0] Get profile error:", error)
+    console.error("Get profile error:", error)
     return NextResponse.json({ error: "خطا در دریافت پروفایل" }, { status: 500 })
   }
 }

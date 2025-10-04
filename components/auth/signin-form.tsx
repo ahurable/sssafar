@@ -18,16 +18,14 @@ export function SignInForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [loginMethod, setLoginMethod] = useState<"email" | "phone">("email")
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
   const [formData, setFormData] = useState({
     identifier: "",
     password: "",
   })
-  const { success } = useSnack()
+  const { success, error } = useSnack()
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setError("")
 
     try {
       const res = await fetch("/api/auth/signin", {
@@ -52,11 +50,11 @@ export function SignInForm() {
         }
         router.refresh()
       } else {
-        setError(data.error || "خطا در ورود")
+        error("خطا در ورود")
       }
     } catch (err) {
       console.error("[v0] Signin error:", err)
-      setError("خطا در برقراری ارتباط با سرور")
+      error("خطا در برقراری ارتباط با سرور")
     } finally {
       setLoading(false)
     }
@@ -66,9 +64,6 @@ export function SignInForm() {
     <Card>
       <CardContent className="p-6">
         <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>
-          )}
 
           <Tabs value={loginMethod} onValueChange={(v) => setLoginMethod(v as "email" | "phone")}>
             <TabsList className="grid w-full grid-cols-2 mb-4">

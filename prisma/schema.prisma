@@ -49,6 +49,10 @@ model User {
   bookings          Booking[]
   posts             Post[]
   
+  createdPanels Panel[]
+  panelUser PanelUser[]
+  creditTransactions CreditTransaction[]
+
   @@index([email])
   @@index([phone])
 }
@@ -177,4 +181,147 @@ model Train {
   
   @@index([origin, destination])
   @@index([available])
+}
+
+enum TransactionType {
+  DEPOSIT    // واریز اعتبار
+  WITHDRAW   // برداشت اعتبار
+  CHARGE     // شارژ (کسر اعتبار)
+  REFUND     // بازگشت اعتبار
+  BONUS      // اعتبار هدیه
+}
+
+model Panel {
+  id String @id @default(cuid())
+  name String
+  description String?
+  slug String @unique
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  adminId String?
+  user User? @relation(fields: [adminId], references: [id], onDelete: NoAction)
+  panelStats PanelStats[]
+
+  panelUser PanelUser[]
+  creditTransactions CreditTransaction[]
+  userTransactions UserTransaction[]
+  panelActivityLog PanelActivityLog[]
+}
+
+
+model PanelUser {
+  id        String   @id @default(cuid())
+  credit    Int      @default(0)
+  isActive  Boolean  @default(true)
+  joinedAt  DateTime @default(now())
+  lastLogin DateTime?
+
+  // ارتباط با پنل
+  panelId   String 
+  panel     Panel    @relation(fields: [panelId], references: [id])
+
+  // ارتباط با تراکنش‌های کاربر
+  transactions UserTransaction[]
+  panelActivityLog PanelActivityLog[]
+  // ارتباط با کاربر اصلی (اگر ثبت‌نام کرده باشد)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // هر کاربر فقط یک بار می‌تواند در یک پنل باشد
+  @@unique([panelId])
+  @@index([panelId])
+  @@index([isActive])
+  @@index([joinedAt])
+  @@map("panel_users")
+}
+
+
+model CreditTransaction {
+  id          String      @id @default(cuid())
+  type        TransactionType
+  amount      Int
+  description String?
+  createdAt   DateTime    @default(now())
+
+  // ارتباط با پنل
+  panelId     String
+  panel       Panel?       @relation(fields: [panelId], references: [id], onDelete: Cascade)
+
+  // ارتباط با ادمین ایجادکننده تراکنش
+  userId     String?
+  user        User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([panelId])
+  @@index([createdAt])
+  @@index([type])
+  @@map("credit_transactions")
+}
+
+model UserTransaction {
+  id          String      @id @default(cuid())
+  type        TransactionType
+  amount      Int
+  description String?
+  createdAt   DateTime    @default(now())
+
+  // ارتباط با کاربر پنل
+  userId      String
+  panelUser   PanelUser   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // ارتباط با پنل (برای کوئری‌های بهینه)
+  panelId     String
+  panel       Panel?       @relation(fields: [panelId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([panelId])
+  @@index([createdAt])
+  @@index([type])
+  @@map("user_transactions")
+}
+
+model PanelActivityLog {
+  id        String   @id @default(cuid())
+  action    String
+  details   Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  // ارتباط با پنل
+  panelId   String
+  panel     Panel    @relation(fields: [panelId], references: [id], onDelete: Cascade)
+
+  // ارتباط با کاربر (اگر عمل توسط کاربر انجام شده)
+  userId    String?
+  panelUser PanelUser? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([panelId])
+  @@index([createdAt])
+  @@map("panel_activity_logs")
+}
+
+model PanelStats {
+  id String @id @default(cuid())
+
+  // آمار استفاده
+  totalUsers      Int @default(0)
+  activeUsers     Int @default(0)
+  totalCreditUsed Int? @default(0)
+  monthlyUsage    Int? @default(0)
+
+  // تاریخ آمار (برای گزارش‌های ماهانه)
+  year  Int?
+  month Int?
+
+  // ارتباط با پنل
+  panelId String
+  panel   Panel  @relation(fields: [panelId], references: [id], onDelete: Cascade)
+
+  // هر پنل فقط یک رکورد آمار برای هر ماه دارد
+  @@unique([panelId, year, month])
+  @@index([panelId])
+  @@index([year, month])
+  @@map("panel_stats")
 }

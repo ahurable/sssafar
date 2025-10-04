@@ -19,7 +19,6 @@ export function Header() {
       if (res.ok) {
         setUser(data.user)
       }
-      console.log(data)
     }
     handleAsync()
   }, [])

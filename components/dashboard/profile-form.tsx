@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { User, MapPin, CreditCard, Save } from "lucide-react"
+import { User, MapPin, CreditCard, Save, Mail } from "lucide-react"
 
 export function ProfileForm() {
   const [loading, setLoading] = useState(true)
@@ -24,13 +24,14 @@ export function ProfileForm() {
     city: "",
     province: "",
   })
+  const [hasExistingData, setHasExistingData] = useState(false)
 
   useEffect(() => {
     fetch("/api/profile")
       .then((res) => res.json())
       .then((data) => {
         if (data.user) {
-          setFormData({
+          const userData = {
             firstName: data.user.firstName || "",
             lastName: data.user.lastName || "",
             nationalId: data.user.nationalId || "",
@@ -38,8 +39,15 @@ export function ProfileForm() {
             postalCode: data.user.postalCode || "",
             city: data.user.city || "",
             province: data.user.province || "",
-          })
+          }
+          
+          setFormData(userData)
+          
+          // Check if any field has existing data
+          const hasData = Object.values(userData).some(value => value && value.trim() !== "")
+          setHasExistingData(hasData)
         }
+        console.log(data.user)
         setLoading(false)
       })
       .catch((err) => {
@@ -50,6 +58,13 @@ export function ProfileForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Prevent submission if there's existing data
+    if (hasExistingData) {
+      setError("برای ویرایش اطلاعات لطفا با پشتیبانی تماس بگیرید")
+      return
+    }
+    
     setSaving(true)
     setError("")
     setSuccess(false)
@@ -65,6 +80,7 @@ export function ProfileForm() {
 
       if (res.ok) {
         setSuccess(true)
+        setHasExistingData(true) // Mark as having data after successful save
         setTimeout(() => setSuccess(false), 3000)
       } else {
         setError(data.error || "خطا در به‌روزرسانی پروفایل")
@@ -78,6 +94,9 @@ export function ProfileForm() {
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    // Prevent changes if there's existing data
+    if (hasExistingData) return
+    
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
@@ -98,9 +117,26 @@ export function ProfileForm() {
     <Card>
       <CardHeader>
         <CardTitle>اطلاعات شخصی</CardTitle>
-        <CardDescription>اطلاعات خود را وارد و به‌روزرسانی کنید</CardDescription>
+        <CardDescription>
+          {hasExistingData 
+            ? "اطلاعات شما قبلا ثبت شده است. برای ویرایش با پشتیبانی تماس بگیرید."
+            : "اطلاعات خود را وارد و به‌روزرسانی کنید"
+          }
+        </CardDescription>
       </CardHeader>
       <CardContent>
+        {hasExistingData && (
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center gap-3 text-blue-700">
+              <Mail className="h-5 w-5" />
+              <div>
+                <p className="font-medium">اطلاعات شما قبلا ثبت شده است</p>
+                <p className="text-sm mt-1">برای ویرایش اطلاعات لطفا با پشتیبانی تماس بگیرید</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-6">
           {success && (
             <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
@@ -124,6 +160,7 @@ export function ProfileForm() {
                   value={formData.firstName}
                   onChange={handleChange}
                   required
+                  disabled={hasExistingData}
                 />
               </div>
             </div>
@@ -140,6 +177,7 @@ export function ProfileForm() {
                   value={formData.lastName}
                   onChange={handleChange}
                   required
+                  disabled={hasExistingData}
                 />
               </div>
             </div>
@@ -157,6 +195,7 @@ export function ProfileForm() {
                 value={formData.nationalId}
                 onChange={handleChange}
                 maxLength={10}
+                disabled={hasExistingData}
               />
             </div>
           </div>
@@ -172,6 +211,7 @@ export function ProfileForm() {
                 className="pr-10 min-h-24"
                 value={formData.address}
                 onChange={handleChange}
+                disabled={hasExistingData}
               />
             </div>
           </div>
@@ -179,7 +219,14 @@ export function ProfileForm() {
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="city">شهر</Label>
-              <Input id="city" name="city" placeholder="نام شهر" value={formData.city} onChange={handleChange} />
+              <Input 
+                id="city" 
+                name="city" 
+                placeholder="نام شهر" 
+                value={formData.city} 
+                onChange={handleChange} 
+                disabled={hasExistingData}
+              />
             </div>
 
             <div className="space-y-2">
@@ -191,17 +238,22 @@ export function ProfileForm() {
                 value={formData.postalCode}
                 onChange={handleChange}
                 maxLength={10}
+                disabled={hasExistingData}
               />
             </div>
           </div>
 
           <div className="flex justify-end gap-3">
-            <Button type="button" variant="outline">
+            <Button type="button" variant="outline" disabled={hasExistingData}>
               انصراف
             </Button>
-            <Button type="submit" disabled={saving}>
+            <Button 
+              type="submit" 
+              disabled={saving || hasExistingData}
+              className={hasExistingData ? "bg-gray-400 cursor-not-allowed" : ""}
+            >
               <Save className="ml-2 h-4 w-4" />
-              {saving ? "در حال ذخیره..." : "ذخیره اطلاعات"}
+              {hasExistingData ? "غیرقابل ویرایش" : saving ? "در حال ذخیره..." : "ذخیره اطلاعات"}
             </Button>
           </div>
         </form>

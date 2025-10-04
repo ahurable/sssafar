@@ -1,3 +1,4 @@
+import { PanelUser } from "@prisma/client";
 
 export interface UserType {
     id: string,
@@ -10,6 +11,7 @@ export interface UserType {
     firstName?: string,
     lastName?: string,
     nationalId?: string,
+    panelUser: PanelUser[] | null,
     phone?: string,
     phoneVerified: boolean,
     postalCode?: string,
