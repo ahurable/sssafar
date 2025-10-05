@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
-import { User, Ticket, Settings, LogOut, PanelBottom } from "lucide-react"
+import { User, Ticket, Settings, LogOut, PanelBottom, Users } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useSnack } from "@/hooks/use-notification"
 import { useEffect, useState } from "react"
@@ -32,6 +32,25 @@ export function DashboardNav() {
   const { error } = useSnack()
   const [ me, setMe ] = useState<UserType | null>()
   const [loading, setLoading] = useState<boolean>(true)
+
+  // Calculate age from date of birth (Gregorian date string)
+  const calculateAge = (dateOfBirth: string): number => {
+    if (!dateOfBirth) return 0
+    
+    const birthDate = new Date(dateOfBirth)
+    const today = new Date()
+    
+    let age = today.getFullYear() - birthDate.getFullYear()
+    const monthDiff = today.getMonth() - birthDate.getMonth()
+    
+    // Adjust age if birthday hasn't occurred this year yet
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--
+    }
+    
+    return age
+  }
+
   useEffect(() => {
     const handleMe = async () => {
       const res = await fetch(
@@ -42,6 +61,7 @@ export function DashboardNav() {
         error("خطا در دریافت پروفایل")
       }
       setMe(data.user)
+      
       setLoading(false)
     }
     handleMe()
@@ -82,7 +102,22 @@ export function DashboardNav() {
               >
                 <PanelBottom className="h-4 w-4" />
                   پنل ها
-               </Link>
+            </Link>
+          }
+          {
+            me && me.dateOfBirth && calculateAge(me.dateOfBirth) > 18 &&
+            <Link
+                href="/dashboard/travelers"
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  pathname == "panels"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                )}
+              >
+                <Users className="h-4 w-4" />
+                  افزودن مسافران
+            </Link>
           }
           <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10">
             <LogOut className="h-4 w-4" />

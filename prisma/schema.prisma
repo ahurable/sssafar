@@ -48,13 +48,26 @@ model User {
   
   bookings          Booking[]
   posts             Post[]
-  
+  travelers         Traveler[]
   createdPanels Panel[]
   panelUser PanelUser[]
   creditTransactions CreditTransaction[]
 
   @@index([email])
   @@index([phone])
+}
+
+model Traveler {
+  id String @unique @default(cuid())
+  firstName String
+  lastName String
+  nationalId String
+  dateOfBirth DateTime
+  passportNumber String
+  passportExpiry String
+
+  userId String
+  createdBy User @relation(fields: [userId], references: [id] , onDelete: Cascade)
 }
 
 model Post {

@@ -8,13 +8,18 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { User, MapPin, CreditCard, Save, Mail } from "lucide-react"
+import { User, MapPin, CreditCard, Save, Mail, Calendar, AlertCircle } from "lucide-react"
+import DatePicker from "react-multi-date-picker"
+import { DateObject } from "react-multi-date-picker"
+import persian from "react-date-object/calendars/persian"
+import persian_fa from "react-date-object/locales/persian_fa"
 
 export function ProfileForm() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState("")
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -23,8 +28,10 @@ export function ProfileForm() {
     postalCode: "",
     city: "",
     province: "",
+    dateOfBirth: "",
   })
   const [hasExistingData, setHasExistingData] = useState(false)
+  const [selectedDate, setSelectedDate] = useState<DateObject | null>(null)
 
   useEffect(() => {
     fetch("/api/profile")
@@ -39,15 +46,29 @@ export function ProfileForm() {
             postalCode: data.user.postalCode || "",
             city: data.user.city || "",
             province: data.user.province || "",
+            dateOfBirth: data.user.dateOfBirth || "",
           }
           
           setFormData(userData)
+          // Set Persian date if exists
+          if (userData.dateOfBirth) {
+            try {
+              const gregorianDate = new Date(userData.dateOfBirth)
+              const persianDate = new DateObject({
+                date: gregorianDate,
+                calendar: persian,
+                locale: persian_fa
+              })
+              setSelectedDate(persianDate)
+            } catch (error) {
+              console.error("Error setting date:", error)
+            }
+          }
           
           // Check if any field has existing data
           const hasData = Object.values(userData).some(value => value && value.trim() !== "")
           setHasExistingData(hasData)
         }
-        console.log(data.user)
         setLoading(false)
       })
       .catch((err) => {
@@ -55,6 +76,53 @@ export function ProfileForm() {
         setLoading(false)
       })
   }, [])
+
+  // Validate form fields
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {}
+
+    // Required fields validation
+    if (!formData.firstName.trim()) {
+      errors.firstName = "نام الزامی است"
+    } else if (formData.firstName.trim().length < 2) {
+      errors.firstName = "نام باید حداقل ۲ حرف باشد"
+    }
+
+    if (!formData.lastName.trim()) {
+      errors.lastName = "نام خانوادگی الزامی است"
+    } else if (formData.lastName.trim().length < 2) {
+      errors.lastName = "نام خانوادگی باید حداقل ۲ حرف باشد"
+    }
+
+    if (!formData.nationalId.trim()) {
+      errors.nationalId = "کد ملی الزامی است"
+    } else if (!/^\d{10}$/.test(formData.nationalId)) {
+      errors.nationalId = "کد ملی باید ۱۰ رقم باشد"
+    }
+
+    if (!selectedDate) {
+      errors.dateOfBirth = "تاریخ تولد الزامی است"
+    }
+
+    if (!formData.address.trim()) {
+      errors.address = "آدرس الزامی است"
+    } else if (formData.address.trim().length < 10) {
+      errors.address = "آدرس باید حداقل ۱۰ حرف باشد"
+    }
+
+    if (!formData.city.trim()) {
+      errors.city = "شهر الزامی است"
+    }
+
+    if (!formData.postalCode.trim()) {
+      errors.postalCode = "کد پستی الزامی است"
+    } else if (!/^\d{10}$/.test(formData.postalCode)) {
+      errors.postalCode = "کد پستی باید ۱۰ رقم باشد"
+    }
+
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -65,22 +133,41 @@ export function ProfileForm() {
       return
     }
     
+    // Validate form
+    if (!validateForm()) {
+      setError("لطفا اطلاعات فرم را به درستی تکمیل کنید")
+      return
+    }
+    
     setSaving(true)
     setError("")
     setSuccess(false)
+    setFormErrors({})
 
     try {
+      // Convert Persian date to Gregorian for storage
+      let dateOfBirth = ""
+      if (selectedDate) {
+        const gregorianDate = selectedDate.convert(persian, "gregorian")
+        dateOfBirth = gregorianDate.toDate().toISOString().split('T')[0]
+      }
+
+      const submitData = {
+        ...formData,
+        dateOfBirth
+      }
+
       const res = await fetch("/api/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(submitData),
       })
 
       const data = await res.json()
 
       if (res.ok) {
         setSuccess(true)
-        setHasExistingData(true) // Mark as having data after successful save
+        setHasExistingData(true)
         setTimeout(() => setSuccess(false), 3000)
       } else {
         setError(data.error || "خطا در به‌روزرسانی پروفایل")
@@ -94,13 +181,46 @@ export function ProfileForm() {
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    // Prevent changes if there's existing data
     if (hasExistingData) return
+    
+    const { name, value } = e.target
     
     setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }))
+
+    // Clear error when user starts typing
+    if (formErrors[name]) {
+      setFormErrors(prev => ({
+        ...prev,
+        [name]: ""
+      }))
+    }
+  }
+
+  const handleDateChange = (date: DateObject | null) => {
+    if (hasExistingData) return
+    
+    setSelectedDate(date)
+    
+    // Clear date error when user selects a date
+    if (formErrors.dateOfBirth) {
+      setFormErrors(prev => ({
+        ...prev,
+        dateOfBirth: ""
+      }))
+    }
+  }
+
+  const isFormValid = () => {
+    return formData.firstName.trim().length >= 2 && 
+           formData.lastName.trim().length >= 2 && 
+           /^\d{10}$/.test(formData.nationalId) && 
+           formData.address.trim().length >= 10 && 
+           formData.city.trim() && 
+           /^\d{10}$/.test(formData.postalCode) && 
+           selectedDate !== null
   }
 
   if (loading) {
@@ -144,102 +264,202 @@ export function ProfileForm() {
             </div>
           )}
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
+              <AlertCircle className="h-4 w-4" />
+              {error}
+            </div>
           )}
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="firstName">نام</Label>
+              <Label htmlFor="firstName">
+                نام
+                <span className="text-red-500 mr-1">*</span>
+              </Label>
               <div className="relative">
                 <User className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="firstName"
                   name="firstName"
                   placeholder="نام خود را وارد کنید"
-                  className="pr-10"
+                  className={`pr-10 ${formErrors.firstName ? "border-red-500" : ""}`}
                   value={formData.firstName}
                   onChange={handleChange}
                   required
                   disabled={hasExistingData}
                 />
               </div>
+              {formErrors.firstName && (
+                <p className="text-red-500 text-xs flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {formErrors.firstName}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="lastName">نام خانوادگی</Label>
+              <Label htmlFor="lastName">
+                نام خانوادگی
+                <span className="text-red-500 mr-1">*</span>
+              </Label>
               <div className="relative">
                 <User className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="lastName"
                   name="lastName"
                   placeholder="نام خانوادگی خود را وارد کنید"
-                  className="pr-10"
+                  className={`pr-10 ${formErrors.lastName ? "border-red-500" : ""}`}
                   value={formData.lastName}
                   onChange={handleChange}
                   required
                   disabled={hasExistingData}
                 />
               </div>
+              {formErrors.lastName && (
+                <p className="text-red-500 text-xs flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {formErrors.lastName}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="nationalId">
+                کد ملی
+                <span className="text-red-500 mr-1">*</span>
+              </Label>
+              <div className="relative">
+                <CreditCard className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="nationalId"
+                  name="nationalId"
+                  placeholder="کد ملی ۱۰ رقمی"
+                  className={`pr-10 ${formErrors.nationalId ? "border-red-500" : ""}`}
+                  value={formData.nationalId}
+                  onChange={handleChange}
+                  maxLength={10}
+                  disabled={hasExistingData}
+                />
+              </div>
+              {formErrors.nationalId && (
+                <p className="text-red-500 text-xs flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {formErrors.nationalId}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="dateOfBirth">
+                تاریخ تولد
+                <span className="text-red-500 mr-1">*</span>
+              </Label>
+              <div className="relative">
+                <Calendar className="absolute right-3 top-3 h-4 w-4 text-muted-foreground z-10" />
+                <DatePicker
+                  value={selectedDate}
+                  onChange={handleDateChange}
+                  calendar={persian}
+                  locale={persian_fa}
+                  calendarPosition="bottom-right"
+                  disabled={hasExistingData}
+                  render={(value, openCalendar) => (
+                    <div className="relative">
+                      <input
+                        className={`w-full h-10 px-3 pr-10 border rounded-md text-sm bg-background ${
+                          formErrors.dateOfBirth ? "border-red-500" : "border-input"
+                        } ${hasExistingData ? "bg-muted cursor-not-allowed" : ""}`}
+                        placeholder="تاریخ تولد را انتخاب کنید"
+                        value={value || ""}
+                        onClick={openCalendar}
+                        readOnly
+                        disabled={hasExistingData}
+                      />
+                    </div>
+                  )}
+                  className="rmdp-prime"
+                />
+              </div>
+              {formErrors.dateOfBirth && (
+                <p className="text-red-500 text-xs flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {formErrors.dateOfBirth}
+                </p>
+              )}
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="nationalId">کد ملی</Label>
-            <div className="relative">
-              <CreditCard className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="nationalId"
-                name="nationalId"
-                placeholder="کد ملی ۱۰ رقمی"
-                className="pr-10"
-                value={formData.nationalId}
-                onChange={handleChange}
-                maxLength={10}
-                disabled={hasExistingData}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="address">آدرس</Label>
+            <Label htmlFor="address">
+              آدرس
+              <span className="text-red-500 mr-1">*</span>
+            </Label>
             <div className="relative">
               <MapPin className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
               <Textarea
                 id="address"
                 name="address"
                 placeholder="آدرس کامل خود را وارد کنید"
-                className="pr-10 min-h-24"
+                className={`pr-10 min-h-24 ${formErrors.address ? "border-red-500" : ""}`}
                 value={formData.address}
                 onChange={handleChange}
                 disabled={hasExistingData}
               />
             </div>
+            {formErrors.address && (
+              <p className="text-red-500 text-xs flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {formErrors.address}
+              </p>
+            )}
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="city">شهر</Label>
+              <Label htmlFor="city">
+                شهر
+                <span className="text-red-500 mr-1">*</span>
+              </Label>
               <Input 
                 id="city" 
                 name="city" 
                 placeholder="نام شهر" 
+                className={formErrors.city ? "border-red-500" : ""}
                 value={formData.city} 
                 onChange={handleChange} 
                 disabled={hasExistingData}
               />
+              {formErrors.city && (
+                <p className="text-red-500 text-xs flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {formErrors.city}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="postalCode">کد پستی</Label>
+              <Label htmlFor="postalCode">
+                کد پستی
+                <span className="text-red-500 mr-1">*</span>
+              </Label>
               <Input
                 id="postalCode"
                 name="postalCode"
                 placeholder="کد پستی ۱۰ رقمی"
+                className={formErrors.postalCode ? "border-red-500" : ""}
                 value={formData.postalCode}
                 onChange={handleChange}
                 maxLength={10}
                 disabled={hasExistingData}
               />
+              {formErrors.postalCode && (
+                <p className="text-red-500 text-xs flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {formErrors.postalCode}
+                </p>
+              )}
             </div>
           </div>
 
@@ -249,13 +469,20 @@ export function ProfileForm() {
             </Button>
             <Button 
               type="submit" 
-              disabled={saving || hasExistingData}
-              className={hasExistingData ? "bg-gray-400 cursor-not-allowed" : ""}
+              disabled={saving || hasExistingData || !isFormValid()}
+              className={hasExistingData || !isFormValid() ? "bg-gray-400 cursor-not-allowed" : ""}
             >
               <Save className="ml-2 h-4 w-4" />
               {hasExistingData ? "غیرقابل ویرایش" : saving ? "در حال ذخیره..." : "ذخیره اطلاعات"}
             </Button>
           </div>
+
+          {!isFormValid() && !hasExistingData && (
+            <div className="bg-amber-50 border border-amber-200 text-amber-700 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
+              <AlertCircle className="h-4 w-4" />
+              لطفا تمام فیلدهای ضروری (علامت‌دار با *) را به درستی پر کنید
+            </div>
+          )}
         </form>
       </CardContent>
     </Card>
