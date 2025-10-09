@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Plus, Edit, ExternalLink } from "lucide-react"
 import { CreatePanelDialog } from "./create-panel-dialog"
 import { EditPanelDialog } from "./edit-panel-dialog"
+import Link from "next/link"
 
 interface Panel {
   id: string
@@ -59,7 +60,7 @@ export function PanelManagement() {
 
   const handleVisitPanel = (panelId: string) => {
     // Navigate to panel page or open panel view
-    window.open(`/panels/${panelId}`, '_blank')
+    window.open(`panels/${panelId}/edit`, '_blank')
   }
 
 
@@ -154,13 +155,6 @@ export function PanelManagement() {
                     <ExternalLink className="h-4 w-4 ml-1" />
                     مشاهده پنل
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => setEditPanel(panel)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -169,14 +163,7 @@ export function PanelManagement() {
       </div>
 
       <CreatePanelDialog open={createOpen} onOpenChange={setCreateOpen} onSuccess={fetchPanels} />
-      {editPanel && (
-        <EditPanelDialog 
-          panel={editPanel}
-          open={!!editPanel}
-          onOpenChange={() => setEditPanel(null)}
-          onSuccess={fetchPanels}
-        />
-      )}
+      
     </div>
   )
 }

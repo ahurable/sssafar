@@ -8,8 +8,11 @@ datasource db {
 }
 
 enum UserRole {
-  USER
-  ADMIN
+  USER // کاربر معمولی
+  ADMIN  // مدیر
+  ACCOUNTANT //حسابدار 
+  ROTO // نماینده سازمان
+  ORGAN // ارگان یا سازمان
 }
 
 enum BookingStatus {
@@ -51,7 +54,10 @@ model User {
   travelers         Traveler[]
   createdPanels Panel[]
   panelUser PanelUser[]
+  panelMember MembersOnPanel[]
+  contracts Contract[]
   creditTransactions CreditTransaction[]
+  userCredit Credit?
 
   @@index([email])
   @@index([phone])
@@ -212,12 +218,16 @@ model Panel {
   isActive Boolean @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
+  discountPercentage Int @default(0)
+  memberCredit Int @default(0)
   adminId String?
   user User? @relation(fields: [adminId], references: [id], onDelete: NoAction)
   panelStats PanelStats[]
+  contractId String? @unique
+  contract Contract? @relation(fields: [contractId], references: [id])
 
   panelUser PanelUser[]
+  members MembersOnPanel[]
   creditTransactions CreditTransaction[]
   userTransactions UserTransaction[]
   panelActivityLog PanelActivityLog[]
@@ -251,6 +261,37 @@ model PanelUser {
 }
 
 
+model MembersOnPanel {
+  id        String   @id @default(cuid())
+  credit    Int      @default(0)
+  isActive  Boolean  @default(true)
+  joinedAt  DateTime @default(now())
+  lastLogin DateTime?
+
+  // ارتباط با پنل
+  panelId   String 
+  panel     Panel    @relation(fields: [panelId], references: [id], onDelete: Cascade)
+
+  // ارتباط با تراکنش‌های کاربر
+  // transactions UserTransaction[]
+  // panelActivityLog PanelActivityLog[]
+  // ارتباط با کاربر اصلی (اگر ثبت‌نام کرده باشد)
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // هر کاربر فقط یک بار می‌تواند در یک پنل باشد
+  @@unique([panelId, userId])
+  @@index([panelId])
+  @@index([userId])
+  @@index([isActive])
+  @@index([joinedAt])
+  @@map("panel_members")
+}
+
+
+
+
+
 model CreditTransaction {
   id          String      @id @default(cuid())
   type        TransactionType
@@ -259,12 +300,15 @@ model CreditTransaction {
   createdAt   DateTime    @default(now())
 
   // ارتباط با پنل
-  panelId     String
-  panel       Panel?       @relation(fields: [panelId], references: [id], onDelete: Cascade)
+  panelId     String?
+  panel       Panel?       @relation(fields: [panelId], references: [id], onDelete: NoAction)
 
   // ارتباط با ادمین ایجادکننده تراکنش
-  userId     String?
-  user        User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId     String
+  user        User?       @relation(fields: [userId], references: [id], onDelete: NoAction)
+
+  creditId   String?
+  credit     Credit?      @relation(fields: [creditId], references: [id], onDelete: Cascade)
 
   @@index([panelId])
   @@index([createdAt])
@@ -337,4 +381,56 @@ model PanelStats {
   @@index([panelId])
   @@index([year, month])
   @@map("panel_stats")
+}
+
+model Credit {
+  id           String  @id   @default(cuid())  @unique
+  balance       Int           @default(0)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  transactions  CreditTransaction[]
+
+  userId       String  @unique
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("transactions")
+}
+
+
+enum ContractStatus {
+  DRAFT
+  ACTIVE
+  CLOSED
+}
+
+
+model Contract {
+  id               String   @id @default(cuid())
+  title            String
+  description      String?
+  organizationName     String
+  status           ContractStatus @default(DRAFT)
+  closeReason      String?
+  files            File[]   // Relation to multiple files
+  userId           String
+  createdBy        User     @relation(fields: [userId], references: [id])
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  panel  Panel?
+
+  @@map("contracts")
+}
+
+model File {
+  id        String   @id @default(cuid())
+  filename  String
+  mimetype  String
+  path      String   // File path on disk or cloud URL
+  size      Int      // File size in bytes
+  contract  Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  contractId String
+  createdAt DateTime @default(now())
+
+  @@map("files")
 }

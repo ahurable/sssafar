@@ -216,10 +216,10 @@ export function ProfileForm() {
   const isFormValid = () => {
     return formData.firstName.trim().length >= 2 && 
            formData.lastName.trim().length >= 2 && 
-           /^\d{10}$/.test(formData.nationalId) && 
+          //  /^\d{10}$/.test(formData.nationalId) && 
            formData.address.trim().length >= 10 && 
            formData.city.trim() && 
-           /^\d{10}$/.test(formData.postalCode) && 
+          //  /^\d{10}$/.test(formData.postalCode) && 
            selectedDate !== null
   }
 

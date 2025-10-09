@@ -25,20 +25,29 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await hashPassword(validatedData.password)
 
     // Create user
-    const user = await prisma.user.create({
-      data: {
-        email: validatedData.email || null,
-        phone: validatedData.phone || null,
-        password: hashedPassword,
-      },
-      select: {
-        id: true,
-        email: true,
-        phone: true,
-        role: true,
-        firstName: true,
-        lastName: true,
-      },
+    const user = await prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          email: validatedData.email || null,
+          phone: validatedData.phone || null,
+          password: hashedPassword,
+        },
+        select: {
+          id: true,
+          email: true,
+          phone: true,
+          role: true,
+          firstName: true,
+          lastName: true
+        },
+      })
+      await tx.credit.create({
+        data: {
+          userId: user.id,
+          balance: 0
+        }
+      })
+      return user
     })
 
     // Create token and set session

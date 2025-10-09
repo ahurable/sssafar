@@ -16,5 +16,12 @@ export interface UserType {
     phoneVerified: boolean,
     postalCode?: string,
     provience?: string,
-    role?: "USER" | "ADMIN"
+    userCredit: {
+        id: string,
+        userId: string,
+        balance: number,
+        createdAt: string,
+        updatedAt: string
+    }
+    role?: "USER" | "ADMIN" | "ORGAN" | "ACCOUNTANT" | "ROTO"
 }

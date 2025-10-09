@@ -5,12 +5,12 @@ import { prisma } from "@/lib/prisma"
 export async function GET(request: NextRequest) {
   try {
     const session = await getSession()
-
+    console.log(session?.role)
     if (!session) {
       return NextResponse.json({ error: "احراز هویت نشده" }, { status: 401 })
     }
 
-    if (session.role !== "ADMIN") {
+    if (!["ADMIN", "ORGAN"].includes(session.role)) {
       return NextResponse.json({ error: "دسترسی غیرمجاز" }, { status: 403 })
     }
 

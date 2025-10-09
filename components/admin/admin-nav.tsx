@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Users, FileText, Settings, LogOut, PanelRightIcon } from "lucide-react"
+import { LayoutDashboard, Users, FileText, Settings, LogOut, PanelRightIcon, PlusSquare, File } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const navItems = [
@@ -19,7 +19,7 @@ const navItems = [
   {
     title: "پست‌ها",
     href: "/admin/posts",
-    icon: FileText,
+    icon: PlusSquare,
   },
   {
     title: "پنل ها",
@@ -30,6 +30,11 @@ const navItems = [
     title: "تنظیمات",
     href: "/admin/settings",
     icon: Settings,
+  },
+  {
+    title: "قرارداد ها",
+    href: "/admin/contracts",
+    icon: File,
   },
 ]
 

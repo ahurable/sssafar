@@ -4,11 +4,23 @@ import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Plane, Clock, Calendar } from "lucide-react"
+import { Plane, Clock, Calendar, ChevronDown, ArrowRight, ArrowLeft } from "lucide-react"
 import { flights } from "@/lib/data/flights"
+import { useRouter } from "next/navigation"
 
 export function FlightList() {
   const [flightList] = useState(flights)
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+  const router = useRouter()
+
+  const handleBookFlight = (flightId: string, type: "oneway" | "twoway") => {
+    setOpenDropdown(null)
+    router.push(`/flights/${flightId}/book/${type}`)
+  }
+
+  const toggleDropdown = (flightId: string) => {
+    setOpenDropdown(openDropdown === flightId ? null : flightId)
+  }
 
   return (
     <div className="space-y-4">
@@ -65,7 +77,62 @@ export function FlightList() {
                     {flight.price.toLocaleString("fa-IR")} <span className="text-sm font-normal">تومان</span>
                   </p>
                 </div>
-                <Button className="w-full md:w-auto">خرید بلیط</Button>
+                
+                {/* Booking Dropdown */}
+                <div className="relative">
+                  <Button 
+                    onClick={() => toggleDropdown(flight.id)}
+                    className="w-full md:w-auto flex items-center gap-2"
+                  >
+                    خرید بلیط
+                    <ChevronDown className={`h-4 w-4 transition-transform ${openDropdown === flight.id ? 'rotate-180' : ''}`} />
+                  </Button>
+
+                  {openDropdown === flight.id && (
+                    <div className="absolute top-full left-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                      <div className="p-2">
+                        <div className="mb-2 px-3 py-2 border-b">
+                          <p className="font-medium text-sm text-gray-700">نوع بلیط را انتخاب کنید:</p>
+                        </div>
+                        
+                        <button
+                          onClick={() => handleBookFlight(flight.id, "oneway")}
+                          className="w-full flex items-center justify-between p-3 text-right hover:bg-blue-50 rounded-md transition-colors group"
+                        >
+                          <div className="flex items-center gap-3">
+                            <ArrowRight className="h-4 w-4 text-blue-600" />
+                            <div>
+                              <p className="font-medium text-sm">پرواز یک‌طرفه</p>
+                              <p className="text-xs text-muted-foreground">فقط پرواز رفت</p>
+                            </div>
+                          </div>
+                          <p className="text-sm font-bold text-blue-600">
+                            {flight.price.toLocaleString("fa-IR")} تومان
+                          </p>
+                        </button>
+                        
+                        <button
+                          onClick={() => handleBookFlight(flight.id, "twoway")}
+                          className="w-full flex items-center justify-between p-3 text-right hover:bg-green-50 rounded-md transition-colors group"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center">
+                              <ArrowRight className="h-4 w-4 text-green-600" />
+                              <ArrowLeft className="h-4 w-4 text-green-600 -mr-1" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-sm">پرواز دوطرفه</p>
+                              <p className="text-xs text-muted-foreground">پرواز رفت و برگشت</p>
+                            </div>
+                          </div>
+                          <p className="text-sm font-bold text-green-600">
+                            {(flight.price * 1.8).toLocaleString("fa-IR")} تومان
+                          </p>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </CardContent>

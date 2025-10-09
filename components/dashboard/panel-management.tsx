@@ -12,6 +12,9 @@ interface Panel {
   createdAt: string
   updatedAt: string
   slug: string
+  panelUser?: {
+    userId: string
+  }[]
   description: string | null
   isActive: boolean
   adminId: string | null
@@ -19,12 +22,20 @@ interface Panel {
 
 export function PanelManagement({ panelId }: { panelId: string }) {
   const [panels, setPanels] = useState<Panel[]>([])
+  const [userPanels, setUserPanels] = useState<Panel[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
 
   useEffect(() => {
     fetchPanels()
+    fetchMe()
   }, [])
+
+  // useEffect(() => {
+  //   console.log(userId)
+  //   // console.log(p)
+  // }, [userId, panels])
 
   const fetchPanels = async () => {
     try {
@@ -35,13 +46,24 @@ export function PanelManagement({ panelId }: { panelId: string }) {
       }
       const data = await response.json()
       setPanels(data.panels)
-      console.log(data.panels)
+      setUserPanels(data.userPanels)
+      console.log(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : "خطای ناشناخته")
     } finally {
       setLoading(false)
     }
   }
+
+  const fetchMe = async () => {
+    const res = await fetch("/api/auth/me")
+    const data = await res.json()
+    if (res.ok)
+      setUserId(data.user.id)
+  }
+
+
+  useEffect(() => console.log(userPanels) , [userPanels])
 
   const handleCreatePanel = () => {
     // منطق ایجاد پنل جدید
@@ -53,16 +75,9 @@ export function PanelManagement({ panelId }: { panelId: string }) {
     console.log("ویرایش پنل:", panelId)
   }
 
-  const handleDeletePanel = (panelId: string) => {
-    // منطق حذف پنل
-    if (confirm("آیا از حذف این پنل اطمینان دارید؟")) {
-      console.log("حذف پنل:", panelId)
-    }
-  }
-
-  const handleViewPanel = (panelSlug: string) => {
+  const handleViewPanel = (panelId: string) => {
     // مشاهده پنل
-    window.open(`/panel/${panelSlug}`, "_blank")
+    window.open(`panels/${panelId}`, "_blank")
   }
 
   const formatDate = (dateString: string) => {
@@ -92,13 +107,9 @@ export function PanelManagement({ panelId }: { panelId: string }) {
           <h2 className="text-2xl font-bold">مدیریت پنل‌ها</h2>
           <p className="text-muted-foreground">مدیریت و مشاهده پنل‌های ایجاد شده</p>
         </div>
-        <Button onClick={handleCreatePanel} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          ایجاد پنل جدید
-        </Button>
       </div>
 
-      {panels.length === 0 ? (
+      {panels.length === 0 && userPanels.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <div className="text-muted-foreground mb-4">هنوز هیچ پنلی ایجاد نکرده‌اید</div>
@@ -107,7 +118,7 @@ export function PanelManagement({ panelId }: { panelId: string }) {
         </Card>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-1">
-          {panels && panels.map((panel) => (
+          {(panels && userPanels || userPanels || panels).map((panel) => (
             <Card key={panel.id} className="relative">
               <CardHeader>
                 <div className="flex justify-between items-start">
@@ -121,33 +132,20 @@ export function PanelManagement({ panelId }: { panelId: string }) {
                     <CardDescription>{panel.slug}</CardDescription>
                   </div>
                   <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleViewPanel(panel.slug)}
-                      className="flex items-center gap-1"
-                    >
-                      <Eye className="h-4 w-4" />
-                      مشاهده
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditPanel(panel.id)}
-                      className="flex items-center gap-1"
-                    >
-                      <Edit className="h-4 w-4" />
-                      ویرایش
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDeletePanel(panel.id)}
-                      className="flex items-center gap-1"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      حذف
-                    </Button>
+                    {
+                      panel.panelUser && panel.panelUser.find(user => user.userId == userId) &&
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleViewPanel(panel.id)}
+                          className="flex items-center gap-1"
+                        >
+                          <Eye className="h-4 w-4" />
+                          مشاهده
+                        </Button>
+                      </>
+                    }
                   </div>
                 </div>
               </CardHeader>

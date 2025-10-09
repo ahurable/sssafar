@@ -1,0 +1,2 @@
+{"timestamp":"2025-10-08T19:29:18.235Z","message":"Authentication Response","data":{"Error":{"Id":"Err0102001","Message":"Invalid login credentials supplied"},"Success":false,"SessionId":null}}
+{"timestamp":"2025-10-08T19:29:18.235Z","message":"API Error","data":{"error":"Invalid login credentials supplied"}}

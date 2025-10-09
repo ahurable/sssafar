@@ -15,11 +15,22 @@ export async function GET(request: NextRequest) {
     if (session && session.role == "ADMIN") {
       const panels = await prisma.panel.findMany({
             include: {
+                panelUser : {
+                  select: {
+                    id: true,
+                    userId: true,
+                    user: {
+                      select: {
+                        email: true
+                      }
+                    }
+                  }
+                },
                 _count: {
-                select: {
-                    panelUser: true,
-                },
-                },
+                  select: {
+                    panelUser: true
+                  }
+                }
             },
             orderBy: {
                 createdAt: "desc",
@@ -28,18 +39,35 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({ panels })
     }
-
-    const panels = await prisma.panel.findMany({
+    
+    const userPanels = await prisma.panel.findMany({
         where: {
             panelUser: {
                 some: {
                     userId: session.userId
                 }
             }
+        },
+        include: {
+          panelUser: {
+            select: {
+              userId: true
+            }
+          }
         }
     })
 
-    return NextResponse.json( { panels }, { status: 200 })
+    const panels = await prisma.panel.findMany({
+      where: {
+        members: {
+          some: {
+            userId: session.userId
+          }
+        }
+      }
+    })
+
+    return NextResponse.json( { userPanels, panels }, { status: 200 })
 
     // Test if prisma is available
     if (!prisma) {

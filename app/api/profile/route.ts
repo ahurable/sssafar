@@ -19,7 +19,8 @@ export async function GET() {
           where: {
             adminId: session.userId
           }
-        }
+        },
+        userCredit: true
       }
     })
 
@@ -73,7 +74,8 @@ export async function PUT(request: NextRequest) {
         city: true,
         province: true,
         dateOfBirth: true,
-      },
+        userCredit: true
+      }
     })
 
     return NextResponse.json({
