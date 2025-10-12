@@ -1,2 +1,54 @@
-{"timestamp":"2025-10-08T19:29:18.235Z","message":"Authentication Response","data":{"Error":{"Id":"Err0102001","Message":"Invalid login credentials supplied"},"Success":false,"SessionId":null}}
-{"timestamp":"2025-10-08T19:29:18.235Z","message":"API Error","data":{"error":"Invalid login credentials supplied"}}
+{"timestamp":"2025-10-11T19:17:41.863Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"5e9abef4-d6a6-f011-8116-00505694e174"}}
+{"timestamp":"2025-10-11T19:17:41.866Z","message":"Session created successfully","data":{"expiresAt":"2025-10-11T19:32:41.864Z"}}
+{"timestamp":"2025-10-11T19:20:56.589Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"acd7d168-d7a6-f011-8116-00505694e174"}}
+{"timestamp":"2025-10-11T19:20:56.591Z","message":"Session created successfully","data":{"expiresAt":"2025-10-11T19:35:56.590Z"}}
+{"timestamp":"2025-10-11T19:21:36.050Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"66d35680-d7a6-f011-8116-00505694e174"}}
+{"timestamp":"2025-10-11T19:21:36.051Z","message":"Session created successfully","data":{"expiresAt":"2025-10-11T19:36:36.051Z"}}
+{"timestamp":"2025-10-11T19:22:08.694Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"fae9ca93-d7a6-f011-8116-00505694e174"}}
+{"timestamp":"2025-10-11T19:22:08.696Z","message":"Session created successfully","data":{"expiresAt":"2025-10-11T19:37:08.696Z"}}
+{"timestamp":"2025-10-12T11:42:28.088Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"ab368786-60a7-f011-8116-00505694e174"}}
+{"timestamp":"2025-10-12T11:42:28.090Z","message":"Session created successfully","data":{"expiresAt":"2025-10-12T11:57:28.090Z"}}
+{"timestamp":"2025-10-12T11:43:43.187Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"1cf277b3-60a7-f011-8116-00505694e174"}}
+{"timestamp":"2025-10-12T11:43:43.191Z","message":"Session created successfully","data":{"expiresAt":"2025-10-12T11:58:43.191Z"}}
+{"timestamp":"2025-10-12T12:22:03.511Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"226f910e-66a7-f011-8116-00505694e174"}}
+{"timestamp":"2025-10-12T12:22:03.513Z","message":"Session created successfully","data":{"expiresAt":"2025-10-12T12:37:03.513Z"}}
+{"timestamp":"2025-10-12T12:23:23.000Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"05e0f13d-66a7-f011-8116-00505694e174"}}
+{"timestamp":"2025-10-12T12:23:23.001Z","message":"Session created successfully","data":{"expiresAt":"2025-10-12T12:38:23.000Z"}}
+{"timestamp":"2025-10-12T12:25:39.853Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"de27858f-66a7-f011-8116-00505694e174"}}
+{"timestamp":"2025-10-12T12:25:39.853Z","message":"Session created successfully","data":{"expiresAt":"2025-10-12T12:40:39.853Z"}}
+{"timestamp":"2025-10-12T12:37:28.947Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"329f2936-68a7-f011-8116-00505694e174"}}
+{"timestamp":"2025-10-12T12:37:28.948Z","message":"Session created successfully","data":{"expiresAt":"2025-10-12T12:52:28.948Z"}}
+{"timestamp":"2025-10-12T12:38:42.145Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"73bccd61-68a7-f011-8116-00505694e174"}}
+{"timestamp":"2025-10-12T12:38:42.145Z","message":"Session created successfully","data":{"expiresAt":"2025-10-12T12:53:42.145Z"}}
+{"timestamp":"2025-10-12T12:42:51.505Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"32f16df6-68a7-f011-8116-00505694e174"}}
+{"timestamp":"2025-10-12T12:42:51.507Z","message":"Session created successfully","data":{"expiresAt":"2025-10-12T12:57:51.507Z"}}
+{"timestamp":"2025-10-12T12:43:49.060Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"bbc5bb18-69a7-f011-8116-00505694e174"}}
+{"timestamp":"2025-10-12T12:43:49.061Z","message":"Session created successfully","data":{"expiresAt":"2025-10-12T12:58:49.061Z"}}
+{"timestamp":"2025-10-12T12:44:57.564Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"deb1ad3d-69a7-f011-8116-00505694e174"}}
+{"timestamp":"2025-10-12T12:44:57.564Z","message":"Session created successfully","data":{"expiresAt":"2025-10-12T12:59:57.564Z"}}
+{"timestamp":"2025-10-12T12:47:06.619Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"c4b77d8e-69a7-f011-8116-00505694e174"}}
+{"timestamp":"2025-10-12T12:47:06.619Z","message":"Session created successfully","data":{"expiresAt":"2025-10-12T13:02:06.619Z"}}
+{"timestamp":"2025-10-12T13:55:50.395Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"baf85f27-73a7-f011-8116-00505694e174"}}
+{"timestamp":"2025-10-12T13:55:50.397Z","message":"Session created successfully","data":{"expiresAt":"2025-10-12T14:10:50.397Z"}}
+{"timestamp":"2025-10-12T14:00:46.168Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"d7c5bed8-73a7-f011-8116-00505694e174"}}
+{"timestamp":"2025-10-12T14:00:46.169Z","message":"Session created successfully","data":{"expiresAt":"2025-10-12T14:15:46.169Z"}}
+{"timestamp":"2025-10-12T14:01:45.210Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"50b4eefb-73a7-f011-8116-00505694e174"}}
+{"timestamp":"2025-10-12T14:01:45.212Z","message":"Session created successfully","data":{"expiresAt":"2025-10-12T14:16:45.212Z"}}
+{"timestamp":"2025-10-12T14:39:27.852Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"3d5e9540-79a7-f011-8116-00505694e174"}}
+{"timestamp":"2025-10-12T14:39:27.853Z","message":"Session created successfully","data":{"expiresAt":"2025-10-12T14:54:27.853Z"}}
+{"timestamp":"2025-10-12T14:45:03.897Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"a14ec308-7aa7-f011-8116-00505694e174"}}
+{"timestamp":"2025-10-12T14:45:03.899Z","message":"Session created successfully","data":{"expiresAt":"2025-10-12T15:00:03.899Z"}}
+{"timestamp":"2025-10-12T14:47:19.519Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"0afca959-7aa7-f011-8116-00505694e174"}}
+{"timestamp":"2025-10-12T14:47:19.520Z","message":"Session created successfully","data":{"expiresAt":"2025-10-12T15:02:19.520Z"}}
+{"timestamp":"2025-10-12T15:16:50.648Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"f6816479-7ea7-f011-8116-00505694e174"}}
+{"timestamp":"2025-10-12T15:16:50.649Z","message":"Session created successfully","data":{"expiresAt":"2025-10-12T15:31:50.649Z"}}
+{"timestamp":"2025-10-12T15:41:13.088Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"9c540fe1-81a7-f011-8116-00505694e174"}}
+{"timestamp":"2025-10-12T15:41:13.092Z","message":"Session created successfully","data":{"expiresAt":"2025-10-12T15:56:13.091Z"}}
+{"timestamp":"2025-10-12T15:51:44.998Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"3b9ab259-83a7-f011-8116-00505694e174"}}
+{"timestamp":"2025-10-12T15:51:45.000Z","message":"Session created successfully","data":{"expiresAt":"2025-10-12T16:06:45.000Z"}}
+{"timestamp":"2025-10-12T16:20:07.354Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"9d352e50-87a7-f011-8116-00505694e174"}}
+{"timestamp":"2025-10-12T16:20:07.378Z","message":"Session created successfully","data":{"expiresAt":"2025-10-12T16:35:07.378Z"}}
+{"timestamp":"2025-10-12T16:36:49.516Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"d38d84a5-89a7-f011-8116-00505694e174"}}
+{"timestamp":"2025-10-12T16:36:49.524Z","message":"Session created successfully","data":{"expiresAt":"2025-10-12T16:51:49.524Z"}}
+{"timestamp":"2025-10-12T18:03:30.875Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"79bcbac1-95a7-f011-8116-00505694e174"}}
+{"timestamp":"2025-10-12T18:03:30.895Z","message":"Session created successfully","data":{"expiresAt":"2025-10-12T18:18:30.895Z"}}

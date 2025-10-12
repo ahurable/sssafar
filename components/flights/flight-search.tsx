@@ -2,8 +2,10 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useFlight } from "@/contexts/search/FlightContext"
 import { useSearch } from "@/hooks/use-search"
 import { Search, Calendar, MapPin, ChevronDown, Loader2 } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
 interface Suggestion {
@@ -36,8 +38,8 @@ const FlightSearch = () => {
     const [currentInput, setCurrentInput] = useState("")
     const [currentField, setCurrentField] = useState("")
 
-    const { searchHotels, searchFlights, searchTrains, getCitySuggestions } = useSearch()
-
+    const { getCitySuggestions } = useSearch()
+    const { searchFlights, setFlightsData } = useFlight()
     useEffect(() => {
         const fetchSuggestions = async () => {
             if (currentInput.length < 2) {
@@ -130,6 +132,8 @@ const FlightSearch = () => {
         return tripTypeMap[tripType] || "OneWay"
     }
 
+    const router = useRouter()
+
     const handleFlightSearch = async () => {
         if (!flightSearch.from || !flightSearch.to || !flightSearch.departureDate) {
             alert("لطفا تمام فیلدهای ضروری را پر کنید")
@@ -146,7 +150,7 @@ const FlightSearch = () => {
             // Extract airport codes
             const originCode = extractAirportCode(flightSearch.from)
             const destinationCode = extractAirportCode(flightSearch.to)
-
+           
             // Prepare request body for PartoCRS API
             const requestBody = {
                 PricingSourceType: "All",
@@ -187,6 +191,9 @@ const FlightSearch = () => {
             // Call the flight search API
             const response = await searchFlights(requestBody)
             
+            setFlightsData(response.PricedItineraries)
+            router.push('/flights')
+
             // Handle the response - you might want to pass this to a parent component or context
             console.log("Flight search results:", response)
             

@@ -219,7 +219,7 @@ model Panel {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   discountPercentage Int @default(0)
-  memberCredit Int @default(0)
+  totalCredit Int @default(0)
   adminId String?
   user User? @relation(fields: [adminId], references: [id], onDelete: NoAction)
   panelStats PanelStats[]
@@ -233,14 +233,18 @@ model Panel {
   panelActivityLog PanelActivityLog[]
 }
 
+enum PanelRole {
+  ADMIN
+  ECO
+  ACC
+}
 
 model PanelUser {
   id        String   @id @default(cuid())
-  credit    Int      @default(0)
   isActive  Boolean  @default(true)
   joinedAt  DateTime @default(now())
   lastLogin DateTime?
-
+  role PanelRole @default(ADMIN)
   // ارتباط با پنل
   panelId   String 
   panel     Panel    @relation(fields: [panelId], references: [id])
@@ -433,4 +437,11 @@ model File {
   createdAt DateTime @default(now())
 
   @@map("files")
+}
+
+model PartoSessionId {
+  id String @id @default(cuid())
+  session String?
+  createdAt DateTime @default(now())
+  expiresAt DateTime
 }

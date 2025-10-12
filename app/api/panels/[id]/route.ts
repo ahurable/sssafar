@@ -98,7 +98,7 @@ export async function POST(request: NextRequest, { params } : { params : { id: s
                         id: existingPanelUser.userId
                     },
                     data: {
-                        role: "USER" // Set back to regular user role
+                        role: "USER"
                     }
                 })
 
@@ -108,7 +108,8 @@ export async function POST(request: NextRequest, { params } : { params : { id: s
                         panelId: params.id
                     }, 
                     data: {
-                        userId: body.id
+                        userId: body.id,
+                        role: "ADMIN"
                     }, 
                     select: {
                         user: true,
@@ -134,7 +135,8 @@ export async function POST(request: NextRequest, { params } : { params : { id: s
                 const createPanelUser = await tx.panelUser.create({
                     data: {
                         userId: body.id,
-                        panelId: params.id.toString()
+                        panelId: params.id.toString(),
+                        role: "ADMIN"
                     },
                     select: {
                         user: true,
@@ -171,4 +173,43 @@ export async function POST(request: NextRequest, { params } : { params : { id: s
             error: "خطا در انجام عملیات"
         }, {status: 500})
     }
+}
+
+export async function PUT(request: NextRequest, { params } : { params : { id: string }}) {
+
+    const session = await getSession()
+    if (!session || session.role != "ADMIN") {
+        return NextResponse.json({
+            error: "لطفا وارد شوید"
+        }, {status:401})
+    }
+
+    const body = await request.json()
+
+    try {
+        const result = await prisma.$transaction(async (tx) => {
+            const upPanel = await tx.panel.update({
+                where: {
+                    id: params.id
+                },
+                data: {
+                    name: body.name,
+                    description: body.description,
+                    totalCredit: body.credit
+                }
+            })
+
+            return { action: "updated" }
+        })
+
+        return NextResponse.json({
+            success: "بروزرسانی شد"
+        }, { status : 201 })
+        
+    } catch {
+        return NextResponse.json({
+            error: "مشکلی پیش آمد"
+        }, { status: 500 })
+    }
+
 }

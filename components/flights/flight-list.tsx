@@ -1,143 +1,291 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Plane, Clock, Calendar, ChevronDown, ArrowRight, ArrowLeft } from "lucide-react"
-import { flights } from "@/lib/data/flights"
+import { Plane, Clock, ChevronDown, ArrowRight, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useFlight } from "@/contexts/search/FlightContext"
 
-export function FlightList() {
-  const [flightList] = useState(flights)
+// Types based on your API response
+interface FlightSegment {
+  ArrivalAirportLocationCode: string
+  DepartureAirportLocationCode: string
+  DepartureDateTime: string
+  ArrivalDateTime: string
+  MarketingAirlineCode: string
+  FlightNumber: string
+  JourneyDuration: string
+  OperatingAirline: {
+    Code: string
+    Equipment: string
+  }
+  SeatsRemaining: number
+}
+
+interface OriginDestinationOption {
+  FlightSegments: FlightSegment[]
+  JourneyDurationPerMinute: number
+}
+
+interface FlightPricing {
+  ItinTotalFare: {
+    TotalFare: number
+    Currency: string
+    BaseFare: number
+    TotalTax: number
+  }
+}
+
+interface Flight {
+  OriginDestinationOptions: OriginDestinationOption[]
+  AirItineraryPricingInfo: FlightPricing
+  ValidatingAirlineCode: string
+}
+
+interface FlightListProps {
+  flights: Flight[]
+  itemsPerPage?: number
+}
+
+export function FlightList({ flights, itemsPerPage = 10 }: FlightListProps) {
+  const [currentPage, setCurrentPage] = useState(1)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const router = useRouter()
-
-  const handleBookFlight = (flightId: string, type: "oneway" | "twoway") => {
-    setOpenDropdown(null)
-    router.push(`/flights/${flightId}/book/${type}`)
+  const { getAirlineName } = useFlight()
+  // Calculate pagination
+  const totalPages = Math.ceil(flights.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const currentFlights = flights
+  // Format date and time
+  const formatDateTime = (dateTimeString: string) => {
+    const date = new Date(dateTimeString)
+    return {
+      time: date.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' }),
+      date: date.toLocaleDateString('fa-IR')
+    }
   }
 
-  const toggleDropdown = (flightId: string) => {
-    setOpenDropdown(openDropdown === flightId ? null : flightId)
+  // Format currency
+  const formatCurrency = (amount: number, currency: string) => {
+    if (currency === "IRR") {
+      return (amount / 10).toLocaleString('fa-IR') // Convert to Toman
+    }
+    return amount.toLocaleString('fa-IR')
+  }
+
+  const handleBookFlight = (flightIndex: number, type: "oneway" | "twoway") => {
+    setOpenDropdown(null)
+    // You might want to pass the actual flight data instead of just index
+    router.push(`/flights/${flightIndex}/book/${type}`)
+  }
+
+  const toggleDropdown = (flightIndex: string) => {
+    setOpenDropdown(openDropdown === flightIndex ? null : flightIndex)
+  }
+
+  const goToPage = (page: number) => {
+    setCurrentPage(page)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-4">
-        <p className="text-sm text-muted-foreground">{flightList.length} پرواز یافت شد</p>
+        <p className="text-sm text-muted-foreground">{flights.length} پرواز یافت شد</p>
+        
+        {/* Pagination Info */}
+        <div className="text-sm text-muted-foreground">
+          صفحه {currentPage.toLocaleString('fa-IR')} از {totalPages.toLocaleString('fa-IR')}
+        </div>
       </div>
 
-      {flightList.map((flight) => (
-        <Card key={flight.id} className="hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                    <Plane className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold">{flight.airline}</h3>
-                    <p className="text-sm text-muted-foreground">شماره پرواز: {flight.flightNumber}</p>
-                  </div>
-                </div>
+      {/* Flight List */}
+      {currentFlights.map((flight, index) => {
+        const firstSegment = flight.OriginDestinationOptions[0]?.FlightSegments[0]
+        const totalPrice = flight.AirItineraryPricingInfo.ItinTotalFare.TotalFare
+        const currency = flight.AirItineraryPricingInfo.ItinTotalFare.Currency
+        const flightId = `flight-${startIndex + index}`
 
-                <div className="grid grid-cols-3 gap-4 items-center">
-                  <div className="text-center">
-                    <p className="text-2xl font-bold">{flight.departureTime}</p>
-                    <p className="text-sm text-muted-foreground">{flight.from}</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="flex items-center justify-center gap-2 mb-1">
-                      <div className="h-px flex-1 bg-border" />
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <div className="h-px flex-1 bg-border" />
+        if (!firstSegment) return null
+
+        const departureInfo = formatDateTime(firstSegment.DepartureDateTime)
+        const arrivalInfo = formatDateTime(
+          flight.OriginDestinationOptions[0]?.FlightSegments[
+            flight.OriginDestinationOptions[0]?.FlightSegments.length - 1
+          ]?.ArrivalDateTime
+        )
+
+        return (
+          <Card key={flightId} className="hover:shadow-lg transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                      <Plane className="h-6 w-6 text-primary" />
                     </div>
-                    <p className="text-xs text-muted-foreground">{flight.duration}</p>
+                    <div>
+                      <h3 className="font-bold">
+                        {getAirlineName(flight.ValidatingAirlineCode)}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        شماره پرواز: {firstSegment.FlightNumber}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold">{flight.arrivalTime}</p>
-                    <p className="text-sm text-muted-foreground">{flight.to}</p>
-                  </div>
-                </div>
 
-                <div className="flex items-center gap-2 mt-3">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">{flight.date}</span>
-                  <Badge variant="outline">{flight.class === "economy" ? "اکونومی" : "بیزینس"}</Badge>
-                  <Badge variant="secondary">{flight.availableSeats} صندلی خالی</Badge>
-                </div>
-              </div>
-
-              <div className="flex flex-col items-end gap-3 md:border-r md:pr-6">
-                <div className="text-left">
-                  <p className="text-sm text-muted-foreground">قیمت هر نفر</p>
-                  <p className="text-2xl font-bold text-primary">
-                    {flight.price.toLocaleString("fa-IR")} <span className="text-sm font-normal">تومان</span>
-                  </p>
-                </div>
-                
-                {/* Booking Dropdown */}
-                <div className="relative">
-                  <Button 
-                    onClick={() => toggleDropdown(flight.id)}
-                    className="w-full md:w-auto flex items-center gap-2"
-                  >
-                    خرید بلیط
-                    <ChevronDown className={`h-4 w-4 transition-transform ${openDropdown === flight.id ? 'rotate-180' : ''}`} />
-                  </Button>
-
-                  {openDropdown === flight.id && (
-                    <div className="absolute top-full left-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                      <div className="p-2">
-                        <div className="mb-2 px-3 py-2 border-b">
-                          <p className="font-medium text-sm text-gray-700">نوع بلیط را انتخاب کنید:</p>
-                        </div>
-                        
-                        <button
-                          onClick={() => handleBookFlight(flight.id, "oneway")}
-                          className="w-full flex items-center justify-between p-3 text-right hover:bg-blue-50 rounded-md transition-colors group"
-                        >
-                          <div className="flex items-center gap-3">
-                            <ArrowRight className="h-4 w-4 text-blue-600" />
-                            <div>
-                              <p className="font-medium text-sm">پرواز یک‌طرفه</p>
-                              <p className="text-xs text-muted-foreground">فقط پرواز رفت</p>
-                            </div>
-                          </div>
-                          <p className="text-sm font-bold text-blue-600">
-                            {flight.price.toLocaleString("fa-IR")} تومان
-                          </p>
-                        </button>
-                        
-                        <button
-                          onClick={() => handleBookFlight(flight.id, "twoway")}
-                          className="w-full flex items-center justify-between p-3 text-right hover:bg-green-50 rounded-md transition-colors group"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="flex items-center">
-                              <ArrowRight className="h-4 w-4 text-green-600" />
-                              <ArrowLeft className="h-4 w-4 text-green-600 -mr-1" />
-                            </div>
-                            <div>
-                              <p className="font-medium text-sm">پرواز دوطرفه</p>
-                              <p className="text-xs text-muted-foreground">پرواز رفت و برگشت</p>
-                            </div>
-                          </div>
-                          <p className="text-sm font-bold text-green-600">
-                            {(flight.price * 1.8).toLocaleString("fa-IR")} تومان
-                          </p>
-                        </button>
+                  <div className="grid grid-cols-3 gap-4 items-center">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold">{departureInfo.time}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {firstSegment.DepartureAirportLocationCode}
+                      </p>
+                    </div>
+                    <div className="text-center">
+                      <div className="flex items-center justify-center gap-2 mb-1">
+                        <div className="h-px flex-1 bg-border" />
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <div className="h-px flex-1 bg-border" />
                       </div>
+                      <p className="text-xs text-muted-foreground">
+                        {flight.OriginDestinationOptions[0]?.JourneyDurationPerMinute} دقیقه
+                      </p>
                     </div>
-                  )}
+                    <div className="text-center">
+                      <p className="text-2xl font-bold">{arrivalInfo.time}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {firstSegment.ArrivalAirportLocationCode}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 mt-3">
+                    <span className="text-sm text-muted-foreground">{departureInfo.date}</span>
+                    <Badge variant="outline">اکونومی</Badge>
+                    <Badge variant="secondary">
+                      {firstSegment.SeatsRemaining} صندلی خالی
+                    </Badge>
+                    {flight.OriginDestinationOptions[0]?.FlightSegments.length > 1 && (
+                      <Badge variant="outline" className="bg-orange-50">
+                        {flight.OriginDestinationOptions[0]?.FlightSegments.length - 1} توقف
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-end gap-3 md:border-r md:pr-6">
+                  <div className="text-left">
+                    <p className="text-sm text-muted-foreground">قیمت هر نفر</p>
+                    <p className="text-2xl font-bold text-primary">
+                      {formatCurrency(totalPrice, currency)}{" "}
+                      <span className="text-sm font-normal">تومان</span>
+                    </p>
+                  </div>
+                  
+                  {/* Booking Dropdown */}
+                  <div className="relative">
+                    <Button 
+                      onClick={() => toggleDropdown(flightId)}
+                      className="w-full md:w-auto flex items-center gap-2"
+                    >
+                      خرید بلیط
+                      <ChevronDown className={`h-4 w-4 transition-transform ${openDropdown === flightId ? 'rotate-180' : ''}`} />
+                    </Button>
+
+                    {openDropdown === flightId && (
+                      <div className="absolute top-full left-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                        <div className="p-2">
+                          <div className="mb-2 px-3 py-2 border-b">
+                            <p className="font-medium text-sm text-gray-700">نوع بلیط را انتخاب کنید:</p>
+                          </div>
+                          
+                          <button
+                            onClick={() => handleBookFlight(startIndex + index, "oneway")}
+                            className="w-full flex items-center justify-between p-3 text-right hover:bg-blue-50 rounded-md transition-colors group"
+                          >
+                            <div className="flex items-center gap-3">
+                              <ArrowRight className="h-4 w-4 text-blue-600" />
+                              <div>
+                                <p className="font-medium text-sm">پرواز یک‌طرفه</p>
+                                <p className="text-xs text-muted-foreground">فقط پرواز رفت</p>
+                              </div>
+                            </div>
+                            <p className="text-sm font-bold text-blue-600">
+                              {formatCurrency(totalPrice, currency)} تومان
+                            </p>
+                          </button>
+                          
+                          <button
+                            onClick={() => handleBookFlight(startIndex + index, "twoway")}
+                            className="w-full flex items-center justify-between p-3 text-right hover:bg-green-50 rounded-md transition-colors group"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="flex items-center">
+                                <ArrowRight className="h-4 w-4 text-green-600" />
+                                <ArrowLeft className="h-4 w-4 text-green-600 -mr-1" />
+                              </div>
+                              <div>
+                                <p className="font-medium text-sm">پرواز دوطرفه</p>
+                                <p className="text-xs text-muted-foreground">پرواز رفت و برگشت</p>
+                              </div>
+                            </div>
+                            <p className="text-sm font-bold text-green-600">
+                              {formatCurrency(totalPrice * 1.8, currency)} تومان
+                            </p>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+            </CardContent>
+          </Card>
+        )
+      })}
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 pt-6 border-t">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => goToPage(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="flex items-center gap-1"
+          >
+            <ChevronRight className="h-4 w-4" />
+            قبلی
+          </Button>
+
+          <div className="flex items-center gap-1">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <Button
+                key={page}
+                variant={currentPage === page ? "default" : "outline"}
+                size="sm"
+                onClick={() => goToPage(page)}
+                className="min-w-10"
+              >
+                {page.toLocaleString('fa-IR')}
+              </Button>
+            ))}
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => goToPage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="flex items-center gap-1"
+          >
+            بعدی
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

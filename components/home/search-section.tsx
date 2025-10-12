@@ -12,7 +12,7 @@ import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { useSearch } from "@/hooks/use-search"
 import FlightSearch from "../flights/flight-search"
-
+import HotelSearch from "../hotels/hotel-search"
 gsap.registerPlugin(ScrollTrigger)
 
 interface SearchSectionProps {
@@ -122,8 +122,6 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
     
     if (activeTab === "hotel") {
       setHotelSearch(prev => ({ ...prev, [field]: value }))
-    } else if (activeTab === "flight") {
-      setFlightSearch(prev => ({ ...prev, [field]: value }))
     } else if (activeTab === "train") {
       setTrainSearch(prev => ({ ...prev, [field]: value }))
     }
@@ -313,101 +311,7 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
 
             {/* Hotel Search */}
             <TabsContent value="hotel" className="space-y-6">
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                <div className="space-y-3 relative">
-                  <Label htmlFor="hotel-city" className="text-sm font-semibold">شهر مقصد</Label>
-                  <div className="relative">
-                    <MapPin className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                    {suggestionLoading && currentField === "city" && (
-                      <Loader2 className="absolute left-3 top-3 h-4 w-4 animate-spin text-muted-foreground" />
-                    )}
-                    <Input 
-                      id="hotel-city" 
-                      placeholder="تهران، استانبول، دبی..." 
-                      className="pr-10 h-12 rounded-lg border-2 focus:border-blue-500 transition-colors"
-                      value={hotelSearch.city}
-                      onChange={(e) => handleInputChange(e.target.value, "city")}
-                      onKeyDown={(e) => handleKeyDown(e, "city")}
-                      onFocus={() => setCurrentField("city")}
-                      onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                    />
-                    {renderSuggestions("city")}
-                  </div>
-                </div>
-                
-                <div className="space-y-3">
-                  <Label htmlFor="hotel-checkin" className="text-sm font-semibold">تاریخ ورود</Label>
-                  <div className="relative">
-                    <Calendar className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                      id="hotel-checkin" 
-                      type="date" 
-                      min={new Date().toISOString().split('T')[0]}
-                      className="pr-10 h-12 rounded-lg border-2 focus:border-blue-500 transition-colors"
-                      value={hotelSearch.checkIn}
-                      onChange={(e) => setHotelSearch(prev => ({ ...prev, checkIn: e.target.value }))}
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-3">
-                  <Label htmlFor="hotel-checkout" className="text-sm font-semibold">تاریخ خروج</Label>
-                  <div className="relative">
-                    <Calendar className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                      id="hotel-checkout" 
-                      type="date" 
-                      min={hotelSearch.checkIn || new Date().toISOString().split('T')[0]}
-                      className="pr-10 h-12 rounded-lg border-2 focus:border-blue-500 transition-colors"
-                      value={hotelSearch.checkOut}
-                      onChange={(e) => setHotelSearch(prev => ({ ...prev, checkOut: e.target.value }))}
-                    />
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-3">
-                    <Label htmlFor="hotel-guests" className="text-sm font-semibold">تعداد مهمان</Label>
-                    <div className="relative">
-                      <Users className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input 
-                        id="hotel-guests" 
-                        type="number" 
-                        min="1"
-                        max="10"
-                        className="pr-10 h-12 rounded-lg border-2 focus:border-blue-500 transition-colors"
-                        value={hotelSearch.guests}
-                        onChange={(e) => setHotelSearch(prev => ({ ...prev, guests: parseInt(e.target.value) || 1 }))}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <Label htmlFor="hotel-rooms" className="text-sm font-semibold">تعداد اتاق</Label>
-                    <div className="relative">
-                      <Bed className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input 
-                        id="hotel-rooms" 
-                        type="number" 
-                        min="1"
-                        max="5"
-                        className="pr-10 h-12 rounded-lg border-2 focus:border-blue-500 transition-colors"
-                        value={hotelSearch.rooms}
-                        onChange={(e) => setHotelSearch(prev => ({ ...prev, rooms: parseInt(e.target.value) || 1 }))}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <Button 
-                className="w-full h-14 text-lg rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl"
-                onClick={handleHotelSearch}
-                disabled={isLoading}
-              >
-                <Search className="ml-2 h-5 w-5" />
-                {isLoading ? "در حال جستجو..." : "جستجوی هتل"}
-              </Button>
+              <HotelSearch />
             </TabsContent>
 
             {/* Flight Search */}

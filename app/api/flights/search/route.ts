@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const sessionId = flightSessionService.getSession()
+    const sessionId = await flightSessionService.getSession()
     console.log(sessionId)
 
     // Construct the request body for PartoCRS API
@@ -27,6 +27,8 @@ export async function POST(request: NextRequest) {
       IsGenuine: body.IsGenuine || false
     }
 
+    console.log(requestBody)
+
     // Call PartoCRS API
     const response = await fetch('https://apidemo.partocrs.com/api/Air/AirLowFareSearch', {
       method: 'POST',
@@ -35,7 +37,7 @@ export async function POST(request: NextRequest) {
         // No Authorization header as specified
       },
       body: JSON.stringify({
-        request: requestBody
+        ...requestBody
       })
     })
 

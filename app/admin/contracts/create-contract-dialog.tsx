@@ -44,7 +44,7 @@ export function CreateContractDialog({ open, onOpenChange, onSuccess }: CreateCo
         setFormData({ title: "", description: "", organizationName: "" })
         
         // Navigate to edit page to upload files
-        router.push(`/contracts/${data.contract.id}/edit`)
+        router.push(`/admin/contracts/${data.contract.id}/`)
       }
     } catch (error) {
       console.error("Error creating contract:", error)

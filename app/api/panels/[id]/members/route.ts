@@ -25,14 +25,17 @@ export const GET = async (request: NextRequest, {params} : {params: {id:string}}
             },
             select: {
               panelMember: {
-                include: {
+                where: {
+                  panelId: params.id
+                },
+                select: {
                   user: {
                     select: {
                       id: true,
                       firstName: true,
                       lastName: true,
-                      phone: true,
-                      email: true
+                      email: true,
+                      phone: true
                     }
                   }
                 }
