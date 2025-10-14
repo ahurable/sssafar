@@ -446,6 +446,7 @@ model PartoSessionId {
   session String?
   createdAt DateTime @default(now())
   expiresAt DateTime
+<<<<<<< HEAD
 }
 
 enum PaymentType {
@@ -488,4 +489,6 @@ model Invoice {
   expireAt DateTime @default(now())
 
   travelers Json
+=======
+>>>>>>> 62d8977ceb499e1f3c5a0c743c4e9f10a4f71df9
 }

@@ -52,6 +52,7 @@
 {"timestamp":"2025-10-12T16:36:49.524Z","message":"Session created successfully","data":{"expiresAt":"2025-10-12T16:51:49.524Z"}}
 {"timestamp":"2025-10-12T18:03:30.875Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"79bcbac1-95a7-f011-8116-00505694e174"}}
 {"timestamp":"2025-10-12T18:03:30.895Z","message":"Session created successfully","data":{"expiresAt":"2025-10-12T18:18:30.895Z"}}
+<<<<<<< HEAD
 {"timestamp":"2025-10-13T09:58:52.713Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"1a951638-1ba8-f011-8116-00505694e174"}}
 {"timestamp":"2025-10-13T09:58:52.747Z","message":"Session created successfully","data":{"expiresAt":"2025-10-13T10:13:52.747Z"}}
 {"timestamp":"2025-10-13T10:22:06.372Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"9b50ce76-1ea8-f011-8116-00505694e174"}}
@@ -98,3 +99,5 @@
 {"timestamp":"2025-10-14T19:30:07.505Z","message":"Session created successfully","data":{"expiresAt":"2025-10-14T19:45:07.505Z"}}
 {"timestamp":"2025-10-14T19:45:19.989Z","message":"Authentication Response","data":{"Error":null,"Success":true,"SessionId":"bb2fed4f-36a9-f011-8116-00505694e174"}}
 {"timestamp":"2025-10-14T19:45:20.001Z","message":"Session created successfully","data":{"expiresAt":"2025-10-14T20:00:20.001Z"}}
+=======
+>>>>>>> 62d8977ceb499e1f3c5a0c743c4e9f10a4f71df9
