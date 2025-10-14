@@ -8,240 +8,22 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Calendar, User, Users, Plane, MapPin, Search, Plus, User2, Trash2, AlertCircle, FileText, Shield, Clock } from "lucide-react"
+import { Calendar, User, Users, Plane, MapPin, Search, Plus, User2, Trash2, AlertCircle, FileText, Shield, Clock, Loader2 } from "lucide-react"
 import DatePicker from "react-multi-date-picker"
 import type { DateObject } from "react-multi-date-picker"
 import persian from "react-date-object/calendars/persian"
 import persian_fa from "react-date-object/locales/persian_fa"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-
+import { useParams, useRouter } from "next/navigation"
+import { TravelerForm } from "@/components/dashboard/traveler-form"
 // Enhanced Traveler Form Component
-function TravelerForm({ onTravelerAdded, existingTravelers = [], selectedTravelers = [], onTravelerSelect, onTravelerRemove }) {
-  const [showForm, setShowForm] = useState(false)
-  const [newTraveler, setNewTraveler] = useState({
-    firstName: "",
-    lastName: "",
-    nationalId: "",
-    dateOfBirth: "",
-  })
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
 
-  const validateTraveler = (traveler: any) => {
-    const errors: Record<string, string> = {}
-
-    if (!traveler.firstName.trim()) {
-      errors.firstName = "نام الزامی است"
-    } else if (traveler.firstName.trim().length < 2) {
-      errors.firstName = "نام باید حداقل ۲ حرف باشد"
-    }
-
-    if (!traveler.lastName.trim()) {
-      errors.lastName = "نام خانوادگی الزامی است"
-    } else if (traveler.lastName.trim().length < 2) {
-      errors.lastName = "نام خانوادگی باید حداقل ۲ حرف باشد"
-    }
-
-    if (!traveler.nationalId.trim()) {
-      errors.nationalId = "کد ملی الزامی است"
-    } else if (!/^\d{10}$/.test(traveler.nationalId)) {
-      errors.nationalId = "کد ملی باید ۱۰ رقم باشد"
-    }
-
-    // Check for duplicate national ID
-    const isDuplicate = selectedTravelers.some(t => t.nationalId === traveler.nationalId) || 
-                       existingTravelers.some(t => t.nationalId === traveler.nationalId)
-    if (isDuplicate) {
-      errors.nationalId = "این کد ملی قبلاً ثبت شده است"
-    }
-
-    setFormErrors(errors)
-    return Object.keys(errors).length === 0
-  }
-
-  const handleAddTraveler = () => {
-    if (validateTraveler(newTraveler)) {
-      const traveler = {
-        id: Date.now().toString(),
-        ...newTraveler,
-        age: calculateAge(newTraveler.dateOfBirth)
-      }
-      onTravelerAdded(traveler)
-      setNewTraveler({ firstName: "", lastName: "", nationalId: "", dateOfBirth: "" })
-      setShowForm(false)
-      setFormErrors({})
-    }
-  }
-
-  const calculateAge = (dateOfBirth: string): number => {
-    if (!dateOfBirth) return 0
-    const birthDate = new Date(dateOfBirth)
-    const today = new Date()
-    let age = today.getFullYear() - birthDate.getFullYear()
-    const monthDiff = today.getMonth() - birthDate.getMonth()
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--
-    }
-    
-    return age
-  }
-
-  const isTravelerSelected = (travelerId: string) => {
-    return selectedTravelers.some(t => t.id === travelerId)
-  }
-
-  const canAddMoreTravelers = selectedTravelers.length < 9
-
-  return (
-    <div className="space-y-6">
-      {/* Selected Travelers */}
-      {selectedTravelers.length > 0 && (
-        <div className="space-y-3">
-          <Label>مسافران انتخاب شده ({selectedTravelers.length}/9)</Label>
-          {selectedTravelers.map(traveler => (
-            <div key={traveler.id} className="flex items-center justify-between p-3 border border-green-200 bg-green-50 rounded-lg">
-              <div className="flex items-center gap-3">
-                <User2 className="h-4 w-4 text-green-600" />
-                <div>
-                  <p className="font-medium">{traveler.firstName} {traveler.lastName}</p>
-                  <p className="text-sm text-muted-foreground">کد ملی: {traveler.nationalId} • سن: {traveler.age} سال</p>
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onTravelerRemove(traveler.id)}
-                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Existing Travelers */}
-      {existingTravelers.length > 0 && canAddMoreTravelers && (
-        <div className="space-y-3">
-          <Label>مسافران ثبت شده</Label>
-          {existingTravelers.map(traveler => (
-            <div key={traveler.id} className="flex items-center justify-between p-3 border rounded-lg">
-              <div className="flex items-center gap-3">
-                <User2 className="h-4 w-4 text-blue-800" />
-                <div>
-                  <p className="font-medium">{traveler.firstName} {traveler.lastName}</p>
-                  <p className="text-sm text-muted-foreground">کد ملی: {traveler.nationalId} • سن: {traveler.age} سال</p>
-                </div>
-              </div>
-              <Button 
-                variant={isTravelerSelected(traveler.id) ? "default" : "outline"} 
-                size="sm"
-                onClick={() => onTravelerSelect(traveler)}
-                disabled={isTravelerSelected(traveler.id) || !canAddMoreTravelers}
-              >
-                {isTravelerSelected(traveler.id) ? "انتخاب شده" : "انتخاب"}
-              </Button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Add New Traveler Form */}
-      {canAddMoreTravelers && (
-        <>
-          {!showForm ? (
-            <Button 
-              type="button" 
-              variant="outline" 
-              className="w-full"
-              onClick={() => setShowForm(true)}
-            >
-              <Plus className="ml-2 h-4 w-4" />
-              افزودن مسافر جدید
-            </Button>
-          ) : (
-            <Card>
-              <CardContent className="p-4">
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>نام</Label>
-                      <Input
-                        value={newTraveler.firstName}
-                        onChange={(e) => setNewTraveler(prev => ({ ...prev, firstName: e.target.value }))}
-                        placeholder="نام"
-                        className={formErrors.firstName ? "border-red-500" : ""}
-                      />
-                      {formErrors.firstName && (
-                        <p className="text-red-500 text-xs flex items-center gap-1">
-                          <AlertCircle className="h-3 w-3" />
-                          {formErrors.firstName}
-                        </p>
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      <Label>نام خانوادگی</Label>
-                      <Input
-                        value={newTraveler.lastName}
-                        onChange={(e) => setNewTraveler(prev => ({ ...prev, lastName: e.target.value }))}
-                        placeholder="نام خانوادگی"
-                        className={formErrors.lastName ? "border-red-500" : ""}
-                      />
-                      {formErrors.lastName && (
-                        <p className="text-red-500 text-xs flex items-center gap-1">
-                          <AlertCircle className="h-3 w-3" />
-                          {formErrors.lastName}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>کد ملی</Label>
-                    <Input
-                      value={newTraveler.nationalId}
-                      onChange={(e) => setNewTraveler(prev => ({ ...prev, nationalId: e.target.value }))}
-                      placeholder="کد ملی"
-                      maxLength={10}
-                      className={formErrors.nationalId ? "border-red-500" : ""}
-                    />
-                    {formErrors.nationalId && (
-                      <p className="text-red-500 text-xs flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        {formErrors.nationalId}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button onClick={handleAddTraveler} className="flex-1">
-                      افزودن مسافر
-                    </Button>
-                    <Button variant="outline" onClick={() => {
-                      setShowForm(false)
-                      setFormErrors({})
-                    }}>
-                      انصراف
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </>
-      )}
-
-      {!canAddMoreTravelers && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-          <p className="text-amber-700 text-sm text-center">
-            شما حداکثر تعداد مجاز مسافر (۹ نفر) را انتخاب کرده‌اید
-          </p>
-        </div>
-      )}
-    </div>
-  )
-}
 
 export default function OneWayReservation() {
+  const params = useParams()
+  const fareSourceCode = params.id as string
+  
   const [formData, setFormData] = useState({
     origin: "",
     destination: "",
@@ -253,22 +35,85 @@ export default function OneWayReservation() {
   const [existingTravelers, setExistingTravelers] = useState([])
   const [selectedTravelers, setSelectedTravelers] = useState([])
   const [loading, setLoading] = useState(false)
+  const [revalidateData, setRevalidateData] = useState<any>(null)
+  const [flightDetails, setFlightDetails] = useState<any>(null)
+  const [services, setServices] = useState<any[]>([])
+  const [selectedServices, setSelectedServices] = useState<any[]>([])
+  const router = useRouter()
+  // Load flight details and revalidate
+  useEffect(() => {
+    const loadFlightDetails = async () => {
+      try {
+        setLoading(true)
+        
+        // First, revalidate the flight with PartoCRS API
+        const revalidateResponse = await fetch('/api/flights/revalidate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({// This should come from your context
+            FareSourceCode: fareSourceCode,
+            IsGenuine: false
+          })
+        })
 
-  // Mock flight data - in real app, this would come from props or route params
-  const flightDetails = {
-    airline: "ایران ایر",
-    flightNumber: "IR101",
-    from: "تهران (THR)",
-    to: "مشهد (MHD)",
-    departureTime: "08:00",
-    arrivalTime: "09:30",
-    date: "۱۴۰۲/۱۰/۱۵",
-    duration: "۱ ساعت و ۳۰ دقیقه",
-    class: "اکونومی",
-    price: 1500000,
-    aircraft: "بوئینگ ۷۳۷",
-    capacity: 180
-  }
+        if (!revalidateResponse.ok) {
+          throw new Error('Failed to revalidate flight')
+        }
+
+        const revalidateResult = await revalidateResponse.json()
+        setRevalidateData(revalidateResult)
+        console.log(revalidateResult)
+        // Extract flight details from revalidate response
+        if (revalidateResult.Success && revalidateResult.PricedItinerary) {
+          const itinerary = revalidateResult.PricedItinerary
+          const firstOption = itinerary.OriginDestinationOptions[0]
+          const firstSegment = firstOption?.FlightSegments[0]
+          
+          if (firstSegment) {
+            const departureInfo = formatDateTime(firstSegment.DepartureDateTime)
+            const arrivalInfo = formatDateTime(firstSegment.ArrivalDateTime)
+            
+            setFlightDetails({
+              airline: getAirlineName(itinerary.ValidatingAirlineCode),
+              flightNumber: firstSegment.FlightNumber,
+              from: firstSegment.DepartureAirportLocationCode,
+              to: firstSegment.ArrivalAirportLocationCode,
+              departureTime: departureInfo.time,
+              arrivalTime: arrivalInfo.time,
+              date: departureInfo.date,
+              duration: firstSegment.JourneyDuration,
+              class: getCabinClass(firstSegment.CabinClassCode),
+              price: itinerary.AirItineraryPricingInfo.ItinTotalFare.TotalFare / 10, // Convert to Toman
+              aircraft: firstSegment.OperatingAirline?.Equipment || "نامشخص",
+              capacity: firstSegment.SeatsRemaining,
+              baggage: firstSegment.Baggage,
+              terminal: firstSegment.DepartureTerminal
+            })
+          }
+
+          // Set available services
+          const allServices = [
+            ...(revalidateResult.Services || []),
+            ...(revalidateResult.MealTypeServices || []),
+            ...(revalidateResult.SeatServices || []),
+            ...(revalidateResult.CancellationGuaranteeServices || [])
+          ]
+          setServices(allServices)
+        }
+      } catch (error) {
+        console.error('Error loading flight details:', error)
+        alert('خطا در دریافت اطلاعات پرواز')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (fareSourceCode) {
+      loadFlightDetails()
+    }
+  }, [fareSourceCode])
 
   // Load existing travelers
   useEffect(() => {
@@ -285,6 +130,38 @@ export default function OneWayReservation() {
     }
     loadTravelers()
   }, [])
+
+  const formatDateTime = (dateTimeString: string) => {
+    const date = new Date(dateTimeString)
+    return {
+      time: date.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' }),
+      date: date.toLocaleDateString('fa-IR'),
+      dateFull: date.toLocaleDateString('fa-IR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+    }
+  }
+
+  const getAirlineName = (iataCode: string) => {
+    const airlines: { [key: string]: string } = {
+      "EK": "امارات",
+      "QR": "قطر ایرویز", 
+      "EY": "اتیهاد ایرویز",
+      "TK": "ترکیش ایرلاینز",
+      "OV": "سلام ایر",
+      "W5": "ماهان ایر",
+      "IR": "ایران ایر",
+      "ZV": "قشم ایر"
+    }
+    return airlines[iataCode] || iataCode
+  }
+
+  const getCabinClass = (cabinCode: number) => {
+    const cabins = {
+      1: "اکونومی",
+      2: "بیزینس", 
+      3: "فرست کلاس"
+    }
+    return cabins[cabinCode as keyof typeof cabins] || "اکونومی"
+  }
 
   const handleDateChange = (date: DateObject | null) => {
     setSelectedDate(date)
@@ -313,6 +190,29 @@ export default function OneWayReservation() {
     setSelectedTravelers(prev => prev.filter(t => t.id !== travelerId))
   }
 
+  const handleServiceToggle = (service: any) => {
+    setSelectedServices(prev => {
+      const isSelected = prev.some(s => s.ServiceId === service.ServiceId || s.MealTypeServiceId === service.MealTypeServiceId || s.SeatServiceId === service.SeatServiceId)
+      if (isSelected) {
+        return prev.filter(s => s.ServiceId !== service.ServiceId && s.MealTypeServiceId !== service.MealTypeServiceId && s.SeatServiceId !== service.SeatServiceId)
+      } else {
+        return [...prev, service]
+      }
+    })
+  }
+
+  const calculateTotalPrice = () => {
+    if (!flightDetails) return 0
+    
+    const basePrice = flightDetails.price * selectedTravelers.length
+    const servicesPrice = selectedServices.reduce((total, service) => {
+      const serviceCost = service.ServiceCost?.Amount || service.MealTypeServiceCost?.Amount || service.SeatServiceCost?.Amount || service.Amount || 0
+      return total + (serviceCost / 10) // Convert to Toman
+    }, 0)
+    
+    return basePrice + servicesPrice
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -321,27 +221,37 @@ export default function OneWayReservation() {
       return
     }
 
+    if (!revalidateData?.Success) {
+      alert("اطلاعات پرواز معتبر نیست. لطفاً دوباره تلاش کنید.")
+      return
+    }
+
     setLoading(true)
 
-    // Prepare data for API
-    const reservationData = {
-      type: "one-way",
-      ...formData,
+    // Prepare data for booking API
+    const invoiceData = {
+      flightType: "one-way",
+      kind: "FLIGHT",
+      flightSourceCode: fareSourceCode,
       travelers: selectedTravelers,
-      flightDetails: flightDetails
+      selectedServices: selectedServices,
+      amount: calculateTotalPrice().toString()
     }
 
     try {
-      const response = await fetch("/api/flights/book", {
+      const response = await fetch("/api/invoice/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(reservationData)
+        body: JSON.stringify(invoiceData)
       })
 
       if (response.ok) {
         const result = await response.json()
         // Navigate to payment page or show success
         console.log("Booking successful:", result)
+        
+        // Redirect to payment page
+        router.push(`/invoice/${result.invoiceId}`)
       } else {
         const error = await response.json()
         alert(error.error || "خطا در رزرو پرواز")
@@ -352,6 +262,31 @@ export default function OneWayReservation() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (loading && !flightDetails) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-black to-white flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-white mx-auto mb-4" />
+          <p className="text-white text-lg">در حال دریافت اطلاعات پرواز...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!flightDetails) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-black to-white flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <p className="text-white text-lg">خطا در دریافت اطلاعات پرواز</p>
+          <Button className="mt-4" onClick={() => window.history.back()}>
+            بازگشت
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -367,7 +302,7 @@ export default function OneWayReservation() {
           </div>
 
           <div className="grid lg:grid-cols-2 gap-8">
-            {/* Left Section - Flight Details & Rules */}
+            {/* Left Section - Flight Details & Services */}
             <div className="space-y-6">
               {/* Flight Summary */}
               <Card className="">
@@ -401,6 +336,9 @@ export default function OneWayReservation() {
                       <div className="text-center">
                         <p className="text-xl font-bold">{flightDetails.departureTime}</p>
                         <p className="text-sm text-muted-foreground">{flightDetails.from}</p>
+                        {flightDetails.terminal && (
+                          <p className="text-xs text-gray-500">ترمینال {flightDetails.terminal}</p>
+                        )}
                       </div>
                       <div className="text-center">
                         <div className="flex items-center justify-center gap-2 mb-1">
@@ -430,94 +368,61 @@ export default function OneWayReservation() {
                         <p className="font-medium">{flightDetails.aircraft}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground">ظرفیت</p>
-                        <p className="font-medium">{flightDetails.capacity} صندلی</p>
+                        <p className="text-sm text-muted-foreground">بار مجاز</p>
+                        <p className="font-medium">{flightDetails.baggage || "اطلاعات موجود نیست"}</p>
                       </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Flight Rules & Policies */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Shield className="h-5 w-5" />
-                    قوانین و مقررات
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-3">
-                    <h4 className="font-semibold flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-blue-800" />
-                      شرایط استرداد
-                    </h4>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-800">•</span>
-                        استرداد تا ۲۴ ساعت قبل از پرواز: ۹۰٪ مبلغ برگشت داده می‌شود
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-800">•</span>
-                        استرداد تا ۱۲ ساعت قبل از پرواز: ۷۰٪ مبلغ برگشت داده می‌شود
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-800">•</span>
-                        استرداد تا ۶ ساعت قبل از پرواز: ۵۰٪ مبلغ برگشت داده می‌شود
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-red-600">•</span>
-                        کمتر از ۶ ساعت تا پرواز: امکان استرداد وجود ندارد
-                      </li>
-                    </ul>
-                  </div>
+              {/* Additional Services */}
+              {services.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Plus className="h-5 w-5" />
+                      خدمات اضافی
+                    </CardTitle>
+                    <CardDescription>
+                      خدمات اختیاری برای پرواز خود انتخاب کنید
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {services.map((service, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="checkbox"
+                            checked={selectedServices.some(s => 
+                              s.ServiceId === service.ServiceId || 
+                              s.MealTypeServiceId === service.MealTypeServiceId || 
+                              s.SeatServiceId === service.SeatServiceId
+                            )}
+                            onChange={() => handleServiceToggle(service)}
+                            className="h-4 w-4 text-blue-600"
+                          />
+                          <div>
+                            <p className="font-medium">{service.Description}</p>
+                            {service.FlightNumber && (
+                              <p className="text-sm text-muted-foreground">پرواز: {service.FlightNumber}</p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium text-blue-600">
+                            {((service.ServiceCost?.Amount || service.MealTypeServiceCost?.Amount || service.SeatServiceCost?.Amount || service.Amount || 0) / 10).toLocaleString('fa-IR')} تومان
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
 
-                  <div className="space-y-3">
-                    <h4 className="font-semibold flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-blue-600" />
-                      شرایط تغییر پرواز
-                    </h4>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-600">•</span>
-                        تغییر پرواز تا ۴۸ ساعت قبل: رایگان
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-600">•</span>
-                        تغییر پرواز تا ۲۴ ساعت قبل: ۱۰٪ هزینه تغییر
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-red-600">•</span>
-                        کمتر از ۲۴ ساعت: امکان تغییر وجود ندارد
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div className="space-y-3">
-                    <h4 className="font-semibold flex items-center gap-2">
-                      <User className="h-4 w-4 text-blue-800" />
-                      مدارک لازم
-                    </h4>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-800">•</span>
-                        کارت ملی یا شناسنامه برای پروازهای داخلی
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-800">•</span>
-                        حضور در فرودگاه حداقل ۲ ساعت قبل از پرواز
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-800">•</span>
-                        همراه داشتن بلیط الکترونیکی یا چاپ شده
-                      </li>
-                    </ul>
-                  </div>
-                </CardContent>
-              </Card>
             </div>
 
-            {/* Right Section - Traveler Information */}
+            {/* Right Section - Traveler Information & Booking Summary */}
             <div className="space-y-6">
               <Card className="">
                 <CardHeader className="text-green-600">
@@ -536,6 +441,7 @@ export default function OneWayReservation() {
                     onTravelerRemove={handleTravelerRemove}
                     existingTravelers={existingTravelers}
                     selectedTravelers={selectedTravelers}
+                    mode="booking"
                   />
                 </CardContent>
               </Card>
@@ -552,12 +458,25 @@ export default function OneWayReservation() {
                       <span className="font-medium">{selectedTravelers.length} نفر</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span>قیمت هر بلیط:</span>
-                      <span className="font-medium">{flightDetails.price.toLocaleString("fa-IR")} تومان</span>
+                      <span>قیمت پایه:</span>
+                      <span className="font-medium">{(flightDetails.price * selectedTravelers.length).toLocaleString("fa-IR")} تومان</span>
                     </div>
+                    
+                    {selectedServices.length > 0 && (
+                      <div className="border-t pt-3">
+                        <p className="text-sm text-muted-foreground mb-2">خدمات اضافی:</p>
+                        {selectedServices.map((service, index) => (
+                          <div key={index} className="flex justify-between items-center text-sm">
+                            <span>{service.Description}</span>
+                            <span>{((service.ServiceCost?.Amount || service.MealTypeServiceCost?.Amount || service.SeatServiceCost?.Amount || service.Amount || 0) / 10).toLocaleString('fa-IR')} تومان</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
                     <div className="flex justify-between items-center text-lg font-bold border-t pt-3">
                       <span>مبلغ قابل پرداخت:</span>
-                      <span className="text-blue-800">{(flightDetails.price * selectedTravelers.length).toLocaleString("fa-IR")} تومان</span>
+                      <span className="text-blue-800">{calculateTotalPrice().toLocaleString("fa-IR")} تومان</span>
                     </div>
                     
                     <Button 
@@ -565,7 +484,14 @@ export default function OneWayReservation() {
                       className="w-full bg-blue-800 hover:bg-blue-700 h-12 text-lg mt-4"
                       disabled={loading}
                     >
-                      {loading ? "در حال پردازش..." : "تایید و پرداخت"}
+                      {loading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin ml-2" />
+                          در حال پردازش...
+                        </>
+                      ) : (
+                        "تایید و پرداخت"
+                      )}
                     </Button>
                   </CardContent>
                 </Card>

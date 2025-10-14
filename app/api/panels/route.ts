@@ -44,17 +44,33 @@ export async function GET(request: NextRequest) {
         where: {
             panelUser: {
                 some: {
-                    userId: session.userId
+                  userId: session.userId
                 }
             }
         },
+        
         include: {
-          panelUser: {
-            select: {
-              userId: true
+            panelUser : {
+              select: {
+                id: true,
+                userId: true,
+                user: {
+                  select: {
+                    email: true
+                  }
+                }
+              }
+            },
+            _count: {
+              select: {
+                panelUser: true
+              }
             }
-          }
-        }
+        },
+        orderBy: {
+            createdAt: "desc",
+        },
+        
     })
 
     const panels = await prisma.panel.findMany({

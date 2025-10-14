@@ -3,7 +3,8 @@ import "./globals.css"
 import localFont from "next/font/local"
 import { NotificationProvider } from "@/contexts/notification/NotificationContext"
 import { NotificationContainer } from "@/contexts/notification/NotificationContainer"
-
+import { FlightProvider } from "@/contexts/search/FlightContext"
+import { HotelProvider } from "@/contexts/search/HotelContext"
 
 const dana = localFont({
     src: [
@@ -66,7 +67,11 @@ export default function RootLayout({
     <html lang="fa" dir="rtl" className={`${dana.className}`}>
       <body>
         <NotificationProvider>
-          {children}
+          <FlightProvider>
+            <HotelProvider>
+            {children}
+            </HotelProvider>
+          </FlightProvider>
           <NotificationContainer/>
         </NotificationProvider>
       </body>

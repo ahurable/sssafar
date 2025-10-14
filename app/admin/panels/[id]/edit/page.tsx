@@ -51,6 +51,7 @@ export default function EditPanelPage() {
     name: "",
     description: "",
     slug: "",
+    credit: 0,
     isActive: true,
   })
   const [users, setUsers] = useState<UserType[] | null>(null)
@@ -74,11 +75,13 @@ export default function EditPanelPage() {
       const res = await fetch(`/api/panels/${params.id}`)
       if (res.ok) {
         const data = await res.json()
+        console.log(data)
         setPanel(data.panel)
         setFormData({
           name: data.panel.name || "",
           description: data.panel.description || "",
           slug: data.panel.slug || "",
+          credit: data.panel.totalCredit ||  0,
           isActive: data.panel.isActive,
         })
       }
@@ -336,6 +339,21 @@ export default function EditPanelPage() {
                   rows={4}
                   placeholder="توضیحات مربوط به پنل"
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="slug">اعتبار پنل</Label>
+                <Input
+                  id="slug"
+                  value={formData.credit}
+                  onChange={(e) => setFormData({ ...formData, credit: parseInt(e.target.value) })}
+                  required
+                  placeholder="اعتبار برای پنل به تومان"
+                  className="font-mono text-sm"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  کاربر دارای دسترسی با اجازه بقیه کاربران میتواند از این اعتبار برای اعضای پنل استفاده کنید
+                </p>
               </div>
 
               <div className="flex items-center gap-2">

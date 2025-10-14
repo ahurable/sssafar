@@ -2,6 +2,7 @@
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
+import { prisma } from './prisma';
 
 interface SessionData {
   sessionId: string;
@@ -56,6 +57,19 @@ class FlightSessionService {
     if (this.refreshPromise) {
       return await this.refreshPromise;
     }
+
+    const latestSessionId = await prisma.partoSessionId.findFirst({
+      select: {
+        session: true,
+        expiresAt: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    })
+
+    if (latestSessionId && latestSessionId.session && new Date() < latestSessionId.expiresAt)
+      return latestSessionId.session
 
     // Otherwise, get a new session
     return this.refreshSession();
@@ -127,6 +141,8 @@ class FlightSessionService {
     const data = await response.json();
     this.logResponse('Authentication Response', data);
 
+    
+
     if (!response.ok) {
       this.logResponse('HTTP Error', {
         status: response.status,
@@ -143,12 +159,19 @@ class FlightSessionService {
       throw new Error(`Authentication failed: ${errorMsg}`);
     }
 
-    if (!data.sessionId) {
+    if (!data.SessionId) {
       this.logResponse('No sessionId received', data);
       throw new Error('No sessionId received in authentication response');
     }
 
-    return data.sessionId;
+    await prisma.partoSessionId.create({
+      data: {
+        session: data.SessionId,
+        expiresAt : new Date(Date.now() + 15 * 60 * 1000)
+      }
+    })
+
+    return data.SessionId;
   }
 
   private validateCredentials(): void {

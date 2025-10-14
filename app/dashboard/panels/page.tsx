@@ -22,6 +22,7 @@ export default function PanelsPage() {
         if (!res.ok) {
             error("خطا در دریافت اطلاعات")
         }
+        console.log(data.user)
         setMe(data.user)
     }
     handleAsync()
@@ -42,10 +43,8 @@ export default function PanelsPage() {
             </aside>
             <div className="lg:col-span-3">
               {
-                me && me.panelUser != null && me.panelUser.length > 0 && me?.panelUser.map(panel => [
-                    
-                <PanelManagement panelId={panel.id}  />
-                ])
+                me && me.panelUser != null && me.panelUser.length > 0 && me?.panelUser[0] &&
+                <PanelManagement panelId={me.panelUser[0].panelId} /> 
               }
             </div>
           </div>

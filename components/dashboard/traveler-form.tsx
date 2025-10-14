@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -13,7 +12,7 @@ import type { DateObject } from "react-multi-date-picker"
 import persian from "react-date-object/calendars/persian"
 import persian_fa from "react-date-object/locales/persian_fa"
 
-export interface ChildData {
+export interface TravelerData {
   id: string
   firstName: string
   lastName: string
@@ -24,25 +23,40 @@ export interface ChildData {
   age?: number
 }
 
-interface ChildrenFormProps {
-  existingChildren?: ChildData[]
-  onSave?: (children: ChildData[]) => void
+interface TravelerFormProps {
+  existingTravelers?: TravelerData[]
+  selectedTravelers?: TravelerData[]
+  onTravelerSelect?: (traveler: TravelerData) => void
+  onTravelerRemove?: (travelerId: string) => void
+  onTravelerAdded?: (traveler: TravelerData) => void
+  onSave?: (travelers: TravelerData[]) => void
   readOnly?: boolean
+  maxTravelers?: number
+  mode?: "booking" | "dashboard"
 }
 
-export function TravelerForm({ existingChildren = [], onSave, readOnly = false }: ChildrenFormProps) {
+export function TravelerForm({ 
+  existingTravelers = [], 
+  selectedTravelers = [], 
+  onTravelerSelect,
+  onTravelerRemove,
+  onTravelerAdded,
+  onSave,
+  readOnly = false,
+  maxTravelers = 9,
+  mode = "booking"
+}: TravelerFormProps) {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState("")
   const [formErrors, setFormErrors] = useState<Record<string, string>>({})
+  const [showForm, setShowForm] = useState(false)
   
-  // Separate states for existing travelers and new travelers
-  const [existingTravelers, setExistingTravelers] = useState<ChildData[]>([])
-  const [newTravelers, setNewTravelers] = useState<ChildData[]>([])
+  const [allExistingTravelers, setAllExistingTravelers] = useState<TravelerData[]>([])
+  const [newTravelers, setNewTravelers] = useState<TravelerData[]>([])
 
-  // New child form state
-  const [newChild, setNewChild] = useState<Omit<ChildData, 'id'>>({
+  const [newTraveler, setNewTraveler] = useState<Omit<TravelerData, 'id'>>({
     firstName: "",
     lastName: "",
     nationalId: "",
@@ -54,30 +68,28 @@ export function TravelerForm({ existingChildren = [], onSave, readOnly = false }
   const [selectedPassportExpiry, setSelectedPassportExpiry] = useState<DateObject | null>(null)
 
   useEffect(() => {
-    const loadChildrenData = async () => {
+    const loadTravelersData = async () => {
       try {
-        // Load existing travelers from props or API
-        if (existingChildren.length > 0) {
-          setExistingTravelers(existingChildren)
-        } else {
+        if (existingTravelers.length > 0) {
+          setAllExistingTravelers(existingTravelers)
+        } else if (mode === "dashboard") {
           const response = await fetch("/api/travelers")
           const data = await response.json()
           console.log(data)
           if (data.travelers && data.travelers.length > 0) {
-            setExistingTravelers(data.travelers)
+            setAllExistingTravelers(data.travelers)
           }
         }
       } catch (err) {
-        console.error("Error loading children data:", err)
+        console.error("Error loading travelers data:", err)
       } finally {
         setLoading(false)
       }
     }
 
-    loadChildrenData()
-  }, [])
+    loadTravelersData()
+  }, [existingTravelers, mode])
 
-  // Calculate age from date of birth
   const calculateAge = (dateOfBirth: string): number => {
     if (!dateOfBirth) return 0
     const birthDate = new Date(dateOfBirth)
@@ -92,7 +104,6 @@ export function TravelerForm({ existingChildren = [], onSave, readOnly = false }
     return age
   }
 
-  // Check if passport is expired
   const isPassportExpired = (expiryDate: string): boolean => {
     if (!expiryDate) return false
     const expiry = new Date(expiryDate)
@@ -100,50 +111,43 @@ export function TravelerForm({ existingChildren = [], onSave, readOnly = false }
     return expiry < today
   }
 
-  // Validate child data
-  const validateChild = (child: Omit<ChildData, 'id'>): boolean => {
+  const validateTraveler = (traveler: Omit<TravelerData, 'id'>): boolean => {
     const errors: Record<string, string> = {}
 
-    if (!child.firstName.trim()) {
+    if (!traveler.firstName.trim()) {
       errors.firstName = "نام مسافر الزامی است"
-    } else if (child.firstName.trim().length < 2) {
+    } else if (traveler.firstName.trim().length < 2) {
       errors.firstName = "نام باید حداقل ۲ حرف باشد"
     }
 
-    if (!child.lastName.trim()) {
+    if (!traveler.lastName.trim()) {
       errors.lastName = "نام خانوادگی مسافر الزامی است"
-    } else if (child.lastName.trim().length < 2) {
+    } else if (traveler.lastName.trim().length < 2) {
       errors.lastName = "نام خانوادگی باید حداقل ۲ حرف باشد"
     }
 
-    if (!child.nationalId.trim()) {
+    if (!traveler.nationalId.trim()) {
       errors.nationalId = "کد ملی مسافر الزامی است"
-    } else if (!/^\d{10}$/.test(child.nationalId)) {
+    } else if (!/^\d{10}$/.test(traveler.nationalId)) {
       errors.nationalId = "کد ملی باید ۱۰ رقم باشد"
     }
 
-    // Check for duplicate national ID in new travelers
-    const isDuplicate = newTravelers.some(traveler => traveler.nationalId === child.nationalId)
+    const isDuplicate = allExistingTravelers.some(t => t.nationalId === traveler.nationalId) ||
+                       newTravelers.some(t => t.nationalId === traveler.nationalId) ||
+                       selectedTravelers.some(t => t.nationalId === traveler.nationalId)
     if (isDuplicate) {
-      errors.nationalId = "این کد ملی قبلاً در لیست مسافران جدید اضافه شده است"
+      errors.nationalId = "این کد ملی قبلاً ثبت شده است"
     }
 
-    // Passport number is optional, but if provided, validate length
-    if (child.passportNumber && child.passportNumber.trim().length < 5) {
+    if (traveler.passportNumber && traveler.passportNumber.trim().length < 5) {
       errors.passportNumber = "شماره پاسپورت باید حداقل ۵ کاراکتر باشد"
     }
 
     if (!selectedDate) {
       errors.dateOfBirth = "تاریخ تولد مسافر الزامی است"
-    } else {
-      const age = calculateAge(child.dateOfBirth)
-      if (age >= 12) {
-        errors.dateOfBirth = "مسافر باید زیر ۱۲ سال باشد"
-      }
     }
 
-    // Passport expiry is optional, but if provided, check if expired
-    if (child.passportExpiry && isPassportExpired(child.passportExpiry)) {
+    if (traveler.passportExpiry && isPassportExpired(traveler.passportExpiry)) {
       errors.passportExpiry = "پاسپورت منقضی شده است"
     }
 
@@ -151,22 +155,29 @@ export function TravelerForm({ existingChildren = [], onSave, readOnly = false }
     return Object.keys(errors).length === 0
   }
 
-  const handleAddChild = () => {
+  const handleAddTraveler = () => {
     if (readOnly) return
 
-    if (!validateChild(newChild)) {
+    if (!validateTraveler(newTraveler)) {
       setError("لطفا اطلاعات مسافر را به درستی تکمیل کنید")
       return
     }
 
-    const childWithAge = {
-      ...newChild,
+    const travelerWithAge = {
+      ...newTraveler,
       id: Date.now().toString(),
-      age: calculateAge(newChild.dateOfBirth)
+      age: calculateAge(newTraveler.dateOfBirth)
     }
 
-    setNewTravelers(prev => [...prev, childWithAge])
-    setNewChild({
+    if (mode === "booking") {
+      if (onTravelerAdded) {
+        onTravelerAdded(travelerWithAge)
+      }
+    } else {
+      setNewTravelers(prev => [...prev, travelerWithAge])
+    }
+
+    setNewTraveler({
       firstName: "",
       lastName: "",
       nationalId: "",
@@ -178,24 +189,24 @@ export function TravelerForm({ existingChildren = [], onSave, readOnly = false }
     setSelectedPassportExpiry(null)
     setFormErrors({})
     setError("")
+    setShowForm(false)
   }
 
   const handleRemoveNewTraveler = (id: string) => {
     if (readOnly) return
-    setNewTravelers(prev => prev.filter(child => child.id !== id))
+    setNewTravelers(prev => prev.filter(traveler => traveler.id !== id))
   }
 
-  const handleNewChildChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNewTravelerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (readOnly) return
     
     const { name, value } = e.target
     
-    setNewChild(prev => ({
+    setNewTraveler(prev => ({
       ...prev,
       [name]: value,
     }))
 
-    // Clear error when user starts typing
     if (formErrors[name]) {
       setFormErrors(prev => ({
         ...prev,
@@ -215,12 +226,11 @@ export function TravelerForm({ existingChildren = [], onSave, readOnly = false }
       dateOfBirth = gregorianDate.toDate().toISOString().split('T')[0]
     }
 
-    setNewChild(prev => ({
+    setNewTraveler(prev => ({
       ...prev,
       dateOfBirth
     }))
 
-    // Clear date error when user selects a date
     if (formErrors.dateOfBirth) {
       setFormErrors(prev => ({
         ...prev,
@@ -240,12 +250,11 @@ export function TravelerForm({ existingChildren = [], onSave, readOnly = false }
       passportExpiry = gregorianDate.toDate().toISOString().split('T')[0]
     }
 
-    setNewChild(prev => ({
+    setNewTraveler(prev => ({
       ...prev,
       passportExpiry
     }))
 
-    // Clear passport expiry error when user selects a date
     if (formErrors.passportExpiry) {
       setFormErrors(prev => ({
         ...prev,
@@ -272,19 +281,17 @@ export function TravelerForm({ existingChildren = [], onSave, readOnly = false }
     setSuccess(false)
 
     try {
-      // Only send new travelers to the API
       const res = await fetch("/api/travelers/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ children: newTravelers }),
+        body: JSON.stringify({ travelers: newTravelers }),
       })
 
       const data = await res.json()
 
       if (res.ok) {
         setSuccess(true)
-        // Add the new travelers to existing travelers and clear the form
-        setExistingTravelers(prev => [...prev, ...newTravelers])
+        setAllExistingTravelers(prev => [...prev, ...newTravelers])
         setNewTravelers([])
         if (onSave) {
           onSave(newTravelers)
@@ -294,35 +301,37 @@ export function TravelerForm({ existingChildren = [], onSave, readOnly = false }
         setError(data.error || "خطا در ذخیره اطلاعات مسافران")
       }
     } catch (err) {
-      console.error("Error saving children data:", err)
+      console.error("Error saving travelers data:", err)
       setError("خطا در برقراری ارتباط با سرور")
     } finally {
       setSaving(false)
     }
   }
 
-  const isNewChildValid = () => {
-    const basicValidation = newChild.firstName.trim().length >= 2 && 
-           newChild.lastName.trim().length >= 2 && 
-           /^\d{10}$/.test(newChild.nationalId) && 
-           selectedDate !== null &&
-           calculateAge(newChild.dateOfBirth) < 12
+  const isNewTravelerValid = () => {
+    const basicValidation = newTraveler.firstName.trim().length >= 2 && 
+           newTraveler.lastName.trim().length >= 2 && 
+           /^\d{10}$/.test(newTraveler.nationalId) && 
+           selectedDate !== null
 
-    // Check for duplicate national ID
-    const isDuplicate = newTravelers.some(traveler => traveler.nationalId === newChild.nationalId)
-    if (isDuplicate) {
-      return false
-    }
+    const isDuplicate = allExistingTravelers.some(t => t.nationalId === newTraveler.nationalId) ||
+                       newTravelers.some(t => t.nationalId === newTraveler.nationalId) ||
+                       selectedTravelers.some(t => t.nationalId === newTraveler.nationalId)
 
-    // Passport validation (optional)
     const passportValidation = 
-      (!newChild.passportNumber || newChild.passportNumber.trim().length >= 5) &&
-      (!newChild.passportExpiry || !isPassportExpired(newChild.passportExpiry))
+      (!newTraveler.passportNumber || newTraveler.passportNumber.trim().length >= 5) &&
+      (!newTraveler.passportExpiry || !isPassportExpired(newTraveler.passportExpiry))
 
-    return basicValidation && passportValidation
+    return basicValidation && !isDuplicate && passportValidation
   }
 
-  if (loading) {
+  const isTravelerSelected = (travelerId: string) => {
+    return selectedTravelers.some(t => t.id === travelerId)
+  }
+
+  const canAddMoreTravelers = selectedTravelers.length < maxTravelers
+
+  if (loading && mode === "dashboard") {
     return (
       <Card>
         <CardContent className="p-6">
@@ -332,6 +341,282 @@ export function TravelerForm({ existingChildren = [], onSave, readOnly = false }
     )
   }
 
+  // Booking Mode Layout
+  if (mode === "booking") {
+  return (
+    <div className="space-y-6">
+      {/* Selected Travelers */}
+      {selectedTravelers.length > 0 && (
+        <div className="space-y-3">
+          <Label>مسافران انتخاب شده ({selectedTravelers.length}/{maxTravelers})</Label>
+          {selectedTravelers.map(traveler => (
+            <div key={traveler.id} className="flex items-center justify-between p-3 border border-green-200 bg-green-50 rounded-lg">
+              <div className="flex items-center gap-3">
+                <User2 className="h-4 w-4 text-green-600" />
+                <div>
+                  <p className="font-medium">{traveler.firstName} {traveler.lastName}</p>
+                  <p className="text-sm text-muted-foreground">
+                    کد ملی: {traveler.nationalId} • سن: {traveler.age} سال
+                    {traveler.passportNumber && ` • پاسپورت: ${traveler.passportNumber}`}
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onTravelerRemove?.(traveler.id)}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Existing Travelers Section */}
+      {allExistingTravelers.length > 0 && canAddMoreTravelers && (
+        <div className="space-y-4">
+          <h3 className="font-medium text-lg">مسافران ثبت شده ({allExistingTravelers.length})</h3>
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <p className="text-blue-700 text-sm">
+              این مسافران قبلاً در سیستم ثبت شده‌اند. برای اضافه کردن به سفر، روی دکمه انتخاب کلیک کنید.
+            </p>
+          </div>
+          {allExistingTravelers.map(traveler => (
+            <div key={traveler.id} className="flex items-center justify-between p-4 border rounded-lg bg-gray-50">
+              <div className="flex items-center gap-3">
+                <div className="bg-green-100 p-2 rounded-full">
+                  <User2 className="h-4 w-4 text-green-600" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-medium">
+                    {traveler.firstName} {traveler.lastName}
+                  </h4>
+                  <div className="grid grid-cols-2 gap-2 mt-2 text-sm text-muted-foreground">
+                    <div>کد ملی: {traveler.nationalId}</div>
+                    <div>سن: {traveler.age} سال</div>
+                    <div>پاسپورت: {traveler.passportNumber || 'ثبت نشده'}</div>
+                    <div className={traveler.passportExpiry ? (isPassportExpired(traveler.passportExpiry) ? 'text-red-500' : 'text-green-600') : 'text-gray-500'}>
+                      انقضا: {traveler.passportExpiry ? new Date(traveler.passportExpiry).toLocaleDateString('fa-IR') : 'ثبت نشده'}
+                      {traveler.passportExpiry && isPassportExpired(traveler.passportExpiry) && ' (منقضی)'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <Button 
+                variant={isTravelerSelected(traveler.id) ? "default" : "outline"} 
+                size="sm"
+                onClick={() => onTravelerSelect?.(traveler)}
+                disabled={isTravelerSelected(traveler.id) || !canAddMoreTravelers}
+              >
+                {isTravelerSelected(traveler.id) ? "انتخاب شده" : "انتخاب"}
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Add New Traveler Form */}
+      {canAddMoreTravelers && (
+        <div className="space-y-4">
+          <h3 className="font-medium text-lg">افزودن مسافر جدید</h3>
+          {!showForm ? (
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="w-full"
+              onClick={() => setShowForm(true)}
+            >
+              <Plus className="ml-2 h-4 w-4" />
+              افزودن مسافر جدید
+            </Button>
+          ) : (
+            <Card>
+              <CardContent className="p-4">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>نام</Label>
+                      <Input
+                        value={newTraveler.firstName}
+                        onChange={handleNewTravelerChange}
+                        name="firstName"
+                        placeholder="نام"
+                        className={formErrors.firstName ? "border-red-500" : ""}
+                      />
+                      {formErrors.firstName && (
+                        <p className="text-red-500 text-xs flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" />
+                          {formErrors.firstName}
+                        </p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label>نام خانوادگی</Label>
+                      <Input
+                        value={newTraveler.lastName}
+                        onChange={handleNewTravelerChange}
+                        name="lastName"
+                        placeholder="نام خانوادگی"
+                        className={formErrors.lastName ? "border-red-500" : ""}
+                      />
+                      {formErrors.lastName && (
+                        <p className="text-red-500 text-xs flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" />
+                          {formErrors.lastName}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>کد ملی</Label>
+                    <Input
+                      value={newTraveler.nationalId}
+                      onChange={handleNewTravelerChange}
+                      name="nationalId"
+                      placeholder="کد ملی"
+                      maxLength={10}
+                      className={formErrors.nationalId ? "border-red-500" : ""}
+                    />
+                    {formErrors.nationalId && (
+                      <p className="text-red-500 text-xs flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {formErrors.nationalId}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Passport Number */}
+                  <div className="space-y-2">
+                    <Label>شماره پاسپورت (اختیاری)</Label>
+                    <div className="relative">
+                      <FileText className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        value={newTraveler.passportNumber}
+                        onChange={handleNewTravelerChange}
+                        name="passportNumber"
+                        placeholder="شماره پاسپورت"
+                        className={formErrors.passportNumber ? "border-red-500" : ""}
+                      />
+                    </div>
+                    {formErrors.passportNumber && (
+                      <p className="text-red-500 text-xs flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {formErrors.passportNumber}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Date of Birth */}
+                  <div className="space-y-2">
+                    <Label>تاریخ تولد</Label>
+                    <div className="relative">
+                      <Calendar className="absolute right-3 top-3 h-4 w-4 text-muted-foreground z-10" />
+                      <DatePicker
+                        value={selectedDate}
+                        onChange={handleDateChange}
+                        calendar={persian}
+                        locale={persian_fa}
+                        calendarPosition="bottom-right"
+                        render={(value, openCalendar) => (
+                          <div className="relative">
+                            <input
+                              className={`w-full h-10 px-3 pr-10 border rounded-md text-sm bg-background ${
+                                formErrors.dateOfBirth ? "border-red-500" : "border-input"
+                              }`}
+                              placeholder="تاریخ تولد مسافر را انتخاب کنید"
+                              value={value || ""}
+                              onClick={openCalendar}
+                              readOnly
+                            />
+                          </div>
+                        )}
+                      />
+                    </div>
+                    {formErrors.dateOfBirth && (
+                      <p className="text-red-500 text-xs flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {formErrors.dateOfBirth}
+                      </p>
+                    )}
+                    {newTraveler.dateOfBirth && (
+                      <p className="text-xs text-muted-foreground">
+                        سن: {calculateAge(newTraveler.dateOfBirth)} سال
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Passport Expiry */}
+                  <div className="space-y-2">
+                    <Label>تاریخ انقضای پاسپورت (اختیاری)</Label>
+                    <div className="relative">
+                      <Calendar className="absolute right-3 top-3 h-4 w-4 text-muted-foreground z-10" />
+                      <DatePicker
+                        value={selectedPassportExpiry}
+                        onChange={handlePassportExpiryChange}
+                        calendar={persian}
+                        locale={persian_fa}
+                        calendarPosition="bottom-right"
+                        render={(value, openCalendar) => (
+                          <div className="relative">
+                            <input
+                              className={`w-full h-10 px-3 pr-10 border rounded-md text-sm bg-background ${
+                                formErrors.passportExpiry ? "border-red-500" : "border-input"
+                              }`}
+                              placeholder="تاریخ انقضای پاسپورت (اختیاری)"
+                              value={value || ""}
+                              onClick={openCalendar}
+                              readOnly
+                            />
+                          </div>
+                        )}
+                      />
+                    </div>
+                    {formErrors.passportExpiry && (
+                      <p className="text-red-500 text-xs flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {formErrors.passportExpiry}
+                      </p>
+                    )}
+                    {newTraveler.passportExpiry && (
+                      <p className={`text-xs ${isPassportExpired(newTraveler.passportExpiry) ? 'text-red-500' : 'text-green-600'}`}>
+                        {isPassportExpired(newTraveler.passportExpiry) ? 'پاسپورت منقضی شده' : 'پاسپورت معتبر'}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button onClick={handleAddTraveler} disabled={!isNewTravelerValid()} className="flex-1">
+                      افزودن مسافر
+                    </Button>
+                    <Button variant="outline" onClick={() => {
+                      setShowForm(false)
+                      setFormErrors({})
+                    }}>
+                      انصراف
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
+      {!canAddMoreTravelers && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <p className="text-amber-700 text-sm text-center">
+            شما حداکثر تعداد مجاز مسافر ({maxTravelers} نفر) را انتخاب کرده‌اید
+          </p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+  // Dashboard Mode Layout
   return (
     <Card>
       <CardHeader>
@@ -340,7 +625,7 @@ export function TravelerForm({ existingChildren = [], onSave, readOnly = false }
           اطلاعات مسافران
         </CardTitle>
         <CardDescription>
-          اطلاعات مسافران زیر ۱۲ سال خود را وارد کنید
+          اطلاعات مسافران خود را مدیریت کنید
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -358,16 +643,16 @@ export function TravelerForm({ existingChildren = [], onSave, readOnly = false }
           )}
 
           {/* Existing Travelers Section */}
-          {existingTravelers.length > 0 && (
+          {allExistingTravelers.length > 0 && (
             <div className="space-y-4">
-              <h3 className="font-medium text-lg">مسافران موجود ({existingTravelers.length})</h3>
+              <h3 className="font-medium text-lg">مسافران موجود ({allExistingTravelers.length})</h3>
               <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                 <p className="text-blue-700 text-sm">
                   این مسافران قبلاً در سیستم ثبت شده‌اند و برای سفرهای آینده قابل استفاده هستند.
                 </p>
               </div>
-              {existingTravelers.map((child, index) => (
-                <div key={child.id} className="border rounded-lg p-4 bg-gray-50">
+              {allExistingTravelers.map((traveler) => (
+                <div key={traveler.id} className="border rounded-lg p-4 bg-gray-50">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="bg-green-100 p-2 rounded-full">
@@ -375,15 +660,15 @@ export function TravelerForm({ existingChildren = [], onSave, readOnly = false }
                       </div>
                       <div className="flex-1">
                         <h4 className="font-medium">
-                          {child.firstName} {child.lastName}
+                          {traveler.firstName} {traveler.lastName}
                         </h4>
                         <div className="grid grid-cols-2 gap-2 mt-2 text-sm text-muted-foreground">
-                          <div>کد ملی: {child.nationalId}</div>
-                          <div>سن: {child.age} سال</div>
-                          <div>پاسپورت: {child.passportNumber || 'ثبت نشده'}</div>
-                          <div className={child.passportExpiry ? (isPassportExpired(child.passportExpiry) ? 'text-red-500' : 'text-green-600') : 'text-gray-500'}>
-                            انقضا: {child.passportExpiry ? new Date(child.passportExpiry).toLocaleDateString('fa-IR') : 'ثبت نشده'}
-                            {child.passportExpiry && isPassportExpired(child.passportExpiry) && ' (منقضی)'}
+                          <div>کد ملی: {traveler.nationalId}</div>
+                          <div>سن: {traveler.age} سال</div>
+                          <div>پاسپورت: {traveler.passportNumber || 'ثبت نشده'}</div>
+                          <div className={traveler.passportExpiry ? (isPassportExpired(traveler.passportExpiry) ? 'text-red-500' : 'text-green-600') : 'text-gray-500'}>
+                            انقضا: {traveler.passportExpiry ? new Date(traveler.passportExpiry).toLocaleDateString('fa-IR') : 'ثبت نشده'}
+                            {traveler.passportExpiry && isPassportExpired(traveler.passportExpiry) && ' (منقضی)'}
                           </div>
                         </div>
                       </div>
@@ -407,19 +692,19 @@ export function TravelerForm({ existingChildren = [], onSave, readOnly = false }
               
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="childFirstName">
+                  <Label htmlFor="travelerFirstName">
                     نام مسافر
                     <span className="text-red-500 mr-1">*</span>
                   </Label>
                   <div className="relative">
                     <User className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
-                      id="childFirstName"
+                      id="travelerFirstName"
                       name="firstName"
                       placeholder="نام مسافر"
                       className={`pr-10 ${formErrors.firstName ? "border-red-500" : ""}`}
-                      value={newChild.firstName}
-                      onChange={handleNewChildChange}
+                      value={newTraveler.firstName}
+                      onChange={handleNewTravelerChange}
                     />
                   </div>
                   {formErrors.firstName && (
@@ -431,19 +716,19 @@ export function TravelerForm({ existingChildren = [], onSave, readOnly = false }
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="childLastName">
+                  <Label htmlFor="travelerLastName">
                     نام خانوادگی مسافر
                     <span className="text-red-500 mr-1">*</span>
                   </Label>
                   <div className="relative">
                     <User className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
-                      id="childLastName"
+                      id="travelerLastName"
                       name="lastName"
                       placeholder="نام خانوادگی مسافر"
                       className={`pr-10 ${formErrors.lastName ? "border-red-500" : ""}`}
-                      value={newChild.lastName}
-                      onChange={handleNewChildChange}
+                      value={newTraveler.lastName}
+                      onChange={handleNewTravelerChange}
                     />
                   </div>
                   {formErrors.lastName && (
@@ -457,19 +742,19 @@ export function TravelerForm({ existingChildren = [], onSave, readOnly = false }
 
               <div className="grid gap-4 md:grid-cols-2 mt-4">
                 <div className="space-y-2">
-                  <Label htmlFor="childNationalId">
+                  <Label htmlFor="travelerNationalId">
                     کد ملی مسافر
                     <span className="text-red-500 mr-1">*</span>
                   </Label>
                   <div className="relative">
                     <User className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
-                      id="childNationalId"
+                      id="travelerNationalId"
                       name="nationalId"
                       placeholder="کد ملی ۱۰ رقمی"
                       className={`pr-10 ${formErrors.nationalId ? "border-red-500" : ""}`}
-                      value={newChild.nationalId}
-                      onChange={handleNewChildChange}
+                      value={newTraveler.nationalId}
+                      onChange={handleNewTravelerChange}
                       maxLength={10}
                     />
                   </div>
@@ -482,19 +767,19 @@ export function TravelerForm({ existingChildren = [], onSave, readOnly = false }
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="childPassportNumber">
+                  <Label htmlFor="travelerPassportNumber">
                     شماره پاسپورت
                     <span className="text-gray-500 mr-1">(اختیاری)</span>
                   </Label>
                   <div className="relative">
                     <FileText className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
-                      id="childPassportNumber"
+                      id="travelerPassportNumber"
                       name="passportNumber"
                       placeholder="شماره پاسپورت (اختیاری)"
                       className={`pr-10 ${formErrors.passportNumber ? "border-red-500" : ""}`}
-                      value={newChild.passportNumber}
-                      onChange={handleNewChildChange}
+                      value={newTraveler.passportNumber}
+                      onChange={handleNewTravelerChange}
                     />
                   </div>
                   {formErrors.passportNumber && (
@@ -508,7 +793,7 @@ export function TravelerForm({ existingChildren = [], onSave, readOnly = false }
 
               <div className="grid gap-4 md:grid-cols-2 mt-4">
                 <div className="space-y-2">
-                  <Label htmlFor="childDateOfBirth">
+                  <Label htmlFor="travelerDateOfBirth">
                     تاریخ تولد مسافر
                     <span className="text-red-500 mr-1">*</span>
                   </Label>
@@ -541,18 +826,15 @@ export function TravelerForm({ existingChildren = [], onSave, readOnly = false }
                       {formErrors.dateOfBirth}
                     </p>
                   )}
-                  {newChild.dateOfBirth && (
+                  {newTraveler.dateOfBirth && (
                     <p className="text-xs text-muted-foreground">
-                      سن: {calculateAge(newChild.dateOfBirth)} سال
-                      {calculateAge(newChild.dateOfBirth) >= 12 && (
-                        <span className="text-red-500 mr-2"> (باید زیر ۱۲ سال باشد)</span>
-                      )}
+                      سن: {calculateAge(newTraveler.dateOfBirth)} سال
                     </p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="childPassportExpiry">
+                  <Label htmlFor="travelerPassportExpiry">
                     تاریخ انقضای پاسپورت
                     <span className="text-gray-500 mr-1">(اختیاری)</span>
                   </Label>
@@ -585,9 +867,9 @@ export function TravelerForm({ existingChildren = [], onSave, readOnly = false }
                       {formErrors.passportExpiry}
                     </p>
                   )}
-                  {newChild.passportExpiry && (
-                    <p className={`text-xs ${isPassportExpired(newChild.passportExpiry) ? 'text-red-500' : 'text-green-600'}`}>
-                      {isPassportExpired(newChild.passportExpiry) ? 'پاسپورت منقضی شده' : 'پاسپورت معتبر'}
+                  {newTraveler.passportExpiry && (
+                    <p className={`text-xs ${isPassportExpired(newTraveler.passportExpiry) ? 'text-red-500' : 'text-green-600'}`}>
+                      {isPassportExpired(newTraveler.passportExpiry) ? 'پاسپورت منقضی شده' : 'پاسپورت معتبر'}
                     </p>
                   )}
                 </div>
@@ -596,8 +878,8 @@ export function TravelerForm({ existingChildren = [], onSave, readOnly = false }
               <div className="flex justify-end mt-4">
                 <Button
                   type="button"
-                  onClick={handleAddChild}
-                  disabled={!isNewChildValid()}
+                  onClick={handleAddTraveler}
+                  disabled={!isNewTravelerValid()}
                   className="bg-green-600 hover:bg-green-700"
                 >
                   <Plus className="ml-2 h-4 w-4" />
@@ -611,8 +893,8 @@ export function TravelerForm({ existingChildren = [], onSave, readOnly = false }
           {newTravelers.length > 0 && (
             <div className="space-y-4">
               <h3 className="font-medium text-lg">مسافران جدید ({newTravelers.length})</h3>
-              {newTravelers.map((child, index) => (
-                <div key={child.id} className="border rounded-lg p-4 bg-white">
+              {newTravelers.map((traveler) => (
+                <div key={traveler.id} className="border rounded-lg p-4 bg-white">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="bg-blue-100 p-2 rounded-full">
@@ -620,15 +902,15 @@ export function TravelerForm({ existingChildren = [], onSave, readOnly = false }
                       </div>
                       <div className="flex-1">
                         <h4 className="font-medium">
-                          {child.firstName} {child.lastName}
+                          {traveler.firstName} {traveler.lastName}
                         </h4>
                         <div className="grid grid-cols-2 gap-2 mt-2 text-sm text-muted-foreground">
-                          <div>کد ملی: {child.nationalId}</div>
-                          <div>سن: {child.age} سال</div>
-                          <div>پاسپورت: {child.passportNumber || 'ثبت نشده'}</div>
-                          <div className={child.passportExpiry ? (isPassportExpired(child.passportExpiry) ? 'text-red-500' : 'text-green-600') : 'text-gray-500'}>
-                            انقضا: {child.passportExpiry ? new Date(child.passportExpiry).toLocaleDateString('fa-IR') : 'ثبت نشده'}
-                            {child.passportExpiry && isPassportExpired(child.passportExpiry) && ' (منقضی)'}
+                          <div>کد ملی: {traveler.nationalId}</div>
+                          <div>سن: {traveler.age} سال</div>
+                          <div>پاسپورت: {traveler.passportNumber || 'ثبت نشده'}</div>
+                          <div className={traveler.passportExpiry ? (isPassportExpired(traveler.passportExpiry) ? 'text-red-500' : 'text-green-600') : 'text-gray-500'}>
+                            انقضا: {traveler.passportExpiry ? new Date(traveler.passportExpiry).toLocaleDateString('fa-IR') : 'ثبت نشده'}
+                            {traveler.passportExpiry && isPassportExpired(traveler.passportExpiry) && ' (منقضی)'}
                           </div>
                         </div>
                       </div>
@@ -638,7 +920,7 @@ export function TravelerForm({ existingChildren = [], onSave, readOnly = false }
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => handleRemoveNewTraveler(child.id)}
+                        onClick={() => handleRemoveNewTraveler(traveler.id)}
                         className="text-red-600 hover:text-red-700 hover:bg-red-50"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -663,11 +945,11 @@ export function TravelerForm({ existingChildren = [], onSave, readOnly = false }
             </div>
           )}
 
-          {existingTravelers.length === 0 && newTravelers.length === 0 && !readOnly && (
+          {allExistingTravelers.length === 0 && newTravelers.length === 0 && !readOnly && (
             <div className="text-center py-8 text-muted-foreground">
               <User2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>هنوز مسافری اضافه نکرده‌اید</p>
-              <p className="text-sm mt-1">مسافران زیر ۱۲ سال خود را اضافه کنید</p>
+              <p className="text-sm mt-1">مسافران خود را اضافه کنید</p>
             </div>
           )}
         </form>

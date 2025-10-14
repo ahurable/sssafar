@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     if (type === 'flight') {
       // Fetch from airports API for flight searches
       const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
-      const airportsResponse = await fetch(`${baseUrl}/api/airports/city?query=${encodeURIComponent(query)}`)
+      const airportsResponse = await fetch(`${baseUrl}/api/flights/getAirportCity?query=${encodeURIComponent(query)}`)
       
       if (airportsResponse.ok) {
         const airports = await airportsResponse.json()

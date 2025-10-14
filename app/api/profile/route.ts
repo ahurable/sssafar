@@ -20,6 +20,7 @@ export async function GET() {
             adminId: session.userId
           }
         },
+        panelMember: true,
         userCredit: true
       }
     })

@@ -32,7 +32,7 @@ export default function DashboardPage() {
               <DashboardNav />
             </aside>
             <div className="lg:col-span-3">
-              <TravelerForm />
+              <TravelerForm mode="dashboard" />
             </div>
           </div>
         </div>
