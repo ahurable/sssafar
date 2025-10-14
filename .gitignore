@@ -16,6 +16,8 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+/assets/data/
+
 # env files
 # vercel
 .vercel
