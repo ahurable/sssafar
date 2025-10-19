@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    // Disable lightningcss if it's causing issues
+    useLightningcss: false,
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },
