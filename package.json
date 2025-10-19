@@ -49,6 +49,7 @@
     "cmdk": "1.0.4",
     "crypto": "latest",
     "date-fns": "latest",
+    "lightningcss": "^1.25.1",
     "embla-carousel-react": "8.5.1",
     "geist": "^1.3.1",
     "gsap": "latest",
