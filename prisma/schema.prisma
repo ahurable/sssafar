@@ -59,7 +59,7 @@ model User {
   creditTransactions CreditTransaction[]
   invoices Invoice[]
   userCredit Credit?
-
+  userTransactions UserTransaction[]
   @@index([email])
   @@index([phone])
 }
@@ -72,7 +72,11 @@ model Traveler {
   dateOfBirth DateTime
   passportNumber String
   passportExpiry String
-
+  phoneNumber String?
+  email String?
+  gender Int?
+  passengerType Int?
+  
   userId String
   createdBy User @relation(fields: [userId], references: [id] , onDelete: Cascade)
 
@@ -149,25 +153,6 @@ model Booking {
   @@index([bookingCode])
   @@index([type])
   @@index([status])
-}
-
-model Hotel {
-  id          String   @id @default(cuid())
-  name        String
-  city        String
-  address     String
-  rating      Float
-  stars       Int
-  image       String
-  price       Float
-  amenities   String[]
-  description String   @db.Text
-  available   Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  @@index([city])
-  @@index([available])
 }
 
 model Flight {
@@ -252,7 +237,7 @@ model PanelUser {
   panel     Panel    @relation(fields: [panelId], references: [id])
 
   // ارتباط با تراکنش‌های کاربر
-  transactions UserTransaction[]
+  // transactions UserTransaction[]
   panelActivityLog PanelActivityLog[]
   // ارتباط با کاربر اصلی (اگر ثبت‌نام کرده باشد)
   userId    String?
@@ -331,10 +316,10 @@ model UserTransaction {
 
   // ارتباط با کاربر پنل
   userId      String
-  panelUser   PanelUser   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // ارتباط با پنل (برای کوئری‌های بهینه)
-  panelId     String
+  panelId     String?
   panel       Panel?       @relation(fields: [panelId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -446,7 +431,6 @@ model PartoSessionId {
   session String?
   createdAt DateTime @default(now())
   expiresAt DateTime
-<<<<<<< HEAD
 }
 
 enum PaymentType {
@@ -460,6 +444,7 @@ enum InvoiceKind {
   HOTEL
   FLIGHT
   TRAIN
+  CHARGE
 }
 
 enum InvoiceState {
@@ -475,6 +460,7 @@ model Invoice {
   amount String
   state InvoiceState
   selectedServices Json?
+  order Json?
   flightType String?
 
   userId String 
@@ -489,6 +475,55 @@ model Invoice {
   expireAt DateTime @default(now())
 
   travelers Json
-=======
->>>>>>> 62d8977ceb499e1f3c5a0c743c4e9f10a4f71df9
+}
+
+
+
+// HERE IS FOR HOTELS STATIC DATA
+model Hotel {
+  id          Int      @id @default(autoincrement())
+  hotelId     Int      @unique
+  name        String
+  type        HotelType @default(INTERNATIONAL)
+  
+  // Relations
+  images      HotelImage[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([hotelId])
+  @@index([name])
+  @@index([type])
+}
+
+model HotelImage {
+  id          Int      @id @default(autoincrement())
+  hotelId     Int
+  imageUrl    String
+  thumbnailUrl String?
+  type        ImageType @default(GALLERY)
+  isDomestic  Boolean  @default(false)
+  
+  // Relations
+  hotel       Hotel    @relation(fields: [hotelId], references: [hotelId])
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([hotelId])
+  @@index([type])
+  @@index([isDomestic])
+}
+
+enum HotelType {
+  INTERNATIONAL
+  DOMESTIC
+}
+
+enum ImageType {
+  MAIN
+  HERO
+  GALLERY
+  THUMBNAIL
 }

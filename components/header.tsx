@@ -12,7 +12,7 @@ export function Header() {
   const [user, setUser] = useState<UserType|null>()
   useEffect(() => {
     const handleAsync = async () => {
-      const res = await fetch('api/auth/me', {
+      const res = await fetch('/api/auth/me', {
         method: 'get'
       })
       const data = await res.json()

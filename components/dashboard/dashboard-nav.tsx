@@ -3,11 +3,12 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
-import { User, Ticket, Settings, LogOut, PanelBottom, Users } from "lucide-react"
+import { User, Ticket, Settings, LogOut, PanelBottom, Users, File } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useSnack } from "@/hooks/use-notification"
 import { useEffect, useState } from "react"
 import { UserType } from "@/lib/types"
+import { Button } from "../ui/button"
 
 const navItems = [
   {
@@ -25,6 +26,11 @@ const navItems = [
     href: "/dashboard/settings",
     icon: Settings,
   },
+  {
+    title: "صورت حساب ها",
+    href: "/dashboard/invoices",
+    icon: File
+  }
 ]
 
 export function DashboardNav() {
@@ -97,6 +103,11 @@ export function DashboardNav() {
         <span>
           آخرین بروزرسانی در: {lastupdate}
         </span>
+        <Link href={'/dashboard/charge'} className="p-4">
+          <Button className="bg-green-400 w-full text-2xl p-8 font-bold">
+            شارژ اعتبار
+          </Button>
+        </Link>
       </Card>
       <Card className="mt-4">
         <CardContent className="p-4">

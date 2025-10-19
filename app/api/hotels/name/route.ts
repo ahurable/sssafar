@@ -1,24 +1,7 @@
 // app/api/hotels/name/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import path from 'path';
-import fs from 'fs/promises';
+import { prisma } from '@/lib/prisma';
 
-let hotelNamesMapping: Record<number, string> = {};
-
-async function loadHotelNamesMapping() {
-  try {
-    const mappingPath = path.join(process.cwd(), 'assets', 'data', 'hotel-names-mapping.json');
-    const data = await fs.readFile(mappingPath, 'utf-8');
-    hotelNamesMapping = JSON.parse(data);
-    console.log(`✅ Loaded ${Object.keys(hotelNamesMapping).length} hotel names from mapping`);
-  } catch (error) {
-    console.error('❌ Error loading hotel names mapping:', error);
-    hotelNamesMapping = {};
-  }
-}
-
-// Load on startup
-loadHotelNamesMapping();
 
 // Support GET method for individual hotel names
 export async function GET(request: NextRequest) {
@@ -41,8 +24,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const hotelName = hotelNamesMapping[id] || `هتل ${id}`;
-    return NextResponse.json({ name: hotelName });
+    const getHotelName = await prisma.hotel.findUnique({
+      where: {
+        hotelId: id
+      }
+    })
+    console.log(getHotelName)
+    return NextResponse.json({ ...getHotelName });
 
   } catch (error) {
     console.error('Error in hotel name API (GET):', error);
@@ -65,12 +53,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const names: Record<number, string> = {};
-    hotelIds.forEach(id => {
-      names[id] = hotelNamesMapping[id] || `هتل ${id}`;
-    });
+    // const names: Record<number, string> = {};
+    const getHotelsNames = await prisma.hotel.findMany({
+      where: {
+        hotelId: {
+          in: hotelIds
+        }
+      }
+    })
 
-    return NextResponse.json({ names });
+    console.log(getHotelsNames)
+
+    return NextResponse.json([ ...getHotelsNames ] , { status: 200 });
 
   } catch (error) {
     console.error('Error in hotel name API (POST):', error);

@@ -36,9 +36,15 @@ export const GET = async (request: NextRequest) => {
             }
         })
 
+        if (invoices && invoices.length > 0) {
+            return NextResponse.json({
+                invoices: invoices
+            }   , { status: 200 })
+        }
+        
         return NextResponse.json({
-            invoices: invoices
-        }, { status: 200 })
+            message: "صورت حسابی یافت نشد"
+        }, { status: 404 })
 
     } catch (error) {
         console.error("Error fetching invoices:", error)

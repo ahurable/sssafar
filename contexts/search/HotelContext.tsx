@@ -152,7 +152,9 @@ interface HotelContextType {
   getHotelsImages: (hotelIds: number[]) => Promise<{[key: number]:  HotelImage[]}>
   filters: FilterState
   setFilters: (filters: FilterState) => void
-  clearFilters: () => void
+  clearFilters: () => void,
+  request: any,
+  setRequest: (request: any) => void
 }
 
 const defaultFilters: FilterState = {
@@ -211,7 +213,7 @@ export function HotelProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [filters, setFilters] = useState<FilterState>(defaultFilters)
   const [filteredHotels, setFilteredHotels] = useState<any[]>([])
-  
+  const [request, setRequest] = useState()
   const getHotelNames = async (hotelIds: number[]): Promise<{[key: number]: string}> => {
     try {
       const response = await fetch('/api/hotels/name', { // Changed to /api/hotels/name
@@ -225,7 +227,8 @@ export function HotelProvider({ children }: { children: ReactNode }) {
       }
       
       const data = await response.json();
-      return data.names;
+      console.log(data)
+      return data;
     } catch (error) {
       console.error('Error getting hotel names:', error);
       const fallbackNames: {[key: number]: string} = {};
@@ -400,6 +403,7 @@ export function HotelProvider({ children }: { children: ReactNode }) {
   }
 
   const setHotelsData = (hotels:any) => {
+    // console.log(hotels)
     setHotelData(hotels)
     setLoading(false)
   }
@@ -420,7 +424,9 @@ export function HotelProvider({ children }: { children: ReactNode }) {
       getHotelsImages,
       filters,
       setFilters,
-      clearFilters
+      clearFilters,
+      request,
+      setRequest
     }}>
       {children}
     </HotelContext.Provider>

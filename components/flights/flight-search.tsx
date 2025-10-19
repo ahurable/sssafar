@@ -39,7 +39,7 @@ const FlightSearch = () => {
     const [currentField, setCurrentField] = useState("")
 
     const { getCitySuggestions } = useSearch()
-    const { searchFlights, setFlightsData } = useFlight()
+    const { searchFlights, setFlightsData, setFlightRequest } = useFlight()
     useEffect(() => {
         const fetchSuggestions = async () => {
             if (currentInput.length < 2) {
@@ -187,9 +187,10 @@ const FlightSearch = () => {
                     OriginType: "None"
                 })
             }
-
+            setFlightRequest(requestBody)
             // Call the flight search API
             const response = await searchFlights(requestBody)
+            
             
             setFlightsData(response.PricedItineraries)
             router.push('/flights')

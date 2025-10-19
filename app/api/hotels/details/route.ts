@@ -189,7 +189,7 @@ export async function POST(request: NextRequest) {
     }
 
     const externalResponse: HotelDetailsResponse = await response.json();
-
+    console.log(externalResponse)
     // Return the external API response
     return NextResponse.json({
       success: true,

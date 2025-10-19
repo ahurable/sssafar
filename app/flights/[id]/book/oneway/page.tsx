@@ -201,6 +201,8 @@ export default function OneWayReservation() {
     })
   }
 
+  useEffect(() => { console.log(selectedTravelers)} , [selectedTravelers])
+
   const calculateTotalPrice = () => {
     if (!flightDetails) return 0
     
@@ -235,6 +237,7 @@ export default function OneWayReservation() {
       flightSourceCode: fareSourceCode,
       travelers: selectedTravelers,
       selectedServices: selectedServices,
+      order: revalidateData.PricedItinerary,
       amount: calculateTotalPrice().toString()
     }
 
@@ -254,7 +257,7 @@ export default function OneWayReservation() {
         router.push(`/invoice/${result.invoiceId}`)
       } else {
         const error = await response.json()
-        alert(error.error || "خطا در رزرو پرواز")
+        alert(error.message || "خطا در رزرو پرواز")
       }
     } catch (error) {
       console.error("Error booking flight:", error)

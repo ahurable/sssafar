@@ -5,20 +5,31 @@ import { StdioNull } from 'node:child_process'
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react'
 import { read, utils } from 'xlsx'
 
-interface FlightSearchParams {
-  OriginDestinationInformations: Array<{
-    DepartureDateTime: string
-    OriginLocationCode: string
-    DestinationLocationCode: string
-  }>
-  AdultCount: number
-  ChildCount: number
-  InfantCount: number
-  TravelPreference?: {
-    CabinType: string
-    MaxStopsQuantity: string
-    AirTripType: string
-  }
+export interface TravelPreference {
+  CabinType: string;
+  MaxStopsQuantity: string;
+  AirTripType: string;
+  VendorExcludeCodes: string[];
+  VendorPreferenceCodes: string[];
+}
+
+export interface OriginDestinationInformation {
+  DepartureDateTime: string;
+  DestinationLocationCode: string;
+  DestinationType: string;
+  OriginLocationCode: string;
+  OriginType: string;
+}
+
+export interface FlightSearchRequest {
+  PricingSourceType: string;
+  RequestOption: string;
+  AdultCount: number;
+  ChildCount: number;
+  InfantCount: number;
+  TravelPreference: TravelPreference;
+  OriginDestinationInformations: OriginDestinationInformation[];
+  IsGenuine: boolean;
 }
 
 interface FilterState {
@@ -39,6 +50,28 @@ interface FlightContextType {
   getAirlineName: (iataCode: string) => string 
   applyFilters: (filters: FilterState) => void
   filteredFlights: any[]
+  flightRequest: FlightSearchRequest
+  setFlightRequest: (request: FlightSearchRequest) => void
+}
+
+// Helper functions remain the same
+export const getCabinType = (cabinClass: string): string => {
+  const cabinMap: { [key: string]: string } = {
+    "economy": "Economy",
+    "business": "Business", 
+    "first": "First",
+    "premium": "PremiumEconomy"
+  };
+  return cabinMap[cabinClass] || "Economy";
+}
+
+export const getAirTripType = (tripType: string): string => {
+  const tripMap: { [key: string]: string } = {
+    "oneway": "OneWay",
+    "roundtrip": "RoundTrip",
+    "multicity": "MultiCity"
+  };
+  return tripMap[tripType] || "OneWay";
 }
 
 
@@ -167,7 +200,31 @@ export function FlightProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [airlineNames, setAirlineNames] = useState<{ [iata: string]: string }>({}) // Add this
   const [filteredFlights, setFilteredFlights] = useState<any[]>([])
-  
+  const [flightRequest, setFlightRequest] = useState<FlightSearchRequest>({
+    PricingSourceType: "All",
+    RequestOption: "All",
+    AdultCount: 2,
+    ChildCount: 1,
+    InfantCount: 0,
+    TravelPreference: {
+      CabinType: getCabinType("economy"),
+      MaxStopsQuantity: "All",
+      AirTripType: getAirTripType("oneway"),
+      VendorExcludeCodes: [],
+      VendorPreferenceCodes: []
+    },
+    OriginDestinationInformations: [
+      {
+        DepartureDateTime: "2024-01-15T00:00:00.0000000+03:30",
+        DestinationLocationCode: "THR",
+        DestinationType: "None",
+        OriginLocationCode: "IKA", 
+        OriginType: "None"
+      }
+    ],
+    IsGenuine: false
+  })
+
   const getTimeRange = (timeString: string) => {
     const time = new Date(timeString).getHours()
     if (time >= 6 && time < 12) return "صبح (۶-۱۲)"
@@ -281,7 +338,9 @@ export function FlightProvider({ children }: { children: ReactNode }) {
       clearResults,
       airlineNames,
       getAirlineName,
-      applyFilters
+      applyFilters,
+      flightRequest,
+      setFlightRequest
     }}>
       {children}
     </FlightContext.Provider>

@@ -6,11 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select } from "@/components/ui/select"
 import { User, Calendar, Plus, Trash2, Save, AlertCircle, User2, FileText } from "lucide-react"
 import DatePicker from "react-multi-date-picker"
 import type { DateObject } from "react-multi-date-picker"
 import persian from "react-date-object/calendars/persian"
 import persian_fa from "react-date-object/locales/persian_fa"
+import { cn } from "@/lib/utils"
 
 export interface TravelerData {
   id: string
@@ -21,6 +23,10 @@ export interface TravelerData {
   passportNumber?: string
   passportExpiry?: string
   age?: number
+  email?: string
+  phoneNumber?: string
+  gender: string
+  passengerType: string
 }
 
 interface TravelerFormProps {
@@ -63,6 +69,10 @@ export function TravelerForm({
     dateOfBirth: "",
     passportNumber: "",
     passportExpiry: "",
+    phoneNumber: "",
+    email: "",
+    gender: "",
+    passengerType: ""
   })
   const [selectedDate, setSelectedDate] = useState<DateObject | null>(null)
   const [selectedPassportExpiry, setSelectedPassportExpiry] = useState<DateObject | null>(null)
@@ -171,9 +181,11 @@ export function TravelerForm({
 
     if (mode === "booking") {
       if (onTravelerAdded) {
+        console.log(travelerWithAge)
         onTravelerAdded(travelerWithAge)
       }
     } else {
+      console.log(travelerWithAge)
       setNewTravelers(prev => [...prev, travelerWithAge])
     }
 
@@ -184,6 +196,10 @@ export function TravelerForm({
       dateOfBirth: "",
       passportNumber: "",
       passportExpiry: "",
+      phoneNumber: "",
+      email: "",
+      gender: "",
+      passengerType: ""
     })
     setSelectedDate(null)
     setSelectedPassportExpiry(null)
@@ -509,6 +525,96 @@ export function TravelerForm({
                     )}
                   </div>
 
+                  <div className="space-y-2">
+                    <Label>ایمیل (اختیاری)</Label>
+                    <div className="relative">
+                      <Input
+                        value={newTraveler.email}
+                        onChange={handleNewTravelerChange}
+                        name="email"
+                        placeholder="آدرس ایمیل"
+                        className={formErrors.email ? "border-red-500" : ""}
+                      />
+                    </div>
+                    {formErrors.email && (
+                      <p className="text-red-500 text-xs flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {formErrors.email}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>شماره همراه (اختیاری)</Label>
+                    <div className="relative">
+                      <Input
+                        value={newTraveler.phoneNumber}
+                        onChange={handleNewTravelerChange}
+                        name="phoneNumber"
+                        placeholder="شماره موبایل"
+                        className={formErrors.phoneNumber ? "border-red-500" : ""}
+                      />
+                    </div>
+                    {formErrors.phoneNumber && (
+                      <p className="text-red-500 text-xs flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {formErrors.phoneNumber}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>جنسیت</Label>
+                    <div className="relative">
+                      <select
+                        name="gender"
+                        defaultValue="یک مورد را انتخاب کنید"
+                        onChange={e => setNewTraveler(prev => ({...prev, gender: e.target.value}))}
+                        className={cn(
+                                'file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
+                                'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+                                'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
+                              )}
+                      >
+                        <option value="0">مرد</option>
+                        <option value="1">زن</option>
+                      </select>
+                    </div>
+                    {formErrors.gender && (
+                      <p className="text-red-500 text-xs flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {formErrors.gender}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>نوع مسافر</Label>
+                    <div className="relative">
+                      <select
+                        name="passengerType"
+                        defaultValue="یک مورد را انتخاب کنید"
+                        onChange={e => setNewTraveler(prev => ({...prev, passengerType: e.target.value}))}
+                        className={cn(
+                                'file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
+                                'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+                                'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
+                              )}
+                      >
+                        <option value="0">کهن سال</option>
+                        <option value="1">بزرگسال</option>
+                        <option value="2">کودک</option>
+                        <option value="3">نوزاد</option>
+                      </select>
+                    </div>
+                    {formErrors.gender && (
+                      <p className="text-red-500 text-xs flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {formErrors.gender}
+                      </p>
+                    )}
+                  </div>
+
                   {/* Date of Birth */}
                   <div className="space-y-2">
                     <Label>تاریخ تولد</Label>
@@ -791,6 +897,103 @@ export function TravelerForm({
                 </div>
               </div>
 
+                  
+                  <div className="space-y-2">
+                    <Label>ایمیل (اختیاری)</Label>
+                    <div className="relative">
+                      <Input
+                        value={newTraveler.email}
+                        onChange={handleNewTravelerChange}
+                        name="email"
+                        placeholder="آدرس ایمیل"
+                        className={formErrors.email ? "border-red-500" : ""}
+                      />
+                    </div>
+                    {formErrors.email && (
+                      <p className="text-red-500 text-xs flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {formErrors.email}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>شماره همراه (اختیاری)</Label>
+                    <div className="relative">
+                      <Input
+                        value={newTraveler.phoneNumber}
+                        onChange={handleNewTravelerChange}
+                        name="phoneNumber"
+                        placeholder="شماره موبایل"
+                        className={formErrors.phoneNumber ? "border-red-500" : ""}
+                      />
+                    </div>
+                    {formErrors.phoneNumber && (
+                      <p className="text-red-500 text-xs flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {formErrors.phoneNumber}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>جنسیت</Label>
+                    <div className="relative">
+                      <select
+                        name="gender"
+                        defaultValue="یک مورد را انتخاب کنید"
+                        onChange={e => {
+                            console.log(e.target.value)
+                           setNewTraveler(prev => ({...prev, gender: e.target.value}))}
+                        }
+                        className={cn(
+                                'file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
+                                'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+                                'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
+                              )}
+                      >
+                        <option value="0">مرد</option>
+                        <option value="1">زن</option>
+                      </select>
+                    </div>
+                    {formErrors.gender && (
+                      <p className="text-red-500 text-xs flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {formErrors.gender}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>نوع مسافر</Label>
+                    <div className="relative">
+                      <select
+                        name="passengerType"
+                        defaultValue="یک مورد را انتخاب کنید"
+                        onChange={e => {
+                          console.log(e.target.value)
+                          setNewTraveler(prev => ({...prev, passengerType: e.target.value}))}
+                        }
+                        className={cn(
+                                'file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
+                                'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+                                'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
+                              )}
+                      >
+                        <option value="0">کهن سال</option>
+                        <option value="1">بزرگسال</option>
+                        <option value="2">کودک</option>
+                        <option value="3">نوزاد</option>
+                      </select>
+                    </div>
+                    {formErrors.gender && (
+                      <p className="text-red-500 text-xs flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {formErrors.gender}
+                      </p>
+                    )}
+                  </div>
+
               <div className="grid gap-4 md:grid-cols-2 mt-4">
                 <div className="space-y-2">
                   <Label htmlFor="travelerDateOfBirth">
@@ -912,6 +1115,10 @@ export function TravelerForm({
                             انقضا: {traveler.passportExpiry ? new Date(traveler.passportExpiry).toLocaleDateString('fa-IR') : 'ثبت نشده'}
                             {traveler.passportExpiry && isPassportExpired(traveler.passportExpiry) && ' (منقضی)'}
                           </div>
+                          <div>جنسیت: {traveler.gender || 'ثبت نشد ، امکان بروز خطا'}</div>
+                          <div>رده سنی: {traveler.passengerType || 'ثبت نشده ، امکان بروز خطا'}</div>
+                          <div>شماره همراه: {traveler.phoneNumber || 'ثبت نشده ، امکان بروز خطا'}</div>
+                          <div>ایمیل: {traveler.email || 'ثبت نشده ، امکان بروز خطا'}</div>
                         </div>
                       </div>
                     </div>

@@ -14,6 +14,7 @@ const InvoicePage = ({ params } : { params : { id : string }}) => {
 
     useEffect(() => {
         fetchInvoice()
+        fetchUserCredit()
     }, [])
 
     const fetchInvoice = async () => {
@@ -31,8 +32,9 @@ const InvoicePage = ({ params } : { params : { id : string }}) => {
         const res = await fetch('/api/profile')
         const data = await res.json()
         if (res.ok) {
-            setUserCredit(data.userCredit)
-            setUserPanels(data.panelMember)
+            setUserCredit(data.user.userCredit)
+            // console.log(data)
+            setUserPanels(data.user.panelMember)
         }
     }
 

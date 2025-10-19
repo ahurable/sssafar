@@ -60,7 +60,7 @@ const HotelSearch = () => {
   const [currentInput, setCurrentInput] = useState("")
 
   const { error, success } = useSnack()
-  const { setHotelsData } = useHotel()
+  const { setHotelsData, setRequest } = useHotel()
 
   const suggestionsRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -214,6 +214,11 @@ const HotelSearch = () => {
       return
     }
 
+    if (!hotelSearch.guests) {
+      alert("لطفاً تاریخ تعداد مهمانان را انتخاب کنید")
+      return
+    }
+
     setIsLoading(true)
     try {
       // Here you would make your actual hotel search API call
@@ -233,6 +238,7 @@ const HotelSearch = () => {
       const data = await response.json()
       console.log(data)
       setHotelsData(data.data)
+      setRequest(data.request)
       router.push('/hotels/')
       setSearchLoading(false)
       

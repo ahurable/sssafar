@@ -3,12 +3,12 @@ import { Header } from "@/components/header";
 import HotelDetails from "@/components/hotels/hotel-details";
 
 
-export default function Page({ params }: { params : { fareSourceCode : string}}) {
+export default function Page({ params }: { params : { hotelId : string}}) {
 
     return (
         <>
             <Header />
-                <HotelDetails fareSourceCode={params.fareSourceCode} />
+                <HotelDetails hotelId={params.hotelId} />
             <Footer/>
         </>
     )
