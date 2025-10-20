@@ -22,30 +22,30 @@ class FlightSessionService {
     }
   }
 
-  private logToFile(filename: string, message: string, data?: any) {
-    const timestamp = new Date().toISOString();
-    const logEntry = {
-      timestamp,
-      message,
-      ...(data && { data })
-    };
+  // private logToFile(filename: string, message: string, data?: any) {
+  //   const timestamp = new Date().toISOString();
+  //   const logEntry = {
+  //     timestamp,
+  //     message,
+  //     ...(data && { data })
+  //   };
 
-    const logLine = JSON.stringify(logEntry) + '\n';
+  //   const logLine = JSON.stringify(logEntry) + '\n';
     
-    fs.appendFileSync(
-      path.join(this.logsDir, filename),
-      logLine,
-      { encoding: 'utf8' }
-    );
-  }
+  //   fs.appendFileSync(
+  //     path.join(this.logsDir, filename),
+  //     logLine,
+  //     { encoding: 'utf8' }
+  //   );
+  // }
 
-  private logRequest(message: string, data?: any) {
-    this.logToFile('request.log', message, data);
-  }
+  // private logRequest(message: string, data?: any) {
+  //   this.logToFile('request.log', message, data);
+  // }
 
-  private logResponse(message: string, data?: any) {
-    this.logToFile('response.log', message, data);
-  }
+  // private logResponse(message: string, data?: any) {
+  //   this.logToFile('response.log', message, data);
+  // }
 
   async getSession(): Promise<string> {
     // If we have a valid session, return it
@@ -89,9 +89,9 @@ class FlightSessionService {
         isRefreshing: false
       };
 
-      this.logResponse('Session created successfully', {
-        expiresAt: expiresAt.toISOString()
-      });
+      // this.logResponse('Session created successfully', {
+      //   expiresAt: expiresAt.toISOString()
+      // });
       return sessionId;
     } catch (error) {
       this.session = null;
@@ -124,11 +124,11 @@ class FlightSessionService {
       Password: hashedPassword,
     };
 
-    this.logRequest('Authentication Request', {
-      OfficeId: requestBody.OfficeId,
-      UserName: requestBody.UserName,
-      Password: hashedPassword, // Log only first 10 chars for security
-    });
+    // this.logRequest('Authentication Request', {
+    //   OfficeId: requestBody.OfficeId,
+    //   UserName: requestBody.UserName,
+    //   Password: hashedPassword, // Log only first 10 chars for security
+    // });
 
     const response = await fetch('https://apidemo.partocrs.com/api/Authenticate/CreateSession', {
       method: 'POST',
@@ -139,28 +139,28 @@ class FlightSessionService {
     });
 
     const data = await response.json();
-    this.logResponse('Authentication Response', data);
+    // this.logResponse('Authentication Response', data);
 
     
 
     if (!response.ok) {
-      this.logResponse('HTTP Error', {
-        status: response.status,
-        statusText: response.statusText
-      });
+      // this.logResponse('HTTP Error', {
+      //   status: response.status,
+      //   statusText: response.statusText
+      // });
       throw new Error(`Authentication failed: ${response.status} ${response.statusText}`);
     }
 
     if (!data.Success) {
       const errorMsg = data.Error?.Message || 'Unknown authentication error';
-      this.logResponse('API Error', {
-        error: errorMsg
-      });
+      // this.logResponse('API Error', {
+      //   error: errorMsg
+      // });
       throw new Error(`Authentication failed: ${errorMsg}`);
     }
 
     if (!data.SessionId) {
-      this.logResponse('No sessionId received', data);
+      // this.logResponse('No sessionId received', data);
       throw new Error('No sessionId received in authentication response');
     }
 
@@ -186,18 +186,18 @@ class FlightSessionService {
       .map(([key]) => key);
 
     if (missing.length > 0) {
-      this.logRequest('Credentials validation failed', {
-        missingVariables: missing
-      });
+      // this.logRequest('Credentials validation failed', {
+        // missingVariables: missing
+      // });
       throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
     }
 
-    this.logRequest('Credentials validation passed');
+    // this.logRequest('Credentials validation passed');
   }
 
   // Force refresh if needed (e.g., after receiving auth error)
   async forceRefresh(): Promise<string> {
-    this.logRequest('Forcing session refresh');
+    // this.logRequest('Forcing session refresh');
     this.session = null;
     return this.refreshSession();
   }
