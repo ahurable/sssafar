@@ -65,7 +65,7 @@ model User {
 }
 
 model Traveler {
-  id String @unique @default(cuid())
+  id String @id @default(cuid())
   firstName String
   lastName String
   nationalId String
