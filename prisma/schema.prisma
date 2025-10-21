@@ -515,7 +515,7 @@ model PanelStats {
 }
 
 model Credit {
-  id           String  @id   @default(cuid())  @unique
+  id           String  @id   @default(cuid())
   balance       Int           @default(0)
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
