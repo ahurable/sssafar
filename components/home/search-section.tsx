@@ -272,50 +272,43 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
   }
 
   return (
-    <section ref={sectionRef} className="py-16 md:py-24 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-blue-900">
+    <section ref={sectionRef} className="py-16 md:py-24 bg-blue-400 dark:from-gray-900 dark:to-blue-900">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-4xl font-bold text-white dark:text-white mb-4">
             سفر بعدی خود را پیدا کنید
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-xl text-white max-w-2xl mx-auto">
             بهترین هتل ها، پروازها و قطارها را با بهترین قیمت ها کشف کنید
           </p>
         </div>
 
-        <Card ref={cardRef} className="mx-auto max-w-6xl p-8 shadow-2xl border-0 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-2xl">
+        <Card ref={cardRef} className="mx-auto shadow-none bg-blue-400 w-full border-0 dark:bg-gray-800/95 backdrop-blur-sm">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-8 bg-muted/50 p-1 rounded-lg">
+            <TabsList className="grid w-full grid-cols-2 mb-8 p-1">
               <TabsTrigger 
                 value="hotel" 
-                className="flex items-center gap-3 data-[state=active]:bg-white data-[state=active]:shadow-lg rounded-md py-3 transition-all duration-300"
+                className="flex items-center gap-3 data-[state=active]:text-blue-400 text-white data-[state=active]:bg-white py-3 transition-all duration-300"
               >
-                <Hotel className="h-5 w-5" />
-                <span>هتل</span>
+                <Hotel className="h-12 w-12" />
+                <span className=" data-[state=active]:text-black font-black text-2xl">هتل</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="flight" 
-                className="flex items-center gap-3 data-[state=active]:bg-white data-[state=active]:shadow-lg rounded-md py-3 transition-all duration-300"
+                className="flex items-center gap-3 data-[state=active]:bg-white text-white data-[state=active]:text-blue-400 py-3 transition-all duration-300"
               >
-                <Plane className="h-5 w-5" />
-                <span>پرواز</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="train" 
-                className="flex items-center gap-3 data-[state=active]:bg-white data-[state=active]:shadow-lg rounded-md py-3 transition-all duration-300"
-              >
-                <Train className="h-5 w-5" />
-                <span>قطار</span>
+                <Plane className="h-12 w-12" />
+                <span className=" font-black text-2xl">پرواز</span>
               </TabsTrigger>
             </TabsList>
 
             {/* Hotel Search */}
-            <TabsContent value="hotel" className="space-y-6">
+            <TabsContent value="hotel" className="space-y-6 p-4">
               <HotelSearch />
             </TabsContent>
 
             {/* Flight Search */}
-            <TabsContent value="flight" className="space-y-6">
+            <TabsContent value="flight" className="space-y-6 p-4">
                   <FlightSearch />
             </TabsContent>
 

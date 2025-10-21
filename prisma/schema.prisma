@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgres"
-  url      = "postgresql://root:xvM1wnZy6CbtM24IEBchJUk3@grande-casse.liara.cloud:31026/postgres"
+  url      = env("DATABASE_URL")
 }
 
 enum UserRole {
@@ -188,6 +188,146 @@ model Train {
   @@index([origin, destination])
   @@index([available])
 }
+
+
+model Tour {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  startDate   DateTime
+  endDate     DateTime
+  isActive    Boolean  @default(true)
+  featured    Boolean  @default(false)
+  
+  // ارتباط با مدل‌های موجود
+  prices      TourPrice[]
+  itineraries TourItinerary[]
+  routes      TourRoute[]
+  rules       TourRule[]
+  transports  TourTransport[]
+  images TourImage[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([isActive])
+  @@index([featured])
+  @@index([startDate, endDate])
+  @@map("tours")
+}
+
+model TourImage {
+  id          String   @id @default(cuid())
+  tourId      String
+  tour        Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  filename    String
+  path        String   // Full path like "/assets/images/tours/[tourId]/[filename]"
+  isPrimary   Boolean  @default(false)
+  order       Int      @default(0)
+  altText     String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("tour_images")
+  @@index([tourId])
+  @@index([isPrimary])
+  @@index([order])
+}
+
+model TourPrice {
+  id          String   @id @default(cuid())
+  tourId      String
+  tour        Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  
+  type        PriceType
+  price       Float
+  description String?
+  
+  createdAt DateTime @default(now())
+  
+  @@map("tour_prices")
+}
+
+model TourItinerary {
+  id          String   @id @default(cuid())
+  tourId      String
+  tour        Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  
+  day         Int
+  title       String
+  description String
+  activities  Json?
+  
+  createdAt DateTime @default(now())
+  
+  @@map("tour_itineraries")
+}
+
+model TourRoute {
+  id          String   @id @default(cuid())
+  tourId      String
+  tour        Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  
+  order       Int
+  city        String
+  country     String
+  duration    Int?
+  description String?
+  
+  createdAt DateTime @default(now())
+  
+  @@map("tour_routes")
+}
+
+model TourRule {
+  id          String   @id @default(cuid())
+  tourId      String
+  tour        Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  
+  title       String
+  description String
+  
+  createdAt DateTime @default(now())
+  
+  @@map("tour_rules")
+}
+
+model TourTransport {
+  id          String   @id @default(cuid())
+  tourId      String
+  tour        Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  
+  type        TransportType
+  departure   DateTime
+  arrival     DateTime
+  fromCity    String
+  toCity      String
+  carrier     String?
+  flightNumber String?
+  trainNumber String?
+  
+  createdAt DateTime @default(now())
+  
+  @@map("tour_transports")
+}
+
+// اضافه کردن enumهای لازم
+enum PriceType {
+  ADULT
+  CHILD
+  INFANT
+  STUDENT
+  SENIOR
+}
+
+enum TransportType {
+  FLIGHT
+  TRAIN
+  BUS
+  FERRY
+}
+
 
 enum TransactionType {
   DEPOSIT    // واریز اعتبار
@@ -445,6 +585,7 @@ enum InvoiceKind {
   FLIGHT
   TRAIN
   CHARGE
+  TOUR
 }
 
 enum InvoiceState {

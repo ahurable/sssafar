@@ -22,7 +22,7 @@ export function SettingsForm() {
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="p-4">
         <CardHeader>
           <CardTitle>تغییر رمز عبور</CardTitle>
           <CardDescription>برای امنیت بیشتر، رمز عبور قوی انتخاب کنید</CardDescription>

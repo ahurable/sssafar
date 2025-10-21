@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Search, Calendar, MapPin, Users, Loader2, Bed } from "lucide-react"
+import { Search, Calendar, MapPin, Users, Loader2, Bed, Plus, Minus } from "lucide-react"
 import gsap from "gsap"
 import { hotels } from "@/lib/data/hotels"
 import { useSnack } from "@/hooks/use-notification"
@@ -40,6 +40,7 @@ const HotelSearch = () => {
   const cardRef = useRef<HTMLDivElement>(null)
   const [searchLoading, setSearchLoading] = useState(false)
   const router = useRouter()
+  
   // Hotel search state
   const [hotelSearch, setHotelSearch] = useState<HotelSearchFormData>({
     city: "",
@@ -52,19 +53,23 @@ const HotelSearch = () => {
     rooms: 1
   })
 
+  // Guests & Rooms popover state
+  const [showGuestsRooms, setShowGuestsRooms] = useState(false)
+
   // Suggestions state
   const [suggestions, setSuggestions] = useState<CitySuggestion[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0)
   const [suggestionLoading, setSuggestionLoading] = useState(false)
   const [currentInput, setCurrentInput] = useState("")
+  const [isCityFocused, setIsCityFocused] = useState(false)
 
   const { error, success } = useSnack()
   const { setHotelsData, setRequest } = useHotel()
 
   const suggestionsRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-
+  const guestsRoomsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -131,12 +136,39 @@ const HotelSearch = () => {
     return () => clearTimeout(timer)
   }, [currentInput])
 
+  // Handle click outside for both suggestions and guests/rooms
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      // Close suggestions
+      if (
+        suggestionsRef.current && 
+        !suggestionsRef.current.contains(event.target as Node) &&
+        inputRef.current &&
+        !inputRef.current.contains(event.target as Node)
+      ) {
+        setShowSuggestions(false)
+      }
+
+      // Close guests/rooms popover
+      if (
+        guestsRoomsRef.current && 
+        !guestsRoomsRef.current.contains(event.target as Node) &&
+        !(event.target as Element).closest('.guests-rooms-trigger')
+      ) {
+        setShowGuestsRooms(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
+
   const handleSuggestionClick = (suggestion: CitySuggestion) => {
-    console.log('clicked on suggestion')
     const displayValue = suggestion.nameFa 
       ? `${suggestion.nameFa} (${suggestion.name})`
       : suggestion.name;
-    console.log(displayValue)
     
     setHotelSearch(prev => ({
       ...prev,
@@ -148,30 +180,11 @@ const HotelSearch = () => {
     
     setShowSuggestions(false)
     setCurrentInput("")
+    setIsCityFocused(false)
   }
-
-  // Add this useEffect to handle clicks outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        suggestionsRef.current && 
-        !suggestionsRef.current.contains(event.target as Node) &&
-        inputRef.current &&
-        !inputRef.current.contains(event.target as Node)
-      ) {
-        setShowSuggestions(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [])
 
   const handleInputChange = (value: string) => {
     setCurrentInput(value)
-    // Only update the display value, clear the IDs when user is typing
     setHotelSearch(prev => ({ 
       ...prev, 
       city: value,
@@ -202,8 +215,22 @@ const HotelSearch = () => {
     }
   }
 
+  const handleGuestsRoomsChange = (type: 'guests' | 'rooms', operation: 'increment' | 'decrement') => {
+    setHotelSearch(prev => {
+      const currentValue = prev[type]
+      let newValue = currentValue
+
+      if (operation === 'increment') {
+        newValue = type === 'guests' ? Math.min(currentValue + 1, 10) : Math.min(currentValue + 1, 5)
+      } else {
+        newValue = type === 'guests' ? Math.max(currentValue - 1, 1) : Math.max(currentValue - 1, 1)
+      }
+
+      return { ...prev, [type]: newValue }
+    })
+  }
+
   const handleHotelSearch = async () => {
-    // Validate form data
     if (!hotelSearch.city || !hotelSearch.cityId) {
       alert("لطفاً یک شهر معتبر انتخاب کنید")
       return
@@ -214,16 +241,8 @@ const HotelSearch = () => {
       return
     }
 
-    if (!hotelSearch.guests) {
-      alert("لطفاً تاریخ تعداد مهمانان را انتخاب کنید")
-      return
-    }
-
     setIsLoading(true)
     try {
-      // Here you would make your actual hotel search API call
-      console.log("Searching with data:", hotelSearch)
-      
       setSearchLoading(true)
       const response = await fetch('/api/hotels/search/list', {
         method: 'POST',
@@ -236,7 +255,6 @@ const HotelSearch = () => {
       }
 
       const data = await response.json()
-      console.log(data)
       setHotelsData(data.data)
       setRequest(data.request)
       router.push('/hotels/')
@@ -255,40 +273,45 @@ const HotelSearch = () => {
     return (
       <div 
         ref={suggestionsRef}
-        className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto mt-1"
+        className="absolute top-full right-0 left-0 bg-white border-2 border-blue-300 rounded-2xl shadow-2xl z-50 max-h-80 overflow-y-auto mt-2 transition-all duration-300 transform origin-top"
+        style={{
+          animation: 'slideDown 0.3s ease-out'
+        }}
       >
         {suggestions.map((suggestion, index) => (
           <div
             key={`${suggestion.id}-${suggestion.type}`}
-            className={`p-3 cursor-pointer border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors ${
-              index === activeSuggestionIndex ? 'bg-blue-50 border-blue-200' : ''
+            className={`p-4 cursor-pointer border-b border-gray-100 last:border-b-0 transition-all duration-200 ${
+              index === activeSuggestionIndex 
+                ? 'bg-blue-50 border-r-4 border-r-blue-500 scale-[1.02]' 
+                : 'hover:bg-gray-50 hover:scale-[1.01]'
             }`}
             onMouseDown={(e) => {
-              e.preventDefault() // Prevent input blur
+              e.preventDefault()
               handleSuggestionClick(suggestion)
             }}
           >
             <div className="flex justify-between items-start">
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-sm">
+              <div className="flex-1 text-right">
+                <div className="flex items-center gap-3 justify-end">
+                  <span className="font-bold text-lg text-gray-800">
                     {suggestion.nameFa || suggestion.name}
                   </span>
                   {suggestion.nameFa && (
-                    <span className="text-xs text-gray-500">({suggestion.name})</span>
+                    <span className="text-base text-gray-500">({suggestion.name})</span>
                   )}
                 </div>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className={`text-xs px-2 py-1 rounded-full ${
+                <div className="flex items-center gap-3 mt-2 justify-end">
+                  <span className={`text-sm px-3 py-1.5 rounded-full font-medium ${
                     suggestion.type === 'domestic' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-blue-100 text-blue-800'
+                      ? 'bg-green-100 text-green-800 border border-green-200' 
+                      : 'bg-blue-100 text-blue-800 border border-blue-200'
                   }`}>
                     {suggestion.type === 'domestic' ? 'داخلی' : 'بین‌المللی'}
                   </span>
                   {suggestion.isPopular && (
-                    <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
-                      محبوب
+                    <span className="text-sm bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-full font-medium border border-yellow-200">
+                      💫 محبوب
                     </span>
                   )}
                 </div>
@@ -300,105 +323,198 @@ const HotelSearch = () => {
     )
   }
 
+  const renderGuestsRoomsSelector = () => {
+    if (!showGuestsRooms) return null
+
+    return (
+      <div 
+        ref={guestsRoomsRef}
+        className="absolute top-full right-0 left-0 bg-white border-2 border-blue-300 rounded-2xl shadow-2xl z-50 p-6 mt-2 transition-all duration-300 transform origin-top"
+        style={{
+          animation: 'slideDown 0.3s ease-out'
+        }}
+      >
+        <div className="space-y-6">
+          {/* Guests Selector */}
+          <div className="flex items-center justify-between">
+            <div className="text-right">
+              <div className="font-bold text-lg text-gray-800">تعداد مهمان</div>
+              <div className="text-sm text-gray-600 mt-1">حداکثر 10 مهمان</div>
+            </div>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => handleGuestsRoomsChange('guests', 'decrement')}
+                disabled={hotelSearch.guests <= 1}
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 disabled:bg-gray-100 disabled:text-gray-400 transition-all duration-200"
+              >
+                <Minus className="h-5 w-5" />
+              </button>
+              <span className="text-2xl font-bold text-gray-800 min-w-8 text-center">
+                {hotelSearch.guests}
+              </span>
+              <button
+                onClick={() => handleGuestsRoomsChange('guests', 'increment')}
+                disabled={hotelSearch.guests >= 10}
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 disabled:bg-gray-100 disabled:text-gray-400 transition-all duration-200"
+              >
+                <Plus className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Rooms Selector */}
+          <div className="flex items-center justify-between">
+            <div className="text-right">
+              <div className="font-bold text-lg text-gray-800">تعداد اتاق</div>
+              <div className="text-sm text-gray-600 mt-1">حداکثر 5 اتاق</div>
+            </div>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => handleGuestsRoomsChange('rooms', 'decrement')}
+                disabled={hotelSearch.rooms <= 1}
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 disabled:bg-gray-100 disabled:text-gray-400 transition-all duration-200"
+              >
+                <Minus className="h-5 w-5" />
+              </button>
+              <span className="text-2xl font-bold text-gray-800 min-w-8 text-center">
+                {hotelSearch.rooms}
+              </span>
+              <button
+                onClick={() => handleGuestsRoomsChange('rooms', 'increment')}
+                disabled={hotelSearch.rooms >= 5}
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 disabled:bg-gray-100 disabled:text-gray-400 transition-all duration-200"
+              >
+                <Plus className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <>
+    <div className="rounded-3xl ">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {/* City Input - Enhanced with animations */}
         <div className="space-y-3 relative">
-          <Label htmlFor="hotel-city" className="text-sm font-semibold">شهر مقصد</Label>
+          <Label htmlFor="hotel-city" className="text-lg font-bold text-white text-right block">شهر مقصد</Label>
           <div className="relative">
-            <MapPin className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+            <MapPin className="absolute right-4 top-4 h-5 w-5 text-gray-400" />
             {suggestionLoading && (
-              <Loader2 className="absolute left-3 top-3 h-4 w-4 animate-spin text-muted-foreground" />
+              <Loader2 className="absolute left-4 top-4 h-5 w-5 animate-spin text-blue-600" />
             )}
             <Input 
+              ref={inputRef}
               id="hotel-city" 
               placeholder="تهران، استانبول، دبی..." 
-              className="pr-10 h-12 rounded-lg border-2 focus:border-blue-500 transition-colors"
+              className={`pr-12 h-14 rounded-2xl border-2 bg-white text-gray-800 placeholder-gray-500 text-lg font-medium transition-all duration-300 ${
+                isCityFocused 
+                  ? 'border-blue-500 scale-105 shadow-lg' 
+                  : 'border-gray-300 hover:border-blue-400'
+              } ${showSuggestions ? 'rounded-b-none border-b-2 border-b-blue-300' : ''}`}
               value={hotelSearch.city}
               onChange={(e) => handleInputChange(e.target.value)}
               onKeyDown={handleKeyDown}
-              onFocus={() => setShowSuggestions(suggestions.length > 0)}
-              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+              onFocus={() => {
+                setIsCityFocused(true)
+                setShowSuggestions(suggestions.length > 0)
+              }}
+              onBlur={() => {
+                setIsCityFocused(false)
+                setTimeout(() => setShowSuggestions(false), 200)
+              }}
             />
             {renderSuggestions()}
           </div>
         </div>
         
+        {/* Check-in Date */}
         <div className="space-y-3">
-          <Label htmlFor="hotel-checkin" className="text-sm font-semibold">تاریخ ورود</Label>
+          <Label htmlFor="hotel-checkin" className="text-lg font-bold text-white text-right block">تاریخ ورود</Label>
           <div className="relative">
-            <Calendar className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Calendar className="absolute right-4 top-4 h-5 w-5 text-gray-400" />
             <Input 
               id="hotel-checkin" 
               type="date" 
               min={new Date().toISOString().split('T')[0]}
-              className="pr-10 h-12 rounded-lg border-2 focus:border-blue-500 transition-colors"
+              className="pr-12 h-14 rounded-2xl border-2 border-gray-300 bg-white text-gray-800 text-lg font-medium transition-all duration-300 hover:border-blue-400 focus:border-blue-500 focus:scale-105 focus:shadow-lg"
               value={hotelSearch.checkIn}
               onChange={(e) => setHotelSearch(prev => ({ ...prev, checkIn: e.target.value }))}
             />
           </div>
         </div>
         
+        {/* Check-out Date */}
         <div className="space-y-3">
-          <Label htmlFor="hotel-checkout" className="text-sm font-semibold">تاریخ خروج</Label>
+          <Label htmlFor="hotel-checkout" className="text-lg font-bold text-white text-right block">تاریخ خروج</Label>
           <div className="relative">
-            <Calendar className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Calendar className="absolute right-4 top-4 h-5 w-5 text-gray-400" />
             <Input 
               id="hotel-checkout" 
               type="date" 
               min={hotelSearch.checkIn || new Date().toISOString().split('T')[0]}
-              className="pr-10 h-12 rounded-lg border-2 focus:border-blue-500 transition-colors"
+              className="pr-12 h-14 rounded-2xl border-2 border-gray-300 bg-white text-gray-800 text-lg font-medium transition-all duration-300 hover:border-blue-400 focus:border-blue-500 focus:scale-105 focus:shadow-lg"
               value={hotelSearch.checkOut}
               onChange={(e) => setHotelSearch(prev => ({ ...prev, checkOut: e.target.value }))}
             />
           </div>
         </div>
         
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-3">
-            <Label htmlFor="hotel-guests" className="text-sm font-semibold">تعداد مهمان</Label>
-            <div className="relative">
-              <Users className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input 
-                id="hotel-guests" 
-                type="number" 
-                min="1"
-                max="10"
-                className="pr-10 h-12 rounded-lg border-2 focus:border-blue-500 transition-colors"
-                value={hotelSearch.guests}
-                onChange={(e) => setHotelSearch(prev => ({ ...prev, guests: parseInt(e.target.value) || 1 }))}
-              />
+        {/* Guests & Rooms Selector */}
+        <div className="space-y-3 relative">
+          <Label className="text-lg font-bold text-white text-right block">مهمان و اتاق</Label>
+          <div 
+            className="guests-rooms-trigger cursor-pointer"
+            onClick={() => setShowGuestsRooms(!showGuestsRooms)}
+          >
+            <div className="relative h-14 rounded-2xl border-2 border-gray-300 bg-white hover:border-blue-400 transition-all duration-300 flex items-center justify-between px-4">
+              <div className="flex items-center gap-4">
+                <Users className="h-5 w-5 text-gray-400" />
+                <Bed className="h-5 w-5 text-gray-400" />
+              </div>
+              <div className="text-right">
+                <div className="text-gray-800 text-lg font-medium">
+                  {hotelSearch.guests} مهمان
+                </div>
+                <div className="text-gray-500 text-sm">
+                  {hotelSearch.rooms} اتاق
+                </div>
+              </div>
             </div>
           </div>
-          
-          <div className="space-y-3">
-            <Label htmlFor="hotel-rooms" className="text-sm font-semibold">تعداد اتاق</Label>
-            <div className="relative">
-              <Bed className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input 
-                id="hotel-rooms" 
-                type="number" 
-                min="1"
-                max="5"
-                className="pr-10 h-12 rounded-lg border-2 focus:border-blue-500 transition-colors"
-                value={hotelSearch.rooms}
-                onChange={(e) => setHotelSearch(prev => ({ ...prev, rooms: parseInt(e.target.value) || 1 }))}
-              />
-            </div>
-          </div>
+          {renderGuestsRoomsSelector()}
         </div>
       </div>
       
+      {/* Search Button */}
       <Button 
-        className="w-full h-14 text-lg rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+        className="w-full h-16 text-xl font-bold rounded-2xl bg-gradient-to-r from-white to-blue-100 text-blue-600 hover:from-blue-100 hover:to-white transition-all duration-300 shadow-2xl hover:shadow-3xl hover:scale-105 mt-8"
         onClick={handleHotelSearch}
         disabled={isLoading}
       >
-        <Search className="ml-2 h-5 w-5" />
+        <Search className="ml-3 h-6 w-6" />
         {isLoading ? "در حال جستجو..." : "جستجوی هتل"}
       </Button>
-    </>
+
+      <style jsx>{`
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-10px) scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+        
+        /* Style the date input for better appearance */
+        input[type="date"] {
+          color-scheme: light;
+        }
+      `}</style>
+    </div>
   )
 }
 

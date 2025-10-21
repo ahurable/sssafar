@@ -65,7 +65,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fa" dir="rtl" className={`${dana.className}`}>
-      <body>
+      <body dir="rtl">
         <NotificationProvider>
           <FlightProvider>
             <HotelProvider>

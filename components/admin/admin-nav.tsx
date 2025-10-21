@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Users, FileText, Settings, LogOut, PanelRightIcon, PlusSquare, File } from "lucide-react"
+import { LayoutDashboard, Users, FileText, Settings, LogOut, PanelRightIcon, PlusSquare, File, Plane } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const navItems = [
@@ -25,6 +25,11 @@ const navItems = [
     title: "پنل ها",
     href: "/admin/panels",
     icon: PanelRightIcon
+  },
+  {
+    title: "تور ها",
+    href: "/admin/tours",
+    icon: Plane
   },
   {
     title: "تنظیمات",

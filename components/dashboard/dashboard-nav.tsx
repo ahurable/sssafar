@@ -93,7 +93,7 @@ export function DashboardNav() {
   },[me])
   return (
     <div className="sticky top-20">
-      <Card className="text-center">
+      <Card className="text-center p-4">
         <span>
           اعتبار کیف پول
         </span>

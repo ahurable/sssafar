@@ -103,13 +103,14 @@ class FlightSessionService {
 
   private hashPassword(password: string): string {
     // Create SHA-512 hash - ensure proper encoding
-    const hash = crypto.createHash('SHA512');
+    // const hash = crypto.createHash('SHA512');
     
-    // Important: Use the exact same encoding the API expects
-    // Try different encodings if needed
-    hash.update(password, 'utf-8');
+    // // Important: Use the exact same encoding the API expects
+    // // Try different encodings if needed
+    // hash.update(password, 'utf-8');
     
-    return hash.digest('hex').toUpperCase();
+    // return hash.digest('hex').toUpperCase();
+    return password
   }
 
   private async authenticateWithThirdParty(): Promise<string> {

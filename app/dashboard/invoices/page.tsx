@@ -174,7 +174,7 @@ export default function InvoicesPage() {
                     const kindConfig = getKindIcon(invoice.kind);
                     
                     return (
-                      <Card key={invoice.id} className="border shadow-sm hover:shadow-md transition-shadow">
+                      <Card key={invoice.id} className="border shadow-sm hover:shadow-md transition-shadow p-4">
                         <CardHeader className="pb-4">
                           <div className="flex justify-between items-start">
                             <div className="flex items-center gap-3">

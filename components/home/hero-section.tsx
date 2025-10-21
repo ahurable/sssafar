@@ -59,25 +59,25 @@ export function HeroSection() {
       </div>
 
       <div className="container relative z-10 mx-auto px-4 text-center">
-        <h1 ref={titleRef} className="mb-6 text-5xl font-bold leading-tight text-balance md:text-6xl lg:text-7xl">
+        <h1 ref={titleRef} className="mb-6 text-5xl text-blue-400 font-bold leading-tight text-balance md:text-6xl lg:text-7xl">
           سفر رویایی خود را
           <br />
-          <span className="bg-gradient-to-l from-primary to-primary/60 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-l from-primary text-blue-400 to-primary/60 bg-clip-text">
             با ما تجربه کنید
           </span>
         </h1>
         <p
           ref={subtitleRef}
-          className="mx-auto mb-8 max-w-2xl text-lg text-muted-foreground leading-relaxed md:text-xl"
+          className="mx-auto mb-8 max-w-2xl text-lg text-blue-400 leading-relaxed md:text-xl"
         >
           رزرو آنلاین هتل، خرید بلیط هواپیما و قطار با بهترین قیمت و خدمات عالی. سفر شما از اینجا شروع می‌شود.
         </p>
         <div ref={buttonRef} className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <Button size="lg" className="text-base">
+          <Button size="lg" className="text-2xl bg-blue-400 text-white py-6 px-10">
             شروع رزرو
             <ArrowLeft className="mr-2 h-5 w-5" />
           </Button>
-          <Button size="lg" variant="outline" className="text-base bg-transparent">
+          <Button size="lg" variant="outline" className="text-2xl border-blue-400 text-blue-400 py-6 px-10">
             مشاهده تورها
           </Button>
         </div>

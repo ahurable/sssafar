@@ -119,7 +119,7 @@ export function PanelManagement({ panelId }: { panelId: string }) {
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-1">
           {(panels && userPanels || userPanels || panels).map((panel) => (
-            <Card key={panel.id} className="relative">
+            <Card key={panel.id} className="relative p-4">
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>

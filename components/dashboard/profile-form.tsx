@@ -234,7 +234,7 @@ export function ProfileForm() {
   }
 
   return (
-    <Card>
+    <Card className="p-4">
       <CardHeader>
         <CardTitle>اطلاعات شخصی</CardTitle>
         <CardDescription>
