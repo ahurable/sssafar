@@ -1,5 +1,4 @@
-import { redirect } from "next/navigation"
-import { getSession } from "@/lib/auth"
+
 import { AdminStats } from "@/components/admin/admin-stats"
 import { RecentUsers } from "@/components/admin/recent-users"
 import { RecentBookings } from "@/components/admin/recent-bookings"
