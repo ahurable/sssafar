@@ -55,7 +55,7 @@ export function Header() {
   }
 
   const ProfileMenu = () => (
-    <div className="absolute left-0 top-full mt-2 w-72 rounded-2xl border border-gray-200 bg-white shadow-xl transition-all duration-200 z-50">
+    <div className="absolute left-0 lg:left-[-20px] lg:top-[50px] after:content-[' '] after:top-[-10px] after:z-[-1] after:left-[30px] after:absolute after:w-5 after:h-5 after:bg-white after:rotate-45 top-full mt-2 w-72 rounded-2xl border border-gray-200 bg-white shadow-xl transition-all duration-200 z-50">
       <div className="p-3">
         {user ? (
           // Logged in user menu
@@ -173,7 +173,7 @@ export function Header() {
           </Link>
 
           {/* Profile Menu */}
-          <div className="flex items-center gap-2" ref={profileMenuRef}>
+          <div className="flex items-center gap-2 relative" ref={profileMenuRef}>
             <Link href="/tours">
               <span className="block px-10 py-2 text-blue-400 rounded-full border border-blue-400"> مشاهده تور ها</span>
             </Link>

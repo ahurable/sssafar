@@ -54,11 +54,11 @@ export default function FlightsPage() {
             <h1 className="text-3xl font-bold mb-2">نتایج جستجو</h1>
             <p className="text-muted-foreground">{flights.length} پرواز یافت شد</p>
           </div>
-          <div className="grid gap-6 lg:grid-cols-4">
-            <aside className="lg:col-span-1">
+          <div className="grid gap-6 lg:grid-cols-4 grid-cols-1">
+            <aside className="lg:col-span-1 col-span-1">
               <FlightFilters />
             </aside>
-            <div className="lg:col-span-3">
+            <div className="lg:col-span-3 col-span-1">
               <FlightList flights={flights} />
             </div>
           </div>

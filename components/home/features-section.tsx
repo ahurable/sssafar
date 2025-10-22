@@ -60,8 +60,8 @@ export function FeaturesSection() {
     <section ref={sectionRef} className="bg-muted/30 py-16 md:py-24">
       <div className="container mx-auto px-4">
         <div className="mb-12 text-center">
-          <h2 className="mb-4 text-3xl font-bold text-balance md:text-4xl text-red-400">چرا سفرتودی؟</h2>
-          <p className="mx-auto max-w-2xl text-muted-foreground leading-relaxed text-red-400">
+          <h2 className="mb-4 text-3xl font-bold text-balance md:text-4xl text-emerald-400">چرا سفرتودی؟</h2>
+          <p className="mx-auto max-w-2xl leading-relaxed text-emerald-400">
             ما با ارائه بهترین خدمات و امکانات، سفر شما را به تجربه‌ای فراموش‌نشدنی تبدیل می‌کنیم
           </p>
         </div>
@@ -79,10 +79,10 @@ export function FeaturesSection() {
               >
                 <CardContent className="flex flex-col items-center p-6 text-center">
                   <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                    <Icon className="h-8 w-8 text-primary text-red-400" />
+                    <Icon className="h-8 w-8 text-emerald-400" />
                   </div>
-                  <h3 className="mb-2 text-xl font-bold text-red-400">{feature.title}</h3>
-                  <p className="text-sm leading-relaxed text-red-400">{feature.description}</p>
+                  <h3 className="mb-2 text-xl font-bold text-emerald-400">{feature.title}</h3>
+                  <p className="text-sm leading-relaxed text-emerald-400">{feature.description}</p>
                 </CardContent>
               </Card>
             )

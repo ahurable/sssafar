@@ -13,6 +13,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { useSearch } from "@/hooks/use-search"
 import FlightSearch from "../flights/flight-search"
 import HotelSearch from "../hotels/hotel-search"
+import DomesticFlightSearch from "../flights/domestic-flight-search"
 gsap.registerPlugin(ScrollTrigger)
 
 interface SearchSectionProps {
@@ -29,7 +30,7 @@ interface Suggestion {
 }
 
 export function SearchSection({ onSearchResults }: SearchSectionProps) {
-  const [activeTab, setActiveTab] = useState("hotel")
+  const [activeTab, setActiveTab] = useState<"hotel" | "flight">("hotel")
   const [isLoading, setIsLoading] = useState(false)
   const sectionRef = useRef<HTMLElement>(null)
   const cardRef = useRef<HTMLDivElement>(null)
@@ -270,9 +271,14 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
     nextWeek.setDate(nextWeek.getDate() + 7)
     return nextWeek.toISOString().split('T')[0]
   }
+  const cardBackgrounds = {
+    hotel: 'bg-emerald-400',
+    flight: 'bg-blue-400',
+    domesticFlights: 'bg-red-400'
+  }
 
   return (
-    <section ref={sectionRef} className="py-16 md:py-24 bg-blue-400 dark:from-gray-900 dark:to-blue-900">
+    <section ref={sectionRef} className={`py-16 md:py-24  dark:from-gray-900 dark:to-blue-900 ${cardBackgrounds[activeTab]}`}>
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-white dark:text-white mb-4">
@@ -283,22 +289,29 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
           </p>
         </div>
 
-        <Card ref={cardRef} className="mx-auto shadow-none bg-blue-400 w-full border-0 dark:bg-gray-800/95 backdrop-blur-sm">
+        <Card ref={cardRef} className={`mx-auto shadow-none ${cardBackgrounds[activeTab]} w-full border-0 dark:bg-gray-800/95 backdrop-blur-sm`}>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-8 p-1">
+            <TabsList className="grid w-full grid-cols-3 mb-8 p-1">
               <TabsTrigger 
                 value="hotel" 
-                className="flex items-center gap-3 data-[state=active]:text-blue-400 text-white data-[state=active]:bg-white py-3 transition-all duration-300"
+                className="flex items-center gap-3 data-[state=active]:text-emerald-400 text-white data-[state=active]:bg-white py-3 transition-all duration-300"
               >
                 <Hotel className="h-12 w-12" />
-                <span className=" data-[state=active]:text-black font-black text-2xl">هتل</span>
+                <span className=" data-[state=active]:text-black font-black lg:text-2xl">هتل</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="flight" 
                 className="flex items-center gap-3 data-[state=active]:bg-white text-white data-[state=active]:text-blue-400 py-3 transition-all duration-300"
               >
                 <Plane className="h-12 w-12" />
-                <span className=" font-black text-2xl">پرواز</span>
+                <span className=" font-black lg:text-2xl">پرواز خارجی</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="domesticFlights" 
+                className="flex items-center gap-3 data-[state=active]:bg-white text-white data-[state=active]:text-red-400 py-3 transition-all duration-300"
+              >
+                <Plane className="h-12 w-12" />
+                <span className=" font-black lg:text-2xl">پرواز داخلی</span>
               </TabsTrigger>
             </TabsList>
 
@@ -310,6 +323,10 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
             {/* Flight Search */}
             <TabsContent value="flight" className="space-y-6 p-4">
                   <FlightSearch />
+            </TabsContent>
+
+            <TabsContent value="domesticFlights" className="space-y-6 p-4">
+                  <DomesticFlightSearch />
             </TabsContent>
 
             {/* Train Search */}

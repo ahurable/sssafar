@@ -163,7 +163,7 @@ export function FlightList({ flights, itemsPerPage = 10 }: FlightListProps) {
   return (
     <div className="space-y-6">
       {/* Date Selection Section */}
-      <Card className="border-2 border-blue-100 bg-blue-50">
+      <Card className="border-2 border-blue-100 bg-blue-50 overflow-auto" >
         <CardContent className="p-4">
           <div className="flex items-center gap-3 mb-4">
             <Calendar className="h-5 w-5 text-blue-600" />

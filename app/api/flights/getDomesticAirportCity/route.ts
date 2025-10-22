@@ -14,7 +14,7 @@ let airportsCache: Airport[] | null = null
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const query = searchParams.get('query')?.toLowerCase() || ''
-  console.log('fired')
+
   try {
     if (!airportsCache) {
       airportsCache = await loadAirportsFromXLSX()
@@ -54,8 +54,8 @@ export async function GET(request: NextRequest) {
 
 async function loadAirportsFromXLSX(): Promise<Airport[]> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-    const fileUrl = `${baseUrl}/data/Airport.xls` // Using City.xlsx
+    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+    const fileUrl = `${baseUrl}/data/DomesticAirlines.xlsx` // Using City.xlsx
     
     console.log('🔍 Attempting to fetch file from:', fileUrl)
     
@@ -123,15 +123,11 @@ async function loadAirportsFromXLSX(): Promise<Airport[]> {
     const cityColumn = columnNames.find(col => 
       col.toLowerCase().includes('city') || col.toLowerCase().includes('city name')
     )
-    const countryColumn = columnNames.find(col => 
-      col.toLowerCase().includes('country') || col.toLowerCase().includes('country code')
-    )
 
     console.log('🔍 Detected columns:', {
       iata: iataColumn,
       name: nameColumn,
-      city: cityColumn,
-      country: countryColumn
+      city: cityColumn
     })
 
     const airports: Airport[] = data.map((row: any, index: number) => {
@@ -139,19 +135,17 @@ async function loadAirportsFromXLSX(): Promise<Airport[]> {
       const iata = iataColumn ? row[iataColumn] : row[columnNames[0]]
       const name = nameColumn ? row[nameColumn] : row[columnNames[1]] 
       const city = cityColumn ? row[cityColumn] : row[columnNames[2]]
-      const country = countryColumn ? row[countryColumn] : row[columnNames[3]]
 
       return {
         iata: (iata || '').toString().trim(),
         name: (name || '').toString().trim(),
-        city: (city || '').toString().trim(),
-        country: (country || '').toString().trim()
+        city: (city || '').toString().trim()
       }
     }).filter(airport => airport.iata && airport.name && airport.city)
 
     console.log(`✅ Successfully loaded ${airports.length} airports from XLSX`)
     console.log('📝 First 3 airports:', airports.slice(0, 3))
-    // console.log(airports)
+    
     return airports
 
   } catch (error) {
@@ -163,7 +157,7 @@ async function loadAirportsFromXLSX(): Promise<Airport[]> {
 async function debugFileAccess() {
   try {
     const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
-    const fileUrl = `${baseUrl}/data/Airport.xls`
+    const fileUrl = `${baseUrl}/data/DomesticAirlines.xlsx`
     
     const response = await fetch(fileUrl)
     return {

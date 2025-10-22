@@ -32,6 +32,16 @@ export interface FlightSearchRequest {
   IsGenuine: boolean;
 }
 
+export interface DomesticFlightSearchRequest {
+  airline: string
+  origin: string
+  destination: string
+  departureDate: string // Format: YYYY-MM-DD
+  adults: number
+  children?: number
+  infants?: number
+}
+
 interface FilterState {
   priceRange: [number, number]
   airlines: string[]
@@ -52,6 +62,9 @@ interface FlightContextType {
   filteredFlights: any[]
   flightRequest: FlightSearchRequest
   setFlightRequest: (request: FlightSearchRequest) => void
+  domesticFlightRequest: DomesticFlightSearchRequest
+  setDomesticFlightRequest: (request: DomesticFlightSearchRequest) => void
+  searchDomesticFlights: (params:any) => void
 }
 
 // Helper functions remain the same
@@ -224,7 +237,13 @@ export function FlightProvider({ children }: { children: ReactNode }) {
     ],
     IsGenuine: false
   })
-
+  const [domesticFlightRequest, setDomesticFlightRequest] = useState<DomesticFlightSearchRequest>({
+    airline: 'ZV',
+    origin: '',
+    destination: '',
+    adults: 1,
+    departureDate: ''
+  })
   const getTimeRange = (timeString: string) => {
     const time = new Date(timeString).getHours()
     if (time >= 6 && time < 12) return "صبح (۶-۱۲)"
@@ -323,6 +342,27 @@ export function FlightProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const searchDomesticFlights = async (params: any) => {
+    try {
+      const response = await fetch('/api/flights/search/nira', 
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type':'application/json'
+          },
+          body: JSON.stringify(params)
+        }
+      )
+      const data = await response.json()
+      console.log(data)
+      if (!response.ok)
+        return data
+      return data
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const setFlightsData = (flights:any) => {
     setFlightData(flights)
     setLoading(false)
@@ -340,7 +380,10 @@ export function FlightProvider({ children }: { children: ReactNode }) {
       getAirlineName,
       applyFilters,
       flightRequest,
-      setFlightRequest
+      setFlightRequest,
+      setDomesticFlightRequest,
+      domesticFlightRequest,
+      searchDomesticFlights
     }}>
       {children}
     </FlightContext.Provider>

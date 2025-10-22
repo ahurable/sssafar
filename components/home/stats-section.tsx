@@ -48,16 +48,16 @@ export function StatsSection() {
   }, [])
 
   return (
-    <section ref={sectionRef} className="bg-primary py-16 text-primary-foreground md:py-20">
+    <section ref={sectionRef} className="bg-emerald-600 py-16 text-emerald-600-foreground md:py-20">
       <div className="container mx-auto px-4">
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat, index) => (
             <div key={index} className="text-center">
-              <div className="mb-2 text-4xl font-bold md:text-5xl">
+              <div className="mb-2 text-4xl text-white font-bold md:text-5xl">
                 {animatedValues[index].toLocaleString("fa-IR")}
                 {stat.suffix}
               </div>
-              <div className="text-lg text-primary-foreground/80">{stat.label}</div>
+              <div className="text-lg text-white">{stat.label}</div>
             </div>
           ))}
         </div>

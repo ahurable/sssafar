@@ -668,3 +668,27 @@ enum ImageType {
   GALLERY
   THUMBNAIL
 }
+
+
+model CipService {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String?
+  content     Json?
+  image       String?
+  airport     String
+  price       Float?
+  currency    String   @default("IRR")
+  duration    String?
+  features    String[]
+  included    String[]
+  notIncluded String[]
+  priority    Int      @default(0)
+  published   Boolean  @default(false)
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("cip_services")
+}

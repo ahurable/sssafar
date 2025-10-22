@@ -574,7 +574,7 @@ export function InvoiceComponent({
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       {/* Header with expiration */}
-      <Card className="border-l-4 border-l-amber-500">
+      <Card className="border-r-4 border-r-amber-500 mt-8">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -617,7 +617,7 @@ export function InvoiceComponent({
         <div className="lg:col-span-2 space-y-6">
           {/* Flight Information */}
           {isFlightInvoice && flightOrder && (
-            <Card>
+            <Card className="py-6">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Plane className="h-5 w-5" />
@@ -633,7 +633,7 @@ export function InvoiceComponent({
           {/* Hotel Information with Revalidated Data */}
           {isHotelInvoice && currentHotelOrder && (
             <>
-              <Card>
+              <Card className="py-6">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2">
@@ -667,7 +667,7 @@ export function InvoiceComponent({
 
               {/* Revalidation Data Section */}
               {revalidatedHotel && (
-                <Card>
+                <Card className="py-6">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Info className="h-5 w-5 text-blue-600" />
@@ -890,7 +890,7 @@ export function InvoiceComponent({
 
           {/* Travelers Information */}
           {invoice.travelers &&
-          <Card>
+          <Card className="py-6 mb-8">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5" />
@@ -963,7 +963,7 @@ export function InvoiceComponent({
         {/* Payment Section - FIXED AND COMPLETE */}
         <div className="space-y-6">
           {/* Amount Summary */}
-          <Card>
+          <Card className="py-6">
             <CardHeader>
               <CardTitle>خلاصه پرداخت</CardTitle>
             </CardHeader>
@@ -986,7 +986,7 @@ export function InvoiceComponent({
 
           {/* Payment Methods - Only show if invoice is waiting for payment */}
           {invoice.state === "WAITING" && !paid && (
-            <Card>
+            <Card className="py-6">
               <CardHeader>
                 <CardTitle>روش پرداخت</CardTitle>
                 <CardDescription>یکی از روش‌های پرداخت زیر را انتخاب کنید</CardDescription>
@@ -1126,7 +1126,7 @@ export function InvoiceComponent({
 
           {/* Paid State */}
           {(invoice.state === "PAID" || paid) && (
-            <Card>
+            <Card >
               <CardContent className="p-6">
                 <div className="text-center">
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">

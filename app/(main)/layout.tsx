@@ -9,42 +9,42 @@ import { HotelProvider } from "@/contexts/search/HotelContext"
 const dana = localFont({
     src: [
         {
-        path: '../assets/font/dana-thin.woff',
+        path: '../../assets/font/dana-thin.woff',
         weight: '300',
         style: 'normal'
         },
         {
-        path: '../assets/font/dana-light.woff',
+        path: '../../assets/font/dana-light.woff',
         weight: '400',
         style: 'normal'
         },
         {
-        path: '../assets/font/dana-regular.woff',
+        path: '../../assets/font/dana-regular.woff',
         weight: '500',
         style: 'normal'
         },
         {
-        path: '../assets/font/dana-demibold.woff',
+        path: '../../assets/font/dana-demibold.woff',
         weight: '600',
         style: 'normal'
         },
         {
-        path: '../assets/font/dana-bold.woff',
+        path: '../../assets/font/dana-bold.woff',
         weight: '700',
         style: 'normal'
         },
         {
-        path: '../assets/font/dana-ultrabold.woff',
+        path: '../../assets/font/dana-ultrabold.woff',
         weight: '800',
         style: 'normal'
         },
         {
-        path: '../assets/font/dana-extrabold.woff',
+        path: '../../assets/font/dana-extrabold.woff',
         weight: '900',
         style: 'normal'
         },
         {
-        path: '../assets/font/dana-black.woff',
+        path: '../../assets/font/dana-black.woff',
         weight: '950',
         style: 'normal'
         }

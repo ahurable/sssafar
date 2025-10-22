@@ -394,7 +394,7 @@ const HotelSearch = () => {
   }
 
   return (
-    <div className="rounded-3xl ">
+    <div className="rounded-3xl "  style={{direction:'rtl'}}>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {/* City Input - Enhanced with animations */}
         <div className="space-y-3 relative">
@@ -489,7 +489,7 @@ const HotelSearch = () => {
       
       {/* Search Button */}
       <Button 
-        className="w-full h-16 text-xl font-bold rounded-2xl bg-gradient-to-r from-white to-blue-100 text-blue-600 hover:from-blue-100 hover:to-white transition-all duration-300 shadow-2xl hover:shadow-3xl hover:scale-105 mt-8"
+        className="w-full h-16 text-xl font-bold rounded-2xl bg-gradient-to-r from-white to-blue-100 text-emerald-600 hover:from-blue-100 hover:to-white transition-all duration-300 shadow-2xl hover:shadow-3xl hover:scale-105 mt-8"
         onClick={handleHotelSearch}
         disabled={isLoading}
       >

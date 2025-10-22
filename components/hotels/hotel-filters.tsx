@@ -63,7 +63,7 @@ export function HotelFilters() {
   const showingHotels = filteredHotels.length
 
   return (
-    <Card className="sticky top-20">
+    <Card className="sticky top-20 py-6">
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
           <span>فیلترها</span>
@@ -81,9 +81,9 @@ export function HotelFilters() {
             onValueChange={handlePriceChange}
             max={5000000} 
             step={100000} 
-            className="mt-2" 
+            className="mt-2 bg-emerald-600" 
           />
-          <div className="flex justify-between text-sm text-muted-foreground">
+          <div className="flex justify-between text-sm">
             <span>{localFilters.priceRange[0].toLocaleString("fa-IR")}</span>
             <span>{localFilters.priceRange[1].toLocaleString("fa-IR")}</span>
           </div>
@@ -98,6 +98,7 @@ export function HotelFilters() {
                 <Checkbox 
                   id={`rating-${rating}`}
                   checked={localFilters.hotelRatings.includes(rating)}
+                  className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
                   onCheckedChange={(checked) => 
                     handleRatingChange(rating, checked as boolean)
                   }
@@ -121,6 +122,7 @@ export function HotelFilters() {
               <div key={amenity} className="flex items-center gap-2">
                 <Checkbox 
                   id={`amenity-${amenity}`}
+                  className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
                   checked={localFilters.amenities.includes(amenity)}
                   onCheckedChange={(checked) => 
                     handleAmenityChange(amenity, checked as boolean)
@@ -141,7 +143,7 @@ export function HotelFilters() {
         <div className="flex gap-2 pt-4">
           <Button 
             onClick={handleApplyFilters}
-            className="flex-1"
+            className="flex-1 bg-emerald-600"
             size="sm"
           >
             اعمال فیلترها
@@ -158,7 +160,7 @@ export function HotelFilters() {
         {/* Active Filters */}
         {(filters.hotelRatings.length > 0 || filters.amenities.length > 0) && (
           <div className="pt-4 border-t">
-            <Label className="text-sm">فیلترهای فعال:</Label>
+            <Label className="text-sm text-green-400">فیلترهای فعال:</Label>
             <div className="flex flex-wrap gap-1 mt-2">
               {filters.hotelRatings.map(rating => (
                 <span 

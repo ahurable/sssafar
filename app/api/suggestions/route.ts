@@ -5,7 +5,8 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const query = searchParams.get('query')?.toLowerCase() || ''
   const type = searchParams.get('type') || 'hotel'
-
+  // console.log(query) => tehr
+  // console.log(type) => flight
   try {
     let suggestions: any[] = []
 
@@ -24,18 +25,39 @@ export async function GET(request: NextRequest) {
           code: airport.iata,
           type: 'airport' as const
         }))
-      } else {
+        // console.log(suggestions)
+      } 
+      
+      
+      else {
         console.warn('Failed to fetch airports, using fallback')
         suggestions = getFallbackAirportSuggestions(query)
       }
-    } else {
+    } 
+    else if (type == "domesticFlights") {
+      const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+      const airportsResponse = await fetch(`${baseUrl}/api/flights/getDomesticAirportCity?query=${encodeURIComponent(query)}`)
+      
+      if (airportsResponse.ok) {
+        const airports = await airportsResponse.json()
+        suggestions = airports.map((airport: any) => ({
+          id: airport.iata,
+          name: airport.name,
+          city: airport.city,
+          country: airport.country,
+          code: airport.iata,
+          type: 'airport' as const
+        }))
+      } 
+    }
+    else {
       // For hotels and trains, use city-based suggestions
       suggestions = getCitySuggestions(query)
     }
 
     // Limit results
     suggestions = suggestions.slice(0, 10)
-
+    console.log(suggestions)
     return NextResponse.json(suggestions)
   } catch (error) {
     console.error('Suggestions API error:', error)
