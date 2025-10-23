@@ -8,7 +8,6 @@ import { useSnack } from "@/hooks/use-notification"
 import { UserType } from "@/lib/types"
 import { AddPanelMembersForm } from "./panel-details"
 
-
 interface Panel {
   id: string
   name: string
@@ -17,11 +16,16 @@ interface Panel {
   slug: string
   panelUser?: {
     userId: string
+    role: string
+  }[]
+  members?: {
+    userId: string
   }[]
   description: string | null
   isActive: boolean
   adminId: string | null
 }
+
 
 
 
@@ -79,7 +83,7 @@ export default function Page( { params } : { params : { id: string } } ) {
             <div className="lg:col-span-3">
               {
                 me && me.panelUser != null && me.panelUser.length > 0 && panel &&
-                <AddPanelMembersForm _panel={panel} />
+                <AddPanelMembersForm panel={panel} />
               }
             </div>
           </div>

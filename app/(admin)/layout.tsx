@@ -3,6 +3,7 @@ import { AdminNav } from "@/components/admin/admin-nav"
 import { getSession } from "@/lib/auth"
 import "../(main)/globals.css"
 import localFont from "next/font/local"
+import { NotificationProvider } from "@/contexts/notification/NotificationContext"
 
 
 const dana = localFont({
@@ -62,10 +63,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <html dir="rtl">
       <body className={dana.className}>
-        <div className="flex min-h-screen">
-          <AdminNav />
-          <main className="flex-1">{children}</main>
-        </div>
+        <NotificationProvider>
+          <div className="flex min-h-screen">
+            <AdminNav />
+            <main className="flex-1">{children}</main>
+          </div>
+        </NotificationProvider>
       </body>
     </html>
   )

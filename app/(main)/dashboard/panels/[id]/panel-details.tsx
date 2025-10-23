@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { User, Mail, Phone, Plus, Trash2, Users, AlertCircle, CheckCircle2 } from "lucide-react"
+import { User, Mail, Phone, Plus, Trash2, Users, AlertCircle, CheckCircle2, FileText, Clock, CheckCircle, XCircle } from "lucide-react"
+import { useSnack } from "@/hooks/use-notification"
 
 interface User {
   id: string
@@ -27,6 +28,7 @@ interface Panel {
   slug: string
   panelUser?: {
     userId: string
+    role: string
   }[]
   members?: {
     userId: string
@@ -63,7 +65,72 @@ interface MembersOnPanel {
   joinedAt: string
 }
 
-export function AddPanelMembersForm({_panel}:{_panel:Panel}) {
+interface PanelCreditTransaction {
+  id: string
+  amount: number
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED'
+  type: 'INITIAL' | 'INCREAMENT' | 'DECREAMENT'
+  panelId: string
+  userId: string
+  requestedBy: string
+  createdAt: string
+  updatedAt: string
+  approvals: {
+    id: string
+    status: 'PENDING' | 'APPROVED' | 'REJECTED'
+    role: 'ADMIN' | 'ECO' | 'ACC'
+    panelUser: {
+      user: {
+        id: string
+        firstName: string | null
+        lastName: string | null
+      }
+    }
+  }[]
+  user: {
+    firstName: string | null
+    lastName: string | null
+    email: string
+  }
+}
+
+interface PanelUserRole {
+  role: 'ADMIN' | 'ECO' | 'ACC'
+  userId: string
+}
+
+
+export function AddPanelMembersForm( {panel} : {panel:Panel} ) {
+
+  const { error } = useSnack()
+  const [panelRole, setPanelRole] = useState<PanelUserRole | null>()
+
+
+  const fetchPanelUser = async () => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/panels/${panel.id}/user`)
+    const data = await response.json()
+    console.log(data)
+    if (!response.ok)
+      error('خطا در صحت سنجی دسترسی کاربر')
+    setPanelRole(data)
+  }
+
+  useEffect(() => {
+    fetchPanelUser()
+  }, [])
+
+
+
+  return (
+    panel && panelRole && <AddMemberForm _panel={panel} userRole={panelRole} />
+  )
+
+}
+
+
+
+
+export function AddMemberForm({_panel, userRole}:{_panel:Panel, userRole: PanelUserRole}) {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -72,8 +139,8 @@ export function AddPanelMembersForm({_panel}:{_panel:Panel}) {
   const [panel, setPanel] = useState(_panel)
   // Data states
   const [users, setUsers] = useState<User[]>([])
-//   const [panels, setPanels] = useState<Panel[]>([])
   const [existingMembers, setExistingMembers] = useState<{panelMember:panelMember[]}[]|null>()
+  const [transactions, setTransactions] = useState<PanelCreditTransaction[]>([])
   
   // Form states
   const [selectedPanel, setSelectedPanel] = useState(panel.id)
@@ -81,9 +148,7 @@ export function AddPanelMembersForm({_panel}:{_panel:Panel}) {
   const [selectedUsers, setSelectedUsers] = useState<string[]>([])
   const [initialCredit, setInitialCredit] = useState(0)
 
-
-
-   const handleUserSearch = async (e:FormEvent<HTMLInputElement>) => {
+  const handleUserSearch = async (e:FormEvent<HTMLInputElement>) => {
       try {
         e.preventDefault()
         const usersRes = await fetch(`/api/admin/users?search=${e.currentTarget.value}`)
@@ -107,8 +172,10 @@ export function AddPanelMembersForm({_panel}:{_panel:Panel}) {
     console.log(selectedPanel)
     if (selectedPanel) {
       loadExistingMembers(selectedPanel)
+      loadTransactions(selectedPanel)
     } else {
       setExistingMembers(null)
+      setTransactions([])
     }
   }, [selectedPanel])
 
@@ -127,6 +194,40 @@ export function AddPanelMembersForm({_panel}:{_panel:Panel}) {
       }
     } catch (err) {
       console.error("Error loading members:", err)
+    }
+  }
+
+  const loadTransactions = async (panelId: string) => {
+    try {
+      const res = await fetch(`/api/panels/${panelId}/transactions`)
+      const data = await res.json()
+      if (res.ok) {
+        setTransactions(data.transactions || [])
+      }
+    } catch (err) {
+      console.error("Error loading transactions:", err)
+    }
+  }
+
+  const handleApproveTransaction = async (transactionId: string, approved: boolean) => {
+    try {
+      const res = await fetch(`/api/transactions/${transactionId}/approve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ approved })
+      })
+
+      if (res.ok) {
+        await loadTransactions(selectedPanel)
+        setSuccess(true)
+        setTimeout(() => setSuccess(false), 3000)
+      } else {
+        const data = await res.json()
+        setError(data.error || "خطا در تایید تراکنش")
+      }
+    } catch (err) {
+      console.error("Error approving transaction:", err)
+      setError("خطا در برقراری ارتباط با سرور")
     }
   }
 
@@ -213,6 +314,7 @@ export function AddPanelMembersForm({_panel}:{_panel:Panel}) {
         setInitialCredit(0)
         setSearchQuery("")
         await loadExistingMembers(selectedPanel)
+        await loadTransactions(selectedPanel)
         setTimeout(() => setSuccess(false), 3000)
       } else {
         setError(data.error || "خطا در افزودن اعضا به پنل")
@@ -231,6 +333,32 @@ export function AddPanelMembersForm({_panel}:{_panel:Panel}) {
     ).filter(Boolean) as User[]
   }
 
+  const getStatusBadge = (status: string) => {
+    const statusConfig = {
+      PENDING: { variant: "secondary" as const, icon: Clock, text: "در انتظار", color: "text-yellow-600" },
+      APPROVED: { variant: "default" as const, icon: CheckCircle, text: "تایید شده", color: "text-green-600" },
+      REJECTED: { variant: "destructive" as const, icon: XCircle, text: "رد شده", color: "text-red-600" },
+      CANCELLED: { variant: "outline" as const, icon: XCircle, text: "لغو شده", color: "text-gray-600" }
+    }
+
+    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.PENDING
+    const IconComponent = config.icon
+
+    return (
+      <Badge variant={config.variant} className="flex items-center gap-1">
+        <IconComponent className={`h-3 w-3 ${config.color}`} />
+        {config.text}
+      </Badge>
+    )
+  }
+
+  const getApprovalStatus = (transaction: PanelCreditTransaction) => {
+    const userApproval = transaction.approvals.find(approval => 
+      approval.panelUser.user.id === userRole.userId
+    )
+    return userApproval?.status || 'PENDING'
+  }
+
   if (loading) {
     return (
       <Card>
@@ -241,8 +369,127 @@ export function AddPanelMembersForm({_panel}:{_panel:Panel}) {
     )
   }
 
+  // Render for ECO and ACC roles - Show only transactions
+  if (userRole.role === 'ECO' || userRole.role === 'ACC') {
+    return (
+      <Card className="py-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            تراکنش‌های اعتبار پنل
+          </CardTitle>
+          <CardDescription>
+            مدیریت و تایید تراکنش‌های اعتبار اعضای پنل
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {success && (
+            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm flex items-center gap-2 mb-4">
+              <CheckCircle2 className="h-4 w-4" />
+              عملیات با موفقیت انجام شد
+            </div>
+          )}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-center gap-2 mb-4">
+              <AlertCircle className="h-4 w-4" />
+              {error}
+            </div>
+          )}
+
+          {/* Transactions List */}
+          <div className="space-y-4">
+            {transactions.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                هیچ تراکنشی یافت نشد
+              </div>
+            ) : (
+              transactions.map(transaction => {
+                const userApprovalStatus = getApprovalStatus(transaction)
+                const canApprove = userApprovalStatus === 'PENDING' && transaction.status === 'PENDING'
+
+                return (
+                  <div key={transaction.id} className="border rounded-lg p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <div className="font-medium flex items-center gap-2">
+                          {transaction.user.firstName && transaction.user.lastName 
+                            ? `${transaction.user.firstName} ${transaction.user.lastName}`
+                            : transaction.user.email
+                          }
+                          <Badge variant="outline">
+                            {transaction.type === 'INITIAL' ? 'اعتبار اولیه' : 
+                             transaction.type === 'INCREAMENT' ? 'افزایش اعتبار' : 'کاهش اعتبار'}
+                          </Badge>
+                        </div>
+                        <div className="text-sm text-muted-foreground mt-1">
+                          مبلغ: {transaction.amount.toLocaleString()} تومان
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          تاریخ درخواست: {new Date(transaction.createdAt).toLocaleDateString('fa-IR')}
+                        </div>
+                      </div>
+                      {getStatusBadge(transaction.status)}
+                    </div>
+
+                    {/* Approvals Status */}
+                    <div className="mb-3">
+                      <div className="text-sm font-medium mb-2">وضعیت تاییدها:</div>
+                      <div className="flex gap-2 flex-wrap">
+                        {transaction.approvals.map(approval => (
+                          <Badge 
+                            key={approval.id} 
+                            variant={approval.status === 'APPROVED' ? 'default' : 'outline'}
+                            className="text-xs"
+                          >
+                            {approval.role}: {approval.status === 'APPROVED' ? 'تایید' : 
+                                            approval.status === 'REJECTED' ? 'رد' : 'در انتظار'}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    {transaction.status === 'PENDING' && (
+                      <div className="flex gap-2 justify-end">
+                        <div className="text-xs text-muted-foreground">
+                          وضعیت شما: {userApprovalStatus === 'APPROVED' ? 'تایید کرده‌اید' : 
+                                    userApprovalStatus === 'REJECTED' ? 'رد کرده‌اید' : 'در انتظار'}
+                        </div>
+                        {canApprove && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleApproveTransaction(transaction.id, false)}
+                              className="text-red-600 border-red-200 hover:bg-red-50"
+                            >
+                              <XCircle className="h-4 w-4 ml-1" />
+                              رد
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() => handleApproveTransaction(transaction.id, true)}
+                            >
+                              <CheckCircle className="h-4 w-4 ml-1" />
+                              تایید
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )
+              })
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Render for ADMIN role - Show full form
   return (
-    <Card>
+    <Card className="py-6">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Users className="h-5 w-5" />

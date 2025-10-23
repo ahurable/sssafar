@@ -29,7 +29,8 @@ interface Panel {
     id: string
   }
   panelUser?: {
-    userId: string
+    userId: string,
+    role: "ADMIN" | "ACC" | "ECO"
   }[]
   createdAt: string
   updatedAt: string
@@ -55,7 +56,10 @@ export default function EditPanelPage() {
     isActive: true,
   })
   const [users, setUsers] = useState<UserType[] | null>(null)
-  const [candidate, setCandidate] = useState<UserType | null>(null)
+  const [adminCandidate, setAdminCandidate] = useState<UserType | null>(null)
+  const [accountantCandidate, setAccountantCandidate] = useState<UserType | null>(null)
+  const [ecoCandidate, setEcoCandidate] = useState<UserType | null>(null)
+
   const [foundedUsers, setFoundedUsers] = useState<UserType[] | null>(null)
   const [contracts, setContracts] = useState<Contract[] | null>(null)
   const [foundedContracts, setFoundedContracts] = useState<Contract[] | null>(null)
@@ -187,23 +191,78 @@ export default function EditPanelPage() {
   }
 
   const handleSelectAdmin = async () => {
-    if (!candidate) {
+    if (!adminCandidate) {
       error("ابتدا کاندیدای مدیریت را انتخاب کنید")
       return
     }
 
     try {
-      const res = await fetch(`/api/panels/${params.id}`, {
+      const res = await fetch(`/api/panels/${params.id}/admin`, {
         method: 'POST',
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(candidate)
+        body: JSON.stringify(adminCandidate)
       })
 
       if (res.ok) {
         success("با موفقیت کاربر به عنوان مدیر انتخاب شد")
-        setCandidate(null)
+        setAdminCandidate(null)
+      } else {
+        error("مشکلی در انتخاب کاربر به عنوان مدیر پیش آمد")
+      }
+    } catch (err) {
+      console.error("Error selecting admin:", err)
+      error("خطا در انتخاب مدیر")
+    }
+  }
+
+
+  const handleSelectEco = async () => {
+    if (!ecoCandidate) {
+      error("ابتدا کاندیدای مدیریت را انتخاب کنید")
+      return
+    }
+
+    try {
+      const res = await fetch(`/api/panels/${params.id}/eco`, {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(ecoCandidate)
+      })
+
+      if (res.ok) {
+        success("با موفقیت کاربر به عنوان مدیر انتخاب شد")
+        setEcoCandidate(null)
+      } else {
+        error("مشکلی در انتخاب کاربر به عنوان مدیر پیش آمد")
+      }
+    } catch (err) {
+      console.error("Error selecting admin:", err)
+      error("خطا در انتخاب مدیر")
+    }
+  }
+
+  const handleSelectAccountant = async () => {
+    if (!accountantCandidate) {
+      error("ابتدا کاندیدای مدیریت را انتخاب کنید")
+      return
+    }
+
+    try {
+      const res = await fetch(`/api/panels/${params.id}/accountant`, {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(accountantCandidate)
+      })
+
+      if (res.ok) {
+        success("با موفقیت کاربر به عنوان مدیر انتخاب شد")
+        setAccountantCandidate(null)
       } else {
         error("مشکلی در انتخاب کاربر به عنوان مدیر پیش آمد")
       }
@@ -251,12 +310,22 @@ export default function EditPanelPage() {
       )
       if (_contract)
         setSelectedContract(_contract)
-      const _user = users?.find(user => 
-        panel.panelUser?.find(panelUser => panelUser.userId == user.id)
+      const admin = users?.find(user => 
+        panel.panelUser?.find(panelUser => panelUser.userId == user.id && panelUser.role == "ADMIN")
+      )
+      const accountant = users?.find(user =>
+        panel.panelUser?.find(panelUser => panelUser.userId == user.id && panelUser.role == "ACC")
+      )
+      const eco = users?.find(user =>
+        panel.panelUser?.find(panelUser => panelUser.userId == user.id && panelUser.role == "ECO")
       )
       // console.log(_user)
-      if (_user)
-        setCandidate(_user)
+      if (admin)
+        setAdminCandidate(admin)
+      if (accountant)
+        setAccountantCandidate(accountant)
+      if (eco)
+        setEcoCandidate(eco)
     }
   }, [contracts, users])
 
@@ -292,7 +361,7 @@ export default function EditPanelPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Panel Information */}
-        <Card>
+        <Card className="py-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Save className="h-5 w-5" />
@@ -385,7 +454,7 @@ export default function EditPanelPage() {
         </Card>
 
         {/* Admin Selection */}
-        <Card>
+        <Card className="py-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
@@ -410,11 +479,11 @@ export default function EditPanelPage() {
                 <div
                   key={user.id}
                   className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                    candidate?.id === user.id 
+                    adminCandidate?.id === user.id 
                       ? "bg-primary text-primary-foreground border-primary" 
                       : "hover:bg-muted"
                   }`}
-                  onClick={() => setCandidate(user)}
+                  onClick={() => setAdminCandidate(user)}
                 >
                   <div className="font-medium">{getUserDisplayName(user)}</div>
                   <div className="text-xs opacity-75 mt-1">
@@ -425,18 +494,18 @@ export default function EditPanelPage() {
               ))}
             </div>
 
-            {candidate && (
+            {adminCandidate && (
               <div className="p-3 bg-muted rounded-lg">
                 <div className="font-medium">کاربر انتخاب شده:</div>
-                <div className="text-sm mt-1">{getUserDisplayName(candidate)}</div>
-                {candidate.email && <div className="text-xs text-muted-foreground">ایمیل: {candidate.email}</div>}
-                {candidate.phone && <div className="text-xs text-muted-foreground">شماره: {candidate.phone}</div>}
+                <div className="text-sm mt-1">{getUserDisplayName(adminCandidate)}</div>
+                {adminCandidate.email && <div className="text-xs text-muted-foreground">ایمیل: {adminCandidate.email}</div>}
+                {adminCandidate.phone && <div className="text-xs text-muted-foreground">شماره: {adminCandidate.phone}</div>}
               </div>
             )}
 
             <Button 
               onClick={handleSelectAdmin} 
-              disabled={!candidate}
+              disabled={!adminCandidate}
               className="w-full"
             >
               <UserPlus className="h-4 w-4 ml-2" />
@@ -444,7 +513,128 @@ export default function EditPanelPage() {
             </Button>
           </CardContent>
         </Card>
-        <Card>
+        {/* Admin Selection */}
+        <Card className="py-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              انتخاب معاون مالی
+            </CardTitle>
+            <CardDescription>
+              کاربر مورد نظر را به عنوان معاون مالی این پنل انتخاب کنید
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="user-search">جستجوی کاربر</Label>
+              <Input
+                id="user-search"
+                onChange={handleUserSearch}
+                placeholder="ایمیل، شماره تماس یا نام کاربر را وارد کنید"
+              />
+            </div>
+
+            <div className="space-y-2 max-h-80 overflow-y-auto">
+              {(foundedUsers || users)?.map(user => (
+                <div
+                  key={user.id}
+                  className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                    ecoCandidate?.id === user.id 
+                      ? "bg-primary text-primary-foreground border-primary" 
+                      : "hover:bg-muted"
+                  }`}
+                  onClick={() => setEcoCandidate(user)}
+                >
+                  <div className="font-medium">{getUserDisplayName(user)}</div>
+                  <div className="text-xs opacity-75 mt-1">
+                    {user.email && <div>ایمیل: {user.email}</div>}
+                    {user.phone && <div>شماره: {user.phone}</div>}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {ecoCandidate && (
+              <div className="p-3 bg-muted rounded-lg">
+                <div className="font-medium">کاربر انتخاب شده:</div>
+                <div className="text-sm mt-1">{getUserDisplayName(ecoCandidate)}</div>
+                {ecoCandidate.email && <div className="text-xs text-muted-foreground">ایمیل: {ecoCandidate.email}</div>}
+                {ecoCandidate.phone && <div className="text-xs text-muted-foreground">شماره: {ecoCandidate.phone}</div>}
+              </div>
+            )}
+
+            <Button 
+              onClick={handleSelectEco} 
+              disabled={!ecoCandidate}
+              className="w-full"
+            >
+              <UserPlus className="h-4 w-4 ml-2" />
+              انتخاب معاون مالی
+            </Button>
+          </CardContent>
+        </Card>
+        {/* Admin Selection */}
+        <Card className="py-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              انتخاب حسابدار
+            </CardTitle>
+            <CardDescription>
+              کاربر مورد نظر را به عنوان حسابدار این پنل انتخاب کنید
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="user-search">جستجوی کاربر</Label>
+              <Input
+                id="user-search"
+                onChange={handleUserSearch}
+                placeholder="ایمیل، شماره تماس یا نام کاربر را وارد کنید"
+              />
+            </div>
+
+            <div className="space-y-2 max-h-80 overflow-y-auto">
+              {(foundedUsers || users)?.map(user => (
+                <div
+                  key={user.id}
+                  className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                    accountantCandidate?.id === user.id 
+                      ? "bg-primary text-primary-foreground border-primary" 
+                      : "hover:bg-muted"
+                  }`}
+                  onClick={() => setAccountantCandidate(user)}
+                >
+                  <div className="font-medium">{getUserDisplayName(user)}</div>
+                  <div className="text-xs opacity-75 mt-1">
+                    {user.email && <div>ایمیل: {user.email}</div>}
+                    {user.phone && <div>شماره: {user.phone}</div>}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {accountantCandidate && (
+              <div className="p-3 bg-muted rounded-lg">
+                <div className="font-medium">کاربر انتخاب شده:</div>
+                <div className="text-sm mt-1">{getUserDisplayName(accountantCandidate)}</div>
+                {accountantCandidate.email && <div className="text-xs text-muted-foreground">ایمیل: {accountantCandidate.email}</div>}
+                {accountantCandidate.phone && <div className="text-xs text-muted-foreground">شماره: {accountantCandidate.phone}</div>}
+              </div>
+            )}
+
+            <Button 
+              onClick={handleSelectAccountant} 
+              disabled={!accountantCandidate}
+              className="w-full"
+            >
+              <UserPlus className="h-4 w-4 ml-2" />
+              انتخاب حسابدار
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="py-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />

@@ -57,6 +57,7 @@ model User {
   panelMember MembersOnPanel[]
   contracts Contract[]
   creditTransactions CreditTransaction[]
+  panelCreditTransactions PanelCreditTransaction[]
   invoices Invoice[]
   userCredit Credit?
   userTransactions UserTransaction[]
@@ -355,7 +356,7 @@ model Panel {
 
   panelUser PanelUser[]
   members MembersOnPanel[]
-  creditTransactions CreditTransaction[]
+  creditTransactions PanelCreditTransaction[]
   userTransactions UserTransaction[]
   panelActivityLog PanelActivityLog[]
 }
@@ -372,6 +373,7 @@ model PanelUser {
   joinedAt  DateTime @default(now())
   lastLogin DateTime?
   role PanelRole @default(ADMIN)
+  approvals PanelCreditTransactionApproval[]
   // ارتباط با پنل
   panelId   String 
   panel     Panel    @relation(fields: [panelId], references: [id])
@@ -383,8 +385,10 @@ model PanelUser {
   userId    String?
   user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  // هر کاربر فقط یک بار می‌تواند در یک پنل باشد
-  @@unique([panelId])
+    // ✅ Fix: Allow multiple users per panel, but each user can only have one role per panel
+  @@unique([panelId, userId])
+  @@unique([panelId, role]) // Each role can only be assigned to one user per panel
+  
   @@index([panelId])
   @@index([isActive])
   @@index([joinedAt])
@@ -398,7 +402,6 @@ model MembersOnPanel {
   isActive  Boolean  @default(true)
   joinedAt  DateTime @default(now())
   lastLogin DateTime?
-
   // ارتباط با پنل
   panelId   String 
   panel     Panel    @relation(fields: [panelId], references: [id], onDelete: Cascade)
@@ -420,6 +423,64 @@ model MembersOnPanel {
 }
 
 
+enum PanelCreditTransactionType {
+  INCREAMENT
+  DECREAMENT
+  INITIAL
+}
+
+enum PanelCreditTransactionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model PanelCreditTransaction {
+  id            String                      @id @default(cuid())
+  amount        Decimal
+  status        PanelCreditTransactionStatus
+  type          PanelCreditTransactionType
+  panelId       String
+  userId        String
+  requestedBy   String // User ID who requested the transaction
+  approvals     PanelCreditTransactionApproval[]
+  panel         Panel                       @relation(fields: [panelId], references: [id])
+  user          User                        @relation(fields: [userId], references: [id])
+  createdAt     DateTime                    @default(now())
+  updatedAt     DateTime                    @updatedAt
+
+  @@index([panelId])
+  @@index([userId])
+  @@index([status])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model PanelCreditTransactionApproval {
+  id            String          @id @default(cuid())
+  transactionId String
+  panelUserId   String
+  role          PanelRole
+  status        ApprovalStatus  @default(PENDING)
+  approvedAt    DateTime?
+  rejectedAt    DateTime?
+  
+  transaction   PanelCreditTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  panelUser     PanelUser              @relation(fields: [panelUserId], references: [id])
+  
+  @@unique([transactionId, panelUserId])
+  @@index([transactionId])
+  @@index([panelUserId])
+  @@index([status])
+}
+
 
 
 
@@ -429,10 +490,9 @@ model CreditTransaction {
   amount      Int
   description String?
   createdAt   DateTime    @default(now())
-
   // ارتباط با پنل
-  panelId     String?
-  panel       Panel?       @relation(fields: [panelId], references: [id], onDelete: NoAction)
+  // panelId     String?
+  // panel       Panel?       @relation(fields: [panelId], references: [id], onDelete: NoAction)
 
   // ارتباط با ادمین ایجادکننده تراکنش
   userId     String
@@ -441,7 +501,7 @@ model CreditTransaction {
   creditId   String?
   credit     Credit?      @relation(fields: [creditId], references: [id], onDelete: Cascade)
 
-  @@index([panelId])
+  // @@index([panelId])
   @@index([createdAt])
   @@index([type])
   @@map("credit_transactions")
