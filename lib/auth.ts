@@ -1,4 +1,4 @@
-import { compare, hash } from "bcryptjs"
+import { compare, hash } from "bcrypt"
 import { SignJWT, jwtVerify } from "jose"
 import { cookies } from "next/headers"
 

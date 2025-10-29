@@ -7,16 +7,27 @@ import { Footer } from "@/components/footer"
 import Link from "next/link"
 
 async function getCipServices() {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/cip?published=true`, {
-    next: { revalidate: 60 } // Cache for 1 minute
-  })
-  
-  if (!res.ok) {
+  // During build time, return empty array
+  if (process.env.NODE_ENV === 'production' || !process.env.NEXT_PUBLIC_APP_URL) {
     return []
   }
   
-  const data = await res.json()
-  return data.services || []
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/cip?published=true`, {
+      next: { revalidate: 60 }
+    })
+    
+    if (!res.ok) {
+      console.error('Failed to fetch CIP services:', res.status)
+      return []
+    }
+    
+    const data = await res.json()
+    return data.services || []
+  } catch (error) {
+    console.error('Error fetching CIP services:', error)
+    return []
+  }
 }
 
 export default async function CipServicesPage() {
