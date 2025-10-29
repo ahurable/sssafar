@@ -27,6 +27,10 @@ export default async function CipServicesPage() {
     return price.toLocaleString("fa-IR") + " " + currency
   }
 
+  if (!services || services.length == 0) {
+    return <></>
+  }
+
   return (
     <>
       <Header/>

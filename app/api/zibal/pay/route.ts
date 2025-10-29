@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
   if (!user || !user.phone) {
     return NextResponse.json({
         message: "شما باید شماره تلفن همراه خود را وارد و تایید نمایید"
-    })
+    }, {status:400})
   }
 
   try {

@@ -376,6 +376,7 @@ export function InvoiceComponent({
       console.log(data)
       if (!res.ok) {
         error("خطایی در رفتن به صفحه پرداخت رخ داد")
+        error(data.message)
       }
       else {
         success("در حال انتقال به صفحه پرداخت")

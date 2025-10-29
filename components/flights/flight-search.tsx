@@ -231,9 +231,9 @@ const FlightSearch = () => {
                     {
                         DepartureDateTime: `${gregorianDepartureDate}T00:00:00.0000000+03:30`,
                         DestinationLocationCode: destinationCode,
-                        DestinationType: "None",
+                        DestinationType: 0,
                         OriginLocationCode: originCode,
-                        OriginType: "None"
+                        OriginType: 0
                     }
                 ],
                 IsGenuine: false
@@ -245,9 +245,9 @@ const FlightSearch = () => {
                 requestBody.OriginDestinationInformations.push({
                     DepartureDateTime: `${gregorianReturnDate}T00:00:00.0000000+03:30`,
                     DestinationLocationCode: originCode,
-                    DestinationType: "None",
+                    DestinationType: 0,
                     OriginLocationCode: destinationCode,
-                    OriginType: "None"
+                    OriginType: 0
                 })
             }
             setFlightRequest(requestBody)

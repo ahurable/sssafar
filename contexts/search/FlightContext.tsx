@@ -16,9 +16,9 @@ export interface TravelPreference {
 export interface OriginDestinationInformation {
   DepartureDateTime: string;
   DestinationLocationCode: string;
-  DestinationType: string;
+  DestinationType: number;
   OriginLocationCode: string;
-  OriginType: string;
+  OriginType: number;
 }
 
 export interface FlightSearchRequest {
@@ -230,9 +230,9 @@ export function FlightProvider({ children }: { children: ReactNode }) {
       {
         DepartureDateTime: "2024-01-15T00:00:00.0000000+03:30",
         DestinationLocationCode: "THR",
-        DestinationType: "None",
+        DestinationType: 0,
         OriginLocationCode: "IKA", 
-        OriginType: "None"
+        OriginType: 0
       }
     ],
     IsGenuine: false

@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState, useRef } from "react"
 import ShamsiDateModal from "./ShamsiCalendar"
 import { formatShamsiDate } from "./utils"
+import { shamsiToGregorianString } from "@/lib/jalaalil"
 
 interface DomesticSuggestion {
   id: string
@@ -27,9 +28,10 @@ const DomesticFlightSearch = () => {
         adults: 0,
         children: 0,
         departureDate: '',
+        cabinClass: '',
         returnDate: '',
         tripType: 'oneway',
-        infrants: 0
+        infants: 0
     })
     
     const [suggestions, setSuggestions] = useState<DomesticSuggestion[]>([])
@@ -44,7 +46,7 @@ const DomesticFlightSearch = () => {
     const [showPassengers, setShowPassengers] = useState(false)
 
     const { getCitySuggestions } = useSearch()
-    const { searchDomesticFlights, setDomesticFlightRequest } = useFlight()
+    const { searchDomesticFlights, setDomesticFlightRequest, setFlightRequest, searchFlights, setFlightsData } = useFlight()
     // searchDomesticFlights, 
     const suggestionsRef = useRef<HTMLDivElement>(null)
     const passengersRef = useRef<HTMLDivElement>(null)
@@ -204,6 +206,7 @@ const DomesticFlightSearch = () => {
             // Extract airport codes
             const originCode = extractAirportCode(domesticFlightSearch.origin)
             const destinationCode = extractAirportCode(domesticFlightSearch.destination)
+            const gregorianDepartureDate = shamsiToGregorianString(domesticFlightSearch.departureDate)
            
             // Prepare request body for Domestic API
             const requestBody = {
@@ -213,6 +216,30 @@ const DomesticFlightSearch = () => {
                 departureDate: domesticFlightSearch.departureDate,
                 adults: domesticFlightSearch.adults,
                 children: domesticFlightSearch.children
+            }
+            const partoRequestBody = {
+                PricingSourceType: "All",
+                RequestOption: "All",
+                AdultCount: domesticFlightSearch.adults,
+                ChildCount: domesticFlightSearch.children,
+                InfantCount: domesticFlightSearch.infants,
+                TravelPreference: {
+                    CabinType: getCabinType(domesticFlightSearch.cabinClass),
+                    MaxStopsQuantity: "All",
+                    AirTripType: getAirTripType(domesticFlightSearch.tripType),
+                    VendorExcludeCodes: [],
+                    VendorPreferenceCodes: []
+                },
+                OriginDestinationInformations: [
+                    {
+                        DepartureDateTime: `${gregorianDepartureDate}T00:00:00.0000000+03:30`,
+                        DestinationLocationCode: destinationCode,
+                        DestinationType: 0,
+                        OriginLocationCode: originCode,
+                        OriginType: 0
+                    }
+                ],
+                IsGenuine: false
             }
 
             // Add return flight for round trips
@@ -225,11 +252,15 @@ const DomesticFlightSearch = () => {
             //         OriginType: "None"
             //     })
             // }
-            setDomesticFlightRequest(requestBody)
+            // setDomesticFlightRequest(requestBody)
+            setFlightRequest(partoRequestBody)
             // Call the domestic flight search API
-            const response = await searchDomesticFlights(requestBody)
-            console.log(response)
-        
+            // const response = await searchDomesticFlights(requestBody)
+            const partoResponse = await searchFlights(partoRequestBody)
+
+            setFlightsData(partoResponse.PricedItineraries)
+            // console.log(response)
+            router.push('/flights')
             // setFlightsData(response.PricedItineraries)
             // router.push('/domestic-flights')
 
