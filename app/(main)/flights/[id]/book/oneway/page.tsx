@@ -280,7 +280,7 @@ export default function OneWayReservation() {
 
   if (!flightDetails) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-black to-white flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
           <p className="text-white text-lg">خطا در دریافت اطلاعات پرواز</p>
@@ -293,7 +293,7 @@ export default function OneWayReservation() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black to-white">
+    <div className="min-h-screen">
       <Header />
 
       <div className="container mx-auto px-4 py-8">
@@ -308,7 +308,7 @@ export default function OneWayReservation() {
             {/* Left Section - Flight Details & Services */}
             <div className="space-y-6">
               {/* Flight Summary */}
-              <Card className="">
+              <Card className="py-6">
                 <CardHeader className=" text-blue-800">
                   <CardTitle className="flex items-center gap-2">
                     <Plane className="h-6 w-6" />
@@ -381,7 +381,7 @@ export default function OneWayReservation() {
 
               {/* Additional Services */}
               {services.length > 0 && (
-                <Card>
+                <Card className="py-6">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Plus className="h-5 w-5" />
@@ -427,7 +427,7 @@ export default function OneWayReservation() {
 
             {/* Right Section - Traveler Information & Booking Summary */}
             <div className="space-y-6">
-              <Card className="">
+              <Card className="py-6">
                 <CardHeader className="text-green-600">
                   <CardTitle className="flex items-center gap-2">
                     <Users className="h-6 w-6" />
@@ -451,7 +451,7 @@ export default function OneWayReservation() {
 
               {/* Booking Summary */}
               {selectedTravelers.length > 0 && (
-                <Card>
+                <Card className="py-6">
                   <CardHeader>
                     <CardTitle>خلاصه رزرو</CardTitle>
                   </CardHeader>

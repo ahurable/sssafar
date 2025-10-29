@@ -58,11 +58,11 @@ export async function POST(request: NextRequest) {
       cbInfantQty: (searchData.infants || 0).toString()
     })
 
-    const officeUser = 'thr630.ws'
+    const officeUser = 'thr639.ws'
     const officePassword = 'Aseman2024@'
 
     // Nira API base URL for availability
-    const niraBaseURL = 'Zv.nirasoftware.com:882'
+    const niraBaseURL = 'http://zv.zagrosairlines.com:882'
     const apiUrl = `${niraBaseURL}/AvailabilityJS.jsp?${params}&OfficeUser=${officeUser}&OfficePassword=${officePassword}`
 
     console.log('🔍 Calling Nira Availability API:', apiUrl)

@@ -67,7 +67,7 @@ export function FlightList({ flights, itemsPerPage = 10 }: FlightListProps) {
     const dates = []
     const today = new Date()
     
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 14; i++) {
       const date = new Date(today)
       date.setDate(today.getDate() + i)
       dates.push(date)
@@ -163,14 +163,14 @@ export function FlightList({ flights, itemsPerPage = 10 }: FlightListProps) {
   return (
     <div className="space-y-6">
       {/* Date Selection Section */}
-      <Card className="border-2 border-blue-100 bg-blue-50 overflow-auto" >
-        <CardContent className="p-4">
-          <div className="flex items-center gap-3 mb-4">
-            <Calendar className="h-5 w-5 text-blue-600" />
-            <h3 className="font-bold text-lg text-blue-800">انتخاب تاریخ پرواز</h3>
+      <Card className="border-2 border-blue-100 bg-gradient-to-br from-blue-50 to-white shadow-lg overflow-hidden rounded-2xl">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <Calendar className="h-6 w-6 text-blue-600" />
+            <h3 className="font-bold text-xl text-blue-800">انتخاب تاریخ پرواز</h3>
           </div>
           
-          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-blue-200 scrollbar-track-transparent">
             {dateOptions.map((date, index) => {
               const dateStr = formatDateForAPI(date)
               const isSelected = selectedDate === dateStr
@@ -181,25 +181,58 @@ export function FlightList({ flights, itemsPerPage = 10 }: FlightListProps) {
                   key={index}
                   variant={isSelected ? "default" : "outline"}
                   className={`
-                    flex flex-col items-center gap-1 min-w-[80px] h-16 px-3 py-2 rounded-xl
+                    flex flex-col items-center justify-center gap-2 
+                    min-w-[100px] h-20 px-4 py-3 rounded-2xl
+                    flex-shrink-0 relative
+                    transition-all duration-300 ease-out
+                    hover:scale-105 active:scale-95
                     ${isSelected 
-                      ? "bg-blue-600 text-white border-blue-600 shadow-md" 
-                      : "bg-white text-gray-700 border-blue-200 hover:bg-blue-50"
+                      ? "bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-200 border-0" 
+                      : "bg-white text-gray-700 border-2 border-blue-100 hover:border-blue-300 hover:bg-blue-25"
                     }
-                    ${isToday && !isSelected ? "border-2 border-blue-400 bg-blue-25" : ""}
-                    transition-all duration-200
+                    ${isToday && !isSelected 
+                      ? "border-2 border-blue-400 bg-gradient-to-br from-blue-25 to-blue-50 ring-2 ring-blue-100" 
+                      : ""
+                    }
                   `}
                   onClick={() => handleDateSelect(date)}
                 >
-                  <span className={`text-xs font-medium ${isSelected ? "text-blue-100" : "text-gray-500"}`}>
-                    {formatDateDisplay(date)}
-                  </span>
-                  <span className="text-sm font-bold">
+                  {/* Today indicator badge */}
+                  {isToday && (
+                    <div className={`absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
+                      ${isSelected 
+                        ? "bg-white text-blue-600" 
+                        : "bg-blue-500 text-white"
+                      }`}>
+                      ام
+                    </div>
+                  )}
+                  
+                  {/* Day number - larger and more prominent */}
+                  <span className={`
+                    text-2xl font-extrabold leading-none
+                    ${isSelected ? "text-white" : "text-gray-800"}
+                  `}>
                     {date.toLocaleDateString('fa-IR', { day: 'numeric' })}
                   </span>
-                  <span className={`text-xs ${isSelected ? "text-blue-100" : "text-gray-400"}`}>
-                    {date.toLocaleDateString('fa-IR', { weekday: 'short' })}
-                  </span>
+                  
+                  <div className="flex flex-col items-center gap-0.5">
+                    {/* Weekday */}
+                    <span className={`
+                      text-xs font-semibold
+                      ${isSelected ? "text-blue-100" : "text-gray-600"}
+                    `}>
+                      {date.toLocaleDateString('fa-IR', { weekday: 'short' })}
+                    </span>
+                    
+                    {/* Date string */}
+                    <span className={`
+                      text-xs font-medium
+                      ${isSelected ? "text-blue-100" : "text-gray-500"}
+                    `}>
+                      {formatDateDisplay(date)}
+                    </span>
+                  </div>
                 </Button>
               )
             })}
@@ -229,6 +262,7 @@ export function FlightList({ flights, itemsPerPage = 10 }: FlightListProps) {
       ) : (
         currentFlights.map((flight, index) => {
           const firstSegment = flight.OriginDestinationOptions[0]?.FlightSegments[0]
+          const secondSegment : any | undefined = flight.OriginDestinationOptions[1]?.FlightSegments[0]
           const totalPrice = flight.AirItineraryPricingInfo.ItinTotalFare.TotalFare
           const currency = flight.AirItineraryPricingInfo.ItinTotalFare.Currency
           const flightId = `flight-${startIndex + index}`
@@ -241,6 +275,14 @@ export function FlightList({ flights, itemsPerPage = 10 }: FlightListProps) {
               flight.OriginDestinationOptions[0]?.FlightSegments.length - 1
             ]?.ArrivalDateTime
           )
+
+          const returnDepartureInfo = secondSegment && formatDateTime(secondSegment.DepartureDateTime)
+          const returnArrivalInfo = secondSegment && formatDateTime(
+            flight.OriginDestinationOptions[1]?.FlightSegments[
+              flight.OriginDestinationOptions[1]?.FlightSegments.length - 1
+            ]?.ArrivalDateTime
+          )
+
 
           return (
             <Card key={flightId} className="hover:shadow-lg transition-shadow border-2">
@@ -288,7 +330,35 @@ export function FlightList({ flights, itemsPerPage = 10 }: FlightListProps) {
                         <p className="text-xs text-gray-500 mt-1">{arrivalInfo.date}</p>
                       </div>
                     </div>
-
+                    { secondSegment && 
+                    <div className="grid grid-cols-3 gap-4 items-center">
+                      <div className="text-center">
+                        <p className="text-2xl font-bold text-gray-900">{returnDepartureInfo.time}</p>
+                        <p className="text-sm text-muted-foreground font-medium">
+                          {secondSegment.DepartureAirportLocationCode}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">{returnDepartureInfo.date}</p>
+                      </div>
+                      <div className="text-center">
+                        <div className="flex items-center justify-center gap-2 mb-1">
+                          <div className="h-px flex-1 bg-border" />
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <div className="h-px flex-1 bg-border" />
+                        </div>
+                        <p className="text-xs text-muted-foreground font-medium">
+                          {flight.OriginDestinationOptions[0]?.JourneyDurationPerMinute} دقیقه
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">مدت پرواز</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-2xl font-bold text-gray-900">{returnArrivalInfo.time}</p>
+                        <p className="text-sm text-muted-foreground font-medium">
+                          {secondSegment.ArrivalAirportLocationCode}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">{returnArrivalInfo.date}</p>
+                      </div>
+                    </div>
+                    }
                     <div className="flex items-center gap-2 mt-4 flex-wrap">
                       <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
                         اکونومی

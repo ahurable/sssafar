@@ -269,7 +269,7 @@ export function FlightFilters() {
         {/* Apply Filters Button */}
         <Button 
           onClick={() => applyFilters(filters)}
-          className="w-full"
+          className="w-full bg-blue-400 hover:bg-blue-500 text-xl font-black"
         >
           اعمال فیلترها
         </Button>

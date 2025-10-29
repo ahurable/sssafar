@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Convert amount from Tomans to Rials (Zibal works with Rials)
-    const amountInRials = paymentData.amount * 10;
+    const amountInRials = paymentData.amount;
 
     // Create callback URL
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';

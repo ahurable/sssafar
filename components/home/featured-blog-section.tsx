@@ -1,22 +1,36 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Clock } from "lucide-react"
-import { blogPosts } from "@/lib/data/blog-posts"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 
 gsap.registerPlugin(ScrollTrigger)
 
+export interface BlogPost {
+  id: string
+  title: string
+  slug: string
+  excerpt: string
+  content: string
+  image: string
+  author: string
+  date: string
+  category: string
+  readTime: string
+  featured?: boolean
+}
+
+
 export function FeaturedBlogSection() {
   const sectionRef = useRef<HTMLElement>(null)
-  const cardsRef = useRef<(HTMLDivElement | null)[]>([])
+  const cardsRef = useRef<(HTMLAnchorElement | null)[]>([])
 
-  const featuredPosts = blogPosts.filter((post) => post.featured).slice(0, 3)
+  const [featuredPosts, setFeaturedPosts] = useState<BlogPost[] | undefined>()
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -39,6 +53,16 @@ export function FeaturedBlogSection() {
     return () => ctx.revert()
   }, [])
 
+  useEffect(() => {
+    async () => {
+      const response = await fetch('/api/posts')
+      const data = await response.json()
+      if (response.ok) {
+        setFeaturedPosts(data)
+      } 
+    }
+  }, [])
+
   return (
     <section ref={sectionRef} className="py-16 md:py-24">
       <div className="container mx-auto px-4">
@@ -56,7 +80,7 @@ export function FeaturedBlogSection() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {featuredPosts.map((post, index) => (
+          { featuredPosts && featuredPosts.map((post, index) => (
             <Link
               key={post.id}
               href={`/blog/${post.slug}`}

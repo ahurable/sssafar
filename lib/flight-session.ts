@@ -13,13 +13,13 @@ interface SessionData {
 class FlightSessionService {
   private session: SessionData | null = null;
   private refreshPromise: Promise<string> | null = null;
-  private logsDir = path.join(process.cwd(), 'partologs');
+  // private logsDir = path.join(process.cwd(), 'partologs');
 
   constructor() {
     // Ensure logs directory exists
-    if (!fs.existsSync(this.logsDir)) {
-      fs.mkdirSync(this.logsDir, { recursive: true });
-    }
+    // if (!fs.existsSync(this.logsDir)) {
+    //   fs.mkdirSync(this.logsDir, { recursive: true });
+    // }
   }
 
   // private logToFile(filename: string, message: string, data?: any) {

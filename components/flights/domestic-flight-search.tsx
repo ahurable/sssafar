@@ -4,9 +4,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useFlight } from "@/contexts/search/FlightContext"
 import { useSearch } from "@/hooks/use-search"
-import { Search, Calendar, MapPin, ChevronDown, Loader2, Users, Baby, User, Plus, Minus } from "lucide-react"
+import { Search, Calendar, MapPin, ChevronDown, Loader2, Users, Baby, User, Plus, Minus, CalendarIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState, useRef } from "react"
+import ShamsiDateModal from "./ShamsiCalendar"
+import { formatShamsiDate } from "./utils"
 
 interface DomesticSuggestion {
   id: string
@@ -25,6 +27,7 @@ const DomesticFlightSearch = () => {
         adults: 0,
         children: 0,
         departureDate: '',
+        returnDate: '',
         tripType: 'oneway',
         infrants: 0
     })
@@ -480,34 +483,27 @@ const DomesticFlightSearch = () => {
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mt-6">
                 {/* Departure Date */}
                 <div className="space-y-3">
-                    <Label htmlFor="domestic-flight-departure-date" className="text-lg font-bold text-white text-right block">تاریخ رفت</Label>
-                    <div className="relative">
-                        <Calendar className="absolute right-4 top-4 h-5 w-5 text-gray-400" />
-                        <Input 
-                            id="domestic-flight-departure-date" 
-                            type="date" 
-                            min={new Date().toISOString().split('T')[0]}
-                            className="pr-12 h-14 rounded-2xl border-2 border-gray-300 bg-white text-gray-800 text-lg font-medium transition-all duration-300 hover:border-blue-400 focus:border-blue-500 focus:scale-105 focus:shadow-lg"
-                            value={domesticFlightSearch.departureDate}
-                            onChange={(e) => setDomesticFlightSearch(prev => ({ ...prev, departureDate: e.target.value }))}
-                        />
-                    </div>
+                    <ShamsiDateModal
+                        departureDate={domesticFlightSearch.departureDate}
+                        returnDate={domesticFlightSearch.returnDate || ""}
+                        tripType={domesticFlightSearch.tripType}
+                        onDepartureDateChange={(date) => setDomesticFlightSearch(prev => ({ ...prev, departureDate: date }))}
+                        onReturnDateChange={(date) => setDomesticFlightSearch(prev => ({ ...prev, returnDate: date }))}
+                        onTripTypeChange={(type) => setDomesticFlightSearch(prev => ({ ...prev, tripType: type }))}
+                    />
                 </div>
 
                 {/* Return Date */}
                 {domesticFlightSearch.tripType === "roundtrip" && (
                     <div className="space-y-3">
-                        <Label htmlFor="domestic-flight-return-date" className="text-lg font-bold text-white text-right block">تاریخ برگشت</Label>
+                        <Label className="text-lg font-bold text-white text-right block">تاریخ برگشت</Label>
                         <div className="relative">
-                            <Calendar className="absolute right-4 top-4 h-5 w-5 text-gray-400" />
-                            <Input 
-                                id="domestic-flight-return-date" 
-                                type="date" 
-                                min={domesticFlightSearch.departureDate || new Date().toISOString().split('T')[0]}
-                                className="pr-12 h-14 rounded-2xl border-2 border-gray-300 bg-white text-gray-800 text-lg font-medium transition-all duration-300 hover:border-blue-400 focus:border-blue-500 focus:scale-105 focus:shadow-lg"
-                                value={domesticFlightSearch.returnDate}
-                                onChange={(e) => setDomesticFlightSearch(prev => ({ ...prev, returnDate: e.target.value }))}
-                            />
+                        <CalendarIcon className="absolute right-4 top-4 h-5 w-5 text-gray-400" />
+                        <div className="w-full h-14 rounded-2xl border-2 border-gray-300 bg-white text-gray-800 text-lg font-medium flex items-center px-4 pr-12">
+                            <span className="text-gray-800">
+                            {formatShamsiDate(domesticFlightSearch.returnDate)}
+                            </span>
+                        </div>
                         </div>
                     </div>
                 )}

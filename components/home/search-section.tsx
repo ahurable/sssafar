@@ -90,9 +90,10 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
   }
 
   return (
-    <section ref={sectionRef} className={`py-16 md:py-24  dark:from-gray-900 dark:to-blue-900 ${cardBackgrounds[activeTab]}`}>
+    <section ref={sectionRef} className={`py-16 md:py-24 relative  dark:from-gray-900 dark:to-blue-900 ${cardBackgrounds[activeTab]}`}>
+      <div className="w-full h-full absolute top-0 right-0 bg-[url('/pattern.png')] bg-[length:180px_180px] z-10 opacity-10"></div>
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
+        <div className="text-center mb-12 relative z-30">
           <h2 className="text-4xl font-bold text-white dark:text-white mb-4">
             سفر بعدی خود را پیدا کنید
           </h2>
@@ -101,7 +102,7 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
           </p>
         </div>
 
-        <Card ref={cardRef} className={`mx-auto shadow-none ${cardBackgrounds[activeTab]} w-full border-0 dark:bg-gray-800/95 backdrop-blur-sm`}>
+        <Card ref={cardRef} className={`mx-auto relative z-30 shadow-none w-full border-0 dark:bg-gray-800/95`}>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-3 mb-8 p-1">
               <TabsTrigger 

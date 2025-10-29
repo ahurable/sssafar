@@ -6,18 +6,18 @@ import { NextRequest, NextResponse } from "next/server";
 export const POST = async (request: NextRequest) => {
     const session = await getSession()
     const sessionId = await flightSessionService.getSession()
-    
-    if (!session) {
+    const body = await request.json()
+    const userId = session?.userId || body.userId
+    if (!userId) {
         return NextResponse.json({
             message: "ابتدا وارد حساب کاربری خود شوید"
         }, { status: 401 })
     }
 
     try {
-        const body = await request.json()
         const user = await prisma.user.findUnique({
             where: {
-                id: session.userId
+                id: userId
             }
         })
 
@@ -43,6 +43,7 @@ export const POST = async (request: NextRequest) => {
                         PassportNumber: traveler.passportNumber
                     },
                     NationalId: traveler.nationalId,
+                    Nationality: "IR",
                     SeatPreference: 0,
                     MealPreference: 0
                 }))
@@ -71,9 +72,30 @@ export const POST = async (request: NextRequest) => {
         })
 
         if (res.ok) {
+            const invoice = await prisma.invoice.findUnique({
+                where: {
+                    id: body.invoiceId
+                }
+            })
+            if (!invoice) {
+                return NextResponse.json({
+                    message: "صورت حساب مربوطه پیدا نشد"
+                }, {status: 404})
+            }
+            const book = await prisma.booking.create({
+                data: {
+                    bookingCode: body.invoiceId,
+                    totalPrice: body.totalPrice,
+                    type: "FLIGHT",
+                    userId: userId,
+                    status: "CONFIRMED",
+                    data: data,
+                    bookingInformation: JSON.stringify(invoice.order)
+                }
+            })
             return NextResponse.json({
                 message: 'بلیط هواپیما سفارش داده شد',
-                data: data
+                data: book
             })
         }
 

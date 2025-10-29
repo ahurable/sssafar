@@ -21,6 +21,13 @@ export const GET = async (request: NextRequest, { params} : { params: { id : str
                 panelId: params.id
             },
             include: {
+                user: {
+                    select: {
+                        email: true,
+                        firstName: true,
+                        lastName: true,
+                    }
+                },
                 approvals: {
                     select: {
                         panelUser: {
@@ -29,11 +36,13 @@ export const GET = async (request: NextRequest, { params} : { params: { id : str
                                     select: {
                                         id: true,
                                         firstName: true,
-                                        lastName: true
+                                        lastName: true,
+                                        email: true
                                     }
                                 }
                             }
-                        }
+                        },
+                        status: true
                     }
                 }
             }

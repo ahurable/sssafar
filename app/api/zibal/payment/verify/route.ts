@@ -68,6 +68,7 @@ const RESULT_CODES = {
 } as const;
 
 export async function POST(request: NextRequest) {
+  
   try {
     const verificationData: PaymentVerificationRequest = await request.json();
     console.log(verificationData)
@@ -95,11 +96,10 @@ export async function POST(request: NextRequest) {
       }
     })
 
-
     if (!invoice) {
       return NextResponse.json({
-        message: "صورت حساب شما پیدا نشد"
-      }, { status: 404 })
+        message: "صورت حساب کاربری شما یافت نشد"
+      },{ status: 404 })
     }
 
     let verificationResult: PaymentVerificationResponse;
@@ -123,9 +123,10 @@ export async function POST(request: NextRequest) {
           );
       }
 
+
       // If verification was successful, process the payment based on type
       if (verificationResult.verified) {
-        await processSuccessfulPayment(verificationData, verificationResult, invoice.id);
+        await processSuccessfulPayment(verificationData, verificationResult, invoice.id, invoice.userId);
       } else if (!verificationResult.verified) {
         await processFailedPayment(verificationData, verificationResult);
       }
@@ -241,7 +242,8 @@ async function verifyZibalPayment(verificationData: PaymentVerificationRequest):
 async function processSuccessfulPayment(
   verificationData: PaymentVerificationRequest, 
   verificationResult: PaymentVerificationResponse,
-  invoiceId: string
+  invoiceId: string,
+  userId: string
 ) {
   try {
     console.log('Processing successful payment:', {
@@ -250,9 +252,12 @@ async function processSuccessfulPayment(
       amount: verificationResult.amount
     });
 
-    const invoice = await prisma.invoice.findUnique({
+    const invoice = await prisma.invoice.update({
       where: {
         id: invoiceId
+      },
+      data: {
+        state: "PAID"
       },
       select: {
         kind: true
@@ -279,7 +284,7 @@ async function processSuccessfulPayment(
         break;
       
       case 'FLIGHT':
-        await processInvoicePayment(verificationData, verificationResult, invoiceId);
+        await bookFlight(invoiceId, userId);
         break;
       // case 'SERVICE_PAYMENT':
       //   await processServicePayment(verificationData, verificationResult);
@@ -294,6 +299,60 @@ async function processSuccessfulPayment(
   } catch (error) {
     console.error('Error processing successful payment:', error);
   }
+}
+
+async function bookFlight(invoiceId:string, userId:string) {
+  const invoice = await prisma.invoice.findUnique({
+    where: {
+      id: invoiceId
+    }
+  })
+
+  if (!invoice) {
+    return NextResponse.json({
+      message: "صورت حساب درخواستی پیدا نشد"
+    }, { status: 404 })
+  }
+
+  if (!invoice.travelers) {
+    return NextResponse.json({
+      message: "در اینویس ارسالی مسافری وجود ندارد"
+    }, { status: 400 })
+  }
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+  const requestData = {
+    travelers: invoice.travelers,
+    invoiceId: invoice.id,
+    fareSourceCode: invoice.flightSourceCode,
+    totalPrice: parseInt(invoice.amount),
+    userId: userId
+  };
+  
+  const response = await fetch(
+    `${baseUrl}/api/flights/book`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type":"application/json"
+      },
+      body: JSON.stringify(requestData)
+    }
+  )
+
+  const data = await response.json()
+
+  console.log("STRAIGHT PAYMENT FLIGHT BOOK RESPONSE: ", data)
+
+  if (!response.ok) {
+    return NextResponse.json({
+      message: "خطایی رخ داد هنگام خرید بلیط"
+    }, { status: 500 })
+  }
+
+  return NextResponse.json({
+    message: "بلیط دریافت شد"
+  }, { status: 200})
+
 }
 
 // Process failed payment

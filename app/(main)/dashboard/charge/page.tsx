@@ -182,7 +182,7 @@ export default function ChargeCreditPage() {
                 {/* Main Content */}
                 <div className="lg:col-span-2 space-y-6">
                   {/* Amount Selection Card */}
-                  <Card className="border shadow-sm hover:shadow-md transition-shadow">
+                  <Card className="border shadow-sm hover:shadow-md transition-shadow py-6">
                     <CardHeader className="pb-4">
                       <CardTitle className="flex items-center gap-2">
                         <Wallet className="h-5 w-5 text-green-600" />
@@ -241,7 +241,7 @@ export default function ChargeCreditPage() {
                   </Card>
 
                   {/* Payment Method Selection */}
-                  <Card className="border shadow-sm hover:shadow-md transition-shadow">
+                  <Card className="border shadow-sm hover:shadow-md transition-shadow py-6">
                     <CardHeader className="pb-4">
                       <CardTitle className="flex items-center gap-2">
                         <CreditCard className="h-5 w-5 text-blue-600" />
@@ -293,7 +293,7 @@ export default function ChargeCreditPage() {
                 {/* Summary Sidebar */}
                 <div className="space-y-6">
                   {/* Order Summary */}
-                  <Card className="border shadow-sm hover:shadow-md transition-shadow sticky top-6">
+                  <Card className="border shadow-sm hover:shadow-md transition-shadow sticky top-6 py-6">
                     <CardHeader>
                       <CardTitle>خلاصه شارژ</CardTitle>
                     </CardHeader>

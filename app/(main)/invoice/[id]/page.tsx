@@ -49,6 +49,7 @@ const InvoicePage = ({ params } : { params : { id : string }}) => {
         )
     }
 
+
     return (
         <>
             <Header />
@@ -58,7 +59,7 @@ const InvoicePage = ({ params } : { params : { id : string }}) => {
                     invoice={invoiceData}
                     userCredit={userCredit}
                     userPanels={userPanels}
-                    onPayment={() => null}
+                    onPayment={() => null }
                 />
             }
             

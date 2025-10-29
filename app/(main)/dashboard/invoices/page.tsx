@@ -83,7 +83,7 @@ export default function InvoicesPage() {
     
     const config = statusConfig[state as keyof typeof statusConfig] || statusConfig.WAITING;
     return (
-      <Badge className={`${config.color} flex items-center gap-1`}>
+      <Badge className={`${config.color} flex flex-wrap items-center gap-1`}>
         {config.icon}
         {config.label}
       </Badge>
@@ -175,14 +175,14 @@ export default function InvoicesPage() {
                     
                     return (
                       <Card key={invoice.id} className="border shadow-sm hover:shadow-md transition-shadow p-4">
-                        <CardHeader className="pb-4">
-                          <div className="flex justify-between items-start">
-                            <div className="flex items-center gap-3">
+                        <CardHeader className="pb-4 flex-wrap">
+                          <div className="flex flex-wrap justify-between items-start">
+                            <div className="flex flex-wrap items-center gap-3">
                               <div className={`p-2 rounded-lg bg-gray-50 ${kindConfig.color}`}>
                                 {kindConfig.icon}
                               </div>
                               <div>
-                                <CardTitle className="text-xl flex items-center gap-2">
+                                <CardTitle className="text-xl flex flex-wrap items-center gap-2">
                                   {kindConfig.label}
                                   {invoice.flightType && (
                                     <span className="text-sm font-normal text-muted-foreground">
@@ -243,7 +243,7 @@ export default function InvoicesPage() {
                               
                               {invoice.order.AirItineraryPricingInfo?.ItinTotalFare && (
                                 <div className="mt-4 pt-4 border-t border-blue-200">
-                                  <div className="flex gap-6 text-sm">
+                                  <div className="flex flex-wrap gap-6 text-sm">
                                     <div>
                                       <span className="text-muted-foreground">قیمت کل:</span>
                                       <p className="font-bold text-blue-800">
@@ -292,13 +292,13 @@ export default function InvoicesPage() {
                             <div className="grid gap-3">
                               {invoice.travelers.map((traveler, index) => (
                                 <div key={traveler.id || index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                  <div className="flex items-center gap-4">
+                                  <div className="flex flex-wrap items-center gap-4">
                                     <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
                                       <span className="text-sm font-medium">{index + 1}</span>
                                     </div>
                                     <div>
                                       <p className="font-medium">{traveler.firstName} {traveler.lastName}</p>
-                                      <div className="flex gap-4 text-sm text-muted-foreground mt-1">
+                                      <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mt-1">
                                         <span>کد ملی: {traveler.nationalId}</span>
                                         <span>سن: {traveler.age} سال</span>
                                         {traveler.passengerType && (
@@ -321,7 +321,7 @@ export default function InvoicesPage() {
                           }
 
                           {/* Action Buttons */}
-                          <div className="flex gap-3 pt-4 border-t">
+                          <div className="flex flex-wrap gap-3 pt-4 border-t">
                             {invoice.state === "WAITING" && (
                               <button className="bg-green-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors">
                                 پرداخت صورت حساب

@@ -1,0 +1,28 @@
+FROM node:18
+
+# Install additional tools for development
+RUN apt-get update && apt-get install -y \
+    openssl \
+    ca-certificates \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+
+RUN npm ci --include=dev --prefer-offline --no-audit
+
+COPY . .
+
+RUN npx prisma generate --schema=./prisma/schema.prisma
+
+RUN npm run build
+
+# Don't switch to limited user for development
+# Keep as root for VS Code access
+
+EXPOSE 3000
+
+CMD ["npm", "run", "dev"]

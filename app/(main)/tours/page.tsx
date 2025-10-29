@@ -83,13 +83,9 @@ export default async function ToursPage({
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar Filters */}
-          <div className="lg:w-1/4">
-            <TourFilters />
-          </div>
-
+          
           {/* Tours Grid */}
-          <div className="lg:w-3/4">
+          <div className="lg:w-4/4">
             {tours.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-muted-foreground text-lg mb-4">

@@ -4,9 +4,12 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useFlight } from "@/contexts/search/FlightContext"
 import { useSearch } from "@/hooks/use-search"
-import { Search, Calendar, MapPin, ChevronDown, Loader2, Users, Baby, User, Plus, Minus } from "lucide-react"
+import { Search, Calendar, MapPin, ChevronDown, Loader2, Users, Baby, User, Plus, Minus, CalendarIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState, useRef } from "react"
+import ShamsiDateModal from "./ShamsiCalendar"
+import { formatShamsiDate } from "./utils"
+import { shamsiToGregorianString } from "@/lib/jalaalil"
 
 interface Suggestion {
   id: string
@@ -209,7 +212,7 @@ const FlightSearch = () => {
             // Extract airport codes
             const originCode = extractAirportCode(flightSearch.from)
             const destinationCode = extractAirportCode(flightSearch.to)
-           
+            const gregorianDepartureDate = shamsiToGregorianString(flightSearch.departureDate)
             // Prepare request body for PartoCRS API
             const requestBody = {
                 PricingSourceType: "All",
@@ -226,7 +229,7 @@ const FlightSearch = () => {
                 },
                 OriginDestinationInformations: [
                     {
-                        DepartureDateTime: `${flightSearch.departureDate}T00:00:00.0000000+03:30`,
+                        DepartureDateTime: `${gregorianDepartureDate}T00:00:00.0000000+03:30`,
                         DestinationLocationCode: destinationCode,
                         DestinationType: "None",
                         OriginLocationCode: originCode,
@@ -238,8 +241,9 @@ const FlightSearch = () => {
 
             // Add return flight for round trips
             if (flightSearch.tripType === "roundtrip" && flightSearch.returnDate) {
+                const gregorianReturnDate = shamsiToGregorianString(flightSearch.returnDate)
                 requestBody.OriginDestinationInformations.push({
-                    DepartureDateTime: `${flightSearch.returnDate}T00:00:00.0000000+03:30`,
+                    DepartureDateTime: `${gregorianReturnDate}T00:00:00.0000000+03:30`,
                     DestinationLocationCode: originCode,
                     DestinationType: "None",
                     OriginLocationCode: destinationCode,
@@ -250,7 +254,7 @@ const FlightSearch = () => {
             // Call the flight search API
             const response = await searchFlights(requestBody)
             
-            
+            console.log(response.PricedItineraries)
             setFlightsData(response.PricedItineraries)
             router.push('/flights')
 
@@ -522,34 +526,27 @@ const FlightSearch = () => {
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mt-6">
                 {/* Departure Date */}
                 <div className="space-y-3">
-                    <Label htmlFor="flight-departure-date" className="text-lg font-bold text-white text-right block">تاریخ رفت</Label>
-                    <div className="relative">
-                        <Calendar className="absolute right-4 top-4 h-5 w-5 text-gray-400" />
-                        <Input 
-                            id="flight-departure-date" 
-                            type="date" 
-                            min={new Date().toISOString().split('T')[0]}
-                            className="pr-12 h-14 rounded-2xl border-2 border-gray-300 bg-white text-gray-800 text-lg font-medium transition-all duration-300 hover:border-blue-400 focus:border-blue-500 focus:scale-105 focus:shadow-lg"
-                            value={flightSearch.departureDate}
-                            onChange={(e) => setFlightSearch(prev => ({ ...prev, departureDate: e.target.value }))}
-                        />
-                    </div>
+                    <ShamsiDateModal
+                        departureDate={flightSearch.departureDate}
+                        returnDate={flightSearch.returnDate || ""}
+                        tripType={flightSearch.tripType}
+                        onDepartureDateChange={(date) => setFlightSearch(prev => ({ ...prev, departureDate: date }))}
+                        onReturnDateChange={(date) => setFlightSearch(prev => ({ ...prev, returnDate: date }))}
+                        onTripTypeChange={(type) => setFlightSearch(prev => ({ ...prev, tripType: type }))}
+                    />
                 </div>
 
                 {/* Return Date */}
                 {flightSearch.tripType === "roundtrip" && (
                     <div className="space-y-3">
-                        <Label htmlFor="flight-return-date" className="text-lg font-bold text-white text-right block">تاریخ برگشت</Label>
+                        <Label className="text-lg font-bold text-white text-right block">تاریخ برگشت</Label>
                         <div className="relative">
-                            <Calendar className="absolute right-4 top-4 h-5 w-5 text-gray-400" />
-                            <Input 
-                                id="flight-return-date" 
-                                type="date" 
-                                min={flightSearch.departureDate || new Date().toISOString().split('T')[0]}
-                                className="pr-12 h-14 rounded-2xl border-2 border-gray-300 bg-white text-gray-800 text-lg font-medium transition-all duration-300 hover:border-blue-400 focus:border-blue-500 focus:scale-105 focus:shadow-lg"
-                                value={flightSearch.returnDate}
-                                onChange={(e) => setFlightSearch(prev => ({ ...prev, returnDate: e.target.value }))}
-                            />
+                        <CalendarIcon className="absolute right-4 top-4 h-5 w-5 text-gray-400" />
+                        <div className="w-full h-14 rounded-2xl border-2 border-gray-300 bg-white text-gray-800 text-lg font-medium flex items-center px-4 pr-12">
+                            <span className="text-gray-800">
+                            {formatShamsiDate(flightSearch.returnDate)}
+                            </span>
+                        </div>
                         </div>
                     </div>
                 )}

@@ -1,9 +1,11 @@
+
 import type React from "react"
 import { AdminNav } from "@/components/admin/admin-nav"
 import { getSession } from "@/lib/auth"
 import "../(main)/globals.css"
 import localFont from "next/font/local"
 import { NotificationProvider } from "@/contexts/notification/NotificationContext"
+import { redirect } from "next/navigation"
 
 
 const dana = localFont({
@@ -56,10 +58,12 @@ const dana = localFont({
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession()
+  
   if (!session)
-    document.location.replace('/')
+    redirect('/')
+  
   if (session && session.role != "ADMIN")
-    document.location.replace('/')
+    redirect('/')
   return (
     <html dir="rtl">
       <body className={dana.className}>

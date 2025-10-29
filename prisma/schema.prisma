@@ -117,39 +117,11 @@ model Booking {
   bookingCode     String        @unique
   totalPrice      Float
   currency        String        @default("IRR")
-  
-  // Hotel specific
-  hotelId         String?
-  hotelName       String?
-  roomType        String?
-  checkIn         DateTime?
-  checkOut        DateTime?
-  guests          Int?
-  
-  // Flight specific
-  flightId        String?
-  flightNumber    String?
-  airline         String?
-  origin          String?
-  destination     String?
-  departureTime   DateTime?
-  arrivalTime     DateTime?
-  passengers      Int?
-  class           String?
-  
-  // Train specific
-  trainId         String?
-  trainNumber     String?
-  trainOrigin     String?
-  trainDestination String?
-  departureDate   DateTime?
-  arrivalDate     DateTime?
-  trainPassengers Int?
-  wagonType       String?
-  
+  bookingInformation Json
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
-  
+  data Json
+
   @@index([userId])
   @@index([bookingCode])
   @@index([type])
@@ -678,8 +650,6 @@ model Invoice {
   travelers Json
 }
 
-
-
 // HERE IS FOR HOTELS STATIC DATA
 model Hotel {
   id          Int      @id @default(autoincrement())
@@ -749,6 +719,23 @@ model CipService {
   featured    Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  reservations CipReservation[]
 
   @@map("cip_services")
+}
+
+model CipReservation {
+  id          String   @id @default(cuid())
+  serviceId   String
+  firstName   String
+  lastName    String
+  phoneNumber String
+  status      String   @default("PENDING") // PENDING, CONFIRMED, CANCELLED
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  service CipService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@map("cip_reservations")
 }

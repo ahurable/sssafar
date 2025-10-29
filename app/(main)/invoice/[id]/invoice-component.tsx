@@ -15,6 +15,7 @@ interface Traveler {
   firstName: string
   lastName: string
   nationalId: string
+  nationality: "IR"
   dateOfBirth: string
   passportNumber?: string
   passportExpiry?: string
@@ -400,7 +401,29 @@ export function InvoiceComponent({
       } else {
         error(data.message)
       }
-    } else {
+    } else if (selectedPaymentMethod === "PANELCREDIT") {
+      const response = await fetch(`/api/invoice/${invoice.id}/payment/panel`, 
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type':'application/json'
+          },
+          body: JSON.stringify({
+            panelId: selectedPanelId
+          })
+        }
+      )
+      const data = await response.json()
+      console.log(data)
+      if (response.ok) {
+        success("پرداخت با موفقیت انجام شد")
+        setPaid(true)
+      } else {
+        error(data.message)
+      }
+    }
+    
+    else {
       onPayment(selectedPaymentMethod, selectedPanelId || undefined)
     }
   }
@@ -434,6 +457,8 @@ export function InvoiceComponent({
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
+            invoiceId: invoice.id,
+            totalPrice: parseInt(invoice.amount),
             fareSourceCode: flightOrder?.FareSourceCode || invoice.flightSourceCode,
             travelers: invoice.travelers
           })
@@ -590,7 +615,7 @@ export function InvoiceComponent({
                     {timeLeft}
                   </span>
                 </p>
-                {isHotelInvoice && revalidatingHotel && (
+                {isHotelInvoice && revalidatingHotel && paid == false && isExpired && (
                   <div className="flex items-center gap-2 text-blue-600 mt-1">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     <span className="text-sm">در حال بروزرسانی اطلاعات هتل...</span>
@@ -600,7 +625,7 @@ export function InvoiceComponent({
             </div>
             <div className="flex items-center gap-2">
               <Badge variant={isExpired ? "destructive" : "default"}>
-                {isExpired ? "منقضی شده" : "در انتظار پرداخت"}
+                {isExpired && "منقضی شده" || !paid && "در انتظار پرداخت" || paid && "پرداخت شده"}
               </Badge>
               {isHotelInvoice && revalidatedHotel && (
                 <Badge className="bg-green-100 text-green-800">
@@ -616,6 +641,7 @@ export function InvoiceComponent({
         {/* Order and Traveler Details */}
         <div className="lg:col-span-2 space-y-6">
           {/* Flight Information */}
+          {/* Flight Information - KEEPING ALL ORIGINAL FLIGHT CONTENT */}
           {isFlightInvoice && flightOrder && (
             <Card className="py-6">
               <CardHeader>
@@ -625,10 +651,187 @@ export function InvoiceComponent({
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* ... flight content ... */}
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {/* Flight Type */}
+                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                      <Label className="text-sm text-blue-700 font-medium">نوع پرواز</Label>
+                      <p className="font-bold text-blue-900 mt-1">
+                        {invoice.flightType === "one-way" ? "یک طرفه" : "رفت و برگشت"}
+                      </p>
+                    </div>
+
+                    {/* Booking Code */}
+                    <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                      <Label className="text-sm text-green-700 font-medium">کد رزرو</Label>
+                      <p className="font-mono font-bold text-green-900 mt-1">
+                        {flightOrder.FareSourceCode?.substring(0, 16)}...
+                      </p>
+                    </div>
+
+                    {/* Airline */}
+                    <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                      <Label className="text-sm text-purple-700 font-medium">شرکت هواپیمایی</Label>
+                      <p className="font-bold text-purple-900 mt-1">
+                        {getAirlineName(flightOrder.ValidatingAirlineCode || "")}
+                      </p>
+                    </div>
+
+                    {/* Payment Status */}
+                    <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                      <Label className="text-sm text-orange-700 font-medium">وضعیت پرداخت</Label>
+                      <p className="font-bold text-orange-900 mt-1">
+                        {flightOrder.PayLater?.HasPayLater ? "پرداخت بعدی" : "پرداخت کامل"}
+                      </p>
+                    </div>
+
+                    {/* Reservation Status */}
+                    <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                      <Label className="text-sm text-red-700 font-medium">وضعیت رزرو</Label>
+                      <p className="font-bold text-red-900 mt-1">
+                        {flightOrder.IsClosed ? "بسته شده" : "فعال"}
+                      </p>
+                    </div>
+
+                    {/* Refund Policy */}
+                    <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-200">
+                      <Label className="text-sm text-indigo-700 font-medium">سیاست استرداد</Label>
+                      <p className="font-bold text-indigo-900 mt-1">
+                        {flightOrder.NonRefundableType === 0 ? "قابل استرداد" : "غیرقابل استرداد"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Additional Flight Information */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    {/* Flight Details */}
+                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                      <Label className="text-sm text-gray-700 font-medium mb-3">جزئیات پرواز</Label>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">سرویس غذا:</span>
+                          <span className="text-sm font-medium">
+                            {flightOrder.IsMealServiceMandatory ? "الزامی" : "اختیاری"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">انتخاب صندلی:</span>
+                          <span className="text-sm font-medium">
+                            {flightOrder.IsSeatServiceMandatory ? "الزامی" : "اختیاری"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">رزرو خودکار:</span>
+                          <span className="text-sm font-medium">
+                            {flightOrder.IsAutoReserved ? "فعال" : "غیرفعال"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Passenger Requirements */}
+                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                      <Label className="text-sm text-gray-700 font-medium mb-3">الزامات مسافر</Label>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">پاسپورت الزامی:</span>
+                          <span className="text-sm font-medium">
+                            {flightOrder.IsPassportMandatory ? "بله" : "خیر"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">تاریخ صدور پاسپورت:</span>
+                          <span className="text-sm font-medium">
+                            {flightOrder.IsPassportIssueDateMandatory ? "الزامی" : "اختیاری"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">آدرس مقصد:</span>
+                          <span className="text-sm font-medium">
+                            {flightOrder.IsDestinationAddressMandatory ? "الزامی" : "اختیاری"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Price Breakdown */}
+                  {flightOrder.AirItineraryPricingInfo?.ItinTotalFare && (
+                    <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-lg border border-blue-200 mt-4">
+                      <Label className="text-lg text-blue-800 font-bold mb-4">جزئیات قیمت</Label>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="text-center">
+                          <p className="text-sm text-blue-600">قیمت کل</p>
+                          <p className="text-xl font-bold text-blue-800">
+                            {flightOrder.AirItineraryPricingInfo.ItinTotalFare.TotalFare?.toLocaleString('fa-IR')}
+                          </p>
+                          <p className="text-xs text-blue-500">
+                            {flightOrder.AirItineraryPricingInfo.ItinTotalFare.Currency}
+                          </p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm text-green-600">قیمت پایه</p>
+                          <p className="text-lg font-bold text-green-800">
+                            {flightOrder.AirItineraryPricingInfo.ItinTotalFare.BaseFare?.toLocaleString('fa-IR')}
+                          </p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm text-red-600">مالیات</p>
+                          <p className="text-lg font-bold text-red-800">
+                            {flightOrder.AirItineraryPricingInfo.ItinTotalFare.TotalTax?.toLocaleString('fa-IR')}
+                          </p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm text-purple-600">نوع کرایه</p>
+                          <p className="text-lg font-bold text-purple-800">
+                            {flightOrder.AirItineraryPricingInfo.FareType === 2 ? "عادی" : "ویژه"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Additional Features */}
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    {flightOrder.HasCancellationGuarantee && (
+                      <Badge className="bg-green-100 text-green-800 border-green-200 px-3 py-1">
+                        ✅ تضمین کنسلی
+                      </Badge>
+                    )}
+                    {flightOrder.HasAmenities && (
+                      <Badge className="bg-blue-100 text-blue-800 border-blue-200 px-3 py-1">
+                        🎁 امکانات ویژه
+                      </Badge>
+                    )}
+                    {flightOrder.HasFareFamilies && (
+                      <Badge className="bg-purple-100 text-purple-800 border-purple-200 px-3 py-1">
+                        👨‍👩‍👧‍👦 خانواده کرایه
+                      </Badge>
+                    )}
+                    {flightOrder.RefundMethod === 0 && (
+                      <Badge className="bg-orange-100 text-orange-800 border-orange-200 px-3 py-1">
+                        💰 روش استرداد: اعتبار
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                
+                {invoice.selectedServices && invoice.selectedServices.length > 0 && (
+                  <div>
+                    <Label className="text-sm text-muted-foreground">خدمات اضافی</Label>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {invoice.selectedServices.map((service, index) => (
+                        <Badge key={index} variant="secondary">
+                          {service.name}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
+
 
           {/* Hotel Information with Revalidated Data */}
           {isHotelInvoice && currentHotelOrder && (
@@ -1041,7 +1244,7 @@ export function InvoiceComponent({
                               onChange={(e) => setSelectedPanelId(e.target.value)}
                             >
                               <option value="">یک پنل انتخاب کنید</option>
-                              {availablePanels.map(panel => (
+                              {userPanels.map(panel => (
                                 <option key={panel.id} value={panel.id}>
                                   {panel.name} - {panel.credit.toLocaleString('fa-IR')} ریال
                                   {panel.discountPercentage > 0 && ` (${panel.discountPercentage}% تخفیف)`}
@@ -1049,7 +1252,7 @@ export function InvoiceComponent({
                               ))}
                             </select>
                             
-                            {availablePanels.length === 0 && (
+                            {userPanels.length === 0 && (
                               <p className="text-sm text-red-600">هیچ پنلی با اعتبار کافی موجود نیست</p>
                             )}
                           </div>

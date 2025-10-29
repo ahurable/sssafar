@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { Plus, Trash2, Save, Upload, X, Image as ImageIcon } from "lucide-react"
+import { Plus, Trash2, Save, Upload, X, Image as ImageIcon, Eye, Star } from "lucide-react"
 import { toast } from "sonner"
 
 interface CipService {
@@ -26,6 +26,7 @@ interface CipService {
   priority: number
   published: boolean
   featured: boolean
+  reservations: any[]
 }
 
 interface EditCipFormProps {
@@ -82,7 +83,7 @@ export function EditCipForm({ service }: EditCipFormProps) {
       const formData = new FormData()
       formData.append("file", file)
 
-      const response = await fetch("/api/upload/image", {
+      const response = await fetch("/api/upload", {
         method: "POST",
         body: formData,
       })
@@ -188,8 +189,37 @@ export function EditCipForm({ service }: EditCipFormProps) {
     }))
   }
 
+  const previewService = () => {
+    window.open(`/cip/${service.id}`, '_blank')
+  }
+
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="space-y-6">
+      {/* Quick Actions Card */}
+      <Card className="py-6">
+        <CardContent className="p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h2 className="text-xl font-bold text-foreground">{service.title}</h2>
+              <p className="text-muted-foreground mt-1">
+                {service.reservations.length} درخواست رزرو
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={previewService}>
+                <Eye className="h-4 w-4 ml-2" />
+                پیش‌نمایش
+              </Button>
+              <Button asChild>
+                <a href={`/cip/${service.id}`} target="_blank">
+                  مشاهده در سایت
+                </a>
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* اطلاعات اصلی */}
         <Card className="py-6">
@@ -318,7 +348,82 @@ export function EditCipForm({ service }: EditCipFormProps) {
           </CardContent>
         </Card>
 
-        {/* بقیه کامپوننت‌ها بدون تغییر */}
+        {/* تنظیمات نمایش */}
+        <Card className="py-6">
+          <CardHeader>
+            <CardTitle>تنظیمات نمایش</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Active/Published Switch */}
+              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-full ${formData.published ? 'bg-green-100' : 'bg-gray-100'}`}>
+                    <Eye className={`h-5 w-5 ${formData.published ? 'text-green-600' : 'text-gray-400'}`} />
+                  </div>
+                  <div>
+                    <Label htmlFor="published" className="text-base font-medium cursor-pointer">
+                      خدمت فعال
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      نمایش این خدمت در سایت
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  id="published"
+                  checked={formData.published}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, published: checked }))}
+                />
+              </div>
+
+              {/* Featured/Special Switch */}
+              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-full ${formData.featured ? 'bg-purple-100' : 'bg-gray-100'}`}>
+                    <Star className={`h-5 w-5 ${formData.featured ? 'text-purple-600' : 'text-gray-400'}`} />
+                  </div>
+                  <div>
+                    <Label htmlFor="featured" className="text-base font-medium cursor-pointer">
+                      خدمت ویژه
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      نشان دادن به عنوان خدمت ویژه
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  id="featured"
+                  checked={formData.featured}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, featured: checked }))}
+                />
+              </div>
+            </div>
+
+            {/* Priority Setting */}
+            <div className="mt-6 p-4 border border-gray-200 rounded-lg">
+              <div className="space-y-2">
+                <Label htmlFor="priority" className="text-base font-medium">
+                  اولویت نمایش
+                </Label>
+                <p className="text-sm text-muted-foreground mb-3">
+                  خدمات با اولویت بالاتر در ابتدا نمایش داده می‌شوند
+                </p>
+                <Input
+                  id="priority"
+                  type="number"
+                  value={formData.priority}
+                  onChange={(e) => setFormData(prev => ({ ...prev, priority: e.target.value }))}
+                  min="0"
+                  max="100"
+                  className="max-w-32"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* بقیه بخش‌های فرم */}
         {/* ... سایر بخش‌های فرم مانند قبل ... */}
 
         {/* دکمه‌های اقدام */}

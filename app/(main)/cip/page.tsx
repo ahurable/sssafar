@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { MapPin, Clock, Star, Check, X } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
+import Link from "next/link"
 
 async function getCipServices() {
   const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/cip?published=true`, {
@@ -43,7 +44,7 @@ export default async function CipServicesPage() {
 
           {/* Services Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {services.map((service) => (
+            {services.map((service:any) => (
               <Card key={service.id} className="overflow-hidden hover:shadow-lg transition-all duration-300">
                 {service.image && (
                   <div className="h-48 overflow-hidden">
@@ -67,7 +68,7 @@ export default async function CipServicesPage() {
                   </div>
 
                   {service.description && (
-                    <p className="text-gray-600 mb-4">{service.description}</p>
+                    <p className="text-gray-600 mb-4">{service.description.substring(0,50)}...</p>
                   )}
 
                   <div className="space-y-3 mb-4">
@@ -93,7 +94,7 @@ export default async function CipServicesPage() {
                     <div className="mb-4">
                       <h4 className="font-semibold text-gray-900 mb-2">ویژگی‌های اصلی:</h4>
                       <div className="space-y-1">
-                        {service.features.slice(0, 3).map((feature, index) => (
+                        {service.features.slice(0, 2).map((feature:any, index:any) => (
                           <div key={index} className="flex items-center text-sm text-gray-600">
                             <Check className="h-4 w-4 ml-1 text-green-500" />
                             {feature}
@@ -102,37 +103,11 @@ export default async function CipServicesPage() {
                       </div>
                     </div>
                   )}
-
-                  {/* Included/Not Included */}
-                  <div className="grid grid-cols-2 gap-4 text-sm mb-4">
-                    <div>
-                      <h5 className="font-semibold text-green-600 mb-1">شامل می‌شود:</h5>
-                      <div className="space-y-1">
-                        {service.included.slice(0, 2).map((item, index) => (
-                          <div key={index} className="flex items-center">
-                            <Check className="h-3 w-3 ml-1 text-green-500" />
-                            <span>{item}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h5 className="font-semibold text-red-600 mb-1">شامل نمی‌شود:</h5>
-                      <div className="space-y-1">
-                        {service.notIncluded.slice(0, 2).map((item, index) => (
-                          <div key={index} className="flex items-center">
-                            <X className="h-3 w-3 ml-1 text-red-500" />
-                            <span>{item}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <Button className="w-full" size="lg">
-                    رزرو خدمت
-                  </Button>
+                  <Link href={`/cip/${service.id}`}>
+                    <Button className="w-full bg-red-400 hover:bg-red-500 text-xl py-6" size="lg">
+                      مشاهده جزئیات
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
             ))}

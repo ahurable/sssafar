@@ -35,6 +35,7 @@ import {
 import { useHotel } from "@/contexts/search/HotelContext"
 import { useSnack } from "@/hooks/use-notification"
 import { useRouter } from "next/navigation"
+import { HotelImage } from "@prisma/client"
 
 // Types for hotel with fare data
 interface HotelWithFare {
@@ -124,13 +125,14 @@ const roomTypeImages: Record<string, string> = {
 
 export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOut }: HotelDetailsProps) {
   const [hotelData, setHotelData] = useState<HotelWithFare | null>(null)
-  const [hotelItinenaries, setHotelItinenaries] = useState<any[]>()
+  const [hotelItinenaries, setHotelItinenaries] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedImage, setSelectedImage] = useState(0)
   const [selectedRoomImage, setSelectedRoomImage] = useState<{[key: string]: number}>({})
   const [hotelImages, setHotelImages] = useState<any[]>([])
   const [hotelName, setHotelName] = useState("")
   const [favorites, setFavorites] = useState<Set<number>>(new Set())
+  const [roomImages, setRoomImages] = useState<{[key: number]: any[]}>({})
   const { getHotelImages, getHotelName } = useHotel()
   const { error, success } = useSnack()
   const router = useRouter()
@@ -181,6 +183,39 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
       return []
     }
   }
+
+  // Function to get room images
+  const getRoomImages = async (hotelId: number) => {
+    try {
+      const images = await getHotelImages(hotelId)
+      console.log('room images for hotel', hotelId, 'are: ', images)
+      return images
+    } catch (err) {
+      console.error('Error fetching room images:', err)
+      return []
+    }
+  }
+
+  // Load room images for all itineraries
+  useEffect(() => {
+    const loadRoomImages = async () => {
+      if (hotelItinenaries && hotelItinenaries.length > 0) {
+        const imagesMap: {[key: number]: any[]} = {}
+        
+        // Load images for each unique hotel
+        const uniqueHotelIds = [...new Set(hotelItinenaries.map(it => it.HotelId))]
+        
+        for (const hotelId of uniqueHotelIds) {
+          const images = await getRoomImages(hotelId)
+          imagesMap[hotelId] = images
+        }
+        
+        setRoomImages(imagesMap)
+      }
+    }
+
+    loadRoomImages()
+  }, [hotelItinenaries])
 
   useEffect(() => {
     const fetchHotelDetails = async () => {
@@ -252,23 +287,13 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
     return mealTypes[mealType] || mealType
   }
 
-  const getRoomImage = (roomName: string, roomIndex: number) => {
-    const roomNameLower = roomName.toLowerCase()
-    
-    if (roomNameLower.includes('استاندارد') || roomNameLower.includes('standard')) {
-      return roomTypeImages.standard
-    } else if (roomNameLower.includes('دلوکس') || roomNameLower.includes('deluxe')) {
-      return roomTypeImages.deluxe
-    } else if (roomNameLower.includes('سوئیت') || roomNameLower.includes('suite')) {
-      return roomTypeImages.suite
-    } else if (roomNameLower.includes('اجرایی') || roomNameLower.includes('executive')) {
-      return roomTypeImages.executive
-    } else if (roomNameLower.includes('خانواده') || roomNameLower.includes('family')) {
-      return roomTypeImages.family
-    } else if (roomNameLower.includes('پرزیدنت') || roomNameLower.includes('presidential')) {
-      return roomTypeImages.presidential
+  const getRandomRoomImage = (hotelId: number) => {
+    const images = roomImages[hotelId] || []
+    if (images.length === 0) {
+      return '/rooms/hotel-room.jpg' // Fallback image
     }
-    return roomTypeImages.default
+    const randomIndex = Math.floor(Math.random() * images.length)
+    return images[randomIndex]?.imageUrl || '/rooms/hotel-room.jpg'
   }
 
   const handleRoomImageChange = (roomId: string, direction: 'next' | 'prev') => {
@@ -509,6 +534,8 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
                 const room = itinerary.Rooms?.[0]
                 if (!room) return null
                 
+                const roomImageUrl = getRandomRoomImage(itinerary.HotelId)
+                
                 return (
                   <Card key={itinerary.FareSourceCode} className="overflow-hidden hover:shadow-lg transition-shadow">
                     <CardContent className="p-0">
@@ -516,13 +543,13 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
                         {/* Room Image */}
                         <div className="lg:w-80 relative h-64 lg:h-auto">
                           <div className="relative w-full h-full">
-                            {/* <Image
-                              src={getRoomImage(room.Name)}
+                            <Image
+                              src={roomImageUrl}
                               alt={room.Name}
                               fill
                               className="object-cover"
                               priority={index === 0}
-                            /> */}
+                            />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                             
                             {/* Room Badges */}
@@ -681,7 +708,7 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
                 <CardContent className="p-6">
                   <h3 className="text-xl font-bold mb-4">امکانات هتل</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {hotelData.Amenities &&hotelData.Amenities.map((amenity, index) => {
+                    {hotelData.Amenities && hotelData.Amenities.map((amenity, index) => {
                       const Icon = amenityIcons[amenity]
                       return (
                         <div key={index} className="flex items-center gap-3 p-3 border rounded-lg hover:shadow-md transition-shadow">
