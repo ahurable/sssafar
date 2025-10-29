@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  app:
+    # Extra volumes for development convenience
+    volumes:
+      - type: bind
+        source: ..
+        target: /workspace
+        consistency: cached
+    # Development-specific environment variables
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    # Development optimizations
+    command: sleep infinity

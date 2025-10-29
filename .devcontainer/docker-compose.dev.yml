@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ../..:/workspaces:cached
+      - ..:/app:cached
+      - /app/node_modules
+    command: sleep infinity
+    environment:
+      - NODE_ENV=development
+    user: root
+  
+  pgadmin:
+    profiles: ["dev"]
+    environment:
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_DEFAULT_EMAIL: admin@safartoday.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin

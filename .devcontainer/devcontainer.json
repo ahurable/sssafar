@@ -1,9 +1,10 @@
 {
-  "name": "Next.js App - Development",
+  "name": "Next.js Development Container",
   "dockerComposeFile": "../docker-compose.dev.yml",
   "service": "app",
   "workspaceFolder": "/app",
   "remoteUser": "root",
+  
   "customizations": {
     "vscode": {
       "extensions": [
@@ -12,9 +13,28 @@
         "esbenp.prettier-vscode",
         "ms-vscode.vscode-typescript-next",
         "prisma.prisma"
-      ]
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "editor.formatOnSave": true
+      }
     }
   },
-  "forwardPorts": [3000, 5432],
-  "postCreateCommand": "npm install"
+  
+  "forwardPorts": [3000, 5432, 8080],  // Change to 3001
+  
+  "portsAttributes": {
+    "3001": {
+      "label": "Next.js Dev Server",
+      "onAutoForward": "notify"
+    }
+  },
+  
+  "postCreateCommand": "echo 'Development container ready!'",
+  
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/app,type=bind,consistency=cached"
+  ],
+  
+  "shutdownAction": "stopCompose"
 }

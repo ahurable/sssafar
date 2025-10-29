@@ -1,28 +1,33 @@
 FROM node:18
 
-# Install additional tools for development
+# Install additional development tools
 RUN apt-get update && apt-get install -y \
     openssl \
     ca-certificates \
     curl \
     git \
+    vim \
+    nano \
+    htop \
+    procps \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
+# Copy package files first for better caching
 COPY package.json package-lock.json* ./
 
-RUN npm ci --include=dev --prefer-offline --no-audit
+# Install all dependencies including dev dependencies
+RUN npm install
 
+# Copy ALL source code
 COPY . .
 
-RUN npx prisma generate --schema=./prisma/schema.prisma
+# Generate Prisma client
+RUN npx prisma generate
 
-RUN npm run build
-
-# Don't switch to limited user for development
-# Keep as root for VS Code access
-
+# Expose port
 EXPOSE 3000
+# Keep container running for Dev Container
 
-CMD ["npm", "run", "dev"]
+CMD ["sleep", "infinity"]
