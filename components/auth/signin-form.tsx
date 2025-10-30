@@ -35,20 +35,26 @@ export function SignInForm() {
       })
 
       const data = await res.json()
-
+      console.log(data)
+      
       if (res.ok) {
+        success('وارد حساب کاربری شدید', '', 3000)
+        
+        // Wait a bit for the cookie to be set and session to be established
+        await new Promise(resolve => setTimeout(resolve, 100))
+        
+        // Refresh to update the session state
+        router.refresh()
+        
+        // Wait a bit more after refresh
+        await new Promise(resolve => setTimeout(resolve, 100))
+        
         // Check if user is admin and redirect accordingly
         if (data.user.role === "ADMIN") {
           router.push("/admin")
         } else {
-          success(
-            'وارد حساب کاربری شدید',
-            '',
-            3000
-          )
           router.push("/dashboard")
         }
-        router.refresh()
       } else {
         error("خطا در ورود")
       }
