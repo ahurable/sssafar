@@ -28,35 +28,29 @@ export function SignInForm() {
     setLoading(true)
 
     try {
+      console.log("Starting signin request...")
       const res = await fetch("/api/auth/signin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
+        credentials: 'include'
       })
 
+      console.log("Response status:", res.status)
       const data = await res.json()
-      console.log(data)
+      console.log("Response data:", data)
       
       if (res.ok) {
-        success('وارد حساب کاربری شدید', '', 3000)
+        success('وارد حساب کاربری شدید', '', 1000)
         
-        // Wait a bit for the cookie to be set and session to be established
-        await new Promise(resolve => setTimeout(resolve, 100))
-        
-        // Refresh to update the session state
-        router.refresh()
-        
-        // Wait a bit more after refresh
-        await new Promise(resolve => setTimeout(resolve, 100))
-        
-        // Check if user is admin and redirect accordingly
-        if (data.user.role === "ADMIN") {
-          router.push("/admin")
-        } else {
-          router.push("/dashboard")
-        }
+        // Wait a bit for the cookie to be processed
+        setTimeout(() => {
+          console.log("Redirecting to:", data.user.role === "ADMIN" ? "/admin" : "/dashboard")
+          // Use window.location for full page reload to ensure middleware runs properly
+          window.location.href = data.user.role === "ADMIN" ? "/admin" : "/dashboard"
+        }, 1000)
       } else {
-        error("خطا در ورود")
+        error(data.error || "خطا در ورود")
       }
     } catch (err) {
       console.error("[v0] Signin error:", err)

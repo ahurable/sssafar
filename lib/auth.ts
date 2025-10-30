@@ -45,14 +45,14 @@ export async function setSession(token: string) {
   console.log('Setting cookie with secure: false')
   
   const cookieStore = await cookies()
+  
   cookieStore.set("token", token, {
     httpOnly: true,
-    secure: false,
-    sameSite: "none",
+    secure: false, // Set to false for both local and server (since you're using HTTP)
+    sameSite: "lax",
     maxAge: 60 * 60 * 24 * 7, // 7 days
     path: "/",
   })
-  console.log('Cookie immediately after setting:', verifyCookie ? 'EXISTS' : 'MISSING')
   console.log('=== END DEBUG ===')
 }
 
