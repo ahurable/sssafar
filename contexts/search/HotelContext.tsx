@@ -171,7 +171,7 @@ const hotelNameCache = new Map<number, string>();
 
 const suggestCity = async (query:string) => {
     try {
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || ''
     const fileUrl = `${baseUrl}/api/hotels/search?q=${query}`
     
     console.log('🔍 Attempting to fetch cities file from:', fileUrl)

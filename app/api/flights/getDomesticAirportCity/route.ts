@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
 
 async function loadAirportsFromXLSX(): Promise<Airport[]> {
   try {
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     const fileUrl = `${baseUrl}/data/DomesticAirlines.xlsx` // Using City.xlsx
     
     console.log('🔍 Attempting to fetch file from:', fileUrl)
@@ -156,7 +156,7 @@ async function loadAirportsFromXLSX(): Promise<Airport[]> {
 
 async function debugFileAccess() {
   try {
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     const fileUrl = `${baseUrl}/data/DomesticAirlines.xlsx`
     
     const response = await fetch(fileUrl)

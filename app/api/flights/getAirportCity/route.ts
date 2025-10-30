@@ -162,7 +162,7 @@ async function loadAirportsFromXLSX(): Promise<Airport[]> {
 
 async function debugFileAccess() {
   try {
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     const fileUrl = `${baseUrl}/data/Airport.xls`
     
     const response = await fetch(fileUrl)

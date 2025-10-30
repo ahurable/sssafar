@@ -90,7 +90,7 @@ export const getAirTripType = (tripType: string): string => {
 
 async function loadAirlinesFromXLSX(): Promise<{ [iata: string]: string }> {
   try {
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     const fileUrl = `${baseUrl}/data/Airline.xlsx`
     
     console.log('🔍 Attempting to fetch airlines file from:', fileUrl)
