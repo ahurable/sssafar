@@ -39,14 +39,21 @@ export async function getSession() {
 }
 
 export async function setSession(token: string) {
+  console.log('=== COOKIE DEBUG ===')
+  console.log('NODE_ENV:', process.env.NODE_ENV)
+  console.log('NEXT_PUBLIC_APP_URL:', process.env.NEXT_PUBLIC_APP_URL)
+  console.log('Setting cookie with secure: false')
+  
   const cookieStore = await cookies()
   cookieStore.set("token", token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: false,
+    sameSite: "none",
     maxAge: 60 * 60 * 24 * 7, // 7 days
     path: "/",
   })
+  console.log('Cookie immediately after setting:', verifyCookie ? 'EXISTS' : 'MISSING')
+  console.log('=== END DEBUG ===')
 }
 
 export async function clearSession() {
