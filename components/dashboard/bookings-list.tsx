@@ -29,6 +29,7 @@ interface Booking {
     TktTimeLimit?: string
     PaymentDeadline?: string
     SupplierName?: string
+    CanExtendPaymentDeadline?: any
   }
 }
 
