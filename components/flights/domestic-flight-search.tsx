@@ -258,7 +258,7 @@ const DomesticFlightSearch = () => {
             // const response = await searchDomesticFlights(requestBody)
             const partoResponse = await searchFlights(partoRequestBody)
 
-            setFlightsData(partoResponse.PricedItineraries)
+            setFlightsData(partoResponse.PricedItineraries, "domestic")
             // console.log(response)
             router.push('/flights')
             // setFlightsData(response.PricedItineraries)

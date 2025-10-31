@@ -46,11 +46,12 @@ interface Flight {
 }
 
 interface FlightListProps {
-  flights: Flight[]
+  flights: Flight[],
+  area: string,
   itemsPerPage?: number
 }
 
-export function FlightList({ flights, itemsPerPage = 10 }: FlightListProps) {
+export function FlightList({ flights, area, itemsPerPage = 10 }: FlightListProps) {
   const [currentPage, setCurrentPage] = useState(1)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const [selectedDate, setSelectedDate] = useState<string>("")
@@ -146,9 +147,9 @@ export function FlightList({ flights, itemsPerPage = 10 }: FlightListProps) {
     return amount.toLocaleString('fa-IR')
   }
 
-  const handleBookFlight = (flightId: string, type: "oneway" | "twoway") => {
+  const handleBookFlight = (flightId: string, area: string) => {
     setOpenDropdown(null)
-    router.push(`/flights/${flightId}/book/${type}`)
+    router.push(`/flights/${flightId}/book/${area}`)
   }
 
   const toggleDropdown = (flightIndex: string) => {
@@ -388,7 +389,7 @@ export function FlightList({ flights, itemsPerPage = 10 }: FlightListProps) {
                     
                     {/* Booking Button */}
                     <Button 
-                      onClick={() => handleBookFlight(flight.FareSourceCode, "oneway")}
+                      onClick={() => handleBookFlight(flight.FareSourceCode, area)}
                       className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-xl font-bold shadow-md hover:shadow-lg transition-all"
                     >
                       خرید بلیط

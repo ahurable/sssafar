@@ -66,7 +66,7 @@ export const POST = async (request: NextRequest) => {
             }
 
             // Flight-specific validations
-            if (body.kind === "FLIGHT") {
+            if (body.kind === "FLIGHT" && body.area == "intl") {
                 if (!traveler.passportNumber || traveler.passportNumber.length === 0) {
                     return NextResponse.json({
                         message: "لطفا از صحت شماره پاسپورت خود برای پرواز خارجی اطمینان حاصل نمائید"

@@ -52,7 +52,7 @@ interface FilterState {
 
 interface FlightContextType {
   flightData: any[]
-  setFlightsData: (flights:any) => void
+  setFlightsData: (flights:any, area: string) => void
   loading: boolean
   searchFlights: (params: any) => any
   clearResults: () => void
@@ -65,6 +65,7 @@ interface FlightContextType {
   domesticFlightRequest: DomesticFlightSearchRequest
   setDomesticFlightRequest: (request: DomesticFlightSearchRequest) => void
   searchDomesticFlights: (params:any) => void
+  area: string
 }
 
 // Helper functions remain the same
@@ -210,6 +211,7 @@ const FlightContext = createContext<FlightContextType | undefined>(undefined)
 
 export function FlightProvider({ children }: { children: ReactNode }) {
   const [flightData, setFlightData] = useState<any[]>([])
+  const [area, setArea] = useState("")
   const [loading, setLoading] = useState(true)
   const [airlineNames, setAirlineNames] = useState<{ [iata: string]: string }>({}) // Add this
   const [filteredFlights, setFilteredFlights] = useState<any[]>([])
@@ -363,8 +365,9 @@ export function FlightProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const setFlightsData = (flights:any) => {
+  const setFlightsData = (flights:any, area:string) => {
     setFlightData(flights)
+    setArea(area)
     setLoading(false)
   }
 
@@ -383,7 +386,8 @@ export function FlightProvider({ children }: { children: ReactNode }) {
       setFlightRequest,
       setDomesticFlightRequest,
       domesticFlightRequest,
-      searchDomesticFlights
+      searchDomesticFlights,
+      area
     }}>
       {children}
     </FlightContext.Provider>

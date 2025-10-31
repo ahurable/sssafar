@@ -238,7 +238,8 @@ export default function OneWayReservation() {
       travelers: selectedTravelers,
       selectedServices: selectedServices,
       order: revalidateData.PricedItinerary,
-      amount: calculateTotalPrice().toString()
+      amount: calculateTotalPrice().toString(),
+      area: "intl"
     }
 
     try {

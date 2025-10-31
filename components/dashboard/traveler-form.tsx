@@ -39,6 +39,7 @@ interface TravelerFormProps {
   readOnly?: boolean
   maxTravelers?: number
   mode?: "booking" | "dashboard"
+  area?: string
 }
 
 export function TravelerForm({ 
@@ -50,7 +51,8 @@ export function TravelerForm({
   onSave,
   readOnly = false,
   maxTravelers = 9,
-  mode = "booking"
+  mode = "booking",
+  area = "intl",
 }: TravelerFormProps) {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -505,8 +507,9 @@ export function TravelerForm({
                   </div>
 
                   {/* Passport Number */}
+                  { area == "intl" &&
                   <div className="space-y-2">
-                    <Label>شماره پاسپورت (اختیاری)</Label>
+                    <Label>شماره پاسپورت</Label>
                     <div className="relative">
                       <FileText className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
@@ -524,6 +527,7 @@ export function TravelerForm({
                       </p>
                     )}
                   </div>
+                  }
 
                   <div className="space-y-2">
                     <Label>ایمیل (اختیاری)</Label>
@@ -655,8 +659,9 @@ export function TravelerForm({
                   </div>
 
                   {/* Passport Expiry */}
+                  {area == "intl" &&
                   <div className="space-y-2">
-                    <Label>تاریخ انقضای پاسپورت (اختیاری)</Label>
+                    <Label>تاریخ انقضای پاسپورت </Label>
                     <div className="relative">
                       <Calendar className="absolute right-3 top-3 h-4 w-4 text-muted-foreground z-10" />
                       <DatePicker
@@ -692,7 +697,7 @@ export function TravelerForm({
                       </p>
                     )}
                   </div>
-
+                  }
                   <div className="flex gap-2">
                     <Button onClick={handleAddTraveler} disabled={!isNewTravelerValid()} className="flex-1">
                       افزودن مسافر

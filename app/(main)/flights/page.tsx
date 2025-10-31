@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react'
 import { useFlight } from "@/contexts/search/FlightContext"
 
 export default function FlightsPage() {
-  const { flightData, filteredFlights, loading } = useFlight()
+  const { flightData, filteredFlights, loading, area } = useFlight()
   const [ flights, setFlights ] = useState(flightData)
 
   useEffect(() => {
@@ -59,7 +59,7 @@ export default function FlightsPage() {
               <FlightFilters />
             </aside>
             <div className="lg:col-span-3 col-span-1">
-              <FlightList flights={flights} />
+              <FlightList flights={flights} area={area} />
             </div>
           </div>
         </div>

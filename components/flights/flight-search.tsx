@@ -255,7 +255,7 @@ const FlightSearch = () => {
             const response = await searchFlights(requestBody)
             
             console.log(response.PricedItineraries)
-            setFlightsData(response.PricedItineraries)
+            setFlightsData(response.PricedItineraries, "intl")
             router.push('/flights')
 
         } catch (error) {

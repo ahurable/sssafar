@@ -322,21 +322,11 @@ export default function InvoicesPage() {
 
                           {/* Action Buttons */}
                           <div className="flex flex-wrap gap-3 pt-4 border-t">
-                            {invoice.state === "WAITING" && (
-                              <button className="bg-green-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors">
-                                پرداخت صورت حساب
-                              </button>
-                            )}
                             <button
                             onClick={() => router.push(`/invoice/${invoice.id}`)} 
                             className="border border-gray-300 px-6 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors">
                               مشاهده جزئیات
                             </button>
-                            {invoice.state === "WAITING" && (
-                              <button className="text-red-600 px-6 py-2 rounded-lg font-medium hover:bg-red-50 transition-colors">
-                                لغو رزرو
-                              </button>
-                            )}
                           </div>
                         </CardContent>
                       </Card>
