@@ -98,7 +98,7 @@ export function DashboardNav() {
           اعتبار کیف پول
         </span>
         <span className="text-3xl font-black">
-          {me?.userCredit.balance} تومان
+          {me?.userCredit.balance.toLocaleString('fa-IR')} ریال
         </span>
         <span>
           آخرین بروزرسانی در: {lastupdate}

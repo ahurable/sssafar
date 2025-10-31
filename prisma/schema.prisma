@@ -9,7 +9,7 @@ datasource db {
 
 enum UserRole {
   USER // کاربر معمولی
-  ADMIN  // مدیر
+  ADMIN // مدیر
   ACCOUNTANT //حسابدار 
   ROTO // نماینده سازمان
   ORGAN // ارگان یا سازمان
@@ -29,77 +29,87 @@ enum BookingType {
 }
 
 model User {
-  id                String    @id @default(cuid())
-  email             String?   @unique
-  phone             String?   @unique
-  password          String
-  role              UserRole  @default(USER)
-  firstName         String?
-  lastName          String?
-  nationalId        String?   @unique
-  address           String?
-  postalCode        String?
-  city              String?
-  province          String?
-  dateOfBirth       DateTime?
-  emailVerified     Boolean   @default(false)
-  phoneVerified     Boolean   @default(false)
-  resetToken        String?
-  resetTokenExpiry  DateTime?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  
-  bookings          Booking[]
-  posts             Post[]
-  travelers         Traveler[]
-  createdPanels Panel[]
-  panelUser PanelUser[]
-  panelMember MembersOnPanel[]
-  contracts Contract[]
-  creditTransactions CreditTransaction[]
+  id               String    @id @default(cuid())
+  email            String?   @unique
+  phone            String?   @unique
+  password         String
+  role             UserRole  @default(USER)
+  firstName        String?
+  lastName         String?
+  nationalId       String?   @unique
+  address          String?
+  postalCode       String?
+  city             String?
+  province         String?
+  dateOfBirth      DateTime?
+  emailVerified    Boolean   @default(false)
+  phoneVerified    Boolean   @default(false)
+  resetToken       String?
+  resetTokenExpiry DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  bookings                Booking[]
+  posts                   Post[]
+  travelers               Traveler[]
+  createdPanels           Panel[]
+  panelUser               PanelUser[]
+  panelMember             MembersOnPanel[]
+  contracts               Contract[]
+  creditTransactions      CreditTransaction[]
   panelCreditTransactions PanelCreditTransaction[]
-  invoices Invoice[]
-  userCredit Credit?
-  userTransactions UserTransaction[]
+  invoices                Invoice[]
+  userCredit              Credit?
+  userTransactions        UserTransaction[]
+  otpCodes                OtpCode[]
+
   @@index([email])
   @@index([phone])
 }
 
+model OtpCode {
+  id         String   @id @default(cuid())
+  code       Int
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  creatdDate DateTime @default(now())
+  expireDate DateTime
+}
+
 model Traveler {
-  id String @id @default(cuid())
-  firstName String
-  lastName String
-  nationalId String
-  dateOfBirth DateTime
+  id             String   @id @default(cuid())
+  firstName      String
+  lastName       String
+  nationalId     String
+  dateOfBirth    DateTime
   passportNumber String
   passportExpiry String
-  phoneNumber String?
-  email String?
-  gender Int?
-  passengerType Int?
-  
-  userId String
-  createdBy User @relation(fields: [userId], references: [id] , onDelete: Cascade)
+  phoneNumber    String?
+  email          String?
+  gender         Int?
+  passengerType  Int?
 
+  userId    String
+  createdBy User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Post {
-  id          String   @id @default(cuid())
-  slug        String   @unique
-  title       String
-  excerpt     String
-  content     String   @db.Text
-  coverImage  String
-  category    String
-  tags        String[]
-  published   Boolean  @default(false)
-  featured    Boolean  @default(false)
-  views       Int      @default(0)
-  authorId    String
-  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
+  id         String   @id @default(cuid())
+  slug       String   @unique
+  title      String
+  excerpt    String
+  content    String   @db.Text
+  coverImage String
+  category   String
+  tags       String[]
+  published  Boolean  @default(false)
+  featured   Boolean  @default(false)
+  views      Int      @default(0)
+  authorId   String
+  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
   @@index([slug])
   @@index([published])
   @@index([featured])
@@ -107,20 +117,20 @@ model Post {
 }
 
 model Booking {
-  id              String        @id @default(cuid())
-  userId          String
-  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type            BookingType
-  status          BookingStatus @default(PENDING)
-  
+  id     String        @id @default(cuid())
+  userId String
+  user   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type   BookingType
+  status BookingStatus @default(PENDING)
+
   // Common fields
-  bookingCode     String        @unique
-  totalPrice      Float
-  currency        String        @default("IRR")
+  bookingCode        String   @unique
+  totalPrice         Float
+  currency           String   @default("IRR")
   bookingInformation Json
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  data Json
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  data               Json
 
   @@index([userId])
   @@index([bookingCode])
@@ -140,7 +150,7 @@ model Flight {
   available     Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  
+
   @@index([origin, destination])
   @@index([available])
 }
@@ -157,11 +167,10 @@ model Train {
   available     Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  
+
   @@index([origin, destination])
   @@index([available])
 }
-
 
 model Tour {
   id          String   @id @default(cuid())
@@ -171,18 +180,18 @@ model Tour {
   endDate     DateTime
   isActive    Boolean  @default(true)
   featured    Boolean  @default(false)
-  
+
   // ارتباط با مدل‌های موجود
   prices      TourPrice[]
   itineraries TourItinerary[]
   routes      TourRoute[]
   rules       TourRule[]
   transports  TourTransport[]
-  images TourImage[]
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
+  images      TourImage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([isActive])
   @@index([featured])
   @@index([startDate, endDate])
@@ -190,98 +199,98 @@ model Tour {
 }
 
 model TourImage {
-  id          String   @id @default(cuid())
-  tourId      String
-  tour        Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
-  filename    String
-  path        String   // Full path like "/assets/images/tours/[tourId]/[filename]"
-  isPrimary   Boolean  @default(false)
-  order       Int      @default(0)
-  altText     String?
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String  @id @default(cuid())
+  tourId    String
+  tour      Tour    @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  filename  String
+  path      String // Full path like "/assets/images/tours/[tourId]/[filename]"
+  isPrimary Boolean @default(false)
+  order     Int     @default(0)
+  altText   String?
 
-  @@map("tour_images")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([tourId])
   @@index([isPrimary])
   @@index([order])
+  @@map("tour_images")
 }
 
 model TourPrice {
-  id          String   @id @default(cuid())
-  tourId      String
-  tour        Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
-  
+  id     String @id @default(cuid())
+  tourId String
+  tour   Tour   @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
   type        PriceType
   price       Float
   description String?
-  
+
   createdAt DateTime @default(now())
-  
+
   @@map("tour_prices")
 }
 
 model TourItinerary {
-  id          String   @id @default(cuid())
-  tourId      String
-  tour        Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
-  
+  id     String @id @default(cuid())
+  tourId String
+  tour   Tour   @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
   day         Int
   title       String
   description String
   activities  Json?
-  
+
   createdAt DateTime @default(now())
-  
+
   @@map("tour_itineraries")
 }
 
 model TourRoute {
-  id          String   @id @default(cuid())
-  tourId      String
-  tour        Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
-  
+  id     String @id @default(cuid())
+  tourId String
+  tour   Tour   @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
   order       Int
   city        String
   country     String
   duration    Int?
   description String?
-  
+
   createdAt DateTime @default(now())
-  
+
   @@map("tour_routes")
 }
 
 model TourRule {
-  id          String   @id @default(cuid())
-  tourId      String
-  tour        Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
-  
+  id     String @id @default(cuid())
+  tourId String
+  tour   Tour   @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
   title       String
   description String
-  
+
   createdAt DateTime @default(now())
-  
+
   @@map("tour_rules")
 }
 
 model TourTransport {
-  id          String   @id @default(cuid())
-  tourId      String
-  tour        Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
-  
-  type        TransportType
-  departure   DateTime
-  arrival     DateTime
-  fromCity    String
-  toCity      String
-  carrier     String?
+  id     String @id @default(cuid())
+  tourId String
+  tour   Tour   @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  type         TransportType
+  departure    DateTime
+  arrival      DateTime
+  fromCity     String
+  toCity       String
+  carrier      String?
   flightNumber String?
-  trainNumber String?
-  
+  trainNumber  String?
+
   createdAt DateTime @default(now())
-  
+
   @@map("tour_transports")
 }
 
@@ -301,36 +310,35 @@ enum TransportType {
   FERRY
 }
 
-
 enum TransactionType {
-  DEPOSIT    // واریز اعتبار
-  WITHDRAW   // برداشت اعتبار
-  CHARGE     // شارژ (کسر اعتبار)
-  REFUND     // بازگشت اعتبار
-  BONUS      // اعتبار هدیه
+  DEPOSIT // واریز اعتبار
+  WITHDRAW // برداشت اعتبار
+  CHARGE // شارژ (کسر اعتبار)
+  REFUND // بازگشت اعتبار
+  BONUS // اعتبار هدیه
 }
 
 model Panel {
-  id String @id @default(cuid())
-  name String
-  description String?
-  slug String @unique
-  isActive Boolean @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  discountPercentage Int @default(0)
-  totalCredit Int @default(0)
-  adminId String?
-  user User? @relation(fields: [adminId], references: [id], onDelete: NoAction)
-  panelStats PanelStats[]
-  contractId String? @unique
-  contract Contract? @relation(fields: [contractId], references: [id])
+  id                 String       @id @default(cuid())
+  name               String
+  description        String?
+  slug               String       @unique
+  isActive           Boolean      @default(true)
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  discountPercentage Int          @default(0)
+  totalCredit        Int          @default(0)
+  adminId            String?
+  user               User?        @relation(fields: [adminId], references: [id], onDelete: NoAction)
+  panelStats         PanelStats[]
+  contractId         String?      @unique
+  contract           Contract?    @relation(fields: [contractId], references: [id])
 
-  panelUser PanelUser[]
-  members MembersOnPanel[]
+  panelUser          PanelUser[]
+  members            MembersOnPanel[]
   creditTransactions PanelCreditTransaction[]
-  userTransactions UserTransaction[]
-  panelActivityLog PanelActivityLog[]
+  userTransactions   UserTransaction[]
+  panelActivityLog   PanelActivityLog[]
 }
 
 enum PanelRole {
@@ -340,50 +348,48 @@ enum PanelRole {
 }
 
 model PanelUser {
-  id        String   @id @default(cuid())
-  isActive  Boolean  @default(true)
-  joinedAt  DateTime @default(now())
+  id        String                           @id @default(cuid())
+  isActive  Boolean                          @default(true)
+  joinedAt  DateTime                         @default(now())
   lastLogin DateTime?
-  role PanelRole @default(ADMIN)
+  role      PanelRole                        @default(ADMIN)
   approvals PanelCreditTransactionApproval[]
   // ارتباط با پنل
-  panelId   String 
-  panel     Panel    @relation(fields: [panelId], references: [id])
+  panelId   String
+  panel     Panel                            @relation(fields: [panelId], references: [id])
 
   // ارتباط با تراکنش‌های کاربر
   // transactions UserTransaction[]
   panelActivityLog PanelActivityLog[]
   // ارتباط با کاربر اصلی (اگر ثبت‌نام کرده باشد)
-  userId    String?
-  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId           String?
+  user             User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-    // ✅ Fix: Allow multiple users per panel, but each user can only have one role per panel
+  // ✅ Fix: Allow multiple users per panel, but each user can only have one role per panel
   @@unique([panelId, userId])
   @@unique([panelId, role]) // Each role can only be assigned to one user per panel
-  
   @@index([panelId])
   @@index([isActive])
   @@index([joinedAt])
   @@map("panel_users")
 }
 
-
 model MembersOnPanel {
-  id        String   @id @default(cuid())
-  credit    Int      @default(0)
-  isActive  Boolean  @default(true)
-  joinedAt  DateTime @default(now())
+  id        String    @id @default(cuid())
+  credit    Int       @default(0)
+  isActive  Boolean   @default(true)
+  joinedAt  DateTime  @default(now())
   lastLogin DateTime?
   // ارتباط با پنل
-  panelId   String 
-  panel     Panel    @relation(fields: [panelId], references: [id], onDelete: Cascade)
+  panelId   String
+  panel     Panel     @relation(fields: [panelId], references: [id], onDelete: Cascade)
 
   // ارتباط با تراکنش‌های کاربر
   // transactions UserTransaction[]
   // panelActivityLog PanelActivityLog[]
   // ارتباط با کاربر اصلی (اگر ثبت‌نام کرده باشد)
-  userId    String
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // هر کاربر فقط یک بار می‌تواند در یک پنل باشد
   @@unique([panelId, userId])
@@ -393,7 +399,6 @@ model MembersOnPanel {
   @@index([joinedAt])
   @@map("panel_members")
 }
-
 
 enum PanelCreditTransactionType {
   INCREAMENT
@@ -415,18 +420,18 @@ enum ApprovalStatus {
 }
 
 model PanelCreditTransaction {
-  id            String                      @id @default(cuid())
-  amount        Decimal
-  status        PanelCreditTransactionStatus
-  type          PanelCreditTransactionType
-  panelId       String
-  userId        String
-  requestedBy   String // User ID who requested the transaction
-  approvals     PanelCreditTransactionApproval[]
-  panel         Panel                       @relation(fields: [panelId], references: [id])
-  user          User                        @relation(fields: [userId], references: [id])
-  createdAt     DateTime                    @default(now())
-  updatedAt     DateTime                    @updatedAt
+  id          String                           @id @default(cuid())
+  amount      Decimal
+  status      PanelCreditTransactionStatus
+  type        PanelCreditTransactionType
+  panelId     String
+  userId      String
+  requestedBy String // User ID who requested the transaction
+  approvals   PanelCreditTransactionApproval[]
+  panel       Panel                            @relation(fields: [panelId], references: [id])
+  user        User                             @relation(fields: [userId], references: [id])
+  createdAt   DateTime                         @default(now())
+  updatedAt   DateTime                         @updatedAt
 
   @@index([panelId])
   @@index([userId])
@@ -436,42 +441,39 @@ model PanelCreditTransaction {
 }
 
 model PanelCreditTransactionApproval {
-  id            String          @id @default(cuid())
+  id            String         @id @default(cuid())
   transactionId String
   panelUserId   String
   role          PanelRole
-  status        ApprovalStatus  @default(PENDING)
+  status        ApprovalStatus @default(PENDING)
   approvedAt    DateTime?
   rejectedAt    DateTime?
-  
-  transaction   PanelCreditTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
-  panelUser     PanelUser              @relation(fields: [panelUserId], references: [id])
-  
+
+  transaction PanelCreditTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  panelUser   PanelUser              @relation(fields: [panelUserId], references: [id])
+
   @@unique([transactionId, panelUserId])
   @@index([transactionId])
   @@index([panelUserId])
   @@index([status])
 }
 
-
-
-
 model CreditTransaction {
-  id          String      @id @default(cuid())
+  id          String          @id @default(cuid())
   type        TransactionType
   amount      Int
   description String?
-  createdAt   DateTime    @default(now())
+  createdAt   DateTime        @default(now())
   // ارتباط با پنل
   // panelId     String?
   // panel       Panel?       @relation(fields: [panelId], references: [id], onDelete: NoAction)
 
   // ارتباط با ادمین ایجادکننده تراکنش
-  userId     String
-  user        User?       @relation(fields: [userId], references: [id], onDelete: NoAction)
+  userId String
+  user   User?  @relation(fields: [userId], references: [id], onDelete: NoAction)
 
-  creditId   String?
-  credit     Credit?      @relation(fields: [creditId], references: [id], onDelete: Cascade)
+  creditId String?
+  credit   Credit? @relation(fields: [creditId], references: [id], onDelete: Cascade)
 
   // @@index([panelId])
   @@index([createdAt])
@@ -480,19 +482,19 @@ model CreditTransaction {
 }
 
 model UserTransaction {
-  id          String      @id @default(cuid())
+  id          String          @id @default(cuid())
   type        TransactionType
   amount      Int
   description String?
-  createdAt   DateTime    @default(now())
+  createdAt   DateTime        @default(now())
 
   // ارتباط با کاربر پنل
-  userId      String
-  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User?  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // ارتباط با پنل (برای کوئری‌های بهینه)
-  panelId     String?
-  panel       Panel?       @relation(fields: [panelId], references: [id], onDelete: Cascade)
+  panelId String?
+  panel   Panel?  @relation(fields: [panelId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([panelId])
@@ -510,8 +512,8 @@ model PanelActivityLog {
   createdAt DateTime @default(now())
 
   // ارتباط با پنل
-  panelId   String
-  panel     Panel    @relation(fields: [panelId], references: [id], onDelete: Cascade)
+  panelId String
+  panel   Panel  @relation(fields: [panelId], references: [id], onDelete: Cascade)
 
   // ارتباط با کاربر (اگر عمل توسط کاربر انجام شده)
   userId    String?
@@ -526,8 +528,8 @@ model PanelStats {
   id String @id @default(cuid())
 
   // آمار استفاده
-  totalUsers      Int @default(0)
-  activeUsers     Int @default(0)
+  totalUsers      Int  @default(0)
+  activeUsers     Int  @default(0)
   totalCreditUsed Int? @default(0)
   monthlyUsage    Int? @default(0)
 
@@ -547,19 +549,18 @@ model PanelStats {
 }
 
 model Credit {
-  id           String  @id   @default(cuid())
-  balance       Int           @default(0)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  id        String   @id @default(cuid())
+  balance   Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  transactions  CreditTransaction[]
+  transactions CreditTransaction[]
 
-  userId       String  @unique
-  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("transactions")
 }
-
 
 enum ContractStatus {
   DRAFT
@@ -567,40 +568,39 @@ enum ContractStatus {
   CLOSED
 }
 
-
 model Contract {
-  id               String   @id @default(cuid())
+  id               String         @id @default(cuid())
   title            String
   description      String?
-  organizationName     String
+  organizationName String
   status           ContractStatus @default(DRAFT)
   closeReason      String?
-  files            File[]   // Relation to multiple files
+  files            File[] // Relation to multiple files
   userId           String
-  createdBy        User     @relation(fields: [userId], references: [id])
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  panel  Panel?
+  createdBy        User           @relation(fields: [userId], references: [id])
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  panel            Panel?
 
   @@map("contracts")
 }
 
 model File {
-  id        String   @id @default(cuid())
-  filename  String
-  mimetype  String
-  path      String   // File path on disk or cloud URL
-  size      Int      // File size in bytes
-  contract  Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  filename   String
+  mimetype   String
+  path       String // File path on disk or cloud URL
+  size       Int // File size in bytes
+  contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
   contractId String
-  createdAt DateTime @default(now())
+  createdAt  DateTime @default(now())
 
   @@map("files")
 }
 
 model PartoSessionId {
-  id String @id @default(cuid())
-  session String?
+  id        String   @id @default(cuid())
+  session   String?
   createdAt DateTime @default(now())
   expiresAt DateTime
 }
@@ -627,21 +627,21 @@ enum InvoiceState {
 }
 
 model Invoice {
-  id String @id @default(cuid())
-  type PaymentType @default(NO)
-  kind InvoiceKind
-  amount String
-  state InvoiceState
+  id               String       @id @default(cuid())
+  type             PaymentType  @default(NO)
+  kind             InvoiceKind
+  amount           String
+  state            InvoiceState
   selectedServices Json?
-  order Json?
-  flightType String?
+  order            Json?
+  flightType       String?
 
-  userId String 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   flightSourceCode String?
-  hotelIdentifier String?
-  trainIdentifier String?
+  hotelIdentifier  String?
+  trainIdentifier  String?
 
   createdAt DateTime @default(now())
 
@@ -652,16 +652,16 @@ model Invoice {
 
 // HERE IS FOR HOTELS STATIC DATA
 model Hotel {
-  id          Int      @id @default(autoincrement())
-  hotelId     Int      @unique
-  name        String
-  type        HotelType @default(INTERNATIONAL)
-  
+  id      Int       @id @default(autoincrement())
+  hotelId Int       @unique
+  name    String
+  type    HotelType @default(INTERNATIONAL)
+
   // Relations
-  images      HotelImage[]
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  images HotelImage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([hotelId])
   @@index([name])
@@ -669,18 +669,18 @@ model Hotel {
 }
 
 model HotelImage {
-  id          Int      @id @default(autoincrement())
-  hotelId     Int
-  imageUrl    String
+  id           Int       @id @default(autoincrement())
+  hotelId      Int
+  imageUrl     String
   thumbnailUrl String?
-  type        ImageType @default(GALLERY)
-  isDomestic  Boolean  @default(false)
-  
+  type         ImageType @default(GALLERY)
+  isDomestic   Boolean   @default(false)
+
   // Relations
-  hotel       Hotel    @relation(fields: [hotelId], references: [hotelId])
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  hotel Hotel @relation(fields: [hotelId], references: [hotelId])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([hotelId])
   @@index([type])
@@ -699,26 +699,25 @@ enum ImageType {
   THUMBNAIL
 }
 
-
 model CipService {
-  id          String   @id @default(cuid())
-  title       String
-  slug        String   @unique
-  description String?
-  content     Json?
-  image       String?
-  airport     String
-  price       Float?
-  currency    String   @default("IRR")
-  duration    String?
-  features    String[]
-  included    String[]
-  notIncluded String[]
-  priority    Int      @default(0)
-  published   Boolean  @default(false)
-  featured    Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String           @id @default(cuid())
+  title        String
+  slug         String           @unique
+  description  String?
+  content      Json?
+  image        String?
+  airport      String
+  price        Float?
+  currency     String           @default("IRR")
+  duration     String?
+  features     String[]
+  included     String[]
+  notIncluded  String[]
+  priority     Int              @default(0)
+  published    Boolean          @default(false)
+  featured     Boolean          @default(false)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
   reservations CipReservation[]
 
   @@map("cip_services")

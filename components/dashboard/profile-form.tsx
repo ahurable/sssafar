@@ -13,12 +13,13 @@ import DatePicker from "react-multi-date-picker"
 import { DateObject } from "react-multi-date-picker"
 import persian from "react-date-object/calendars/persian"
 import persian_fa from "react-date-object/locales/persian_fa"
+import { useSnack } from "@/hooks/use-notification"
 
 export function ProfileForm() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [success, setSuccess] = useState(false)
-  const [error, setError] = useState("")
+  const [_success, setSuccess] = useState(false)
+  const [_error, setError] = useState("")
   const [formErrors, setFormErrors] = useState<Record<string, string>>({})
   const [formData, setFormData] = useState({
     firstName: "",
@@ -30,14 +31,20 @@ export function ProfileForm() {
     province: "",
     dateOfBirth: "",
   })
+  const [phoneNumber, setPhoneNumber] = useState("")
+  const [otpCode, setOtpCode] = useState("")
+  const [hasPhone, setHasPhone] = useState(false)
+  const [isPhoneVerified, setIsPhoneVerified] = useState(false)
   const [hasExistingData, setHasExistingData] = useState(false)
   const [selectedDate, setSelectedDate] = useState<DateObject | null>(null)
-
+  const [hasOtpSent, setHasOtpSent] = useState(false)
+  const { success, error } = useSnack()
   useEffect(() => {
     fetch("/api/profile")
       .then((res) => res.json())
       .then((data) => {
         if (data.user) {
+          console.log("user data is ", data.user)
           const userData = {
             firstName: data.user.firstName || "",
             lastName: data.user.lastName || "",
@@ -64,7 +71,14 @@ export function ProfileForm() {
               console.error("Error setting date:", error)
             }
           }
-          
+          if (data.user.phoneVerified == true) 
+            setIsPhoneVerified(true)
+          if (!data.user.phone || data.user.phone.length == 0)
+            setHasPhone(false)
+          else{
+            setPhoneNumber(data.user.phone)
+            setHasPhone(true)
+          }
           // Check if any field has existing data
           const hasData = Object.values(userData).some(value => value && value.trim() !== "")
           setHasExistingData(hasData)
@@ -76,6 +90,7 @@ export function ProfileForm() {
         setLoading(false)
       })
   }, [])
+
 
   // Validate form fields
   const validateForm = (): boolean => {
@@ -223,6 +238,58 @@ export function ProfileForm() {
            selectedDate !== null
   }
 
+
+  const addPhoneNumber = async () => {
+    const res = await fetch("/api/auth/add-phone", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      }, 
+      body: JSON.stringify({ phoneNumber : phoneNumber})
+    })
+    const data = await res.json()
+    if (res.ok){
+      success(data.message, "",3000)
+      setHasPhone(true)
+    }
+    else 
+      error(data.message, "", 3000)
+  } 
+
+
+  const generateOtp = async () => {
+    const res = await fetch("/api/auth/generate-otp", {
+      method: "POST"
+    })
+    const data = await res.json()
+    if (res.ok){
+      success(data.message, "", 3000)
+      setHasOtpSent(true)
+    }else
+      error(data.message, "", 3000)
+  }
+
+  const handleVerifyNumber = async () => {
+    if (otpCode.length > 0) {
+      const res = await fetch("/api/auth/verify-number", {
+        method: "POST",
+        headers: {
+          "Content-Type":"application/json"
+        },
+        body: JSON.stringify({
+          otpCode: otpCode
+        })
+      })
+      const data = await res.json()
+      if (res.ok) {
+        success(data.message)
+        setHasOtpSent(true)
+      } else {
+        success(data.message)
+      }
+    }
+  }
+
   if (loading) {
     return (
       <Card>
@@ -234,6 +301,62 @@ export function ProfileForm() {
   }
 
   return (
+    <>
+    {hasPhone === false ?
+    <Card className="p-4 my-4">
+      <CardTitle>افزودن شماره همراه</CardTitle>
+      <CardDescription>برای استفاده از خدمات سایت باید شماره همراه خود را اضافه کنید</CardDescription>
+      <CardContent>
+        <div className="grid grid-cols-4 w-full">
+          <div className="col-span-3 pe-2">
+            <Input type="text" placeholder="شماره همراه خود را وارد کنید" onChange={ e => setPhoneNumber(e.currentTarget.value)} />
+          </div>
+          <div className="col-span-1 p-2">
+            <Button className="w-full"
+            onClick={addPhoneNumber}>
+              افزودن شماره همراه
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+    :
+    <Card className="p-4 my-4">
+      <CardTitle>شماره همراه</CardTitle>
+      <CardContent>
+        <div className="grid grid-cols-4 w-full">
+          <div className="col-span-1 p-2">
+            <span>موبایل:</span>
+          </div>
+          <div className="col-span-3 pe-2">
+            <Input type="text" disabled value={phoneNumber} />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+    }
+
+    {isPhoneVerified == false && hasPhone &&
+    <Card className="p-4 my-4">
+      <CardTitle>تایید شماره تلفن همراه</CardTitle>
+      <CardContent>
+        <div className="grid grid-cols-4 w-full">
+          <div className="col-span-3 pe-2">
+            <Input type="text" disabled={!hasOtpSent} onChange={e => setOtpCode(e.currentTarget.value)} placeholder="کد تایید را وارد کنید" />
+          </div>
+          <div className="col-span-1">
+            { hasOtpSent ?
+            <Button className="bg-blue-400 ps-2 w-full"
+            onClick={handleVerifyNumber}>تایید شماره</Button>
+            :
+            <Button className="bg-blue-400 ps-2 w-full"
+            onClick={generateOtp}>ارسال کد تایید</Button>
+            }
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+    }
     <Card className="p-4">
       <CardHeader>
         <CardTitle>اطلاعات شخصی</CardTitle>
@@ -258,15 +381,15 @@ export function ProfileForm() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {success && (
+          {_success && (
             <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
               اطلاعات با موفقیت به‌روزرسانی شد
             </div>
           )}
-          {error && (
+          {_error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
               <AlertCircle className="h-4 w-4" />
-              {error}
+              {_error}
             </div>
           )}
 
@@ -486,5 +609,6 @@ export function ProfileForm() {
         </form>
       </CardContent>
     </Card>
+    </>
   )
 }
