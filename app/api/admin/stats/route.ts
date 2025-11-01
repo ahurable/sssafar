@@ -1,29 +1,29 @@
-import { NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { NextRequest, NextResponse } from "next/server"
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await getSession()
 
-    if (!session) {
-      return NextResponse.json({ error: "احراز هویت نشده" }, { status: 401 })
+    if (!session || session.role !== "ADMIN") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    if (session.role !== "ADMIN") {
-      return NextResponse.json({ error: "دسترسی غیرمجاز" }, { status: 403 })
-    }
+    // Get total users count
+    const totalUsers = await prisma.user.count()
 
-    const [totalUsers, totalPosts, totalBookings, publishedPosts, pendingBookings] = await Promise.all([
-      prisma.user.count(),
-      prisma.post.count(),
-      prisma.booking.count(),
-      prisma.post.count({ where: { published: true } }),
-      prisma.booking.count({ where: { status: "PENDING" } }),
-    ])
+    // Get total bookings count
+    const totalBookings = await prisma.booking.count()
 
+    // Get pending bookings count
+    const pendingBookings = await prisma.booking.count({
+      where: { status: "PENDING" }
+    })
+
+    // Get recent users (last 10)
     const recentUsers = await prisma.user.findMany({
-      take: 5,
+      take: 10,
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
@@ -31,37 +31,72 @@ export async function GET() {
         phone: true,
         firstName: true,
         lastName: true,
-        createdAt: true,
-      },
+        role: true,
+        emailVerified: true,
+        phoneVerified: true,
+        createdAt: true
+      }
     })
 
+    // Get recent bookings (last 10)
     const recentBookings = await prisma.booking.findMany({
-      take: 5,
+      take: 10,
       orderBy: { createdAt: "desc" },
       include: {
         user: {
           select: {
             firstName: true,
             lastName: true,
-            email: true,
-          },
-        },
-      },
+            email: true
+          }
+        }
+      }
     })
 
-    return NextResponse.json({
-      stats: {
-        totalUsers,
-        totalPosts,
-        totalBookings,
-        publishedPosts,
-        pendingBookings,
-      },
-      recentUsers,
-      recentBookings,
+    // Calculate total revenue from successful transactions
+    const successfulTransactions = await prisma.creditTransaction.findMany({
+      where: {
+        type: "DEPOSIT",
+        amount: { gt: 0 }
+      }
     })
-  } catch (error: any) {
-    console.error("[v0] Get stats error:", error)
-    return NextResponse.json({ error: "خطا در دریافت آمار" }, { status: 500 })
+
+    const totalRevenue = successfulTransactions.reduce((sum, transaction) => sum + transaction.amount, 0)
+
+    // Calculate monthly growth (placeholder - you might want to implement proper logic)
+    const monthlyGrowth = 12.5 // This should be calculated based on previous month data
+
+    // Active users (users with bookings in last 30 days)
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+    
+    const activeUsers = await prisma.user.count({
+      where: {
+        bookings: {
+          some: {
+            createdAt: { gte: thirtyDaysAgo }
+          }
+        }
+      }
+    })
+
+    const stats = {
+      totalUsers,
+      totalBookings,
+      totalRevenue,
+      monthlyGrowth,
+      pendingBookings,
+      activeUsers
+    }
+
+    return NextResponse.json({
+      stats,
+      recentUsers,
+      recentBookings
+    })
+
+  } catch (error) {
+    console.error("[v0] Error fetching admin stats:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

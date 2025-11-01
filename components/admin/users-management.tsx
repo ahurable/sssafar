@@ -7,7 +7,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Trash2, Search } from "lucide-react"
+import { Trash2, Search, Edit } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 interface User {
   id: string
@@ -29,6 +30,7 @@ export function UsersManagement() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
+  const router = useRouter()
 
   const fetchUsers = (searchQuery = "") => {
     setLoading(true)
@@ -113,6 +115,9 @@ export function UsersManagement() {
                 </div>
                 <Button variant="destructive" size="sm" onClick={() => handleDelete(user.id)}>
                   <Trash2 className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" className="ms-2" size="sm" onClick={() => router.push(`/admin/users/${user.id}`)}>
+                  <Edit className="h-4 w-4" />
                 </Button>
               </div>
             </CardContent>

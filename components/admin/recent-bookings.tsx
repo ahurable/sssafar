@@ -54,7 +54,7 @@ export function RecentBookings() {
 
   if (loading) {
     return (
-      <Card>
+      <Card className="py-6">
         <CardHeader>
           <CardTitle>رزروهای اخیر</CardTitle>
         </CardHeader>
@@ -66,7 +66,7 @@ export function RecentBookings() {
   }
 
   return (
-    <Card>
+    <Card className="py-6">
       <CardHeader>
         <CardTitle>رزروهای اخیر</CardTitle>
       </CardHeader>

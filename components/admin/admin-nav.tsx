@@ -32,11 +32,6 @@ const navItems = [
     icon: Plane
   },
   {
-    title: "تنظیمات",
-    href: "/admin/settings",
-    icon: Settings,
-  },
-  {
     title: "قرارداد ها",
     href: "/admin/contracts",
     icon: File,

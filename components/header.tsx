@@ -325,13 +325,13 @@ export function Header() {
           <div className="hidden lg:flex items-center gap-6">
             <Link
               href="/tours"
-              className="px-6 py-2 text-white rounded-full bg-gradient-to-l from-red-500 to-pink-500 shadow-lg hover:shadow-xl transition-all hover:scale-105 font-bold"
+              className="px-6 py-2 text-black rounded-full bg-gradient-to-l transition-all hover:scale-105 font-bold"
             >
               تورها
             </Link>
             <Link
               href="/cip-services"
-              className="px-6 py-2 text-white rounded-full bg-gradient-to-l from-pink-500 to-purple-500 shadow-lg hover:shadow-xl transition-all hover:scale-105 font-bold"
+              className="px-6 py-2 text-black rounded-full transition-all hover:scale-105 font-bold"
             >
               خدمات CIP
             </Link>
@@ -341,7 +341,7 @@ export function Header() {
           <div className="flex items-center gap-2 relative" ref={profileMenuRef}>
             <Link 
               href="/tours"
-              className="hidden md:block px-6 py-2 text-white rounded-full bg-gradient-to-l from-red-500 to-pink-500 shadow-lg hover:shadow-xl transition-all hover:scale-105 font-bold"
+              className="hidden md:block px-6 py-2 text-white lg:hidden from-red-600 via-pink-600 to-purple-600 rounded-full bg-gradient-to-l transition-all hover:scale-105 font-bold"
             >
               مشاهده تور ها
             </Link>
