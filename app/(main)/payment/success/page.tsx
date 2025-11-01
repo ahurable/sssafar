@@ -163,8 +163,7 @@ export default function PaymentSuccessPage() {
                   <div className="flex items-start gap-3">
                     <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
                     <div className="text-right text-sm text-green-700">
-                      <p className="font-medium">اعتبار شما با موفقیت افزایش یافت</p>
-                      <p className="mt-1">اکنون می‌توانید از اعتبار خود برای رزرو هتل و پرواز استفاده کنید.</p>
+                      <p className="font-medium">پرداخت شما با موفقیت پردازش شد</p>
                     </div>
                   </div>
                 </div>

@@ -4,12 +4,15 @@ import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Search, Calendar, MapPin, Users, Loader2, Bed, Plus, Minus } from "lucide-react"
+import { Search, Calendar, MapPin, Users, Loader2, Bed, Plus, Minus, CalendarIcon } from "lucide-react"
 import gsap from "gsap"
 import { hotels } from "@/lib/data/hotels"
 import { useSnack } from "@/hooks/use-notification"
 import { useHotel } from "@/contexts/search/HotelContext"
 import { useRouter } from "next/navigation"
+import ShamsiDateModal from "../flights/ShamsiCalendar" // Adjust the path as needed
+import { formatShamsiDate } from "../flights/utils"  // Adjust the path as needed
+import { shamsiToGregorianString } from "@/lib/jalaalil" // Adjust the path as needed
 
 // Updated interface for city suggestions
 interface CitySuggestion {
@@ -244,10 +247,21 @@ const HotelSearch = () => {
     setIsLoading(true)
     try {
       setSearchLoading(true)
+      
+      // Convert Shamsi dates to Gregorian for API
+      const gregorianCheckIn = shamsiToGregorianString(hotelSearch.checkIn)
+      const gregorianCheckOut = shamsiToGregorianString(hotelSearch.checkOut)
+      
+      const searchPayload = {
+        ...hotelSearch,
+        checkIn: gregorianCheckIn,
+        checkOut: gregorianCheckOut
+      }
+
       const response = await fetch('/api/hotels/search/list', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(hotelSearch)
+        body: JSON.stringify(searchPayload)
       })
 
       if (!response.ok) {
@@ -265,6 +279,21 @@ const HotelSearch = () => {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  // Handle date changes from ShamsiDateModal
+  const handleCheckInDateChange = (date: string) => {
+    setHotelSearch(prev => ({ ...prev, checkIn: date }))
+  }
+
+  const handleCheckOutDateChange = (date: string) => {
+    setHotelSearch(prev => ({ ...prev, checkOut: date }))
+  }
+
+  // For hotel search, we don't need trip type, so we'll use a fixed value
+  const handleTripTypeChange = (type: string) => {
+    // Not needed for hotel search, but required by the component
+    console.log("Trip type changed:", type)
   }
 
   const renderSuggestions = () => {
@@ -429,35 +458,28 @@ const HotelSearch = () => {
           </div>
         </div>
         
-        {/* Check-in Date */}
+        {/* Check-in Date - Using ShamsiDateModal */}
         <div className="space-y-3">
-          <Label htmlFor="hotel-checkin" className="text-lg font-bold text-white text-right block">تاریخ ورود</Label>
-          <div className="relative">
-            <Calendar className="absolute right-4 top-4 h-5 w-5 text-gray-400" />
-            <Input 
-              id="hotel-checkin" 
-              type="date" 
-              min={new Date().toISOString().split('T')[0]}
-              className="pr-12 h-14 rounded-2xl border-2 border-gray-300 bg-white text-gray-800 text-lg font-medium transition-all duration-300 hover:border-blue-400 focus:border-blue-500 focus:scale-105 focus:shadow-lg"
-              value={hotelSearch.checkIn}
-              onChange={(e) => setHotelSearch(prev => ({ ...prev, checkIn: e.target.value }))}
-            />
-          </div>
+          <ShamsiDateModal
+            departureDate={hotelSearch.checkIn}
+            returnDate={hotelSearch.checkOut}
+            tripType="oneway" // Fixed for hotel search
+            onDepartureDateChange={handleCheckInDateChange}
+            onReturnDateChange={handleCheckOutDateChange}
+            onTripTypeChange={handleTripTypeChange}
+          />
         </div>
         
-        {/* Check-out Date */}
+        {/* Check-out Date Display */}
         <div className="space-y-3">
-          <Label htmlFor="hotel-checkout" className="text-lg font-bold text-white text-right block">تاریخ خروج</Label>
+          <Label className="text-lg font-bold text-white text-right block">تاریخ خروج</Label>
           <div className="relative">
-            <Calendar className="absolute right-4 top-4 h-5 w-5 text-gray-400" />
-            <Input 
-              id="hotel-checkout" 
-              type="date" 
-              min={hotelSearch.checkIn || new Date().toISOString().split('T')[0]}
-              className="pr-12 h-14 rounded-2xl border-2 border-gray-300 bg-white text-gray-800 text-lg font-medium transition-all duration-300 hover:border-blue-400 focus:border-blue-500 focus:scale-105 focus:shadow-lg"
-              value={hotelSearch.checkOut}
-              onChange={(e) => setHotelSearch(prev => ({ ...prev, checkOut: e.target.value }))}
-            />
+            <CalendarIcon className="absolute right-4 top-4 h-5 w-5 text-gray-400" />
+            <div className="w-full h-14 rounded-2xl border-2 border-gray-300 bg-white text-gray-800 text-lg font-medium flex items-center px-4 pr-12">
+              <span className="text-gray-800">
+                {formatShamsiDate(hotelSearch.checkOut)}
+              </span>
+            </div>
           </div>
         </div>
         
@@ -507,11 +529,6 @@ const HotelSearch = () => {
             opacity: 1;
             transform: translateY(0) scale(1);
           }
-        }
-        
-        /* Style the date input for better appearance */
-        input[type="date"] {
-          color-scheme: light;
         }
       `}</style>
     </div>
