@@ -33,11 +33,15 @@ export function ProfileForm() {
   })
   const [phoneNumber, setPhoneNumber] = useState("")
   const [otpCode, setOtpCode] = useState("")
+  const [emailVerificationCode, setEmailVerificationCode] = useState("")
   const [hasPhone, setHasPhone] = useState(false)
+  const [hasEmail, setHasEmail] = useState(false)
   const [isPhoneVerified, setIsPhoneVerified] = useState(false)
+  const [isEmailVerified, setIsEmailVerified] = useState(false)
   const [hasExistingData, setHasExistingData] = useState(false)
   const [selectedDate, setSelectedDate] = useState<DateObject | null>(null)
   const [hasOtpSent, setHasOtpSent] = useState(false)
+  const [hasEmailVerificationSent, setHasEmailVerificationSent] = useState(false)
   const { success, error } = useSnack()
   useEffect(() => {
     fetch("/api/profile")
@@ -290,6 +294,57 @@ export function ProfileForm() {
     }
   }
 
+  const addEmail = async () => {
+    const res = await fetch("/api/auth/add-email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      }, 
+      body: JSON.stringify({ email })
+    })
+    const data = await res.json()
+    if (res.ok){
+      success(data.message, "",3000)
+      setHasEmail(true)
+    }
+    else 
+      error(data.message, "", 3000)
+  }
+
+  const sendEmailVerification = async () => {
+    const res = await fetch("/api/auth/send-email-verification", {
+      method: "POST"
+    })
+    const data = await res.json()
+    if (res.ok){
+      success(data.message, "", 3000)
+      setHasEmailVerificationSent(true)
+    } else
+      error(data.message, "", 3000)
+  }
+
+  const handleVerifyEmail = async () => {
+    if (emailVerificationCode.length > 0) {
+      const res = await fetch("/api/auth/verify-email", {
+        method: "POST",
+        headers: {
+          "Content-Type":"application/json"
+        },
+        body: JSON.stringify({
+          verificationCode: emailVerificationCode
+        })
+      })
+      const data = await res.json()
+      if (res.ok) {
+        success(data.message)
+        setIsEmailVerified(true)
+        setHasEmailVerificationSent(false)
+      } else {
+        error(data.message)
+      }
+    }
+  }
+
   if (loading) {
     return (
       <Card>
@@ -307,11 +362,11 @@ export function ProfileForm() {
       <CardTitle>افزودن شماره همراه</CardTitle>
       <CardDescription>برای استفاده از خدمات سایت باید شماره همراه خود را اضافه کنید</CardDescription>
       <CardContent>
-        <div className="grid grid-cols-4 w-full">
-          <div className="col-span-3 pe-2">
+        <div className="grid grid-cols-4 items-center w-full">
+          <div className="md:col-span-3 col-span-4 pe-2">
             <Input type="text" placeholder="شماره همراه خود را وارد کنید" onChange={ e => setPhoneNumber(e.currentTarget.value)} />
           </div>
-          <div className="col-span-1 p-2">
+          <div className="md:col-span-1 col-span-4 p-2">
             <Button className="w-full"
             onClick={addPhoneNumber}>
               افزودن شماره همراه
@@ -340,11 +395,11 @@ export function ProfileForm() {
     <Card className="p-4 my-4">
       <CardTitle>تایید شماره تلفن همراه</CardTitle>
       <CardContent>
-        <div className="grid grid-cols-4 w-full">
-          <div className="col-span-3 pe-2">
+        <div className="grid grid-cols-4 w-full items-center">
+          <div className="md:col-span-3 col-span-4 pe-2">
             <Input type="text" disabled={!hasOtpSent} onChange={e => setOtpCode(e.currentTarget.value)} placeholder="کد تایید را وارد کنید" />
           </div>
-          <div className="col-span-1">
+          <div className="md:col-span-1 col-span-4">
             { hasOtpSent ?
             <Button className="bg-blue-400 ps-2 w-full"
             onClick={handleVerifyNumber}>تایید شماره</Button>
@@ -357,6 +412,86 @@ export function ProfileForm() {
       </CardContent>
     </Card>
     }
+
+      {/* Email Section */}
+      {hasEmail === false ?
+      <Card className="p-4 my-4">
+        <CardTitle>افزودن ایمیل</CardTitle>
+        <CardDescription>برای دریافت اطلاعیه‌ها و بازیابی رمز عبور، ایمیل خود را اضافه کنید</CardDescription>
+        <CardContent>
+          <div className="grid grid-cols-4 items-center w-full">
+            <div className="md:col-span-3 col-span-4 pe-2">
+              <Input 
+                type="email" 
+                placeholder="آدرس ایمیل خود را وارد کنید" 
+                onChange={e => setEmail(e.currentTarget.value)} 
+              />
+            </div>
+            <div className="md:col-span-1 col-span-4 p-2">
+              <Button className="w-full" onClick={addEmail}>
+                افزودن ایمیل
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      :
+      <Card className="p-4 my-4">
+        <CardTitle>ایمیل</CardTitle>
+        <CardContent>
+          <div className="grid grid-cols-4 w-full items-center">
+            <div className="col-span-1 p-2">
+              <span>ایمیل:</span>
+            </div>
+            <div className="col-span-3 pe-2">
+              <Input type="email" disabled value={email} />
+            </div>
+          </div>
+          {isEmailVerified && (
+            <div className="mt-2 text-sm text-green-600 flex items-center gap-1">
+              <Mail className="h-4 w-4" />
+              تایید شده
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      }
+
+      {/* Email Verification Section */}
+      {isEmailVerified == false && hasEmail &&
+      <Card className="p-4 my-4">
+        <CardTitle>تایید آدرس ایمیل</CardTitle>
+        <CardContent>
+          <div className="grid grid-cols-4 w-full items-center">
+            <div className="md:col-span-3 col-span-4 pe-2">
+              <Input 
+                type="text" 
+                disabled={!hasEmailVerificationSent} 
+                onChange={e => setEmailVerificationCode(e.currentTarget.value)} 
+                placeholder="کد تایید ایمیل را وارد کنید" 
+              />
+            </div>
+            <div className="md:col-span-1 col-span-4">
+              { hasEmailVerificationSent ?
+              <Button className="bg-blue-400 ps-2 w-full" onClick={handleVerifyEmail}>
+                تایید ایمیل
+              </Button>
+              :
+              <Button className="bg-blue-400 ps-2 w-full" onClick={sendEmailVerification}>
+                ارسال کد تایید
+              </Button>
+              }
+            </div>
+          </div>
+          <div className="mt-2 text-sm text-gray-600">
+            کد تایید به ایمیل <strong>{email}</strong> ارسال خواهد شد
+          </div>
+        </CardContent>
+      </Card>
+      }
+
+
+
     <Card className="p-4">
       <CardHeader>
         <CardTitle>اطلاعات شخصی</CardTitle>

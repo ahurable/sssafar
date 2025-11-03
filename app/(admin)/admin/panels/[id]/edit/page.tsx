@@ -134,7 +134,7 @@ export default function EditPanelPage() {
 
       if (res.ok) {
         success("پنل با موفقیت بروزرسانی شد")
-        router.push("/panels")
+        router.push("/admin/panels")
       } else {
         const errorData = await res.json()
         error("خطا در بروزرسانی پنل: " + (errorData.message || "خطای ناشناخته"))

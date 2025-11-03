@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Users, FileText, Settings, LogOut, PanelRightIcon, PlusSquare, File, Plane } from "lucide-react"
+import { LayoutDashboard, Users, Building, LogOut, PanelRightIcon, PlusSquare, File, Plane, DollarSign } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const navItems = [
@@ -39,8 +39,13 @@ const navItems = [
   {
     title: " سرویس ها",
     href: "/admin/cip",
-    icon: File,
+    icon: Building,
   },
+  {
+    title:  "مالی",
+    href: "/admin/accountant",
+    icon: DollarSign,
+  }
 ]
 
 export function AdminNav() {
