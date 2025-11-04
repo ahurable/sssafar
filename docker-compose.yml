@@ -32,7 +32,7 @@ services:
       start_period: 40s
 
   db:
-    image: postgres:16-alpine
+    image: bitnami/postgresql:16
     ports:
       - "5432:5432"
     environment:
