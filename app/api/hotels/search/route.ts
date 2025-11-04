@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Error in cities search API:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: error },
       { status: 500 }
     );
   }
