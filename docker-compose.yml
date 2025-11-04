@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   app:
@@ -30,10 +30,9 @@ services:
       timeout: 10s
       retries: 5
       start_period: 40s
-    
 
   db:
-    image: postgres:15-alpine
+    image: postgres:16-alpine
     ports:
       - "5432:5432"
     environment:
