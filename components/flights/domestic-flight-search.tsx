@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useFlight } from "@/contexts/search/FlightContext"
 import { useSearch } from "@/hooks/use-search"
-import { Search, Calendar, MapPin, ChevronDown, Loader2, Users, Baby, User, Plus, Minus, CalendarIcon } from "lucide-react"
+import { Search, Calendar, MapPin, ChevronDown, Loader2, Users, Baby, User, Plus, Minus, CalendarIcon, AlertCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState, useRef } from "react"
 import ShamsiDateModal from "./ShamsiCalendar"
@@ -17,6 +17,14 @@ interface DomesticSuggestion {
   code: string
   city: string
   type: 'city' | 'airport'
+}
+
+interface FormErrors {
+  origin?: string
+  destination?: string
+  departureDate?: string
+  returnDate?: string
+  general?: string
 }
 
 const DomesticFlightSearch = () => {
@@ -41,17 +49,34 @@ const DomesticFlightSearch = () => {
     const [currentInput, setCurrentInput] = useState("")
     const [currentField, setCurrentField] = useState("")
     const [isFieldFocused, setIsFieldFocused] = useState("")
+    const [errors, setErrors] = useState<FormErrors>({})
 
     // Passengers popover state
     const [showPassengers, setShowPassengers] = useState(false)
 
     const { getCitySuggestions } = useSearch()
     const { searchDomesticFlights, setDomesticFlightRequest, setFlightRequest, searchFlights, setFlightsData } = useFlight()
-    // searchDomesticFlights, 
+    
     const suggestionsRef = useRef<HTMLDivElement>(null)
     const passengersRef = useRef<HTMLDivElement>(null)
     const fromInputRef = useRef<HTMLInputElement>(null)
     const toInputRef = useRef<HTMLInputElement>(null)
+
+    // Clear errors when user starts typing
+    useEffect(() => {
+        if (errors.origin && domesticFlightSearch.origin) {
+            setErrors(prev => ({ ...prev, origin: undefined }))
+        }
+        if (errors.destination && domesticFlightSearch.destination) {
+            setErrors(prev => ({ ...prev, destination: undefined }))
+        }
+        if (errors.departureDate && domesticFlightSearch.departureDate) {
+            setErrors(prev => ({ ...prev, departureDate: undefined }))
+        }
+        if (errors.returnDate && domesticFlightSearch.returnDate) {
+            setErrors(prev => ({ ...prev, returnDate: undefined }))
+        }
+    }, [domesticFlightSearch.origin, domesticFlightSearch.destination, domesticFlightSearch.departureDate, domesticFlightSearch.returnDate, errors])
 
     useEffect(() => {
         const fetchSuggestions = async () => {
@@ -70,6 +95,7 @@ const DomesticFlightSearch = () => {
             } catch (error) {
                 console.error("Error fetching domestic suggestions:", error)
                 setSuggestions([])
+                setErrors(prev => ({ ...prev, general: "خطا در دریافت پیشنهادات شهرها" }))
             } finally {
                 setSuggestionLoading(false)
             }
@@ -116,6 +142,49 @@ const DomesticFlightSearch = () => {
         return match ? match[1] : value
     }
 
+    const validateForm = (): boolean => {
+        const newErrors: FormErrors = {}
+
+        if (!domesticFlightSearch.origin.trim()) {
+            newErrors.origin = "لطفا شهر مبداء را انتخاب کنید"
+        } else if (!extractAirportCode(domesticFlightSearch.origin)) {
+            newErrors.origin = "لطفا یک فرودگاه معتبر انتخاب کنید"
+        }
+
+        if (!domesticFlightSearch.destination.trim()) {
+            newErrors.destination = "لطفا شهر مقصد را انتخاب کنید"
+        } else if (!extractAirportCode(domesticFlightSearch.destination)) {
+            newErrors.destination = "لطفا یک فرودگاه معتبر انتخاب کنید"
+        }
+
+        if (domesticFlightSearch.origin && domesticFlightSearch.destination) {
+            const originCode = extractAirportCode(domesticFlightSearch.origin)
+            const destinationCode = extractAirportCode(domesticFlightSearch.destination)
+            if (originCode === destinationCode) {
+                newErrors.destination = "شهر مبدا و مقصد نمی‌توانند یکسان باشند"
+            }
+        }
+
+        if (!domesticFlightSearch.departureDate) {
+            newErrors.departureDate = "لطفا تاریخ رفت را انتخاب کنید"
+        }
+
+        if (domesticFlightSearch.tripType === "roundtrip" && !domesticFlightSearch.returnDate) {
+            newErrors.returnDate = "لطفا تاریخ برگشت را انتخاب کنید"
+        }
+
+        if (domesticFlightSearch.departureDate && domesticFlightSearch.returnDate) {
+            const departure = new Date(domesticFlightSearch.departureDate)
+            const returnDate = new Date(domesticFlightSearch.returnDate)
+            if (returnDate < departure) {
+                newErrors.returnDate = "تاریخ برگشت نمی‌تواند قبل از تاریخ رفت باشد"
+            }
+        }
+
+        setErrors(newErrors)
+        return Object.keys(newErrors).length === 0
+    }
+
     const handleSuggestionClick = (suggestion: DomesticSuggestion, field: string) => {
         const value = `${suggestion.city} (${suggestion.code}) - ${suggestion.name}`
         
@@ -123,12 +192,20 @@ const DomesticFlightSearch = () => {
         setShowSuggestions(false)
         setCurrentInput("")
         setIsFieldFocused("")
+        
+        // Clear error for this field
+        setErrors(prev => ({ ...prev, [field]: undefined }))
     }
 
     const handleInputChange = (value: string, field: string) => {
         setCurrentInput(value)
         setCurrentField(field)
         setDomesticFlightSearch(prev => ({ ...prev, [field]: value }))
+        
+        // Clear error when user starts typing
+        if (errors[field as keyof FormErrors]) {
+            setErrors(prev => ({ ...prev, [field]: undefined }))
+        }
     }
 
     const handleKeyDown = (e: React.KeyboardEvent, field: string) => {
@@ -208,27 +285,19 @@ const DomesticFlightSearch = () => {
     const router = useRouter()
 
     const handleDomesticFlightSearch = async () => {
-        if (!domesticFlightSearch.origin) {
-            alert("لطفا شهر مبداء را انتخاب کنید")
+        // Clear previous errors
+        setErrors({})
+        
+        // Validate form
+        if (!validateForm()) {
+            // Focus on first error field
+            if (errors.origin) {
+                fromInputRef.current?.focus()
+            } else if (errors.destination) {
+                toInputRef.current?.focus()
+            }
             return
         }
-        if (!domesticFlightSearch.destination) {
-            alert("لطفا شهر مقصد را انتخاب کنید")
-            return
-        }
-        if (!domesticFlightSearch.departureDate) {
-            alert("لطفا تاریخ رفت را انتخاب کنید")
-            return
-        }
-        if (domesticFlightSearch.tripType =="roundtrip" && !domesticFlightSearch.returnDate) {
-            alert("لطفا تاریخ برگشت را انتخاب کنید یا پرواز یک طرفه انتخاب کنید")
-            return
-        }
-
-        // if (domesticFlightSearch.tripType === "roundtrip" && !domesticFlightSearch.returnDate) {
-        //     alert("لطفا تاریخ برگشت را نیز انتخاب کنید")
-        //     return
-        // }
 
         setIsLoading(true)
         try {
@@ -271,34 +340,32 @@ const DomesticFlightSearch = () => {
                 IsGenuine: false
             }
 
-            // Add return flight for round trips
-            // if (domesticFlightSearch.tripType === "roundtrip" && domesticFlightSearch.returnDate) {
-            //     requestBody.OriginDestinationInformations.push({
-            //         DepartureDateTime: `${domesticFlightSearch.returnDate}T00:00:00.0000000+03:30`,
-            //         DestinationLocationCode: originCode,
-            //         DestinationType: "None",
-            //         OriginLocationCode: destinationCode,
-            //         OriginType: "None"
-            //     })
-            // }
-            // setDomesticFlightRequest(requestBody)
             setFlightRequest(partoRequestBody)
-            // Call the domestic flight search API
-            // const response = await searchDomesticFlights(requestBody)
             const partoResponse = await searchFlights(partoRequestBody)
 
             setFlightsData(partoResponse.PricedItineraries, "domestic")
-            // console.log(response)
             router.push('/flights')
-            // setFlightsData(response.PricedItineraries)
-            // router.push('/domestic-flights')
 
         } catch (error) {
             console.error("Domestic flight search error:", error)
-            alert("خطا در جستجوی پرواز داخلی")
+            setErrors(prev => ({ 
+                ...prev, 
+                general: "خطا در جستجوی پرواز داخلی. لطفا دوباره تلاش کنید." 
+            }))
         } finally {
             setIsLoading(false)
         }
+    }
+
+    const renderError = (field: keyof FormErrors) => {
+        if (!errors[field]) return null
+        
+        return (
+            <div className="flex items-center gap-2 mt-2 text-white text-sm animate-fadeIn">
+                <AlertCircle className="h-4 w-4" />
+                <span>{errors[field]}</span>
+            </div>
+        )
     }
 
     const renderSuggestions = (field: string) => {
@@ -453,6 +520,14 @@ const DomesticFlightSearch = () => {
 
     return (
         <div className="rounded-3xl"  style={{direction:'rtl'}}>
+            {/* General Error Display */}
+            {errors.general && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-3 animate-fadeIn">
+                    <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
+                    <p className="text-red-700 text-sm font-medium">{errors.general}</p>
+                </div>
+            )}
+
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {/* From Input */}
                 <div className="space-y-3 relative">
@@ -467,7 +542,9 @@ const DomesticFlightSearch = () => {
                             id="domestic-flight-from" 
                             placeholder="نام فرودگاه، مثال: تهران (IKA)" 
                             className={`pr-12 h-14 rounded-2xl border-2 bg-white text-gray-800 placeholder-gray-500 text-lg font-medium transition-all duration-300 ${
-                                isFieldFocused === "origin"
+                                errors.origin 
+                                    ? 'border-red-500 bg-red-50 scale-105 shadow-lg' 
+                                    : isFieldFocused === "origin"
                                     ? 'border-blue-500 scale-105 shadow-lg' 
                                     : 'border-gray-300 hover:border-blue-400'
                             } ${showSuggestions && currentField === "origin" ? 'rounded-b-none border-b-2 border-b-blue-300' : ''}`}
@@ -485,6 +562,7 @@ const DomesticFlightSearch = () => {
                             }}
                         />
                         {renderSuggestions("origin")}
+                        {renderError("origin")}
                     </div>
                 </div>
                 
@@ -501,7 +579,9 @@ const DomesticFlightSearch = () => {
                             id="domestic-flight-destination" 
                             placeholder="نام فرودگاه مقصد مثال: مشهد (MHD)" 
                             className={`pr-12 h-14 rounded-2xl border-2 bg-white text-gray-800 placeholder-gray-500 text-lg font-medium transition-all duration-300 ${
-                                isFieldFocused === "destination"
+                                errors.destination 
+                                    ? 'border-red-500 bg-red-50 scale-105 shadow-lg' 
+                                    : isFieldFocused === "destination"
                                     ? 'border-blue-500 scale-105 shadow-lg' 
                                     : 'border-gray-300 hover:border-blue-400'
                             } ${showSuggestions && currentField === "destination" ? 'rounded-b-none border-b-2 border-b-blue-300' : ''}`}
@@ -519,6 +599,7 @@ const DomesticFlightSearch = () => {
                             }}
                         />
                         {renderSuggestions("destination")}
+                        {renderError("destination")}
                     </div>
                 </div>
 
@@ -550,6 +631,8 @@ const DomesticFlightSearch = () => {
                         onDepartureDateChange={(date) => setDomesticFlightSearch(prev => ({ ...prev, departureDate: date }))}
                         onReturnDateChange={(date) => setDomesticFlightSearch(prev => ({ ...prev, returnDate: date }))}
                         onTripTypeChange={(type) => setDomesticFlightSearch(prev => ({ ...prev, tripType: type }))}
+                        error={errors.departureDate}
+                        errorColor="white"
                     />
                 </div>
 
@@ -559,12 +642,17 @@ const DomesticFlightSearch = () => {
                         <Label className="text-lg font-bold text-white text-right block">تاریخ برگشت</Label>
                         <div className="relative">
                         <CalendarIcon className="absolute right-4 top-4 h-5 w-5 text-gray-400" />
-                        <div className="w-full h-14 rounded-2xl border-2 border-gray-300 bg-white text-gray-800 text-lg font-medium flex items-center px-4 pr-12">
+                        <div className={`w-full h-14 rounded-2xl border-2 bg-white text-gray-800 text-lg font-medium flex items-center px-4 pr-12 transition-all duration-300 ${
+                            errors.returnDate 
+                                ? 'border-red-500 bg-red-50 scale-105 shadow-lg' 
+                                : 'border-gray-300'
+                        }`}>
                             <span className="text-gray-800">
                             {formatShamsiDate(domesticFlightSearch.returnDate)}
                             </span>
                         </div>
                         </div>
+                        {renderError("returnDate")}
                     </div>
                 )}
 
@@ -631,6 +719,17 @@ const DomesticFlightSearch = () => {
                     origin {
                         opacity: 1;
                         transform: translateY(0) scale(1);
+                    }
+                }
+                
+                @keyframes fadeIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-5px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
                     }
                 }
                 

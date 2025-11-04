@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useFlight } from "@/contexts/search/FlightContext"
 import { useSearch } from "@/hooks/use-search"
-import { Search, Calendar, MapPin, ChevronDown, Loader2, Users, Baby, User, Plus, Minus, CalendarIcon } from "lucide-react"
+import { Search, Calendar, MapPin, ChevronDown, Loader2, Users, Baby, User, Plus, Minus, CalendarIcon, AlertCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState, useRef } from "react"
 import ShamsiDateModal from "./ShamsiCalendar"
@@ -18,6 +18,14 @@ interface Suggestion {
   code?: string
   city?: string
   type: 'city' | 'airport'
+}
+
+interface FormErrors {
+  from?: string
+  to?: string
+  departureDate?: string
+  returnDate?: string
+  general?: string
 }
 
 const FlightSearch = () => {
@@ -41,6 +49,7 @@ const FlightSearch = () => {
     const [currentInput, setCurrentInput] = useState("")
     const [currentField, setCurrentField] = useState("")
     const [isFieldFocused, setIsFieldFocused] = useState("")
+    const [errors, setErrors] = useState<FormErrors>({})
 
     // Passengers popover state
     const [showPassengers, setShowPassengers] = useState(false)
@@ -52,6 +61,22 @@ const FlightSearch = () => {
     const passengersRef = useRef<HTMLDivElement>(null)
     const fromInputRef = useRef<HTMLInputElement>(null)
     const toInputRef = useRef<HTMLInputElement>(null)
+
+    // Clear errors when user starts typing
+    useEffect(() => {
+        if (errors.from && flightSearch.from) {
+            setErrors(prev => ({ ...prev, from: undefined }))
+        }
+        if (errors.to && flightSearch.to) {
+            setErrors(prev => ({ ...prev, to: undefined }))
+        }
+        if (errors.departureDate && flightSearch.departureDate) {
+            setErrors(prev => ({ ...prev, departureDate: undefined }))
+        }
+        if (errors.returnDate && flightSearch.returnDate) {
+            setErrors(prev => ({ ...prev, returnDate: undefined }))
+        }
+    }, [flightSearch.from, flightSearch.to, flightSearch.departureDate, flightSearch.returnDate, errors])
 
     useEffect(() => {
         const fetchSuggestions = async () => {
@@ -70,6 +95,7 @@ const FlightSearch = () => {
             } catch (error) {
                 console.error("Error fetching suggestions:", error)
                 setSuggestions([])
+                setErrors(prev => ({ ...prev, general: "خطا در دریافت پیشنهادات شهرها" }))
             } finally {
                 setSuggestionLoading(false)
             }
@@ -116,6 +142,49 @@ const FlightSearch = () => {
         return match ? match[1] : value
     }
 
+    const validateForm = (): boolean => {
+        const newErrors: FormErrors = {}
+
+        if (!flightSearch.from.trim()) {
+            newErrors.from = "لطفا شهر مبداء را انتخاب کنید"
+        } else if (!extractAirportCode(flightSearch.from)) {
+            newErrors.from = "لطفا یک فرودگاه معتبر انتخاب کنید"
+        }
+
+        if (!flightSearch.to.trim()) {
+            newErrors.to = "لطفا شهر مقصد را انتخاب کنید"
+        } else if (!extractAirportCode(flightSearch.to)) {
+            newErrors.to = "لطفا یک فرودگاه معتبر انتخاب کنید"
+        }
+
+        if (flightSearch.from && flightSearch.to) {
+            const originCode = extractAirportCode(flightSearch.from)
+            const destinationCode = extractAirportCode(flightSearch.to)
+            if (originCode === destinationCode) {
+                newErrors.to = "شهر مبدا و مقصد نمی‌توانند یکسان باشند"
+            }
+        }
+
+        if (!flightSearch.departureDate) {
+            newErrors.departureDate = "لطفا تاریخ رفت را انتخاب کنید"
+        }
+
+        if (flightSearch.tripType === "roundtrip" && !flightSearch.returnDate) {
+            newErrors.returnDate = "لطفا تاریخ برگشت را انتخاب کنید"
+        }
+
+        if (flightSearch.departureDate && flightSearch.returnDate) {
+            const departure = new Date(flightSearch.departureDate)
+            const returnDate = new Date(flightSearch.returnDate)
+            if (returnDate < departure) {
+                newErrors.returnDate = "تاریخ برگشت نمی‌تواند قبل از تاریخ رفت باشد"
+            }
+        }
+
+        setErrors(newErrors)
+        return Object.keys(newErrors).length === 0
+    }
+
     const handleSuggestionClick = (suggestion: Suggestion, field: string) => {
         let value = ""
         
@@ -129,12 +198,20 @@ const FlightSearch = () => {
         setShowSuggestions(false)
         setCurrentInput("")
         setIsFieldFocused("")
+        
+        // Clear error for this field
+        setErrors(prev => ({ ...prev, [field]: undefined }))
     }
 
     const handleInputChange = (value: string, field: string) => {
         setCurrentInput(value)
         setCurrentField(field)
         setFlightSearch(prev => ({ ...prev, [field]: value }))
+        
+        // Clear error when user starts typing
+        if (errors[field as keyof FormErrors]) {
+            setErrors(prev => ({ ...prev, [field]: undefined }))
+        }
     }
 
     const handleKeyDown = (e: React.KeyboardEvent, field: string) => {
@@ -214,21 +291,17 @@ const FlightSearch = () => {
     const router = useRouter()
 
     const handleFlightSearch = async () => {
-        if (!flightSearch.from) {
-            alert("لطفا مبداء خود را انتخاب کنید")
-            return
-        }
-        if (!flightSearch.to) {
-            alert("لطفا مقصد را انتخاب کنید")
-            return
-        }
-        if (!flightSearch.departureDate) {
-            alert("لطفا تاریخ رفت را انتخاب کنید")
-            return
-        }
-
-        if (flightSearch.tripType === "roundtrip" && !flightSearch.returnDate) {
-            alert("لطفا تاریخ برگشت را نیز انتخاب کنید")
+        // Clear previous errors
+        setErrors({})
+        
+        // Validate form
+        if (!validateForm()) {
+            // Focus on first error field
+            if (errors.from) {
+                fromInputRef.current?.focus()
+            } else if (errors.to) {
+                toInputRef.current?.focus()
+            }
             return
         }
 
@@ -285,10 +358,24 @@ const FlightSearch = () => {
 
         } catch (error) {
             console.error("Flight search error:", error)
-            alert("خطا در جستجوی پرواز")
+            setErrors(prev => ({ 
+                ...prev, 
+                general: "خطا در جستجوی پرواز. لطفا دوباره تلاش کنید." 
+            }))
         } finally {
             setIsLoading(false)
         }
+    }
+
+    const renderError = (field: keyof FormErrors) => {
+        if (!errors[field]) return null
+        
+        return (
+            <div className="flex items-center gap-2 mt-2 text-white text-sm animate-fadeIn">
+                <AlertCircle className="h-4 w-4" />
+                <span>{errors[field]}</span>
+            </div>
+        )
     }
 
     const renderSuggestions = (field: string) => {
@@ -461,6 +548,14 @@ const FlightSearch = () => {
 
     return (
         <div className="rounded-3xl"  style={{direction:'rtl'}}>
+            {/* General Error Display */}
+            {errors.general && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-3 animate-fadeIn">
+                    <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
+                    <p className="text-red-700 text-sm font-medium">{errors.general}</p>
+                </div>
+            )}
+
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {/* From Input */}
                 <div className="space-y-3 relative">
@@ -475,7 +570,9 @@ const FlightSearch = () => {
                             id="flight-from" 
                             placeholder="Tehran (IKA) for example" 
                             className={`pr-12 h-14 rounded-2xl border-2 bg-white text-gray-800 placeholder-gray-500 text-lg font-medium transition-all duration-300 ${
-                                isFieldFocused === "from"
+                                errors.from 
+                                    ? 'border-red-500 bg-red-50 scale-105 shadow-lg' 
+                                    : isFieldFocused === "from"
                                     ? 'border-blue-500 scale-105 shadow-lg' 
                                     : 'border-gray-300 hover:border-blue-400'
                             } ${showSuggestions && currentField === "from" ? 'rounded-b-none border-b-2 border-b-blue-300' : ''}`}
@@ -493,6 +590,7 @@ const FlightSearch = () => {
                             }}
                         />
                         {renderSuggestions("from")}
+                        {renderError("from")}
                     </div>
                 </div>
                 
@@ -509,7 +607,9 @@ const FlightSearch = () => {
                             id="flight-to" 
                             placeholder="Istanbul (ISL) for example" 
                             className={`pr-12 h-14 rounded-2xl border-2 bg-white text-gray-800 placeholder-gray-500 text-lg font-medium transition-all duration-300 ${
-                                isFieldFocused === "to"
+                                errors.to 
+                                    ? 'border-red-500 bg-red-50 scale-105 shadow-lg' 
+                                    : isFieldFocused === "to"
                                     ? 'border-blue-500 scale-105 shadow-lg' 
                                     : 'border-gray-300 hover:border-blue-400'
                             } ${showSuggestions && currentField === "to" ? 'rounded-b-none border-b-2 border-b-blue-300' : ''}`}
@@ -527,6 +627,7 @@ const FlightSearch = () => {
                             }}
                         />
                         {renderSuggestions("to")}
+                        {renderError("to")}
                     </div>
                 </div>
 
@@ -558,6 +659,7 @@ const FlightSearch = () => {
                         onDepartureDateChange={(date) => setFlightSearch(prev => ({ ...prev, departureDate: date }))}
                         onReturnDateChange={(date) => setFlightSearch(prev => ({ ...prev, returnDate: date }))}
                         onTripTypeChange={(type) => setFlightSearch(prev => ({ ...prev, tripType: type }))}
+                        error={errors.departureDate}
                     />
                 </div>
 
@@ -567,12 +669,17 @@ const FlightSearch = () => {
                         <Label className="text-lg font-bold text-white text-right block">تاریخ برگشت</Label>
                         <div className="relative">
                         <CalendarIcon className="absolute right-4 top-4 h-5 w-5 text-gray-400" />
-                        <div className="w-full h-14 rounded-2xl border-2 border-gray-300 bg-white text-gray-800 text-lg font-medium flex items-center px-4 pr-12">
+                        <div className={`w-full h-14 rounded-2xl border-2 bg-white text-gray-800 text-lg font-medium flex items-center px-4 pr-12 transition-all duration-300 ${
+                            errors.returnDate 
+                                ? 'border-red-500 bg-red-50 scale-105 shadow-lg' 
+                                : 'border-gray-300'
+                        }`}>
                             <span className="text-gray-800">
                             {formatShamsiDate(flightSearch.returnDate)}
                             </span>
                         </div>
                         </div>
+                        {renderError("returnDate")}
                     </div>
                 )}
 
@@ -640,6 +747,17 @@ const FlightSearch = () => {
                     to {
                         opacity: 1;
                         transform: translateY(0) scale(1);
+                    }
+                }
+                
+                @keyframes fadeIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-5px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
                     }
                 }
                 

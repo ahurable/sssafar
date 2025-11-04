@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     const results: CitySuggestion[] = [];
 
     // Search in Domestic Hotel Data
-        const domesticPath = path.join(process.cwd(), 'assets', 'data', 'DomesticHotelStaticData', 'DomesticPropertyCity.json');
+        const domesticPath = path.join(process.cwd(), 'assets', 'DomesticPropertyCity.json');
         const domesticData = await fs.readFile(domesticPath, 'utf-8');
         const domesticCities: DomesticCity[] = JSON.parse(domesticData);
 
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
 
         results.push(...domesticMatches);
       
-        const internationalPath = path.join(process.cwd(), 'assets', 'data', 'HotelStaticData', 'PropertyCity.json');
+        const internationalPath = path.join(process.cwd(), 'assets', 'PropertyCity.json');
         const internationalData = await fs.readFile(internationalPath, 'utf-8');
         const internationalCities: InternationalCity[] = JSON.parse(internationalData);
 

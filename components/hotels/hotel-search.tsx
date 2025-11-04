@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Search, Calendar, MapPin, Users, Loader2, Bed, Plus, Minus, CalendarIcon } from "lucide-react"
+import { Search, Calendar, MapPin, Users, Loader2, Bed, Plus, Minus, CalendarIcon, AlertCircle } from "lucide-react"
 import gsap from "gsap"
 import { hotels } from "@/lib/data/hotels"
 import { useSnack } from "@/hooks/use-notification"
@@ -37,6 +37,13 @@ interface HotelSearchFormData {
   rooms: number;
 }
 
+interface FormErrors {
+  city?: string;
+  checkIn?: string;
+  checkOut?: string;
+  general?: string;
+}
+
 const HotelSearch = () => {
   const [isLoading, setIsLoading] = useState(false)
   const sectionRef = useRef<HTMLElement>(null)
@@ -55,6 +62,9 @@ const HotelSearch = () => {
     guests: 1,
     rooms: 1
   })
+
+  // Error state
+  const [errors, setErrors] = useState<FormErrors>({})
 
   // Guests & Rooms popover state
   const [showGuestsRooms, setShowGuestsRooms] = useState(false)
@@ -92,6 +102,19 @@ const HotelSearch = () => {
 
     return () => ctx.revert()
   }, [])
+
+  // Clear errors when user starts typing
+  useEffect(() => {
+    if (errors.city && hotelSearch.city) {
+      setErrors(prev => ({ ...prev, city: undefined }))
+    }
+    if (errors.checkIn && hotelSearch.checkIn) {
+      setErrors(prev => ({ ...prev, checkIn: undefined }))
+    }
+    if (errors.checkOut && hotelSearch.checkOut) {
+      setErrors(prev => ({ ...prev, checkOut: undefined }))
+    }
+  }, [hotelSearch.city, hotelSearch.checkIn, hotelSearch.checkOut, errors])
 
   // Fetch city suggestions with debounce
   const fetchCitySuggestions = async (query: string): Promise<CitySuggestion[]> => {
@@ -131,6 +154,7 @@ const HotelSearch = () => {
       } catch (error) {
         console.error("Error fetching suggestions:", error)
         setSuggestions([])
+        setErrors(prev => ({ ...prev, general: "خطا در دریافت پیشنهادات شهرها" }))
       } finally {
         setSuggestionLoading(false)
       }
@@ -169,6 +193,36 @@ const HotelSearch = () => {
     }
   }, [])
 
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {}
+
+    if (!hotelSearch.city.trim()) {
+      newErrors.city = "لطفاً یک شهر معتبر انتخاب کنید"
+    } else if (!hotelSearch.cityId) {
+      newErrors.city = "لطفاً از لیست پیشنهادی یک شهر انتخاب کنید"
+    }
+
+    if (!hotelSearch.checkIn) {
+      newErrors.checkIn = "لطفاً تاریخ ورود را انتخاب کنید"
+    }
+
+    if (!hotelSearch.checkOut) {
+      newErrors.checkOut = "لطفاً تاریخ خروج را انتخاب کنید"
+    }
+
+    if (hotelSearch.checkIn && hotelSearch.checkOut) {
+      const checkInDate = new Date(hotelSearch.checkIn)
+      const checkOutDate = new Date(hotelSearch.checkOut)
+      
+      if (checkOutDate <= checkInDate) {
+        newErrors.checkOut = "تاریخ خروج باید بعد از تاریخ ورود باشد"
+      }
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
   const handleSuggestionClick = (suggestion: CitySuggestion) => {
     const displayValue = suggestion.nameFa 
       ? `${suggestion.nameFa} (${suggestion.name})`
@@ -185,6 +239,9 @@ const HotelSearch = () => {
     setShowSuggestions(false)
     setCurrentInput("")
     setIsCityFocused(false)
+    
+    // Clear city error
+    setErrors(prev => ({ ...prev, city: undefined }))
   }
 
   const handleInputChange = (value: string) => {
@@ -196,6 +253,11 @@ const HotelSearch = () => {
       cityType: undefined,
       propertyDestinationId: undefined
     }))
+    
+    // Clear city error when user starts typing
+    if (errors.city) {
+      setErrors(prev => ({ ...prev, city: undefined }))
+    }
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -235,13 +297,15 @@ const HotelSearch = () => {
   }
 
   const handleHotelSearch = async () => {
-    if (!hotelSearch.city || !hotelSearch.cityId) {
-      alert("لطفاً یک شهر معتبر انتخاب کنید")
-      return
-    }
-
-    if (!hotelSearch.checkIn || !hotelSearch.checkOut) {
-      alert("لطفاً تاریخ ورود و خروج را انتخاب کنید")
+    // Clear previous errors
+    setErrors({})
+    
+    // Validate form
+    if (!validateForm()) {
+      // Focus on first error field
+      if (errors.city) {
+        inputRef.current?.focus()
+      }
       return
     }
 
@@ -266,7 +330,7 @@ const HotelSearch = () => {
       })
 
       if (!response.ok) {
-        error("خطا در دریافت اطلاعات")
+        throw new Error('Failed to fetch hotels')
       }
 
       const data = await response.json()
@@ -277,6 +341,10 @@ const HotelSearch = () => {
       
     } catch (error) {
       console.error("Error searching hotels:", error)
+      setErrors(prev => ({ 
+        ...prev, 
+        general: "خطا در جستجوی هتل. لطفا دوباره تلاش کنید." 
+      }))
     } finally {
       setIsLoading(false)
     }
@@ -285,16 +353,35 @@ const HotelSearch = () => {
   // Handle date changes from ShamsiDateModal
   const handleCheckInDateChange = (date: string) => {
     setHotelSearch(prev => ({ ...prev, checkIn: date }))
+    // Clear checkIn error when user selects a date
+    if (errors.checkIn) {
+      setErrors(prev => ({ ...prev, checkIn: undefined }))
+    }
   }
 
   const handleCheckOutDateChange = (date: string) => {
     setHotelSearch(prev => ({ ...prev, checkOut: date }))
+    // Clear checkOut error when user selects a date
+    if (errors.checkOut) {
+      setErrors(prev => ({ ...prev, checkOut: undefined }))
+    }
   }
 
   // For hotel search, we don't need trip type, so we'll use a fixed value
   const handleTripTypeChange = (type: string) => {
     // Not needed for hotel search, but required by the component
     console.log("Trip type changed:", type)
+  }
+
+  const renderError = (field: keyof FormErrors) => {
+    if (!errors[field]) return null
+    
+    return (
+      <div className="flex items-center gap-2 mt-2 text-white text-sm animate-fadeIn">
+        <AlertCircle className="h-4 w-4" />
+        <span>{errors[field]}</span>
+      </div>
+    )
   }
 
   const renderSuggestions = () => {
@@ -425,6 +512,14 @@ const HotelSearch = () => {
 
   return (
     <div className="rounded-3xl "  style={{direction:'rtl'}}>
+      {/* General Error Display */}
+      {errors.general && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-3 animate-fadeIn">
+          <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
+          <p className="text-red-700 text-sm font-medium">{errors.general}</p>
+        </div>
+      )}
+
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {/* City Input - Enhanced with animations */}
         <div className="space-y-3 relative">
@@ -439,7 +534,9 @@ const HotelSearch = () => {
               id="hotel-city" 
               placeholder="تهران، استانبول، دبی..." 
               className={`pr-12 h-14 rounded-2xl border-2 bg-white text-gray-800 placeholder-gray-500 text-lg font-medium transition-all duration-300 ${
-                isCityFocused 
+                errors.city 
+                  ? 'border-red-500 bg-red-50 scale-105 shadow-lg' 
+                  : isCityFocused 
                   ? 'border-blue-500 scale-105 shadow-lg' 
                   : 'border-gray-300 hover:border-blue-400'
               } ${showSuggestions ? 'rounded-b-none border-b-2 border-b-blue-300' : ''}`}
@@ -456,6 +553,7 @@ const HotelSearch = () => {
               }}
             />
             {renderSuggestions()}
+            {renderError("city")}
           </div>
         </div>
         
@@ -468,6 +566,7 @@ const HotelSearch = () => {
             onDepartureDateChange={handleCheckInDateChange}
             onReturnDateChange={handleCheckOutDateChange}
             onTripTypeChange={handleTripTypeChange}
+            error={errors.checkIn}
           />
         </div>
         
@@ -476,12 +575,17 @@ const HotelSearch = () => {
           <Label className="text-lg font-bold text-white text-right block">تاریخ خروج</Label>
           <div className="relative">
             <CalendarIcon className="absolute right-4 top-4 h-5 w-5 text-gray-400" />
-            <div className="w-full h-14 rounded-2xl border-2 border-gray-300 bg-white text-gray-800 text-lg font-medium flex items-center px-4 pr-12">
+            <div className={`w-full h-14 rounded-2xl border-2 bg-white text-gray-800 text-lg font-medium flex items-center px-4 pr-12 transition-all duration-300 ${
+              errors.checkOut 
+                ? 'border-red-500 bg-red-50 scale-105 shadow-lg' 
+                : 'border-gray-300'
+            }`}>
               <span className="text-gray-800">
                 {formatShamsiDate(hotelSearch.checkOut)}
               </span>
             </div>
           </div>
+          {renderError("checkOut")}
         </div>
         
         {/* Guests & Rooms Selector */}
@@ -529,6 +633,17 @@ const HotelSearch = () => {
           to {
             opacity: 1;
             transform: translateY(0) scale(1);
+          }
+        }
+        
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(-5px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
           }
         }
       `}</style>

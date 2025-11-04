@@ -3,7 +3,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { Calendar as CalendarIcon, X, Globe } from "lucide-react"
+import { Calendar as CalendarIcon, X, Globe, AlertCircle } from "lucide-react"
 import { 
   toJalaali, 
   toGregorian, 
@@ -26,6 +26,8 @@ interface ShamsiDateModalProps {
   onDepartureDateChange: (date: string) => void
   onReturnDateChange: (date: string) => void
   onTripTypeChange: (type: string) => void
+  error?: string,
+  errorColor?: string
 }
 
 const ShamsiDateModal = ({
@@ -34,7 +36,9 @@ const ShamsiDateModal = ({
   tripType,
   onDepartureDateChange,
   onReturnDateChange,
-  onTripTypeChange
+  onTripTypeChange,
+  error,
+  errorColor
 }: ShamsiDateModalProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedDepartureDate, setSelectedDepartureDate] = useState<string>(departureDate)
@@ -157,6 +161,17 @@ const ShamsiDateModal = ({
     }
   }
 
+  const renderError = () => {
+      if (!error) return null
+      
+      return (
+          <div className={`flex items-center gap-2 mt-2 ${errorColor == "red" ? 'text-red-600' : 'text-white'  } text-sm animate-fadeIn`}>
+              <AlertCircle className="h-4 w-4" />
+              <span>{error}</span>
+          </div>
+      )
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -172,6 +187,7 @@ const ShamsiDateModal = ({
               </span>
             </div>
           </div>
+          {renderError()}
         </div>
       </DialogTrigger>
 
