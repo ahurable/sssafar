@@ -52,7 +52,7 @@ const HotelSearch = () => {
     propertyDestinationId: undefined,
     checkIn: "",
     checkOut: "",
-    guests: 2,
+    guests: 1,
     rooms: 1
   })
 
