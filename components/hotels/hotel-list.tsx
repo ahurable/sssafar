@@ -79,7 +79,7 @@ export function HotelList() {
   const hasMoreHotels = currentPage < totalPages
   
   // Get currently displayed hotels
-  const displayedHotels = (hotelData?.PricedItineraries || []).slice(0, currentPage * HOTELS_PER_PAGE)
+  const displayedHotels = (filteredHotels|| []).slice(0, currentPage * HOTELS_PER_PAGE) || (hotelData?.PricedItineraries || []).slice(0, currentPage * HOTELS_PER_PAGE)
 
   // Function to load hotel names and images
   const loadHotelData = async (hotels: HotelPricedItinerary[]) => {

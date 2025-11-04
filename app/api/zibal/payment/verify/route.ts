@@ -319,7 +319,7 @@ async function bookFlight(invoiceId:string, userId:string) {
       message: "در اینویس ارسالی مسافری وجود ندارد"
     }, { status: 400 })
   }
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://37.32.14.157:3000"
   const requestData = {
     travelers: invoice.travelers,
     invoiceId: invoice.id,

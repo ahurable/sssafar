@@ -162,7 +162,7 @@ export async function POST(request: NextRequest) {
     const amountInRials = paymentData.amount;
 
     // Create callback URL
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://37.32.14.157:3000';
     const callbackUrl = `${baseUrl}/api/zibal/payment/verify`;
     
     if (!paymentData.invoiceId) {

@@ -150,19 +150,12 @@ interface HotelContextType {
   getHotelNames: (hotelIds: number[]) => Promise<{[key: number]: string}>
   getHotelImages: (hotelId: number) => Promise<HotelImage[]>,
   getHotelsImages: (hotelIds: number[]) => Promise<{[key: number]:  HotelImage[]}>
-  filters: FilterState
-  setFilters: (filters: FilterState) => void
   clearFilters: () => void,
   request: any,
   setRequest: (request: any) => void
 }
 
-const defaultFilters: FilterState = {
-  priceRange: [0, 5000000],
-  hotelRatings: [],
-  amenities: [],
-  hotelTypes: [] // Add this
-}
+
 
 
 // Cache for hotel names to avoid repeated file reads
@@ -211,7 +204,6 @@ const HotelContext = createContext<HotelContextType | undefined>(undefined)
 export function HotelProvider({ children }: { children: ReactNode }) {
   const [hotelData, setHotelData] = useState<HotelSearchResponse>()
   const [loading, setLoading] = useState(true)
-  const [filters, setFilters] = useState<FilterState>(defaultFilters)
   const [filteredHotels, setFilteredHotels] = useState<any[]>([])
   const [request, setRequest] = useState()
   const getHotelNames = async (hotelIds: number[]): Promise<{[key: number]: string}> => {
@@ -307,7 +299,6 @@ export function HotelProvider({ children }: { children: ReactNode }) {
   const handleSuggestions = async (query: string) => await suggestCity(query)
 
    const applyFilters = (newFilters: FilterState) => {
-    setFilters(newFilters)
     
     if (!hotelData?.PricedItineraries) return
 
@@ -359,7 +350,6 @@ export function HotelProvider({ children }: { children: ReactNode }) {
   }
 
   const clearFilters = () => {
-    setFilters(defaultFilters)
     if (hotelData?.PricedItineraries) {
       setFilteredHotels(hotelData.PricedItineraries)
     }
@@ -369,8 +359,6 @@ export function HotelProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (hotelData?.PricedItineraries) {
       setFilteredHotels(hotelData.PricedItineraries)
-      // Reset filters when new data comes in
-      setFilters(defaultFilters)
     }
   }, [hotelData])
 
@@ -422,8 +410,6 @@ export function HotelProvider({ children }: { children: ReactNode }) {
       getHotelNames,
       getHotelImages,
       getHotelsImages,
-      filters,
-      setFilters,
       clearFilters,
       request,
       setRequest

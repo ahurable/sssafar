@@ -8,24 +8,58 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { useHotel } from "@/contexts/search/HotelContext"
 
-export function HotelFilters() {
-  const { filters, setFilters, applyFilters, clearFilters, filteredHotels, hotelData } = useHotel()
-  const [localFilters, setLocalFilters] = useState(filters)
+interface FilterState {
+  priceRange: [number, number]
+  hotelRatings: string[]
+  amenities: string[]
+  hotelTypes: string[] // Add this if you need hotel type filtering
+}
 
+const defaultFilters: FilterState = {
+    priceRange: [0, 5000000],
+    hotelRatings: [],
+    amenities: [],
+    hotelTypes: [] // Add this
+  }
+
+
+export function HotelFilters() {
+
+
+  const { applyFilters, clearFilters, filteredHotels, hotelData } = useHotel()
+  const [filters, setFilters] = useState(defaultFilters)
   // Update local filters when context filters change
+  // useEffect(() => {
+  //   setFilters(filters)
+  //   // if(hotelData)
+  //   //   console.log(Math.min(...hotelData.PricedItineraries.map(f => f.NetRate / 10).filter(rate => typeof rate === 'number' && !isNaN(rate))),
+  //   //   Math.max(...hotelData.PricedItineraries.map(f => f.NetRate / 10).filter(rate => typeof rate === 'number' && !isNaN(rate))))
+  // }, [filters])
+
+  const availablePriceRange = hotelData && hotelData.PricedItineraries.length > 0 ? [
+    Math.min(...hotelData.PricedItineraries.map(f => f.NetRate / 10).filter(rate => typeof rate === 'number' && !isNaN(rate))),
+    Math.max(...hotelData.PricedItineraries.map(f => f.NetRate / 10).filter(rate => typeof rate === 'number' && !isNaN(rate)))
+  ] : [0, 50000000];
+
+// Initialize price range when data loads
   useEffect(() => {
-    setLocalFilters(filters)
-  }, [filters])
+    if (hotelData && hotelData.PricedItineraries.length > 0) {
+      setFilters(prev => ({
+        ...prev,
+        priceRange: [availablePriceRange[0], availablePriceRange[1]]
+      }))
+    }
+  }, [hotelData])
 
   const handlePriceChange = (value: number[]) => {
-    setLocalFilters(prev => ({
+    setFilters(prev => ({
       ...prev,
       priceRange: value as [number, number]
     }))
   }
 
   const handleRatingChange = (rating: string, checked: boolean) => {
-    setLocalFilters(prev => ({
+    setFilters(prev => ({
       ...prev,
       hotelRatings: checked 
         ? [...prev.hotelRatings, rating]
@@ -34,7 +68,7 @@ export function HotelFilters() {
   }
 
   const handleAmenityChange = (amenity: string, checked: boolean) => {
-    setLocalFilters(prev => ({
+    setFilters(prev => ({
       ...prev,
       amenities: checked 
         ? [...prev.amenities, amenity]
@@ -43,11 +77,13 @@ export function HotelFilters() {
   }
 
   const handleApplyFilters = () => {
-    applyFilters(localFilters)
+    applyFilters(filters)
+    console.log(availablePriceRange)
+    console.log(filters)
   }
 
   const handleClearFilters = () => {
-    setLocalFilters({
+    setFilters({
       priceRange: [0, 5000000],
       hotelRatings: [],
       amenities: [],
@@ -77,15 +113,16 @@ export function HotelFilters() {
         <div className="space-y-3">
           <Label>محدوده قیمت (تومان)</Label>
           <Slider 
-            value={localFilters.priceRange}
+            value={filters.priceRange}
             onValueChange={handlePriceChange}
-            max={5000000} 
-            step={100000} 
-            className="mt-2 bg-emerald-600" 
+            min={availablePriceRange[0]}
+            max={availablePriceRange[1]}
+            step={100000}
+            className="mt-2"
           />
           <div className="flex justify-between text-sm">
-            <span>{localFilters.priceRange[0].toLocaleString("fa-IR")}</span>
-            <span>{localFilters.priceRange[1].toLocaleString("fa-IR")}</span>
+            <span>{filters.priceRange[0].toLocaleString("fa-IR")}</span>
+            <span>{filters.priceRange[1].toLocaleString("fa-IR")}</span>
           </div>
         </div>
 
@@ -97,7 +134,7 @@ export function HotelFilters() {
               <div key={rating} className="flex items-center gap-2">
                 <Checkbox 
                   id={`rating-${rating}`}
-                  checked={localFilters.hotelRatings.includes(rating)}
+                  checked={filters.hotelRatings.includes(rating)}
                   className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
                   onCheckedChange={(checked) => 
                     handleRatingChange(rating, checked as boolean)
@@ -123,7 +160,7 @@ export function HotelFilters() {
                 <Checkbox 
                   id={`amenity-${amenity}`}
                   className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
-                  checked={localFilters.amenities.includes(amenity)}
+                  checked={filters.amenities.includes(amenity)}
                   onCheckedChange={(checked) => 
                     handleAmenityChange(amenity, checked as boolean)
                   }

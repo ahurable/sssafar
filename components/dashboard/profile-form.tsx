@@ -36,6 +36,7 @@ export function ProfileForm() {
   const [emailVerificationCode, setEmailVerificationCode] = useState("")
   const [hasPhone, setHasPhone] = useState(false)
   const [hasEmail, setHasEmail] = useState(false)
+  const [email, setEmail] = useState()
   const [isPhoneVerified, setIsPhoneVerified] = useState(false)
   const [isEmailVerified, setIsEmailVerified] = useState(false)
   const [hasExistingData, setHasExistingData] = useState(false)
@@ -82,6 +83,14 @@ export function ProfileForm() {
           else{
             setPhoneNumber(data.user.phone)
             setHasPhone(true)
+          }
+          if (data.user.emailVerified == true) 
+            setIsEmailVerified(true)
+          if (!data.user.email || data.user.email.length == 0)
+            setHasEmail(false)
+          else {
+            setEmail(data.user.email)
+            setHasEmail(true)
           }
           // Check if any field has existing data
           const hasData = Object.values(userData).some(value => value && value.trim() !== "")
