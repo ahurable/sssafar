@@ -81,6 +81,7 @@ export default function FinancialManagement() {
       console.log(data)
       setTransactions(data.transactions || [])
       setFilteredTransactions(data || [])
+      setLoading(false)
     } catch (error) {
       console.error("Error fetching transactions:", error)
     } finally {
