@@ -99,17 +99,18 @@ const HotelSearch = () => {
       return [];
     }
 
-    try {
+    // try {
       const response = await fetch(`/api/hotels/search?q=${encodeURIComponent(query)}`);
       if (!response.ok) {
         throw new Error('Failed to fetch suggestions');
       }
       const data = await response.json();
+      console.log(data)
       return data.results || [];
-    } catch (error) {
-      console.error("Error fetching city suggestions:", error);
-      return [];
-    }
+    // } catch (error) {
+    //   console.error("Error fetching city suggestions:", error);
+    //   return [];
+    // }
   };
 
   // Fetch suggestions with debounce

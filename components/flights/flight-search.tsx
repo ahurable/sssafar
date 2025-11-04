@@ -160,20 +160,37 @@ const FlightSearch = () => {
 
     const handlePassengerChange = (type: 'adults' | 'children' | 'infants', operation: 'increment' | 'decrement') => {
         setFlightSearch(prev => {
-            const currentValue = prev[type]
-            let newValue = currentValue
+            const currentValue = prev[type];
+            let newValue = currentValue;
 
             if (operation === 'increment') {
-                const maxValues = { adults: 9, children: 8, infants: 4 }
-                newValue = Math.min(currentValue + 1, maxValues[type])
+                const maxValues = { adults: 9, children: 8, infants: 4 };
+                
+                // Calculate current total using all passenger types from prev state
+                const currentTotal = prev.adults + prev.children + prev.infants;
+                
+                // Check if adding one would exceed maximum total of 9
+                if (currentTotal >= 9) {
+                    return prev; // Don't allow increment - return previous state unchanged
+                }
+                
+                // Special validation for children - they must be less than adults
+                if (type === 'children') {
+                    // Children cannot be equal to or greater than adults
+                    if (prev.children >= prev.adults) {
+                        return prev; // Don't allow increment
+                    }
+                }
+
+                newValue = Math.min(currentValue + 1, maxValues[type]);
             } else {
-                const minValues = { adults: 1, children: 0, infants: 0 }
-                newValue = Math.max(currentValue - 1, minValues[type])
+                const minValues = { adults: 1, children: 0, infants: 0 };
+                newValue = Math.max(currentValue - 1, minValues[type]);
             }
 
-            return { ...prev, [type]: newValue }
-        })
-    }
+            return { ...prev, [type]: newValue };
+        });
+    };
 
     // Map cabin class to API cabin type
     const getCabinType = (cabinClass: string): string => {
@@ -197,8 +214,16 @@ const FlightSearch = () => {
     const router = useRouter()
 
     const handleFlightSearch = async () => {
-        if (!flightSearch.from || !flightSearch.to || !flightSearch.departureDate) {
-            alert("لطفا تمام فیلدهای ضروری را پر کنید")
+        if (!flightSearch.from) {
+            alert("لطفا مبداء خود را انتخاب کنید")
+            return
+        }
+        if (!flightSearch.to) {
+            alert("لطفا مقصد را انتخاب کنید")
+            return
+        }
+        if (!flightSearch.departureDate) {
+            alert("لطفا تاریخ رفت را انتخاب کنید")
             return
         }
 
@@ -448,7 +473,7 @@ const FlightSearch = () => {
                         <Input 
                             ref={fromInputRef}
                             id="flight-from" 
-                            placeholder="تهران (IKA), دبی (DXB)..." 
+                            placeholder="Tehran (IKA) for example" 
                             className={`pr-12 h-14 rounded-2xl border-2 bg-white text-gray-800 placeholder-gray-500 text-lg font-medium transition-all duration-300 ${
                                 isFieldFocused === "from"
                                     ? 'border-blue-500 scale-105 shadow-lg' 
@@ -482,7 +507,7 @@ const FlightSearch = () => {
                         <Input 
                             ref={toInputRef}
                             id="flight-to" 
-                            placeholder="استانبول (IST), لندن (LHR)..." 
+                            placeholder="Istanbul (ISL) for example" 
                             className={`pr-12 h-14 rounded-2xl border-2 bg-white text-gray-800 placeholder-gray-500 text-lg font-medium transition-all duration-300 ${
                                 isFieldFocused === "to"
                                     ? 'border-blue-500 scale-105 shadow-lg' 

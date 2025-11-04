@@ -1,17 +1,18 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { MapPin, Clock, Star, Check, X } from "lucide-react"
+import { MapPin, Clock, Star, Check, X, Plane } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 async function getCipServices() {
   // During build time, return empty array
   if (process.env.NODE_ENV === 'production' || !process.env.NEXT_PUBLIC_APP_URL) {
     return []
   }
-  
+
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/cip?published=true`, {
       next: { revalidate: 60 }
@@ -39,7 +40,20 @@ export default async function CipServicesPage() {
   }
 
   if (!services || services.length == 0) {
-    return <></>
+    return <>
+      <Card className="border-sky-100 bg-sky-50/50">
+          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-sky-100">
+              <Plane className="h-8 w-8 text-sky-600" />
+            </div>
+            <h3 className="mb-2 text-xl font-bold text-sky-800">هنوز خدمات CIP تعریف نشده</h3>
+            <p className="text-sky-600 mb-6">برای شروع سفر، اولین رزرو خود را انجام دهید</p>
+            <Link href="/">
+              <Button className="bg-sky-600 hover:bg-sky-700">بازگشت به صفحه اصلی</Button>
+            </Link>
+          </CardContent>
+        </Card>
+    </>
   }
 
   return (

@@ -207,7 +207,7 @@ export function Header() {
               </Link>
 
               <Link
-                href="/cip-services"
+                href="/cip"
                 className="flex items-center gap-4 w-full px-6 py-5 text-right rounded-2xl transition-all bg-white/80 backdrop-blur-sm border border-gray-200 hover:bg-white hover:shadow-lg hover:border-pink-200 group"
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -330,7 +330,7 @@ export function Header() {
               تورها
             </Link>
             <Link
-              href="/cip-services"
+              href="/cip"
               className="px-6 py-2 text-black rounded-full transition-all hover:scale-105 font-bold"
             >
               خدمات CIP

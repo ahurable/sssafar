@@ -25,7 +25,7 @@ const DomesticFlightSearch = () => {
         airline: 'ZV',
         origin: '',
         destination: '',
-        adults: 0,
+        adults: 1,
         children: 0,
         departureDate: '',
         cabinClass: '',
@@ -154,20 +154,37 @@ const DomesticFlightSearch = () => {
 
     const handlePassengerChange = (type: 'adults' | 'children' | 'infants', operation: 'increment' | 'decrement') => {
         setDomesticFlightSearch(prev => {
-            const currentValue = prev[type]
-            let newValue = currentValue
+            const currentValue = prev[type];
+            let newValue = currentValue;
 
             if (operation === 'increment') {
-                const maxValues = { adults: 9, children: 8, infants: 4 }
-                newValue = Math.min(currentValue + 1, maxValues[type])
+                const maxValues = { adults: 9, children: 8, infants: 4 };
+                
+                // Calculate current total using all passenger types from prev state
+                const currentTotal = prev.adults + prev.children + prev.infants;
+                
+                // Check if adding one would exceed maximum total of 9
+                if (currentTotal >= 9) {
+                    return prev; // Don't allow increment - return previous state unchanged
+                }
+                
+                // Special validation for children - they must be less than adults
+                if (type === 'children') {
+                    // Children cannot be equal to or greater than adults
+                    if (prev.children >= prev.adults) {
+                        return prev; // Don't allow increment
+                    }
+                }
+
+                newValue = Math.min(currentValue + 1, maxValues[type]);
             } else {
-                const minValues = { adults: 1, children: 0, infants: 0 }
-                newValue = Math.max(currentValue - 1, minValues[type])
+                const minValues = { adults: 1, children: 0, infants: 0 };
+                newValue = Math.max(currentValue - 1, minValues[type]);
             }
 
-            return { ...prev, [type]: newValue }
-        })
-    }
+            return { ...prev, [type]: newValue };
+        });
+    };
 
     // Map cabin class origin API cabin type
     const getCabinType = (cabinClass: string): string => {
@@ -191,8 +208,20 @@ const DomesticFlightSearch = () => {
     const router = useRouter()
 
     const handleDomesticFlightSearch = async () => {
-        if (!domesticFlightSearch.origin || !domesticFlightSearch.destination || !domesticFlightSearch.departureDate) {
-            alert("لطفا تمام فیلدهای ضروری را پر کنید")
+        if (!domesticFlightSearch.origin) {
+            alert("لطفا شهر مبداء را انتخاب کنید")
+            return
+        }
+        if (!domesticFlightSearch.destination) {
+            alert("لطفا شهر مقصد را انتخاب کنید")
+            return
+        }
+        if (!domesticFlightSearch.departureDate) {
+            alert("لطفا تاریخ رفت را انتخاب کنید")
+            return
+        }
+        if (domesticFlightSearch.tripType =="roundtrip" && !domesticFlightSearch.returnDate) {
+            alert("لطفا تاریخ برگشت را انتخاب کنید یا پرواز یک طرفه انتخاب کنید")
             return
         }
 
@@ -436,7 +465,7 @@ const DomesticFlightSearch = () => {
                         <Input 
                             ref={fromInputRef}
                             id="domestic-flight-from" 
-                            placeholder="تهران (IKA), مشهد (MHD)..." 
+                            placeholder="نام فرودگاه، مثال: تهران (IKA)" 
                             className={`pr-12 h-14 rounded-2xl border-2 bg-white text-gray-800 placeholder-gray-500 text-lg font-medium transition-all duration-300 ${
                                 isFieldFocused === "origin"
                                     ? 'border-blue-500 scale-105 shadow-lg' 
@@ -470,7 +499,7 @@ const DomesticFlightSearch = () => {
                         <Input 
                             ref={toInputRef}
                             id="domestic-flight-destination" 
-                            placeholder="مشهد (MHD), شیراز (SYZ)..." 
+                            placeholder="نام فرودگاه مقصد مثال: مشهد (MHD)" 
                             className={`pr-12 h-14 rounded-2xl border-2 bg-white text-gray-800 placeholder-gray-500 text-lg font-medium transition-all duration-300 ${
                                 isFieldFocused === "destination"
                                     ? 'border-blue-500 scale-105 shadow-lg' 

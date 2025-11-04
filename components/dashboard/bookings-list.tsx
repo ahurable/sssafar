@@ -3,8 +3,9 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Hotel, Plane, Train, Calendar, MapPin, Download, Loader2, AlertCircle, CheckCircle2 } from "lucide-react"
+import { Hotel, Plane, Train, Calendar, MapPin, Download, Loader2, AlertCircle, CheckCircle2, Router } from "lucide-react"
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 
 interface Booking {
   id: string
@@ -227,6 +228,7 @@ export function BookingsList() {
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -298,7 +300,7 @@ export function BookingsList() {
           </div>
           <h3 className="mb-2 text-xl font-bold text-sky-800">هنوز رزروی ندارید</h3>
           <p className="text-sky-600 mb-6">برای شروع سفر، اولین رزرو خود را انجام دهید</p>
-          <Button className="bg-sky-600 hover:bg-sky-700">شروع رزرو</Button>
+          <Button className="bg-sky-600 hover:bg-sky-700" onClick={() => router.push('/')}>شروع رزرو</Button>
         </CardContent>
       </Card>
     )
