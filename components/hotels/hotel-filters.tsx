@@ -7,41 +7,60 @@ import { Slider } from "@/components/ui/slider"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { useHotel } from "@/contexts/search/HotelContext"
+import { 
+  Sheet, 
+  SheetContent, 
+  SheetHeader, 
+  SheetTitle, 
+  SheetTrigger 
+} from "@/components/ui/sheet"
+import { 
+  Filter, 
+  X, 
+  Star,
+  Wifi,
+  Utensils,
+  Car,
+  Dumbbell,
+  Building,
+  DollarSign,
+  ChevronDown,
+  ChevronUp,
+  Sparkles
+} from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 
 interface FilterState {
   priceRange: [number, number]
   hotelRatings: string[]
   amenities: string[]
-  hotelTypes: string[] // Add this if you need hotel type filtering
+  hotelTypes: string[]
 }
 
 const defaultFilters: FilterState = {
-    priceRange: [0, 5000000],
-    hotelRatings: [],
-    amenities: [],
-    hotelTypes: [] // Add this
-  }
-
+  priceRange: [0, 5000000],
+  hotelRatings: [],
+  amenities: [],
+  hotelTypes: []
+}
 
 export function HotelFilters() {
-
-
   const { applyFilters, clearFilters, filteredHotels, hotelData } = useHotel()
   const [filters, setFilters] = useState(defaultFilters)
-  // Update local filters when context filters change
-  // useEffect(() => {
-  //   setFilters(filters)
-  //   // if(hotelData)
-  //   //   console.log(Math.min(...hotelData.PricedItineraries.map(f => f.NetRate / 10).filter(rate => typeof rate === 'number' && !isNaN(rate))),
-  //   //   Math.max(...hotelData.PricedItineraries.map(f => f.NetRate / 10).filter(rate => typeof rate === 'number' && !isNaN(rate))))
-  // }, [filters])
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    price: true,
+    rating: true,
+    amenities: true,
+    type: true
+  })
+  const [isSheetOpen, setIsSheetOpen] = useState(false)
 
   const availablePriceRange = hotelData && hotelData.PricedItineraries.length > 0 ? [
     Math.min(...hotelData.PricedItineraries.map(f => f.NetRate / 10).filter(rate => typeof rate === 'number' && !isNaN(rate))),
     Math.max(...hotelData.PricedItineraries.map(f => f.NetRate / 10).filter(rate => typeof rate === 'number' && !isNaN(rate)))
   ] : [0, 50000000];
 
-// Initialize price range when data loads
+  // Initialize price range when data loads
   useEffect(() => {
     if (hotelData && hotelData.PricedItineraries.length > 0) {
       setFilters(prev => ({
@@ -76,15 +95,23 @@ export function HotelFilters() {
     }))
   }
 
+  const handleHotelTypeChange = (type: string, checked: boolean) => {
+    setFilters(prev => ({
+      ...prev,
+      hotelTypes: checked 
+        ? [...prev.hotelTypes, type]
+        : prev.hotelTypes.filter(t => t !== type)
+    }))
+  }
+
   const handleApplyFilters = () => {
     applyFilters(filters)
-    console.log(availablePriceRange)
-    console.log(filters)
+    setIsSheetOpen(false)
   }
 
   const handleClearFilters = () => {
     setFilters({
-      priceRange: [0, 5000000],
+      priceRange: availablePriceRange as [number, number],
       hotelRatings: [],
       amenities: [],
       hotelTypes: []
@@ -92,26 +119,112 @@ export function HotelFilters() {
     clearFilters()
   }
 
-  const ratingOptions = ["5 ستاره", "4 ستاره", "3 ستاره", "2 ستاره"]
-  const amenityOptions = ["وای‌فای رایگان", "استخر", "رستوران", "پارکینگ", "سالن ورزشی"]
+  const toggleSection = (section: string) => {
+    setOpenSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }))
+  }
+
+  const getActiveFiltersCount = () => {
+    let count = 0
+    if (filters.priceRange[0] > availablePriceRange[0] || filters.priceRange[1] < availablePriceRange[1]) count++
+    count += filters.hotelRatings.length
+    count += filters.amenities.length
+    count += filters.hotelTypes.length
+    return count
+  }
+
+  const ratingOptions = [
+    { value: "5 ستاره", label: "۵ ستاره", stars: 5 },
+    { value: "4 ستاره", label: "۴ ستاره", stars: 4 },
+    { value: "3 ستاره", label: "۳ ستاره", stars: 3 },
+    { value: "2 ستاره", label: "۲ ستاره", stars: 2 }
+  ]
+
+  const amenityOptions = [
+    { value: "وای‌فای رایگان", label: "وای‌فای رایگان", icon: Wifi },
+    { value: "استخر", label: "استخر", icon: Sparkles },
+    { value: "رستوران", label: "رستوران", icon: Utensils },
+    { value: "پارکینگ", label: "پارکینگ", icon: Car },
+    { value: "سالن ورزشی", label: "سالن ورزشی", icon: Dumbbell }
+  ]
+
+  const hotelTypeOptions = [
+    { value: "هتل", label: "هتل", description: "اقامتگاه کامل" },
+    { value: "مهمانپذیر", label: "مهمانپذیر", description: "اقامتگاه اقتصادی" },
+    { value: "ویلا", label: "ویلا", description: "اقامتگاه مستقل" },
+    { value: "اقامتگاه بومگردی", label: "اقامتگاه بومگردی", description: "تجربه محلی" }
+  ]
 
   const totalHotels = hotelData?.PricedItineraries?.length || 0
   const showingHotels = filteredHotels.length
 
-  return (
-    <Card className="sticky top-20 py-6">
-      <CardHeader>
-        <CardTitle className="flex justify-between items-center">
-          <span>فیلترها</span>
-          <span className="text-sm font-normal text-muted-foreground">
+  const FilterSection = ({ 
+    title, 
+    sectionKey, 
+    icon: Icon, 
+    children 
+  }: { 
+    title: string
+    sectionKey: string
+    icon: any
+    children: React.ReactNode
+  }) => (
+    <div className="border-b border-gray-100 pb-4 p-4 last:border-0">
+      <button
+        onClick={() => toggleSection(sectionKey)}
+        className="flex items-center justify-between w-full py-3 text-right"
+      >
+        <div className="flex items-center gap-2">
+          <Icon className="h-4 w-4 text-gray-500" />
+          <span className="font-medium text-gray-900">{title}</span>
+        </div>
+        {openSections[sectionKey] ? (
+          <ChevronUp className="h-4 w-4 text-gray-500" />
+        ) : (
+          <ChevronDown className="h-4 w-4 text-gray-500" />
+        )}
+      </button>
+      {openSections[sectionKey] && (
+        <div className="mt-2 space-y-3">
+          {children}
+        </div>
+      )}
+    </div>
+  )
+
+  const FilterContent = () => (
+    <div className="space-y-6">
+      {/* Results Count */}
+      <div className="bg-blue-50 rounded-lg p-3">
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-blue-700 font-medium">نتایج جستجو:</span>
+          <span className="text-blue-800 font-semibold">
             {showingHotels} از {totalHotels} هتل
           </span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Price Range Filter */}
-        <div className="space-y-3">
-          <Label>محدوده قیمت (تومان)</Label>
+        </div>
+      </div>
+
+      {/* Active Filters Badge */}
+      {getActiveFiltersCount() > 0 && (
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-gray-600">فیلترهای فعال:</span>
+          <Badge variant="secondary" className="bg-emerald-50 text-emerald-700">
+            {getActiveFiltersCount()} فیلتر
+          </Badge>
+        </div>
+      )}
+
+      {/* Price Range Filter */}
+      <FilterSection title="محدوده قیمت" sectionKey="price" icon={DollarSign}>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <Label className="text-sm font-medium">قیمت هر شب (تومان)</Label>
+            <span className="text-xs bg-emerald-50 text-emerald-700 px-2 py-1 rounded-full">
+              {filters.priceRange[0].toLocaleString('fa-IR')} - {filters.priceRange[1].toLocaleString('fa-IR')}
+            </span>
+          </div>
           <Slider 
             value={filters.priceRange}
             onValueChange={handlePriceChange}
@@ -120,105 +233,218 @@ export function HotelFilters() {
             step={100000}
             className="mt-2"
           />
-          <div className="flex justify-between text-sm">
-            <span>{filters.priceRange[0].toLocaleString("fa-IR")}</span>
-            <span>{filters.priceRange[1].toLocaleString("fa-IR")}</span>
+          <div className="flex justify-between text-xs text-gray-500">
+            <span>{availablePriceRange[0].toLocaleString('fa-IR')}</span>
+            <span>{availablePriceRange[1].toLocaleString('fa-IR')}</span>
           </div>
         </div>
+      </FilterSection>
 
-        {/* Hotel Rating Filter */}
+      {/* Hotel Rating Filter */}
+      <FilterSection title="ستاره هتل" sectionKey="rating" icon={Star}>
         <div className="space-y-3">
-          <Label>امتیاز هتل</Label>
-          <div className="space-y-2">
-            {ratingOptions.map((rating) => (
-              <div key={rating} className="flex items-center gap-2">
-                <Checkbox 
-                  id={`rating-${rating}`}
-                  checked={filters.hotelRatings.includes(rating)}
-                  className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
-                  onCheckedChange={(checked) => 
-                    handleRatingChange(rating, checked as boolean)
-                  }
-                />
+          {ratingOptions.map((rating) => (
+            <div key={rating.value} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+              <Checkbox 
+                id={`rating-${rating.value}`}
+                checked={filters.hotelRatings.includes(rating.value)}
+                className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
+                onCheckedChange={(checked) => 
+                  handleRatingChange(rating.value, checked as boolean)
+                }
+              />
+              <div className="flex-1 text-right">
                 <label 
-                  htmlFor={`rating-${rating}`} 
-                  className="text-sm cursor-pointer flex-1"
+                  htmlFor={`rating-${rating.value}`} 
+                  className="text-sm font-medium cursor-pointer block"
                 >
-                  {rating}
+                  {rating.label}
                 </label>
+                <div className="flex gap-1 mt-1 justify-end">
+                  {Array.from({ length: rating.stars }).map((_, i) => (
+                    <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                  ))}
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Amenities Filter */}
-        <div className="space-y-3">
-          <Label>امکانات</Label>
-          <div className="space-y-2">
-            {amenityOptions.map((amenity) => (
-              <div key={amenity} className="flex items-center gap-2">
-                <Checkbox 
-                  id={`amenity-${amenity}`}
-                  className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
-                  checked={filters.amenities.includes(amenity)}
-                  onCheckedChange={(checked) => 
-                    handleAmenityChange(amenity, checked as boolean)
-                  }
-                />
-                <label 
-                  htmlFor={`amenity-${amenity}`} 
-                  className="text-sm cursor-pointer flex-1"
-                >
-                  {amenity}
-                </label>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex gap-2 pt-4">
-          <Button 
-            onClick={handleApplyFilters}
-            className="flex-1 bg-emerald-600"
-            size="sm"
-          >
-            اعمال فیلترها
-          </Button>
-          <Button 
-            onClick={handleClearFilters}
-            variant="outline"
-            size="sm"
-          >
-            حذف فیلترها
-          </Button>
-        </div>
-
-        {/* Active Filters */}
-        {(filters.hotelRatings.length > 0 || filters.amenities.length > 0) && (
-          <div className="pt-4 border-t">
-            <Label className="text-sm text-green-400">فیلترهای فعال:</Label>
-            <div className="flex flex-wrap gap-1 mt-2">
-              {filters.hotelRatings.map(rating => (
-                <span 
-                  key={rating}
-                  className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
-                >
-                  {rating}
-                </span>
-              ))}
-              {filters.amenities.map(amenity => (
-                <span 
-                  key={amenity}
-                  className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded"
-                >
-                  {amenity}
-                </span>
-              ))}
             </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          ))}
+        </div>
+      </FilterSection>
+
+      {/* Amenities Filter */}
+      <FilterSection title="امکانات هتل" sectionKey="amenities" icon={Sparkles}>
+        <div className="space-y-3">
+          {amenityOptions.map((amenity) => {
+            const AmenityIcon = amenity.icon
+            return (
+              <div key={amenity.value} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                <Checkbox 
+                  id={`amenity-${amenity.value}`}
+                  checked={filters.amenities.includes(amenity.value)}
+                  className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
+                  onCheckedChange={(checked) => 
+                    handleAmenityChange(amenity.value, checked as boolean)
+                  }
+                />
+                <div className="flex items-center gap-2 flex-1 text-right">
+                  <AmenityIcon className="h-4 w-4 text-gray-500" />
+                  <label 
+                    htmlFor={`amenity-${amenity.value}`} 
+                    className="text-sm font-medium cursor-pointer flex-1"
+                  >
+                    {amenity.label}
+                  </label>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </FilterSection>
+
+      {/* Hotel Type Filter */}
+      <FilterSection title="نوع اقامتگاه" sectionKey="type" icon={Building}>
+        <div className="space-y-3">
+          {hotelTypeOptions.map((type) => (
+            <div key={type.value} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+              <Checkbox 
+                id={`type-${type.value}`}
+                checked={filters.hotelTypes.includes(type.value)}
+                className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
+                onCheckedChange={(checked) => 
+                  handleHotelTypeChange(type.value, checked as boolean)
+                }
+              />
+              <div className="flex-1 text-right">
+                <label 
+                  htmlFor={`type-${type.value}`} 
+                  className="text-sm font-medium cursor-pointer block"
+                >
+                  {type.label}
+                </label>
+                <span className="text-xs text-gray-500">{type.description}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </FilterSection>
+    </div>
+  )
+
+  return (
+    <>
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:block">
+        <Card className="sticky top-20 shadow-sm border-0">
+          <CardHeader className="pb-3 border-b">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Filter className="h-5 w-5" />
+                فیلترهای هتل
+              </CardTitle>
+              {getActiveFiltersCount() > 0 && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleClearFilters}
+                  className="text-xs text-gray-500 hover:text-gray-700 h-8"
+                >
+                  حذف همه
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent className="p-4">
+            <FilterContent />
+            <div className="flex gap-2 pt-4">
+              <Button 
+                onClick={handleApplyFilters}
+                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium h-12 text-base"
+              >
+                اعمال فیلترها
+              </Button>
+              <Button 
+                onClick={handleClearFilters}
+                variant="outline"
+                className="h-12"
+              >
+                حذف
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Mobile Filter Button */}
+      <div className="lg:hidden fixed bottom-6 left-6 right-6 z-40">
+        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+          <SheetTrigger asChild>
+            <Button className="w-full shadow-lg h-14 text-lg font-medium bg-emerald-600 hover:bg-emerald-700 text-white">
+              <Filter className="h-5 w-5 ml-2" />
+              فیلترهای هتل
+              {getActiveFiltersCount() > 0 && (
+                <Badge className="mr-2 bg-white text-emerald-600 px-2 py-1 text-xs">
+                  {getActiveFiltersCount()}
+                </Badge>
+              )}
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="bottom" className="h-[90vh] rounded-t-3xl">
+            <SheetHeader className="border-b pb-4">
+              <div className="flex items-center justify-between">
+                <SheetTitle className="flex items-center gap-2 text-lg">
+                  <Filter className="h-5 w-5" />
+                  فیلترهای هتل
+                </SheetTitle>
+                <div className="flex items-center gap-2">
+                  {getActiveFiltersCount() > 0 && (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={handleClearFilters}
+                      className="text-xs text-gray-500 hover:text-gray-700"
+                    >
+                      حذف همه
+                    </Button>
+                  )}
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setIsSheetOpen(false)}
+                    className="p-2"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </SheetHeader>
+            <div className="h-[calc(90vh-140px)] overflow-y-auto py-4">
+              <FilterContent />
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t">
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handleApplyFilters}
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium h-14 text-lg"
+                  size="lg"
+                >
+                  نمایش نتایج
+                  <span className="text-emerald-100 mr-2">
+                    ({showingHotels} هتل)
+                  </span>
+                </Button>
+                <Button 
+                  onClick={handleClearFilters}
+                  variant="outline"
+                  className="h-14 text-lg"
+                  size="lg"
+                >
+                  حذف
+                </Button>
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+    </>
   )
 }

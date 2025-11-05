@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import path from 'path';
-import fs from 'fs/promises';
 
 // Types for Domestic Hotel Data
 interface DomesticCity {
@@ -47,42 +45,51 @@ export async function GET(request: NextRequest) {
     const results: CitySuggestion[] = [];
 
     // Search in Domestic Hotel Data
-        const domesticPath = path.join(process.cwd(), 'assets', 'DomesticPropertyCity.json');
-        const domesticData = await fs.readFile(domesticPath, 'utf-8');
-        const domesticCities: DomesticCity[] = JSON.parse(domesticData);
-
-        const domesticMatches = domesticCities.filter(city => 
-          city.Name.toLowerCase().includes(query) || 
-          city.NameFa.toLowerCase().includes(query)
-        ).map(city => ({
-          id: city.Id,
-          name: city.Name,
-          nameFa: city.NameFa,
-          propertyDestinationId: city.PropertyDestinationId,
-          type: 'domestic' as const,
-          isPopular: city.IsPopular,
-          searchDestinationOrCity: city.SearchDestinationOrCity,
-          isActive: city.IsActive
-        }));
-
-        results.push(...domesticMatches);
-      
-        const internationalPath = path.join(process.cwd(), 'assets', 'PropertyCity.json');
-        const internationalData = await fs.readFile(internationalPath, 'utf-8');
-        const internationalCities: InternationalCity[] = JSON.parse(internationalData);
-
-        const internationalMatches = internationalCities.filter(city => 
-          city.Name.toLowerCase().includes(query)
-        ).map(city => ({
-          id: city.Id,
-          name: city.Name,
-          propertyDestinationId: city.PropertyDestinationId,
-          type: 'international' as const
-        }));
-        console.log(internationalMatches)
-        results.push(...internationalMatches);
-     
+    const domesticResponse = await fetch('http://localhost:3000/data/DomesticPropertyCity.json');
     
+    if (!domesticResponse.ok) {
+      throw new Error(`Failed to fetch domestic cities data: ${domesticResponse.status}`);
+    }
+    
+    const domesticCities: DomesticCity[] = await domesticResponse.json();
+
+    const domesticMatches = domesticCities.filter(city => 
+      city.Name.toLowerCase().includes(query) || 
+      (city.NameFa && city.NameFa.toLowerCase().includes(query))
+    ).map(city => ({
+      id: city.Id,
+      name: city.Name,
+      nameFa: city.NameFa,
+      propertyDestinationId: city.PropertyDestinationId,
+      type: 'domestic' as const,
+      isPopular: city.IsPopular,
+      searchDestinationOrCity: city.SearchDestinationOrCity,
+      isActive: city.IsActive
+    }));
+
+    results.push(...domesticMatches);
+
+    // Search in International Hotel Data
+    const internationalResponse = await fetch('http://localhost:3000/data/PropertyCity.json');
+    
+    if (!internationalResponse.ok) {
+      throw new Error(`Failed to fetch international cities data: ${internationalResponse.status}`);
+    }
+    
+    const internationalCities: InternationalCity[] = await internationalResponse.json();
+
+    const internationalMatches = internationalCities.filter(city => 
+      city.Name.toLowerCase().includes(query)
+    ).map(city => ({
+      id: city.Id,
+      name: city.Name,
+      propertyDestinationId: city.PropertyDestinationId,
+      type: 'international' as const
+    }));
+    
+    console.log(internationalMatches)
+    results.push(...internationalMatches);
+
     console.log(results)
     // Sort results by relevance (exact matches first, then partial matches)
     const sortedResults = results.sort((a, b) => {
@@ -110,7 +117,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Error in cities search API:', error);
     return NextResponse.json(
-      { error: error },
+      { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
     );
   }
