@@ -658,7 +658,7 @@ export function InvoiceComponent({
                     <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                       <Label className="text-sm text-blue-700 font-medium">نوع پرواز</Label>
                       <p className="font-bold text-blue-900 mt-1">
-                        {invoice.flightType === "one-way" ? "یک طرفه" : "رفت و برگشت"}
+                        {invoice.flightType === "OneWay" ? "یک طرفه" : "رفت و برگشت"}
                       </p>
                     </div>
 

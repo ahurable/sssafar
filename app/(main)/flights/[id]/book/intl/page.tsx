@@ -37,6 +37,7 @@ export default function OneWayReservation() {
   const [loading, setLoading] = useState(false)
   const [revalidateData, setRevalidateData] = useState<any>(null)
   const [flightDetails, setFlightDetails] = useState<any>(null)
+  const [returnFlightDetails, setReturnFlightDetails] = useState<any>(null)
   const [services, setServices] = useState<any[]>([])
   const [selectedServices, setSelectedServices] = useState<any[]>([])
   const router = useRouter()
@@ -69,8 +70,9 @@ export default function OneWayReservation() {
         if (revalidateResult.Success && revalidateResult.PricedItinerary) {
           const itinerary = revalidateResult.PricedItinerary
           const firstOption = itinerary.OriginDestinationOptions[0]
+          const secondOption = itinerary.OriginDestinationOptions[1]
           const firstSegment = firstOption?.FlightSegments[0]
-          
+          const secondSegment = secondOption?.FlightSegments[0]
           if (firstSegment) {
             const departureInfo = formatDateTime(firstSegment.DepartureDateTime)
             const arrivalInfo = formatDateTime(firstSegment.ArrivalDateTime)
@@ -91,6 +93,29 @@ export default function OneWayReservation() {
               baggage: firstSegment.Baggage,
               terminal: firstSegment.DepartureTerminal
             })
+          }
+
+          if (secondSegment) {
+            const departureInfo = formatDateTime(secondSegment.DepartureDateTime)
+            const arrivalInfo = formatDateTime(secondSegment.ArrivalDateTime)
+            
+            setReturnFlightDetails({
+                airline: getAirlineName(itinerary.ValidatingAirlineCode),
+                flightNumber: secondSegment.FlightNumber,
+                from: secondSegment.DepartureAirportLocationCode,
+                to: secondSegment.ArrivalAirportLocationCode,
+                departureTime: departureInfo.time,
+                arrivalTime: arrivalInfo.time,
+                date: departureInfo.date,
+                duration: secondSegment.JourneyDuration,
+                class: getCabinClass(secondSegment.CabinClassCode),
+                price: itinerary.AirItineraryPricingInfo.ItinTotalFare.TotalFare / 10, // Convert to Toman
+                aircraft: secondSegment.OperatingAirline?.Equipment || "نامشخص",
+                capacity: secondSegment.SeatsRemaining,
+                baggage: secondSegment.Baggage,
+                terminal: secondSegment.DepartureTerminal
+              })
+            
           }
 
           // Set available services
@@ -378,8 +403,66 @@ export default function OneWayReservation() {
                     </div>
                   </div>
                 </CardContent>
-              </Card>
+                { returnFlightDetails && 
+                <CardContent className="p-6">
+                  <h1 className="pb-6 font-bold">برگشت: </h1>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100">
+                          <Plane className="h-6 w-6 text-blue-800" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold">{returnFlightDetails.airline}</h3>
+                          <p className="text-sm text-muted-foreground">شماره پرواز: {returnFlightDetails.flightNumber}</p>
+                        </div>
+                      </div>
+                    </div>
 
+                    <div className="grid grid-cols-3 gap-4 items-center pt-4 border-t">
+                      <div className="text-center">
+                        <p className="text-xl font-bold">{returnFlightDetails.departureTime}</p>
+                        <p className="text-sm text-muted-foreground">{returnFlightDetails.from}</p>
+                        {returnFlightDetails.terminal && (
+                          <p className="text-xs text-gray-500">ترمینال {returnFlightDetails.terminal}</p>
+                        )}
+                      </div>
+                      <div className="text-center">
+                        <div className="flex items-center justify-center gap-2 mb-1">
+                          <div className="h-px flex-1 bg-border" />
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <div className="h-px flex-1 bg-border" />
+                        </div>
+                        <p className="text-xs text-muted-foreground">{returnFlightDetails.duration}</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-xl font-bold">{returnFlightDetails.arrivalTime}</p>
+                        <p className="text-sm text-muted-foreground">{returnFlightDetails.to}</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                      <div>
+                        <p className="text-sm text-muted-foreground">تاریخ پرواز</p>
+                        <p className="font-medium">{returnFlightDetails.date}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">کلاس</p>
+                        <p className="font-medium">{returnFlightDetails.class}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">هواپیما</p>
+                        <p className="font-medium">{returnFlightDetails.aircraft}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">بار مجاز</p>
+                        <p className="font-medium">{returnFlightDetails.baggage || "اطلاعات موجود نیست"}</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+                }
+              </Card>
               {/* Additional Services */}
               {services.length > 0 && (
                 <Card className="py-6">
