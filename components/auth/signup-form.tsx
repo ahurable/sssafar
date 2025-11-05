@@ -118,11 +118,11 @@ export function SignUpForm() {
 
             <TabsContent value="email" className="space-y-4 animate-in fade-in duration-300">
               <div className="space-y-3">
-                <Label htmlFor="signup-email" className="text-sm font-semibold text-gray-700">
+                <Label htmlFor="signup-email" className="text-sm font-semibold float-right text-gray-700">
                   آدرس ایمیل
                 </Label>
                 <div className="relative">
-                  <Mail className="absolute right-4 top-3 h-5 w-5 text-red-500" />
+                  <Mail className="absolute right-4 top-11 h-5 w-5 text-red-500" />
                   <Input
                     id="signup-email"
                     type="email"
@@ -138,11 +138,11 @@ export function SignUpForm() {
 
             <TabsContent value="phone" className="space-y-4 animate-in fade-in duration-300">
               <div className="space-y-3">
-                <Label htmlFor="signup-phone" className="text-sm font-semibold text-gray-700">
+                <Label htmlFor="signup-phone" className="text-sm font-semibold text-gray-700 float-right">
                   شماره موبایل
                 </Label>
                 <div className="relative">
-                  <Phone className="absolute right-4 top-3 h-5 w-5 text-pink-500" />
+                  <Phone className="absolute right-4 top-11 h-5 w-5 text-pink-500" />
                   <Input
                     id="signup-phone"
                     type="tel"

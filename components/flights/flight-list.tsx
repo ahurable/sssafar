@@ -55,9 +55,10 @@ export function FlightList({ flights, area, itemsPerPage = 10 }: FlightListProps
   const [currentPage, setCurrentPage] = useState(1)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const [selectedDate, setSelectedDate] = useState<string>("")
+  const [userLoading, setUserLoading] = useState(true)
   const router = useRouter()
   const { getAirlineName, flightRequest, setFlightRequest, searchFlights } = useFlight()
-
+  const [user, setUser] = useState<any>(null)
   // Calculate pagination
   const totalPages = Math.ceil(flights.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
@@ -75,6 +76,24 @@ export function FlightList({ flights, area, itemsPerPage = 10 }: FlightListProps
     }
     
     return dates
+  }
+
+  useEffect(() => {
+    getUser()
+  }, [])
+
+  const getUser = async () => {
+    const response = await fetch('/api/auth/me')
+    const data = await response.json()
+    // console.log(data)
+    if (response.ok) {
+      setUser(data.user)
+      setUserLoading(false)
+    }
+    else {
+      setUser(null)
+      setUserLoading(false)
+    }
   }
 
   const dateOptions = generateDates()
@@ -388,12 +407,38 @@ export function FlightList({ flights, area, itemsPerPage = 10 }: FlightListProps
                     </div>
                     
                     {/* Booking Button */}
-                    <Button 
-                      onClick={() => handleBookFlight(flight.FareSourceCode, area)}
-                      className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-xl font-bold shadow-md hover:shadow-lg transition-all"
-                    >
-                      خرید بلیط
-                    </Button>
+                    
+                    {user && user.phoneVerified && user.emailVerified && (
+                      <Button 
+                        onClick={() => handleBookFlight(flight.FareSourceCode, area)}
+                        className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-xl font-bold shadow-md hover:shadow-lg transition-all"
+                      >
+                        خرید بلیط
+                      </Button>
+                    )}
+
+                    {!user && (
+                      <Button 
+                        onClick={() => router.push('/auth/signin')}
+                        className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-xl font-bold shadow-md hover:shadow-lg transition-all"
+                      >
+                        برای خرید بلیط وارد حساب شوید
+                      </Button>
+                    )}
+
+                    {user && (!user.phoneVerified || !user.emailVerified) && (
+                      <Button 
+                        onClick={() => router.push('/dashboard')}
+                        className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-xl font-bold shadow-md hover:shadow-lg transition-all"
+                      >
+                        {!user.phoneVerified && !user.emailVerified 
+                          ? "ایمیل و موبایل خود را تایید کنید" 
+                          : !user.phoneVerified 
+                            ? "موبایل خود را تایید کنید"
+                            : "ایمیل خود را تایید کنید"
+                        }
+                      </Button>
+)}
                   </div>
                 </div>
               </CardContent>

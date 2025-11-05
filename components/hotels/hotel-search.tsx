@@ -562,7 +562,7 @@ const HotelSearch = () => {
           <ShamsiDateModal
             departureDate={hotelSearch.checkIn}
             returnDate={hotelSearch.checkOut}
-            tripType="oneway" // Fixed for hotel search
+            tripType="roundtrip" // Fixed for hotel search
             onDepartureDateChange={handleCheckInDateChange}
             onReturnDateChange={handleCheckOutDateChange}
             onTripTypeChange={handleTripTypeChange}

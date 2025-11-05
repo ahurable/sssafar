@@ -62,7 +62,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (!session)
     redirect('/')
   
-  if (session && session.role != "ADMIN")
+  if (session && session.role != "ADMIN" || session && session.role != "ACCOUNTANT")
     redirect('/')
   return (
     <html dir="rtl">

@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
 
 async function sendVerificationEmail(email: string, code: string) {
   // Create transporter based on environment
-  const transporter = nodemailer.createTransporter({
+  const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: parseInt(process.env.SMTP_PORT || '587'),
     secure: false, // true for 465, false for other ports
