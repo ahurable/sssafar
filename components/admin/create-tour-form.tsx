@@ -54,6 +54,7 @@ export function CreateTourForm() {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
+    city: "",
     startDate: "",
     endDate: "",
     featured: false,
@@ -229,6 +230,16 @@ export function CreateTourForm() {
               id="title"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="title">نام شهر *</Label>
+            <Input
+              id="title"
+              value={formData.city}
+              onChange={(e) => setFormData({ ...formData, city: e.target.value })}
               required
             />
           </div>

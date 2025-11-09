@@ -5,6 +5,7 @@ import { FeaturedBlogSection } from "@/components/home/featured-blog-section"
 import { StatsSection } from "@/components/home/stats-section"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
+import { FAQSection } from "@/components/faq/faq-section"
 
 export default function HomePage() {
   return (
@@ -15,7 +16,7 @@ export default function HomePage() {
         <HeroSection />
         <FeaturesSection />
         <StatsSection />
-        <FeaturedBlogSection />
+        <FAQSection />
       </main>
       <Footer />
     </div>

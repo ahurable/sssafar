@@ -27,7 +27,8 @@ interface ShamsiDateModalProps {
   onReturnDateChange: (date: string) => void
   onTripTypeChange: (type: string) => void
   error?: string,
-  errorColor?: string
+  errorColor?: string,
+  normalReturnCal?: boolean
 }
 
 const ShamsiDateModal = ({
@@ -38,7 +39,8 @@ const ShamsiDateModal = ({
   onReturnDateChange,
   onTripTypeChange,
   error,
-  errorColor
+  errorColor,
+  normalReturnCal
 }: ShamsiDateModalProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedDepartureDate, setSelectedDepartureDate] = useState<string>(departureDate)
@@ -215,7 +217,7 @@ const ShamsiDateModal = ({
               </Button>
             </div>
           </div>
-
+          { !normalReturnCal &&
           <div className="flex items-center gap-4 mb-6">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
@@ -227,6 +229,7 @@ const ShamsiDateModal = ({
               <span className="text-lg font-medium text-gray-800">رفت و برگشت</span>
             </label>
           </div>
+          }
 
           <div className="grid grid-cols-2 gap-8">
             {/* Departure Calendar */}

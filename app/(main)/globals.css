@@ -1,6 +1,17 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import 'leaflet/dist/leaflet.css';
 
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+  border-radius: 0.5rem;
+}
+
+.custom-location-marker {
+  background: transparent !important;
+  border: none !important;
+}
 @custom-variant dark (&:is(.dark *));
 
 :root {

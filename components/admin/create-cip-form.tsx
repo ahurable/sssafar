@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,6 +10,13 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Plus, Trash2, ArrowRight, Upload, X, Image as ImageIcon } from "lucide-react"
 import { toast } from "sonner"
+
+interface AirportSuggestion {
+  id: string,
+  name: string,
+  airportIata: string,
+  airportCity: string
+}
 
 export function CreateCipForm() {
   const router = useRouter()
@@ -21,7 +28,7 @@ export function CreateCipForm() {
     title: "",
     description: "",
     image: "",
-    airport: "",
+    airportId: "", // Changed from airport to airportId
     price: "",
     duration: "",
     features: [""],
@@ -30,7 +37,87 @@ export function CreateCipForm() {
     priority: "0",
     published: false,
     featured: false,
+    entry: false,
+    deferent: false
   })
+  const [airportSuggestions, setAirportSuggestions] = useState<AirportSuggestion[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [airportSearch, setAirportSearch] = useState("")
+
+  const fetchAirportSuggestions = async (q: string) => {
+    if (q.length < 2) {
+      setAirportSuggestions([])
+      setShowSuggestions(false)
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/admin/settings/airports?q=${q}`)
+      if (response.ok) {
+        const data = await response.json()
+        setAirportSuggestions(data)
+        setShowSuggestions(data.length > 0)
+      }
+    } catch (error) {
+      console.error("Error fetching airport suggestions:", error)
+      setAirportSuggestions([])
+      setShowSuggestions(false)
+    }
+  }
+
+  const handleAirportSearchChange = (value: string) => {
+    setAirportSearch(value)
+    if (!value) {
+      setFormData(prev => ({ ...prev, airportId: "" }))
+      setShowSuggestions(false)
+    } else {
+      fetchAirportSuggestions(value)
+    }
+  }
+
+  const handleAirportSelect = (airport: AirportSuggestion) => {
+    setFormData(prev => ({ ...prev, airportId: airport.id }))
+    setAirportSearch(`${airport.name} (${airport.airportIata}) - ${airport.airportCity}`)
+    setShowSuggestions(false)
+    setAirportSuggestions([])
+  }
+
+  const handleClickOutside = (event: MouseEvent) => {
+    const target = event.target as HTMLElement
+    if (!target.closest('.airport-suggestions-container')) {
+      setShowSuggestions(false)
+    }
+  }
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
+
+  const renderAirportSuggestions = () => {
+    if (!showSuggestions || airportSuggestions.length === 0) {
+      return null
+    }
+
+    return (
+      <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto airport-suggestions-container">
+        {airportSuggestions.map((airport) => (
+          <div
+            key={airport.id}
+            className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
+            onClick={() => handleAirportSelect(airport)}
+          >
+            <div className="font-medium text-gray-900">{airport.name}</div>
+            <div className="text-sm text-gray-600">
+              {airport.airportIata} - {airport.airportCity}
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
 
   const handleImageUpload = async (file: File) => {
     setUploading(true)
@@ -83,6 +170,12 @@ export function CreateCipForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    if (!formData.airportId) {
+      toast.error("لطفا یک فرودگاه انتخاب کنید")
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -95,7 +188,7 @@ export function CreateCipForm() {
           title: formData.title,
           description: formData.description || undefined,
           image: formData.image || undefined,
-          airport: formData.airport,
+          airportId: formData.airportId, // Changed from airport to airportId
           price: formData.price ? parseFloat(formData.price) : undefined,
           duration: formData.duration || undefined,
           features: formData.features.filter(f => f.trim()),
@@ -104,6 +197,8 @@ export function CreateCipForm() {
           priority: parseInt(formData.priority),
           published: formData.published,
           featured: formData.featured,
+          entry: formData.entry,
+          deferent: formData.deferent
         }),
       })
 
@@ -166,15 +261,19 @@ export function CreateCipForm() {
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 relative">
                 <Label htmlFor="airport">فرودگاه *</Label>
                 <Input
                   id="airport"
-                  value={formData.airport}
-                  onChange={(e) => setFormData(prev => ({ ...prev, airport: e.target.value }))}
+                  value={airportSearch}
+                  onChange={(e) => handleAirportSearchChange(e.target.value)}
                   placeholder="مثلا: امام خمینی (تهران)"
                   required
                 />
+                {renderAirportSuggestions()}
+                {formData.airportId && (
+                  <input type="hidden" name="airportId" value={formData.airportId} />
+                )}
               </div>
             </div>
 
@@ -473,6 +572,32 @@ export function CreateCipForm() {
                   id="featured"
                   checked={formData.featured}
                   onCheckedChange={(checked) => setFormData(prev => ({ ...prev, featured: checked }))}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="featured" className="text-base">ورودس</Label>
+                  <p className="text-sm text-muted-foreground">
+                    خدمت برای پرواز های ورودی فعال باشد؟
+                  </p>
+                </div>
+                <Switch
+                  id="featured"
+                  checked={formData.entry}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, entry: checked }))}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="featured" className="text-base">خروجی</Label>
+                  <p className="text-sm text-muted-foreground">
+                    خدمت برای پرواز های خروجی فعال باشد؟
+                  </p>
+                </div>
+                <Switch
+                  id="featured"
+                  checked={formData.deferent}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, deferent: checked }))}
                 />
               </div>
             </div>

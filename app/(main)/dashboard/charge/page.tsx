@@ -46,22 +46,6 @@ export default function ChargeCreditPage() {
       color: "text-blue-600",
       bgColor: "bg-blue-50",
       popular: true
-    },
-    {
-      id: "wallet",
-      name: "کیف پول الکترونیکی",
-      description: "پرداخت از طریق کیف پول های دیجیتال",
-      icon: Wallet,
-      color: "text-green-600",
-      bgColor: "bg-green-50"
-    },
-    {
-      id: "crypto",
-      name: "ارز دیجیتال",
-      description: "پرداخت با ارزهای دیجیتال",
-      icon: Zap,
-      color: "text-orange-600",
-      bgColor: "bg-orange-50"
     }
   ]
 

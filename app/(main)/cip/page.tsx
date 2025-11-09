@@ -103,7 +103,7 @@ export default async function CipServicesPage() {
                   <div className="space-y-3 mb-4">
                     <div className="flex items-center text-sm text-gray-500">
                       <MapPin className="h-4 w-4 ml-1" />
-                      <span>فرودگاه {service.airport}</span>
+                      <span>فرودگاه {service.airport && service.airport.name}</span>
                     </div>
                     
                     {service.duration && (

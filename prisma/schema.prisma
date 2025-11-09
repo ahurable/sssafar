@@ -173,14 +173,14 @@ model Train {
 }
 
 model Tour {
-  id          String   @id @default(cuid())
+  id          String          @id @default(cuid())
   title       String
   description String
   startDate   DateTime
   endDate     DateTime
-  isActive    Boolean  @default(true)
-  featured    Boolean  @default(false)
-
+  isActive    Boolean         @default(true)
+  featured    Boolean         @default(false)
+  city        String?
   // ارتباط با مدل‌های موجود
   prices      TourPrice[]
   itineraries TourItinerary[]
@@ -292,6 +292,79 @@ model TourTransport {
   createdAt DateTime @default(now())
 
   @@map("tour_transports")
+}
+
+model CityTour {
+  id               String   @id @default(cuid())
+  title            String
+  slug             String   @unique
+  description      String
+  shortDescription String
+  city             String
+  location         String
+  latitude         Float?
+  longitude        Float?
+  meetingPoint     String
+  meetingLatitude  Float?
+  meetingLongitude Float?
+  duration         Int // in minutes
+  maxCapacity      Int
+  featured         Boolean  @default(false)
+  isActive         Boolean  @default(true)
+  images           String[]
+
+  prices      CityTourPrice[]
+  inclusions  CityTourInclusion[]
+  exclusions  CityTourExclusion[]
+  itineraries CityTourItinerary[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("city_tours")
+}
+
+model CityTourPrice {
+  id       String   @id @default(cuid())
+  type     String // adult, child, infant, etc.
+  price    Int
+  currency String   @default("IRR")
+  tourId   String
+  tour     CityTour @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@map("city_tour_prices")
+}
+
+model CityTourInclusion {
+  id     String   @id @default(cuid())
+  item   String
+  tourId String
+  tour   CityTour @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  @@map("city_tour_inclusions")
+}
+
+model CityTourExclusion {
+  id     String   @id @default(cuid())
+  item   String
+  tourId String
+  tour   CityTour @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  @@map("city_tour_exclusions")
+}
+
+model CityTourItinerary {
+  id          String   @id @default(cuid())
+  order       Int
+  title       String
+  description String
+  duration    Int // in minutes
+  tourId      String
+  tour        CityTour @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  @@map("city_tour_itineraries")
 }
 
 // اضافه کردن enumهای لازم
@@ -699,14 +772,24 @@ enum ImageType {
   THUMBNAIL
 }
 
+model Airport {
+  id          String  @id @default(cuid())
+  name        String
+  airportIata String?
+  airportCity String?
+
+  cipService CipService[]
+}
+
 model CipService {
   id           String           @id @default(cuid())
   title        String
   slug         String           @unique
+  airport      Airport?         @relation(fields: [airportId], references: [id])
+  airportId    String?
   description  String?
   content      Json?
   image        String?
-  airport      String
   price        Float?
   currency     String           @default("IRR")
   duration     String?
@@ -716,6 +799,8 @@ model CipService {
   priority     Int              @default(0)
   published    Boolean          @default(false)
   featured     Boolean          @default(false)
+  entry        Boolean          @default(false)
+  deferent     Boolean          @default(false)
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
   reservations CipReservation[]
@@ -737,4 +822,52 @@ model CipReservation {
   service CipService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 
   @@map("cip_reservations")
+}
+
+model VisaService {
+  id             String   @id @default(cuid())
+  title          String
+  description    String?
+  image          String?
+  country        String
+  city           String
+  price          Float?
+  currency       String   @default("ریال")
+  processingTime String?
+  validity       String?
+  entryType      String
+  features       String[]
+  requirements   String[]
+  documents      String[]
+  priority       Int      @default(0)
+  published      Boolean  @default(false)
+  featured       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("visa_services")
+}
+
+// prisma/schema.prisma
+enum FAQType {
+  HOTEL
+  AIR
+  CIP
+  TOUR
+  CITY_TOUR
+  VISA
+  OTHER
+}
+
+model FAQ {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String
+  type      FAQType
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("faqs")
 }

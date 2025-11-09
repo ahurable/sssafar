@@ -32,6 +32,9 @@ async function getCipService(id: string) {
         id: id,
         published: true 
       },
+      include: {
+        airport: true
+      }
     })
 
     return service
@@ -66,9 +69,15 @@ export async function generateMetadata({ params }: CipDetailPageProps) {
     }
   }
 
+  if (!service.airport || service.airport && !service.airport.name) 
+    return {
+      title: `${service.title} - خدمات CIP فرودگاه `,
+      description: service.description || `خدمت ${service.title} در فرودگاه`,
+    }
+
   return {
-    title: `${service.title} - خدمات CIP فرودگاه ${service.airport}`,
-    description: service.description || `خدمت ${service.title} در فرودگاه ${service.airport}`,
+    title: `${service.title} - خدمات CIP فرودگاه ${service.airport.name}`,
+    description: service.description || `خدمت ${service.title} در فرودگاه ${service.airport.name}`,
   }
 }
 
@@ -139,7 +148,7 @@ export default async function CipDetailPage({ params }: CipDetailPageProps) {
                     <div className="flex items-center gap-4 text-gray-600 mb-4">
                       <div className="flex items-center gap-1">
                         <MapPin className="h-5 w-5" />
-                        <span className="font-semibold">فرودگاه {service.airport}</span>
+                        <span className="font-semibold"> {service.airport && service.airport.name}</span>
                       </div>
                       {service.duration && (
                         <div className="flex items-center gap-1">
@@ -219,16 +228,18 @@ export default async function CipDetailPage({ params }: CipDetailPageProps) {
 
           {/* Sidebar - Booking Card */}
           <div className="lg:col-span-1">
+            { service.airport &&
             <BookingSection 
               service={{
                 id: service.id,
                 title: service.title,
-                airport: service.airport,
+                airport: service.airport.name,
                 price: service.price,
                 currency: service.currency,
                 duration: service.duration
               }}
             />
+            }
 
             {/* Contact Info */}
             <Card className="mt-6 bg-white">

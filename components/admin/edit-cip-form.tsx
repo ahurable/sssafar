@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { Plus, Trash2, Save, Upload, X, Image as ImageIcon, Eye, Star } from "lucide-react"
+import { Plus, Trash2, Save, Upload, X, Image as ImageIcon, Eye, Star, FormInput, FileOutput, FormInputIcon } from "lucide-react"
 import { toast } from "sonner"
 
 interface CipService {
@@ -27,6 +27,8 @@ interface CipService {
   published: boolean
   featured: boolean
   reservations: any[]
+  entry: boolean
+  deferent: boolean
 }
 
 interface EditCipFormProps {
@@ -52,6 +54,8 @@ export function EditCipForm({ service }: EditCipFormProps) {
     priority: "0",
     published: false,
     featured: false,
+    entry: false,
+    deferent: false
   })
 
   // Initialize form with service data
@@ -69,6 +73,8 @@ export function EditCipForm({ service }: EditCipFormProps) {
       priority: service.priority.toString(),
       published: service.published,
       featured: service.featured,
+      entry: service.entry,
+      deferent: service.deferent
     })
     
     if (service.image) {
@@ -398,6 +404,49 @@ export function EditCipForm({ service }: EditCipFormProps) {
                   onCheckedChange={(checked) => setFormData(prev => ({ ...prev, featured: checked }))}
                 />
               </div>
+
+              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-full ${formData.entry ? 'bg-purple-100' : 'bg-gray-100'}`}>
+                    <FormInputIcon className={`h-5 w-5 ${formData.entry ? 'text-purple-600' : 'text-gray-400'}`} />
+                  </div>
+                  <div>
+                    <Label htmlFor="entry" className="text-base font-medium cursor-pointer">
+                      ورودی
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      نشان دادن خدمت برای پرواز های ورودی
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  id="entry"
+                  checked={formData.entry}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, entry: checked }))}
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-full ${formData.deferent ? 'bg-purple-100' : 'bg-gray-100'}`}>
+                    <FileOutput className={`h-5 w-5 ${formData.deferent ? 'text-purple-600' : 'text-gray-400'}`} />
+                  </div>
+                  <div>
+                    <Label htmlFor="deferent" className="text-base font-medium cursor-pointer">
+                      خروجی
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      نشان دادن خدمت برای پرواز های خروجی
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  id="deferent"
+                  checked={formData.deferent}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, deferent: checked }))}
+                />
+              </div>
+
             </div>
 
             {/* Priority Setting */}

@@ -14,6 +14,9 @@ export async function GET(request: NextRequest) {
         { priority: "desc" },
         { createdAt: "desc" }
       ],
+      include: {
+        airport: true
+      }
     })
 
     return NextResponse.json({ services })

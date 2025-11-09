@@ -45,54 +45,60 @@ export async function GET(request: NextRequest) {
     const results: CitySuggestion[] = [];
 
     // Search in Domestic Hotel Data
-    const domesticResponse = await fetch('http://localhost:3000/data/DomesticPropertyCity.json');
+    if (type && type =="domestic") {
+      const domesticResponse = await fetch('http://localhost:3000/data/DomesticPropertyCity.json');
     
-    if (!domesticResponse.ok) {
-      throw new Error(`Failed to fetch domestic cities data: ${domesticResponse.status}`);
+      if (!domesticResponse.ok) {
+        throw new Error(`Failed to fetch domestic cities data: ${domesticResponse.status}`);
+      }
+      
+      const domesticCities: DomesticCity[] = await domesticResponse.json();
+
+      const domesticMatches = domesticCities.filter(city => 
+        city.Name.toLowerCase().includes(query) || 
+        (city.NameFa && city.NameFa.toLowerCase().includes(query))
+      ).map(city => ({
+        id: city.Id,
+        name: city.Name,
+        nameFa: city.NameFa,
+        propertyDestinationId: city.PropertyDestinationId,
+        type: 'domestic' as const,
+        isPopular: city.IsPopular,
+        searchDestinationOrCity: city.SearchDestinationOrCity,
+        isActive: city.IsActive
+      }));
+
+      results.push(...domesticMatches);
     }
-    
-    const domesticCities: DomesticCity[] = await domesticResponse.json();
 
-    const domesticMatches = domesticCities.filter(city => 
-      city.Name.toLowerCase().includes(query) || 
-      (city.NameFa && city.NameFa.toLowerCase().includes(query))
-    ).map(city => ({
-      id: city.Id,
-      name: city.Name,
-      nameFa: city.NameFa,
-      propertyDestinationId: city.PropertyDestinationId,
-      type: 'domestic' as const,
-      isPopular: city.IsPopular,
-      searchDestinationOrCity: city.SearchDestinationOrCity,
-      isActive: city.IsActive
-    }));
+    else {
+      // Search in International Hotel Data
+      const internationalResponse = await fetch('http://localhost:3000/data/PropertyCity.json');
+      
+      if (!internationalResponse.ok) {
+        throw new Error(`Failed to fetch international cities data: ${internationalResponse.status}`);
+      }
+      
+      const internationalCities: InternationalCity[] = await internationalResponse.json();
 
-    results.push(...domesticMatches);
+      const internationalMatches = internationalCities.filter(city => 
+        city.Name.toLowerCase().includes(query)
+      ).map(city => ({
+        id: city.Id,
+        name: city.Name,
+        propertyDestinationId: city.PropertyDestinationId,
+        type: 'international' as const
+      }));
+      
+      console.log(internationalMatches)
+      results.push(...internationalMatches);
 
-    // Search in International Hotel Data
-    const internationalResponse = await fetch('http://localhost:3000/data/PropertyCity.json');
-    
-    if (!internationalResponse.ok) {
-      throw new Error(`Failed to fetch international cities data: ${internationalResponse.status}`);
+      console.log(results)
+      
     }
-    
-    const internationalCities: InternationalCity[] = await internationalResponse.json();
 
-    const internationalMatches = internationalCities.filter(city => 
-      city.Name.toLowerCase().includes(query)
-    ).map(city => ({
-      id: city.Id,
-      name: city.Name,
-      propertyDestinationId: city.PropertyDestinationId,
-      type: 'international' as const
-    }));
-    
-    console.log(internationalMatches)
-    results.push(...internationalMatches);
-
-    console.log(results)
     // Sort results by relevance (exact matches first, then partial matches)
-    const sortedResults = results.sort((a, b) => {
+      const sortedResults = results.sort((a, b) => {
       const aName = a.name.toLowerCase();
       const bName = b.name.toLowerCase();
       const aNameFa = a.nameFa?.toLowerCase() || '';
@@ -107,7 +113,7 @@ export async function GET(request: NextRequest) {
       
       return aName.localeCompare(bName);
     });
-
+      
     return NextResponse.json({
       query,
       count: sortedResults.length,

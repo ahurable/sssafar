@@ -12,7 +12,9 @@ interface CipService {
   title: string
   description: string | null
   image: string | null
-  airport: string
+  airport: {
+    name: string
+  }
   price: number | null
   currency: string
   duration: string | null
@@ -116,7 +118,7 @@ export function CipManagement() {
                       <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-3">
                         <div className="flex items-center gap-1">
                           <MapPin className="h-4 w-4" />
-                          <span>فرودگاه: {service.airport}</span>
+                          <span>فرودگاه: {service.airport && service.airport.name && service.airport.name}</span>
                         </div>
                         {service.duration && (
                           <div className="flex items-center gap-1">
