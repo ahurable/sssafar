@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useRouter } from "next/navigation"
+import { useSnack } from "@/hooks/use-notification"
 
 interface BookingFormProps {
   tour: {
@@ -20,76 +21,39 @@ interface BookingFormProps {
 interface Passenger {
   firstName: string
   lastName: string
-  nationalId: string
-  dateOfBirth: string
+  phoneNumber: string
   passengerType: string
+  description: string
 }
 
 export function CityTourBookingForm({ tour }: BookingFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [passengers, setPassengers] = useState<Passenger[]>([
-    { firstName: '', lastName: '', nationalId: '', dateOfBirth: '', passengerType: 'ADULT' }
-  ])
-  const [contactInfo, setContactInfo] = useState({
-    email: '',
-    phone: '',
-    notes: ''
-  })
+  const [passenger, setPassenger] = useState<Passenger>(
+    { firstName: '', lastName: '', passengerType: 'ADULT', phoneNumber: '', description: '' }
+  )
+  const { success, error } = useSnack()
 
-  const addPassenger = () => {
-    setPassengers([...passengers, { 
-      firstName: '', 
-      lastName: '', 
-      nationalId: '', 
-      dateOfBirth: '', 
-      passengerType: 'ADULT' 
-    }])
-  }
-
-  const removePassenger = (index: number) => {
-    if (passengers.length > 1) {
-      setPassengers(passengers.filter((_, i) => i !== index))
-    }
-  }
-
-  const updatePassenger = (index: number, field: string, value: string) => {
-    const updated = [...passengers]
-    updated[index] = { ...updated[index], [field]: value }
-    setPassengers(updated)
-  }
-
-  const calculateTotal = () => {
-    return passengers.reduce((total, passenger) => {
-      const price = tour.prices.find(p => p.type === passenger.passengerType)
-      return total + (price?.price || 0)
-    }, 0)
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
     try {
-      const response = await fetch('/api/bookings', {
+      const response = await fetch(`/api/activities/${tour.id}/reserve`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          tourId: tour.id,
-          passengers,
-          contactInfo,
-          totalPrice: calculateTotal()
-        }),
+        body: JSON.stringify(passenger),
       })
 
       const data = await response.json()
 
       if (response.ok) {
-        router.push(`/bookings/${data.booking.id}`)
+        success(data.message)
       } else {
-        alert(data.error || 'خطا در ثبت درخواست')
+        error(data.message)
       }
     } catch (error) {
       console.error('Error submitting booking:', error)
@@ -117,14 +81,27 @@ export function CityTourBookingForm({ tour }: BookingFormProps) {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Passengers */}
+          {/* passenger */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <Label>ثبت درخواست</Label>
             </div>
             <div className="grid grid-cols-12">
                 <div className="col-span-12">
-                    <Input placeholder="نام و نام خانوادگی خود را وارد کنید" />
+                    <Label htmlFor="firstName">نام:</Label>
+                    <Input placeholder="نام خود را وارد کنید"
+                      name="firstName"
+                      onChange={(e) => setPassenger({ ...passenger, firstName: e.currentTarget.value })}
+                      value={passenger.firstName}
+                    />
+                </div>
+                <div className="col-span-12 mt-4">
+                    <Label htmlFor="firstName">نام خانوادگی:</Label>
+                    <Input placeholder="نام خانوادگی خود را وارد کنید"
+                      name="lastName"
+                      onChange={(e) => setPassenger({ ...passenger, lastName: e.currentTarget.value })}
+                      value={passenger.lastName}
+                    />
                 </div>
             </div>
           </div>
@@ -132,23 +109,13 @@ export function CityTourBookingForm({ tour }: BookingFormProps) {
           {/* Contact Info */}
           <div className="space-y-4">
             <Label>اطلاعات تماس</Label>
-            
-            <div>
-              <Label>ایمیل</Label>
-              <Input
-                type="email"
-                value={contactInfo.email}
-                onChange={(e) => setContactInfo({ ...contactInfo, email: e.target.value })}
-                required
-              />
-            </div>
 
             <div>
               <Label>شماره تماس</Label>
               <Input
                 type="tel"
-                value={contactInfo.phone}
-                onChange={(e) => setContactInfo({ ...contactInfo, phone: e.target.value })}
+                value={passenger.phoneNumber}
+                onChange={(e) => setPassenger({ ...passenger, phoneNumber: e.target.value })}
                 required
               />
             </div>
@@ -156,26 +123,12 @@ export function CityTourBookingForm({ tour }: BookingFormProps) {
             <div>
               <Label>توضیحات (اختیاری)</Label>
               <Input
-                value={contactInfo.notes}
-                onChange={(e) => setContactInfo({ ...contactInfo, notes: e.target.value })}
+                value={passenger.description}
+                onChange={(e) => setPassenger({ ...passenger, description: e.target.value })}
                 placeholder="درخواست‌های خاص یا توضیحات اضافی"
               />
             </div>
           </div>
-
-          {/* Total Price */}
-          <div className="border-t pt-4">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-muted-foreground">قیمت کل:</span>
-              <span className="text-2xl font-bold text-green-600">
-                {calculateTotal().toLocaleString('fa-IR')} تومان
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground text-center">
-              {passengers.length} مسافر
-            </p>
-          </div>
-
           <Button type="submit" className="w-full bg-blue-600 text-lg py-6" size="lg" disabled={loading}>
             {loading ? 'در حال ثبت درخواست...' : 'ثبت درخواست رزرو'}
           </Button>

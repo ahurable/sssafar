@@ -251,7 +251,13 @@ const DomesticFlightSearch = () => {
                     if (prev.children >= prev.adults) {
                         return prev; // Don't allow increment
                     }
+                } else if (type === 'infants') {
+                    // infants cannot be equal to or greater than adults
+                    if (prev.infants >= prev.adults) {
+                        return prev; // Don't allow increment
+                    }
                 }
+
 
                 newValue = Math.min(currentValue + 1, maxValues[type]);
             } else {

@@ -107,22 +107,14 @@ const ShamsiDateModal = ({
 
   const handleDateSelect = (date: string) => {
     const convertedDate = convertDateFromCalendar(date)
-    
-    if (localTripType === "oneway") {
+    console.log(selectionMode)
+    if (localTripType === "roundtrip" && selectionMode === "departure") {
       setSelectedDepartureDate(convertedDate)
-      applyDates()
+      setSelectionMode('return')
+    } else if (localTripType === "roundtrip" && selectionMode === "return") {
+      setSelectedReturnDate(convertedDate)
     } else {
-      if (selectionMode === "departure") {
-        setSelectedDepartureDate(convertedDate)
-        setSelectionMode("return")
-        // If return date is before new departure date, clear return date
-        if (selectedReturnDate && compareJalaaliDates(selectedReturnDate, convertedDate) < 0) {
-          setSelectedReturnDate("")
-        }
-      } else {
-        setSelectedReturnDate(convertedDate)
-        applyDates()
-      }
+      setSelectedDepartureDate(convertedDate)
     }
   }
 
@@ -430,7 +422,7 @@ const ShamsiDateModal = ({
               </Button>
             </div>
           </div>
-
+          {!normalReturnCal &&
           <div className="p-4 border-b border-gray-200">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
@@ -442,6 +434,7 @@ const ShamsiDateModal = ({
               <span className="text-lg font-medium text-gray-800">رفت و برگشت</span>
             </label>
           </div>
+          }
 
           {/* Selection Tabs for Mobile */}
           {localTripType === "roundtrip" && (
@@ -764,12 +757,12 @@ const Calendar = ({
       </div>
 
       {/* Calendar Days */}
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-0">
         {calendar.map((week, weekIndex) =>
           week.map((day, dayIndex) => (
             <button
               key={`${weekIndex}-${dayIndex}`}
-              className={`aspect-square flex items-center justify-center rounded-lg text-sm font-medium transition-all relative
+              className={`aspect-square flex items-center justify-center rounded-full text-sm font-medium transition-all relative
                 ${!day 
                   ? 'invisible' 
                   : isDateDisabled(day)
@@ -780,8 +773,8 @@ const Calendar = ({
                         ? 'bg-blue-100 text-blue-700'
                         : 'text-gray-700 bg-white hover:bg-blue-50 hover:scale-105 cursor-pointer border border-transparent hover:border-blue-200'
                 }
-                ${isStartOfRange(day) ? 'rounded-r-none' : ''}
-                ${isEndOfRange(day) ? 'rounded-l-none' : ''}
+                ${isStartOfRange(day) && selectedReturnDate.length > 0 ? 'rounded-l-none' : ''}
+                ${isEndOfRange(day) ? 'rounded-r-none' : ''}
                 ${isDateInRange(day) && !isStartOfRange(day) && !isEndOfRange(day) ? 'rounded-none' : ''}
               `}
               onClick={() => day && !isDateDisabled(day) && handleDateClick(day)}
@@ -789,10 +782,10 @@ const Calendar = ({
             >
               {day}
               {isStartOfRange(day) && tripType === "roundtrip" && (
-                <div className="absolute top-0 right-0 w-2 h-full bg-blue-600 rounded-l-full"></div>
+                <div className="absolute top-0 right-0 h-full bg-blue-600 rounded-l-full"></div>
               )}
               {isEndOfRange(day) && tripType === "roundtrip" && (
-                <div className="absolute top-0 left-0 w-2 h-full bg-blue-600 rounded-r-full"></div>
+                <div className="absolute top-0 left-0 h-full bg-blue-600 rounded-r-full"></div>
               )}
             </button>
           ))
