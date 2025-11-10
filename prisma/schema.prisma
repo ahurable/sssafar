@@ -317,9 +317,9 @@ model CityTour {
   inclusions  CityTourInclusion[]
   exclusions  CityTourExclusion[]
   itineraries CityTourItinerary[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  bookings    Reservation[]
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
 
   @@map("city_tours")
 }
@@ -782,35 +782,35 @@ model Airport {
 }
 
 model CipService {
-  id           String           @id @default(cuid())
+  id           String        @id @default(cuid())
   title        String
-  slug         String           @unique
-  airport      Airport?         @relation(fields: [airportId], references: [id])
+  slug         String        @unique
+  airport      Airport?      @relation(fields: [airportId], references: [id])
   airportId    String?
   description  String?
   content      Json?
   image        String?
   price        Float?
-  currency     String           @default("IRR")
+  currency     String        @default("IRR")
   duration     String?
   features     String[]
   included     String[]
   notIncluded  String[]
-  priority     Int              @default(0)
-  published    Boolean          @default(false)
-  featured     Boolean          @default(false)
-  entry        Boolean          @default(false)
-  deferent     Boolean          @default(false)
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
-  reservations CipReservation[]
+  priority     Int           @default(0)
+  published    Boolean       @default(false)
+  featured     Boolean       @default(false)
+  entry        Boolean       @default(false)
+  deferent     Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  reservations Reservation[]
 
   @@map("cip_services")
 }
 
-model CipReservation {
+model Reservation {
   id          String   @id @default(cuid())
-  serviceId   String
+  serviceId   String?
   firstName   String
   lastName    String
   phoneNumber String
@@ -819,7 +819,11 @@ model CipReservation {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  service CipService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  service    CipService?  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  cityTour   CityTour?    @relation(fields: [cityTourId], references: [id])
+  cityTourId String?
+  visa       VisaService? @relation(fields: [visaId], references: [id])
+  visaId     String?
 
   @@map("cip_reservations")
 }
@@ -845,6 +849,9 @@ model VisaService {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
+  faq      FAQ[]
+  bookings Reservation[]
+
   @@map("visa_services")
 }
 
@@ -868,6 +875,9 @@ model FAQ {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  visaId String?
+  visa   VisaService? @relation(fields: [visaId], references: [id], onDelete: Cascade)
 
   @@map("faqs")
 }
