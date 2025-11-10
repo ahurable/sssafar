@@ -5,8 +5,7 @@ import { useState, useEffect, useRef } from "react"
 import { Card } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
-import { Hotel, Plane, Crown, Map, Building, X, Search } from "lucide-react"
+import { Hotel, Plane, Crown, Map, Building, X, Search, ArrowRight } from "lucide-react"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { useSearch } from "@/hooks/use-search"
@@ -35,7 +34,8 @@ interface Suggestion {
 export function SearchSection({ onSearchResults }: SearchSectionProps) {
   const [activeTab, setActiveTab] = useState<"hotel" | "flight" | "domesticFlights" | "cip" | "tour" | "domesticHotel">("domesticFlights")
   const [isLoading, setIsLoading] = useState(false)
-  const [mobileOpen, setMobileOpen] = useState(false)
+  const [mobileMainModalOpen, setMobileMainModalOpen] = useState(false)
+  const [mobileSearchModalOpen, setMobileSearchModalOpen] = useState(false)
   const sectionRef = useRef<HTMLElement>(null)
   const cardRef = useRef<HTMLDivElement>(null)
 
@@ -76,34 +76,123 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
     return () => ctx.revert()
   }, [])
 
-  const handleTabClick = (tab: string) => {
+  const handleTabSelect = (tab: string) => {
     setActiveTab(tab as any)
-    setMobileOpen(false)
+    setMobileMainModalOpen(false)
+    setMobileSearchModalOpen(true)
   }
 
-  // Mobile Tab Buttons
-  const MobileTabButtons = () => (
-    <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-      {Object.entries(tabConfig).map(([key, config]) => {
-        const Icon = config.icon
-        return (
-          <Button
-            key={key}
-            variant={activeTab === key ? "default" : "outline"}
-            className={`flex flex-col items-center gap-2 h-20 ${
-              activeTab === key 
-                ? `bg-${config.color}-500 text-white border-${config.color}-500` 
-                : 'bg-white text-gray-700'
-            }`}
-            onClick={() => handleTabClick(key)}
-          >
-            <Icon className="h-6 w-6" />
-            <span className="text-sm font-medium">{config.label}</span>
-          </Button>
-        )
-      })}
+  const handleBackToMainModal = () => {
+    setMobileSearchModalOpen(false)
+    setMobileMainModalOpen(true)
+  }
+
+  const handleCloseAllModals = () => {
+    setMobileMainModalOpen(false)
+    setMobileSearchModalOpen(false)
+  }
+
+  // Mobile Main Modal - Tab Selection
+  const MobileMainModal = () => (
+    <div className="fixed inset-0 z-50 bg-white">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white sticky top-0 z-10">
+        <h2 className="text-xl font-bold text-gray-800">نوع سفر را انتخاب کنید</h2>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleCloseAllModals}
+          className="h-8 w-8"
+        >
+          <X className="h-5 w-5" />
+        </Button>
+      </div>
+
+      {/* Tab Buttons Grid */}
+      <div className="p-4 overflow-y-auto h-full pb-20">
+        <div className="grid grid-cols-2 gap-4">
+          {Object.entries(tabConfig).map(([key, config]) => {
+            const Icon = config.icon
+            const colorClass = `bg-${config.color}-500`
+            return (
+              <button
+                key={key}
+                onClick={() => handleTabSelect(key)}
+                className={`
+                  flex flex-col items-center justify-center gap-3 
+                  h-40 rounded-2xl bg-white border-2 border-gray-200 
+                  hover:border-${config.color}-300 hover:shadow-lg 
+                  transition-all duration-200 active:scale-95 py-6
+                  group
+                `}
+              >
+                <div className={`p-3 rounded-xl ${colorClass} group-hover:scale-110 transition-transform`}>
+                  <Icon className="h-6 w-6 text-white" />
+                </div>
+                <span className="text-sm font-medium text-gray-800 text-center px-2">
+                  {config.label}
+                </span>
+                <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-gray-600" />
+              </button>
+            )
+          })}
+        </div>
+      </div>
     </div>
   )
+
+  // Mobile Search Modal - Specific Search Component
+  const MobileSearchModal = () => {
+    const renderSearchComponent = () => {
+      switch (activeTab) {
+        case "hotel":
+          return <HotelSearch />
+        case "flight":
+          return <FlightSearch />
+        case "domesticFlights":
+          return <DomesticFlightSearch />
+        case "cip":
+          return <CipSearch />
+        case "tour":
+          return <TourSearch />
+        case "domesticHotel":
+          return <DomesticHotelSearch />
+        default:
+          return <DomesticFlightSearch />
+      }
+    }
+
+    const currentConfig = tabConfig[activeTab]
+
+    return (
+      <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white sticky top-0 z-10">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleBackToMainModal}
+              className="h-8 w-8"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+            <div className="flex items-center gap-2">
+              <div className={`p-2 rounded-lg bg-${currentConfig.color}-500`}>
+                <currentConfig.icon className="h-5 w-5 text-white" />
+              </div>
+              <h2 className="text-xl font-bold text-gray-800">{currentConfig.label}</h2>
+            </div>
+          </div>
+        </div>
+
+        {/* Search Component */}
+        <div className="p-4 overflow-y-auto">
+          {renderSearchComponent()}
+        </div>
+      </div>
+    )
+  }
 
   // Desktop Tabs
   const DesktopTabs = () => (
@@ -156,34 +245,6 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
     </Tabs>
   )
 
-  // Mobile Modal Content
-  const MobileModalContent = () => (
-    <div className="w-full h-full p-2">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-xl font-bold text-gray-800">نوع جستجو</h3>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setMobileOpen(false)}
-          className="h-8 w-8"
-        >
-          <X className="h-4 w-4" />
-        </Button>
-      </div>
-      
-      <MobileTabButtons />
-      
-      <div className="mt-6">
-        {activeTab === "hotel" && <HotelSearch />}
-        {activeTab === "flight" && <FlightSearch />}
-        {activeTab === "domesticFlights" && <DomesticFlightSearch />}
-        {activeTab === "cip" && <CipSearch />}
-        {activeTab === "tour" && <TourSearch />}
-        {activeTab === "domesticHotel" && <DomesticHotelSearch />}
-      </div>
-    </div>
-  )
-
   return (
     <section ref={sectionRef} className={`py-16 md:py-24 relative dark:from-gray-900 dark:to-blue-900 ${cardBackgrounds[activeTab]}`}>
       <div className="w-full h-full absolute top-0 right-0 bg-[url('/pattern.png')] bg-[length:180px_180px] z-10 opacity-10"></div>
@@ -207,19 +268,21 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
         {/* Mobile Version */}
         <div className="block lg:hidden">
           <Card ref={cardRef} className="relative z-30 shadow-none w-full border-0 dark:bg-gray-800/95">
-            <Dialog open={mobileOpen} onOpenChange={setMobileOpen}>
-              <DialogTrigger asChild>
-                <Button className="w-full h-16 text-lg font-bold rounded-2xl bg-white/20 text-white hover:bg-white/30 transition-all duration-300">
-                  <Search className="ml-2 h-5 w-5" />
-                  جستجو در خدمات سفر
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:w-full w-[100vh] h-full overflow-y-auto">
-                <MobileModalContent />
-              </DialogContent>
-            </Dialog>
+            <Button 
+              onClick={() => setMobileMainModalOpen(true)}
+              className="w-full h-16 text-lg font-bold rounded-2xl bg-white/20 text-white hover:bg-white/30 transition-all duration-300"
+            >
+              <Search className="ml-2 h-5 w-5" />
+              جستجو در خدمات سفر
+            </Button>
           </Card>
         </div>
+
+        {/* Mobile Main Modal */}
+        {mobileMainModalOpen && <MobileMainModal />}
+
+        {/* Mobile Search Modal */}
+        {mobileSearchModalOpen && <MobileSearchModal />}
       </div>
     </section>
   )

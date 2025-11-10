@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Plus, Edit, Trash2 } from "lucide-react"
 import { CreatePostDialog } from "./create-post-dialog"
 import { EditPostDialog } from "./edit-post-dialog"
+import { useRouter } from "next/navigation"
 
 interface Post {
   id: string
@@ -28,10 +29,11 @@ export function PostsManagement() {
   const [loading, setLoading] = useState(true)
   const [createOpen, setCreateOpen] = useState(false)
   const [editPost, setEditPost] = useState<Post | null>(null)
+  const router = useRouter()
 
   const fetchPosts = () => {
     setLoading(true)
-    fetch("/api/posts?published=false")
+    fetch("/api/posts")
       .then((res) => res.json())
       .then((data) => {
         setPosts(data.posts)
@@ -68,7 +70,7 @@ export function PostsManagement() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <p className="text-muted-foreground">{posts.length} پست</p>
-        <Button onClick={() => setCreateOpen(true)}>
+        <Button onClick={() => router.push('/admin/posts/new')}>
           <Plus className="h-4 w-4 ml-2" />
           پست جدید
         </Button>
@@ -98,7 +100,7 @@ export function PostsManagement() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => setEditPost(post)}>
+                  <Button variant="outline" size="sm" onClick={() => router.push(`/admin/posts/edit/${post.id}`)}>
                     <Edit className="h-4 w-4" />
                   </Button>
                   <Button variant="destructive" size="sm" onClick={() => handleDelete(post.id)}>

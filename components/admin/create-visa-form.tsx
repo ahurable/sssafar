@@ -13,6 +13,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Trash2, ArrowRight, Upload, X, Image as ImageIcon } from "lucide-react"
 import { toast } from "sonner"
 
+
+interface PriceTable {
+  id: string
+  title: string
+  columns: string[]
+  rows: PriceTableRow[]
+}
+
+interface PriceTableRow {
+  id: string
+  label: string
+  values: string[]
+}
+
 export function CreateVisaForm() {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -35,6 +49,7 @@ export function CreateVisaForm() {
     requirements: [""],
     documents: [""],
     priority: "0",
+    priceTables: [] as PriceTable[],
     published: false,
     featured: false
   })
@@ -165,6 +180,149 @@ export function CreateVisaForm() {
     setFormData(prev => ({
       ...prev,
       [field]: prev[field].map((f, i) => i === index ? value : f)
+    }))
+  }
+
+  // Add these helper functions to the CreateVisaForm component
+
+  const addPriceTable = () => {
+    const newTable: PriceTable = {
+      id: Math.random().toString(36).substr(2, 9),
+      title: 'جدول قیمتی جدید',
+      columns: ['14 روزه', '1 ماهه'],
+      rows: [
+        {
+          id: Math.random().toString(36).substr(2, 9),
+          label: 'عادی',
+          values: ['', '']
+        }
+      ]
+    }
+    
+    setFormData(prev => ({
+      ...prev,
+      priceTables: [...prev.priceTables, newTable]
+    }))
+  }
+
+  const removePriceTable = (tableIndex: number) => {
+    setFormData(prev => ({
+      ...prev,
+      priceTables: prev.priceTables.filter((_, i) => i !== tableIndex)
+    }))
+  }
+
+  const updatePriceTableTitle = (tableIndex: number, title: string) => {
+    setFormData(prev => ({
+      ...prev,
+      priceTables: prev.priceTables.map((table, i) => 
+        i === tableIndex ? { ...table, title } : table
+      )
+    }))
+  }
+
+  const addPriceTableColumn = (tableIndex: number) => {
+    setFormData(prev => ({
+      ...prev,
+      priceTables: prev.priceTables.map((table, i) => 
+        i === tableIndex ? {
+          ...table,
+          columns: [...table.columns, 'دوره جدید'],
+          rows: table.rows.map(row => ({
+            ...row,
+            values: [...row.values, '']
+          }))
+        } : table
+      )
+    }))
+  }
+
+  const removePriceTableColumn = (tableIndex: number, columnIndex: number) => {
+    setFormData(prev => ({
+      ...prev,
+      priceTables: prev.priceTables.map((table, i) => 
+        i === tableIndex ? {
+          ...table,
+          columns: table.columns.filter((_, j) => j !== columnIndex),
+          rows: table.rows.map(row => ({
+            ...row,
+            values: row.values.filter((_, j) => j !== columnIndex)
+          }))
+        } : table
+      )
+    }))
+  }
+
+  const updatePriceTableColumn = (tableIndex: number, columnIndex: number, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      priceTables: prev.priceTables.map((table, i) => 
+        i === tableIndex ? {
+          ...table,
+          columns: table.columns.map((col, j) => j === columnIndex ? value : col)
+        } : table
+      )
+    }))
+  }
+
+  const addPriceTableRow = (tableIndex: number) => {
+    const newRow: PriceTableRow = {
+      id: Math.random().toString(36).substr(2, 9),
+      label: 'نوع جدید',
+      values: Array(formData.priceTables[tableIndex].columns.length).fill('')
+    }
+    
+    setFormData(prev => ({
+      ...prev,
+      priceTables: prev.priceTables.map((table, i) => 
+        i === tableIndex ? {
+          ...table,
+          rows: [...table.rows, newRow]
+        } : table
+      )
+    }))
+  }
+
+  const removePriceTableRow = (tableIndex: number, rowIndex: number) => {
+    setFormData(prev => ({
+      ...prev,
+      priceTables: prev.priceTables.map((table, i) => 
+        i === tableIndex ? {
+          ...table,
+          rows: table.rows.filter((_, j) => j !== rowIndex)
+        } : table
+      )
+    }))
+  }
+
+  const updatePriceTableRowLabel = (tableIndex: number, rowIndex: number, label: string) => {
+    setFormData(prev => ({
+      ...prev,
+      priceTables: prev.priceTables.map((table, i) => 
+        i === tableIndex ? {
+          ...table,
+          rows: table.rows.map((row, j) => 
+            j === rowIndex ? { ...row, label } : row
+          )
+        } : table
+      )
+    }))
+  }
+
+  const updatePriceTableRowValue = (tableIndex: number, rowIndex: number, valueIndex: number, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      priceTables: prev.priceTables.map((table, i) => 
+        i === tableIndex ? {
+          ...table,
+          rows: table.rows.map((row, j) => 
+            j === rowIndex ? {
+              ...row,
+              values: row.values.map((val, k) => k === valueIndex ? value : val)
+            } : row
+          )
+        } : table
+      )
     }))
   }
 
@@ -557,6 +715,129 @@ export function CreateVisaForm() {
                   onCheckedChange={(checked) => setFormData(prev => ({ ...prev, featured: checked }))}
                 />
               </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="py-6">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>جدول‌های قیمت</CardTitle>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm" 
+                onClick={addPriceTable}
+              >
+                <Plus className="h-4 w-4 ml-1" />
+                افزودن جدول قیمت
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {formData.priceTables.map((table, tableIndex) => (
+                <div key={table.id} className="border rounded-lg p-4 bg-gray-50">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex-1">
+                      <Label>عنوان جدول</Label>
+                      <Input
+                        value={table.title}
+                        onChange={(e) => updatePriceTableTitle(tableIndex, e.target.value)}
+                        placeholder="مثلا: جدول قیمتی بزرگسال"
+                        className="mt-1"
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removePriceTable(tableIndex)}
+                      className="mr-2"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {/* Columns */}
+                  <div className="mb-4">
+                    <Label>ستون‌ها (دوره‌های زمانی)</Label>
+                    <div className="flex gap-2 mt-1">
+                      {table.columns.map((column, columnIndex) => (
+                        <div key={columnIndex} className="flex gap-1">
+                          <Input
+                            value={column}
+                            onChange={(e) => updatePriceTableColumn(tableIndex, columnIndex, e.target.value)}
+                            placeholder="مثلا: 14 روزه"
+                            className="w-32"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => removePriceTableColumn(tableIndex, columnIndex)}
+                            disabled={table.columns.length <= 1}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => addPriceTableColumn(tableIndex)}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Rows */}
+                  <div className="space-y-2">
+                    <Label>ردیف‌ها (انواع ویزا)</Label>
+                    {table.rows.map((row, rowIndex) => (
+                      <div key={row.id} className="flex items-center gap-2">
+                        <Input
+                          value={row.label}
+                          onChange={(e) => updatePriceTableRowLabel(tableIndex, rowIndex, e.target.value)}
+                          placeholder="مثلا: عادی"
+                          className="w-32"
+                        />
+                        <div className="flex gap-1 flex-1">
+                          {row.values.map((value, valueIndex) => (
+                            <Input
+                              key={valueIndex}
+                              value={value}
+                              onChange={(e) => updatePriceTableRowValue(tableIndex, rowIndex, valueIndex, e.target.value)}
+                              placeholder="قیمت"
+                              className="w-24"
+                            />
+                          ))}
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removePriceTableRow(tableIndex, rowIndex)}
+                          disabled={table.rows.length <= 1}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => addPriceTableRow(tableIndex)}
+                    >
+                      <Plus className="h-4 w-4 ml-1" />
+                      افزودن ردیف
+                    </Button>
+                  </div>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>

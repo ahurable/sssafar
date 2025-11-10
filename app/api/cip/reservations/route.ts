@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create reservation
-    const reservation = await prisma.cipReservation.create({
+    const reservation = await prisma.reservation.create({
       data: {
         serviceId,
         firstName,

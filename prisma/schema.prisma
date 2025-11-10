@@ -100,6 +100,7 @@ model Post {
   excerpt    String
   content    String   @db.Text
   coverImage String
+  images     String[] // Multiple images for the post
   category   String
   tags       String[]
   published  Boolean  @default(false)
@@ -110,10 +111,39 @@ model Post {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  // New relations for additional features
+  tables   PostTable[]
+  metadata PostMetadata?
+
   @@index([slug])
   @@index([published])
   @@index([featured])
   @@index([category])
+}
+
+model PostTable {
+  id        String   @id @default(cuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  title     String
+  content   String   @db.Text // HTML content for the table
+  order     Int // Order of tables in the post
+  createdAt DateTime @default(now())
+
+  @@index([postId])
+  @@index([order])
+}
+
+model PostMetadata {
+  id             String   @id @default(cuid())
+  postId         String   @unique
+  post           Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  readingTime    Int      @default(0) // in minutes
+  seoTitle       String?
+  seoDescription String?
+  canonicalUrl   String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model Booking {
@@ -831,6 +861,7 @@ model Reservation {
 model VisaService {
   id             String   @id @default(cuid())
   title          String
+  slug           String?
   description    String?
   image          String?
   country        String
@@ -843,6 +874,7 @@ model VisaService {
   features       String[]
   requirements   String[]
   documents      String[]
+  priceTables    Json?
   priority       Int      @default(0)
   published      Boolean  @default(false)
   featured       Boolean  @default(false)

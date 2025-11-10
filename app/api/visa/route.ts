@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
+import { generateUniqueSlug } from "@/lib/slugify"
 
 export async function GET(request: NextRequest) {
   try {
@@ -45,6 +46,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     
+   
     const {
       title,
       description,
@@ -72,10 +74,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+     const existingSlugs = await prisma.visaService.findMany({
+        select: { slug: true }
+      }).then(services => services.map(s => s.slug))
+
+      const slug = generateUniqueSlug(title, existingSlugs)
+
+
     const visaService = await prisma.visaService.create({
       data: {
         title,
         description,
+        slug,
         image,
         country,
         city,
@@ -89,7 +99,8 @@ export async function POST(request: NextRequest) {
         documents: documents.filter((d: string) => d.trim()),
         priority: parseInt(priority) || 0,
         published: Boolean(published),
-        featured: Boolean(featured)
+        featured: Boolean(featured),
+        priceTables: body.priceTables || []
       }
     });
 

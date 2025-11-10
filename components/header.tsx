@@ -187,7 +187,7 @@ export function Header() {
           </div>
 
           {/* Menu Items */}
-          <div className="flex-1 p-6 h-full bg-white/10 backdrop-blur-md backdrop-filter">
+          <div className="flex-1 p-6 h-full bg-white/10 backdrop-blur-md backdrop-filter overflow-auto scrollbar-hide">
             {/* Main Navigation */}
             <div className="space-y-4 mb-8">
               <h3 className="text-right text-lg font-bold text-gray-700 mb-4">منوی اصلی</h3>
@@ -219,6 +219,49 @@ export function Header() {
                   <div className="text-sm text-gray-600 mt-1">خدمات فرودگاهی و VIP</div>
                 </div>
               </Link>
+
+              {/* New Menu Items */}
+              <Link
+                href="/visa"
+                className="flex items-center gap-4 w-full px-6 py-5 text-right rounded-2xl transition-all bg-white/80 backdrop-blur-sm border border-gray-200 hover:bg-white hover:shadow-lg hover:border-blue-200 group"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 shadow-md group-hover:scale-110 transition-transform">
+                  <Globe className="h-6 w-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="text-lg font-bold text-gray-800">خدمات ویزا</div>
+                  <div className="text-sm text-gray-600 mt-1">دریافت ویزای کشورهای مختلف</div>
+                </div>
+              </Link>
+
+              <Link
+                href="/activities"
+                className="flex items-center gap-4 w-full px-6 py-5 text-right rounded-2xl transition-all bg-white/80 backdrop-blur-sm border border-gray-200 hover:bg-white hover:shadow-lg hover:border-green-200 group"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 shadow-md group-hover:scale-110 transition-transform">
+                  <Globe className="h-6 w-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="text-lg font-bold text-gray-800">گشت شهری</div>
+                  <div className="text-sm text-gray-600 mt-1">تورهای گردشگری درون شهری</div>
+                </div>
+              </Link>
+
+              <Link
+                href="/organs"
+                className="flex items-center gap-4 w-full px-6 py-5 text-right rounded-2xl transition-all bg-white/80 backdrop-blur-sm border border-gray-200 hover:bg-white hover:shadow-lg hover:border-purple-200 group"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 shadow-md group-hover:scale-110 transition-transform">
+                  <Shield className="h-6 w-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="text-lg font-bold text-gray-800">پنل سازمانی</div>
+                  <div className="text-sm text-gray-600 mt-1">خدمات ویژه سازمان‌ها و شرکت‌ها</div>
+                </div>
+              </Link>
             </div>
 
             {/* Secondary Navigation */}
@@ -233,36 +276,35 @@ export function Header() {
                 <div className="w-2 h-2 rounded-full bg-red-500"></div>
                 <span className="flex-1 text-lg">صفحه اصلی</span>
               </Link>
-              {     user ?
-
+              {user ? (
                 <Link
-                href="/dashboard"
-                className="flex items-center gap-4 w-full px-6 py-4 text-right rounded-xl transition-all text-gray-700 hover:bg-white/80 hover:text-pink-600"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <div className="w-2 h-2 rounded-full bg-pink-500"></div>
-                <span className="flex-1 text-lg">داشبورد کاربر</span>
-              </Link>
-              :
-              <>
-              <Link
-                href="/auth/signin"
-                className="flex items-center gap-4 w-full px-6 py-4 text-right rounded-xl transition-all text-gray-700 hover:bg-white/80 hover:text-pink-600"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <div className="w-2 h-2 rounded-full bg-pink-500"></div>
-                <span className="flex-1 text-lg">ورود به حساب</span>
-              </Link>
-              <Link
-                href="/auth/signup"
-                className="flex items-center gap-4 w-full px-6 py-4 text-right rounded-xl transition-all text-gray-700 hover:bg-white/80 hover:text-pink-600"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <div className="w-2 h-2 rounded-full bg-pink-500"></div>
-                <span className="flex-1 text-lg">ایجاد حساب</span>
-              </Link>
-              </>
-              }
+                  href="/dashboard"
+                  className="flex items-center gap-4 w-full px-6 py-4 text-right rounded-xl transition-all text-gray-700 hover:bg-white/80 hover:text-pink-600"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <div className="w-2 h-2 rounded-full bg-pink-500"></div>
+                  <span className="flex-1 text-lg">داشبورد کاربر</span>
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    href="/auth/signin"
+                    className="flex items-center gap-4 w-full px-6 py-4 text-right rounded-xl transition-all text-gray-700 hover:bg-white/80 hover:text-pink-600"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <div className="w-2 h-2 rounded-full bg-pink-500"></div>
+                    <span className="flex-1 text-lg">ورود به حساب</span>
+                  </Link>
+                  <Link
+                    href="/auth/signup"
+                    className="flex items-center gap-4 w-full px-6 py-4 text-right rounded-xl transition-all text-gray-700 hover:bg-white/80 hover:text-pink-600"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <div className="w-2 h-2 rounded-full bg-pink-500"></div>
+                    <span className="flex-1 text-lg">ایجاد حساب</span>
+                  </Link>
+                </>
+              )}
 
               <Link
                 href="/blog"
@@ -334,6 +376,25 @@ export function Header() {
               className="px-6 py-2 text-black rounded-full transition-all hover:scale-105 font-bold"
             >
               خدمات CIP
+            </Link>
+            {/* New Desktop Menu Items */}
+            <Link
+              href="/visa"
+              className="px-6 py-2 text-black rounded-full transition-all hover:scale-105 font-bold"
+            >
+              خدمات ویزا
+            </Link>
+            <Link
+              href="/activities"
+              className="px-6 py-2 text-black rounded-full transition-all hover:scale-105 font-bold"
+            >
+              گشت شهری
+            </Link>
+            <Link
+              href="/organs"
+              className="px-6 py-2 text-black rounded-full transition-all hover:scale-105 font-bold"
+            >
+              پنل سازمانی
             </Link>
           </div>
 
