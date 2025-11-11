@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Search, Plane, Calendar, MapPin, Users, AlertCircle, Loader2 } from "lucide-react"
 import ShamsiDateModal from "../flights/ShamsiCalendar"
-import { shamsiToGregorianString } from "@/lib/jalaalil" // Adjust the path as needed
+import { shamsiToGregorianString } from "@/lib/jalaalil"
 import { useRouter } from "next/navigation"
 
 interface AirportSuggestion {
@@ -156,7 +156,6 @@ const CipSearch = () => {
     setCurrentInput("")
     setIsAirportFocused(false)
     
-    // Clear airport error
     setErrors(prev => ({ ...prev, airport: undefined }))
   }
 
@@ -168,7 +167,6 @@ const CipSearch = () => {
       airportId: undefined
     }))
     
-    // Clear airport error when user starts typing
     if (errors.airport) {
       setErrors(prev => ({ ...prev, airport: undefined }))
     }
@@ -196,12 +194,9 @@ const CipSearch = () => {
   }
 
   const handleSearch = async () => {
-    // Clear previous errors
     setErrors({})
     
-    // Validate form
     if (!validateForm()) {
-      // Focus on first error field
       if (errors.airport) {
         inputRef.current?.focus()
       }
@@ -210,7 +205,6 @@ const CipSearch = () => {
 
     setIsLoading(true)
     try {
-      // Convert Shamsi date to Gregorian for API
       const gregorianDate = shamsiToGregorianString(cipSearch.date)
       
       const searchPayload = {
@@ -219,12 +213,7 @@ const CipSearch = () => {
       }
 
       console.log("CIP Search Payload:", searchPayload)
-
-      // Implement your actual API call here
       router.push(`/cip?airport=${searchPayload.airportId}&date=${searchPayload.date}&passengers=${searchPayload.passengers}`)
-      
-      // Redirect or show results as needed
-      // router.push('/cip/results')
       
     } catch (error) {
       console.error("Error searching CIP services:", error)
@@ -239,7 +228,6 @@ const CipSearch = () => {
 
   const handleDateChange = (date: string) => {
     setCipSearch(prev => ({ ...prev, date }))
-    // Clear date error when user selects a date
     if (errors.date) {
       setErrors(prev => ({ ...prev, date: undefined }))
     }
@@ -249,7 +237,7 @@ const CipSearch = () => {
     if (!errors[field]) return null
     
     return (
-      <div className="flex items-center gap-2 mt-2 text-white text-sm animate-fadeIn">
+      <div className="flex items-center gap-2 mt-2 text-black text-sm">
         <AlertCircle className="h-4 w-4" />
         <span>{errors[field]}</span>
       </div>
@@ -262,18 +250,15 @@ const CipSearch = () => {
     return (
       <div 
         ref={suggestionsRef}
-        className="absolute top-full right-0 left-0 bg-white border-2 border-purple-300 rounded-2xl shadow-2xl z-50 max-h-80 overflow-y-auto mt-2 transition-all duration-300 transform origin-top"
-        style={{
-          animation: 'slideDown 0.3s ease-out'
-        }}
+        className="absolute top-full right-0 left-0 bg-white border border-gray-300 z-50 max-h-80 overflow-y-auto mt-1"
       >
         {suggestions.map((suggestion, index) => (
           <div
             key={`${suggestion.id}`}
-            className={`p-4 cursor-pointer border-b border-gray-100 last:border-b-0 transition-all duration-200 ${
+            className={`p-3 cursor-pointer border-b border-gray-300 last:border-b-0 ${
               index === activeSuggestionIndex 
-                ? 'bg-purple-50 border-r-4 border-r-purple-500 scale-[1.02]' 
-                : 'hover:bg-gray-50 hover:scale-[1.01]'
+                ? 'bg-gray-100' 
+                : 'hover:bg-gray-50'
             }`}
             onMouseDown={(e) => {
               e.preventDefault()
@@ -282,16 +267,16 @@ const CipSearch = () => {
           >
             <div className="flex justify-between items-start">
               <div className="flex-1 text-right">
-                <div className="flex items-center gap-3 justify-end">
-                  <span className="font-bold text-md text-gray-800">
+                <div className="flex items-center gap-2 justify-end">
+                  <span className="font-bold text-black">
                     {suggestion.name}
                   </span>
                 </div>
-                <div className="flex items-center gap-3 mt-2 justify-end">
-                  <span className={`text-sm px-3 py-1.5 rounded-full font-medium bg-green-100 text-green-800 border border-green-200`}>
+                <div className="flex items-center gap-2 mt-1 justify-end">
+                  <span className="text-xs bg-gray-200 text-black px-2 py-1 font-medium border border-gray-300">
                     {suggestion.airportCity}
                   </span>
-                  <span className="text-sm bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-full font-medium border border-yellow-200">
+                  <span className="text-xs bg-gray-200 text-black px-2 py-1 font-medium border border-gray-300">
                     {suggestion.airportIata}
                   </span>
                 </div>
@@ -304,35 +289,33 @@ const CipSearch = () => {
   }
 
   return (
-    <div className="rounded-3xl" style={{direction:'rtl'}}>
+    <div style={{direction:'rtl'}} className="container mx-auto">
       {/* General Error Display */}
       {errors.general && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-3 animate-fadeIn">
-          <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
-          <p className="text-red-700 text-sm font-medium">{errors.general}</p>
+        <div className="mb-4 p-3 bg-red-500 border border-red-700 flex items-center gap-3">
+          <AlertCircle className="h-4 w-4 text-white flex-shrink-0" />
+          <p className="text-white text-sm font-medium">{errors.general}</p>
         </div>
       )}
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {/* Airport Input - Enhanced with error handling */}
-        <div className="space-y-3 relative">
-          <Label htmlFor="cip-airport" className="text-lg font-bold text-white text-right block">فرودگاه</Label>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {/* Airport Input */}
+        <div className="space-y-2 relative">
+          <Label htmlFor="cip-airport" className="text-black text-right block">فرودگاه</Label>
           <div className="relative">
-            <MapPin className="absolute right-4 top-4 h-5 w-5 text-gray-400" />
+            <MapPin className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
             {suggestionLoading && (
-              <Loader2 className="absolute left-4 top-4 h-5 w-5 animate-spin text-purple-600" />
+              <Loader2 className="absolute left-3 top-3 h-4 w-4 animate-spin text-blue-500" />
             )}
             <Input 
               ref={inputRef}
               id="cip-airport" 
               placeholder="فرودگاه بین المللی امام خمینی..." 
-              className={`pr-12 h-14 rounded-2xl border-2 bg-white text-gray-800 placeholder-gray-500 text-lg font-medium transition-all duration-300 ${
+              className={`pr-10 h-12 border border-gray-300 bg-white text-black placeholder-gray-500 ${
                 errors.airport 
-                  ? 'border-red-500 bg-red-50 scale-105 shadow-lg' 
-                  : isAirportFocused 
-                  ? 'border-purple-500 scale-105 shadow-lg' 
-                  : 'border-gray-300 hover:border-purple-400'
-              } ${showSuggestions ? 'rounded-b-none border-b-2 border-b-purple-300' : ''}`}
+                  ? 'border-red-500 bg-red-500' 
+                  : 'border-gray-300'
+              }`}
               value={cipSearch.airport}
               onChange={(e) => fetchSuggestions(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -351,37 +334,44 @@ const CipSearch = () => {
         </div>
 
         {/* Date Input */}
-        <div className="space-y-3">
-          {/* <Label className="text-lg font-bold text-white text-right block">تاریخ</Label> */}
-          <div className="relative">
-            <ShamsiDateModal
-              departureDate={cipSearch.date}
-              returnDate={""}
-              tripType={'OneWay'}
-              onDepartureDateChange={handleDateChange}
-              onReturnDateChange={() => null}
-              onTripTypeChange={() => null}
-              error={errors.date}
-              normalReturnCal={true}
-            />
-            {/* {renderError("date")} */}
-          </div>
+        <div className="space-y-2">
+          <Label className="text-black text-right block">تاریخ</Label>
+
+          <ShamsiDateModal
+            departureDate={cipSearch.date}
+            returnDate={""}
+            tripType={'OneWay'}
+            onDepartureDateChange={handleDateChange}
+            onReturnDateChange={() => null}
+            onTripTypeChange={() => null}
+            error={errors.date}
+            errorColor="black"
+            normalReturnCal={true}
+          />
         </div>
 
         {/* Service Type */}
-        <div className="space-y-3">
-          <Label className="text-lg font-bold text-white text-right block">نوع سرویس</Label>
+        <div className="space-y-2">
+          <Label className="text-black text-right block">نوع سرویس</Label>
           <div className="grid grid-cols-2 gap-2">
             <Button
               variant={cipSearch.serviceType === "departure" ? "default" : "outline"}
-              className="h-14 rounded-2xl"
+              className={`h-12 ${
+                cipSearch.serviceType === "departure" 
+                  ? 'bg-red-800 text-white' 
+                  : 'bg-white text-black border border-gray-300'
+              }`}
               onClick={() => setCipSearch(prev => ({ ...prev, serviceType: "departure" }))}
             >
               خروج
             </Button>
             <Button
               variant={cipSearch.serviceType === "arrival" ? "default" : "outline"}
-              className="h-14 rounded-2xl"
+              className={`h-12 ${
+                cipSearch.serviceType === "arrival" 
+                  ? 'bg-red-800 text-white' 
+                  : 'bg-white text-black border border-gray-300'
+              }`}
               onClick={() => setCipSearch(prev => ({ ...prev, serviceType: "arrival" }))}
             >
               ورود
@@ -390,19 +380,19 @@ const CipSearch = () => {
         </div>
 
         {/* Passengers */}
-        <div className="space-y-3">
-          <Label htmlFor="cip-passengers" className="text-lg font-bold text-white text-right block">تعداد مسافران</Label>
+        <div className="space-y-2">
+          <Label htmlFor="cip-passengers" className="text-black text-right block">تعداد مسافران</Label>
           <div className="relative">
-            <Users className="absolute right-4 top-4 h-5 w-5 text-gray-400" />
+            <Users className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
             <Input 
               type="number"
               id="cip-passengers" 
               min="1"
               max="10"
-              className={`pr-12 h-14 rounded-2xl border-2 bg-white text-gray-800 text-lg font-medium transition-all duration-300 ${
+              className={`pr-10 h-12 border border-gray-300 bg-white text-black ${
                 errors.passengers 
-                  ? 'border-red-500 bg-red-50 scale-105 shadow-lg' 
-                  : 'border-gray-300 hover:border-purple-400'
+                  ? 'border-red-500 bg-red-500' 
+                  : 'border-gray-300'
               }`}
               value={cipSearch.passengers}
               onChange={(e) => setCipSearch(prev => ({ 
@@ -417,37 +407,13 @@ const CipSearch = () => {
 
       {/* Search Button */}
       <Button 
-        className="w-full h-16 text-xl font-bold rounded-2xl bg-gradient-to-r from-white to-purple-100 text-purple-600 hover:from-purple-100 hover:to-white transition-all duration-300 shadow-2xl hover:shadow-3xl hover:scale-105 mt-8"
+        className="w-full h-12 bg-orange-500 text-white hover:bg-orange-600 mt-6"
         onClick={handleSearch}
         disabled={isLoading}
       >
-        <Plane className="ml-3 h-6 w-6" />
+        <Plane className="ml-2 h-4 w-4" />
         {isLoading ? "در حال جستجو..." : "جستجوی CIP"}
       </Button>
-
-      <style jsx>{`
-        @keyframes slideDown {
-          from {
-            opacity: 0;
-            transform: translateY(-10px) scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-        
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(-5px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </div>
   )
 }

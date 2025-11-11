@@ -1,14 +1,10 @@
 // components/search-section.tsx
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { Card } from "@/components/ui/card"
+import { useState, useRef } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
-import { Hotel, Plane, Crown, Map, Building, X, Search, ArrowRight } from "lucide-react"
-import gsap from "gsap"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { useSearch } from "@/hooks/use-search"
+import { Hotel, Plane, Crown, Map, X, ArrowRight } from "lucide-react"
 import FlightSearch from "../flights/flight-search"
 import HotelSearch from "../hotels/hotel-search"
 import DomesticFlightSearch from "../flights/domestic-flight-search"
@@ -16,115 +12,55 @@ import CipSearch from "../cip/cip-search"
 import TourSearch from "../tours/tour-search"
 import DomesticHotelSearch from "../hotels/domestic-hotel-search"
 
-gsap.registerPlugin(ScrollTrigger)
-
 interface SearchSectionProps {
   onSearchResults: (results: any, type: string) => void
 }
 
-interface Suggestion {
-  id: string
-  name: string
-  country: string
-  code?: string
-  city?: string
-  type: 'city' | 'airport'
-}
-
 export function SearchSection({ onSearchResults }: SearchSectionProps) {
   const [activeTab, setActiveTab] = useState<"hotel" | "flight" | "domesticFlights" | "cip" | "tour" | "domesticHotel">("domesticFlights")
-  const [isLoading, setIsLoading] = useState(false)
-  const [mobileMainModalOpen, setMobileMainModalOpen] = useState(false)
   const [mobileSearchModalOpen, setMobileSearchModalOpen] = useState(false)
-  const sectionRef = useRef<HTMLElement>(null)
   const cardRef = useRef<HTMLDivElement>(null)
 
-  const cardBackgrounds = {
-    hotel: 'bg-emerald-400',
-    flight: 'bg-blue-400',
-    domesticFlights: 'bg-red-400',
-    cip: 'bg-purple-400',
-    tour: 'bg-orange-400',
-    domesticHotel: 'bg-cyan-400'
-  }
-
   const tabConfig = {
-    cip: { icon: Crown, label: "CIP فرودگاهی", color: "purple", className: "rounded-tr-xl" },
-    tour: { icon: Map, label: "گشت شهری", color: "orange", className: "rounded-tl-xl" },
-    domesticHotel: { icon: Hotel, label: "هتل داخلی", color: "cyan" },
-    hotel: { icon: Hotel, label: "هتل خارجی", color: "emerald" },
-    flight: { icon: Plane, label: "پرواز خارجی", color: "blue", className: "rounded-br-xl" },
-    domesticFlights: { icon: Plane, label: "پرواز داخلی", color: "red", className: "rounded-bl-xl" },
+    cip: { icon: Crown, label: "CIP فرودگاهی" },
+    tour: { icon: Map, label: "گشت شهری" },
+    domesticHotel: { icon: Hotel, label: "هتل داخلی" },
+    hotel: { icon: Hotel, label: "هتل خارجی" },
+    flight: { icon: Plane, label: "پرواز خارجی" },
+    domesticFlights: { icon: Plane, label: "پرواز داخلی" },
   }
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(cardRef.current, {
-        y: 100,
-        opacity: 0,
-        duration: 1,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 80%",
-          end: "top 50%",
-          scrub: 1,
-        },
-      })
-    }, sectionRef)
-
-    return () => ctx.revert()
-  }, [])
 
   const handleTabSelect = (tab: string) => {
     setActiveTab(tab as any)
-    setMobileMainModalOpen(false)
     setMobileSearchModalOpen(true)
   }
 
-  const handleBackToMainModal = () => {
-    setMobileSearchModalOpen(false)
-    setMobileMainModalOpen(true)
-  }
-
-  const handleCloseAllModals = () => {
-    setMobileMainModalOpen(false)
+  const handleCloseModal = () => {
     setMobileSearchModalOpen(false)
   }
 
   // Mobile Main Modal - Tab Selection
   const MobileMainModal = () => (
-      <>
-      {/* Tab Buttons Grid */}
-        <div className="grid grid-cols-2 rounded-2xl">
-          {Object.entries(tabConfig).map(([key, config]) => {
-            const Icon = config.icon
-            const colorClass = `bg-${config.color}-500`
-            return (
-              <button
-                key={key}
-                onClick={() => handleTabSelect(key)}
-                className={`
-                  flex flex-col items-center justify-center gap-3 
-                  ${config.className && config.className}
-                  h-36 bg-white border border-gray-200 
-                  hover:border-${config.color}-300 hover:shadow-lg 
-                  transition-all duration-200 active:scale-95 py-4
-                  group
-                `}
-              >
-                <div className={`p-3 rounded-xl ${colorClass} group-hover:scale-110 transition-transform`}>
-                  <Icon className="h-6 w-6 text-white" />
-                </div>
-                <span className="text-sm font-medium text-gray-800 text-center px-2">
-                  {config.label}
-                </span>
-                <ArrowRight className="h-4 w-4 text-cyan-500 group-hover:text-gray-600" />
-              </button>
-            )
-          })}
-        </div>
-        </>
+    <div className="grid grid-cols-2 w-full">
+      {Object.entries(tabConfig).map(([key, config]) => {
+        const Icon = config.icon
+        return (
+          <button
+            key={key}
+            onClick={() => handleTabSelect(key)}
+            className="flex flex-col items-center justify-center gap-3 h-32 bg-white border border-gray-300 hover:bg-gray-50 transition-colors p-4 group"
+          >
+            <div className="p-3 bg-orange-500 group-hover:bg-orange-600 transition-colors">
+              <Icon className="h-6 w-6 text-white" />
+            </div>
+            <span className="text-sm font-medium text-black text-center">
+              {config.label}
+            </span>
+            <ArrowRight className="h-4 w-4 text-blue-500" />
+          </button>
+        )
+      })}
+    </div>
   )
 
   // Mobile Search Modal - Specific Search Component
@@ -151,29 +87,27 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
     const currentConfig = tabConfig[activeTab]
 
     return (
-      <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
+      <div className="fixed inset-0 z-50 bg-white">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white sticky top-0 z-10">
+        <div className="flex items-center justify-between p-4 border-b border-gray-300 bg-white">
           <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleBackToMainModal}
-              className="h-8 w-8"
+            <button
+              onClick={handleCloseModal}
+              className="p-2 border border-gray-300 hover:bg-gray-50"
             >
-              <X className="h-5 w-5" />
-            </Button>
+              <X className="h-5 w-5 text-black" />
+            </button>
             <div className="flex items-center gap-2">
-              <div className={`p-2 rounded-lg bg-${currentConfig.color}-500`}>
+              <div className="p-2 bg-red-500">
                 <currentConfig.icon className="h-5 w-5 text-white" />
               </div>
-              <h2 className="text-xl font-bold text-gray-800">{currentConfig.label}</h2>
+              <h2 className="text-xl font-bold text-black">{currentConfig.label}</h2>
             </div>
           </div>
         </div>
 
         {/* Search Component */}
-        <div className="p-4 overflow-y-auto">
+        <div className="p-4 h-[calc(100vh-80px)] overflow-y-auto">
           {renderSearchComponent()}
         </div>
       </div>
@@ -183,82 +117,79 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
   // Desktop Tabs
   const DesktopTabs = () => (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 mb-8 p-1 gap-2">
+      <TabsList className="flex w-full h-max bg-white border-b border-gray-300 p-0">
         {Object.entries(tabConfig).map(([key, config]) => {
           const Icon = config.icon
+          const isSelected = activeTab === key
           return (
             <TabsTrigger 
               key={key}
               value={key} 
-              className="flex items-center gap-3 data-[state=active]:text-white text-white data-[state=active]:bg-white/20 py-3 transition-all duration-300 border-2 border-transparent data-[state=active]:border-white/30"
+              className={`flex-1 flex items-center justify-center gap-3 py-4 border-b-2 transition-colors ${
+                isSelected 
+                  ? 'border-b-2 border-red-800 text-red-800' 
+                  : 'border-b-2 border-transparent text-black hover:text-gray-600'
+              }`}
             >
-              <Icon className="h-6 w-6 lg:h-8 lg:w-8" />
-              <span className="font-black text-sm lg:text-lg">{config.label}</span>
+              <Icon className={`h-5 w-5 ${isSelected ? 'text-red-800' : 'text-black'}`} />
+              <span className=" font-black">{config.label}</span>
             </TabsTrigger>
           )
         })}
       </TabsList>
 
-      {/* Hotel Search */}
-      <TabsContent value="hotel" className="space-y-6 p-4">
+      {/* Tab Contents */}
+      <TabsContent value="hotel" className="p-6 bg-white">
         <HotelSearch />
       </TabsContent>
 
-      {/* Flight Search */}
-      <TabsContent value="flight" className="space-y-6 p-4">
+      <TabsContent value="flight" className="p-6 bg-white">
         <FlightSearch />
       </TabsContent>
 
-      {/* Domestic Flight Search */}
-      <TabsContent value="domesticFlights" className="space-y-6 p-4">
+      <TabsContent value="domesticFlights" className="p-6 bg-white">
         <DomesticFlightSearch />
       </TabsContent>
 
-      {/* CIP Search */}
-      <TabsContent value="cip" className="space-y-6 p-4">
+      <TabsContent value="cip" className="p-6 bg-white">
         <CipSearch />
       </TabsContent>
 
-      {/* Tour Search */}
-      <TabsContent value="tour" className="space-y-6 p-4">
+      <TabsContent value="tour" className="p-6 bg-white">
         <TourSearch />
       </TabsContent>
 
-      {/* Domestic Hotel Search */}
-      <TabsContent value="domesticHotel" className="space-y-6 p-4">
+      <TabsContent value="domesticHotel" className="p-6 bg-white">
         <DomesticHotelSearch />
       </TabsContent>
     </Tabs>
   )
 
   return (
-    <section ref={sectionRef} className={`py-16 md:py-24 relative dark:from-gray-900 dark:to-blue-900 ${cardBackgrounds[activeTab]}`}>
-      <div className="w-full h-full absolute top-0 right-0 bg-[url('/pattern.png')] bg-[length:180px_180px] z-10 opacity-10"></div>
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12 relative z-30">
-          <h2 className="text-4xl font-bold text-white dark:text-white mb-4">
+    <section ref={cardRef} className=" bg-white">
+      <div className="mx-auto">
+        <div className="text-center bg-orange-600 pt-8 pb-20">
+          <h2 className="text-3xl font-bold text-white mb-4">
             سفر بعدی خود را پیدا کنید
           </h2>
-          <p className="text-xl text-white max-w-2xl mx-auto">
+          <p className="text-lg text-white max-w-2xl mx-auto">
             بهترین هتل ها، پروازها، CIP، تورها و قطارها را با بهترین قیمت ها کشف کنید
           </p>
         </div>
 
-        {/* Desktop Version */}
-        <div className="hidden lg:block">
-          <Card ref={cardRef} className="mx-auto relative z-30 shadow-none w-full border-0 dark:bg-gray-800/95">
+        {/* Desktop Version - Tabs */}
+        <div className="hidden lg:block mt-[-50px]">
+          <div className="bg-white border rounded-lg px-8 border-gray-300">
             <DesktopTabs />
-          </Card>
+          </div>
         </div>
 
-        {/* Mobile Version */}
+        {/* Mobile Version - Grid Buttons */}
         <div className="block lg:hidden">
-          <Card ref={cardRef} className="relative z-30 shadow-none w-full border-0 dark:bg-gray-800/95">
+          <div className="bg-white border border-gray-300">
             <MobileMainModal />
-          </Card>
+          </div>
         </div>
-
-        {/* Mobile Main Modal */}
 
         {/* Mobile Search Modal */}
         {mobileSearchModalOpen && <MobileSearchModal />}

@@ -5,16 +5,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Search, Calendar, MapPin, Users, Loader2, Bed, Plus, Minus, CalendarIcon, AlertCircle } from "lucide-react"
-import gsap from "gsap"
-import { hotels } from "@/lib/data/hotels"
-import { useSnack } from "@/hooks/use-notification"
 import { useHotel } from "@/contexts/search/HotelContext"
 import { useRouter } from "next/navigation"
-import ShamsiDateModal from "../flights/ShamsiCalendar" // Adjust the path as needed
-import { formatShamsiDate } from "../flights/utils"  // Adjust the path as needed
-import { shamsiToGregorianString } from "@/lib/jalaalil" // Adjust the path as needed
+import ShamsiDateModal from "../flights/ShamsiCalendar"
+import { formatShamsiDate } from "../flights/utils"
+import { shamsiToGregorianString } from "@/lib/jalaalil"
 
-// Updated interface for city suggestions
 interface CitySuggestion {
   id: number;
   name: string;
@@ -47,12 +43,9 @@ interface FormErrors {
 
 const DomesticHotelSearch = () => {
   const [isLoading, setIsLoading] = useState(false)
-  const sectionRef = useRef<HTMLElement>(null)
-  const cardRef = useRef<HTMLDivElement>(null)
   const [searchLoading, setSearchLoading] = useState(false)
   const router = useRouter()
   
-  // Hotel search state
   const [hotelSearch, setHotelSearch] = useState<HotelSearchFormData>({
     city: "",
     cityId: undefined,
@@ -65,13 +58,8 @@ const DomesticHotelSearch = () => {
     type: 'domestic'
   })
 
-  // Error state
   const [errors, setErrors] = useState<FormErrors>({})
-
-  // Guests & Rooms popover state
   const [showGuestsRooms, setShowGuestsRooms] = useState(false)
-
-  // Suggestions state
   const [suggestions, setSuggestions] = useState<CitySuggestion[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0)
@@ -79,31 +67,11 @@ const DomesticHotelSearch = () => {
   const [currentInput, setCurrentInput] = useState("")
   const [isCityFocused, setIsCityFocused] = useState(false)
 
-  const { error, success } = useSnack()
   const { setHotelsData, setRequest } = useHotel()
 
   const suggestionsRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const guestsRoomsRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(cardRef.current, {
-        y: 100,
-        opacity: 0,
-        duration: 1,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 80%",
-          end: "top 50%",
-          scrub: 1,
-        },
-      })
-    }, sectionRef)
-
-    return () => ctx.revert()
-  }, [])
 
   // Clear errors when user starts typing
   useEffect(() => {
@@ -118,27 +86,20 @@ const DomesticHotelSearch = () => {
     }
   }, [hotelSearch.city, hotelSearch.checkIn, hotelSearch.checkOut, errors])
 
-  // Fetch city suggestions with debounce
   const fetchCitySuggestions = async (query: string): Promise<CitySuggestion[]> => {
     if (query.length < 2) {
       return [];
     }
 
-    // try {
-      const response = await fetch(`/api/hotels/search?q=${encodeURIComponent(query)}&type=domestic`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch suggestions');
-      }
-      const data = await response.json();
-      console.log(data)
-      return data.results || [];
-    // } catch (error) {
-    //   console.error("Error fetching city suggestions:", error);
-    //   return [];
-    // }
+    const response = await fetch(`/api/hotels/search?q=${encodeURIComponent(query)}&type=domestic`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch suggestions');
+    }
+    const data = await response.json();
+    console.log(data)
+    return data.results || [];
   };
 
-  // Fetch suggestions with debounce
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (currentInput.length < 2) {
@@ -169,7 +130,6 @@ const DomesticHotelSearch = () => {
   // Handle click outside for both suggestions and guests/rooms
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      // Close suggestions
       if (
         suggestionsRef.current && 
         !suggestionsRef.current.contains(event.target as Node) &&
@@ -179,7 +139,6 @@ const DomesticHotelSearch = () => {
         setShowSuggestions(false)
       }
 
-      // Close guests/rooms popover
       if (
         guestsRoomsRef.current && 
         !guestsRoomsRef.current.contains(event.target as Node) &&
@@ -242,7 +201,6 @@ const DomesticHotelSearch = () => {
     setCurrentInput("")
     setIsCityFocused(false)
     
-    // Clear city error
     setErrors(prev => ({ ...prev, city: undefined }))
   }
 
@@ -256,7 +214,6 @@ const DomesticHotelSearch = () => {
       propertyDestinationId: undefined
     }))
     
-    // Clear city error when user starts typing
     if (errors.city) {
       setErrors(prev => ({ ...prev, city: undefined }))
     }
@@ -299,12 +256,9 @@ const DomesticHotelSearch = () => {
   }
 
   const handleHotelSearch = async () => {
-    // Clear previous errors
     setErrors({})
     
-    // Validate form
     if (!validateForm()) {
-      // Focus on first error field
       if (errors.city) {
         inputRef.current?.focus()
       }
@@ -315,7 +269,6 @@ const DomesticHotelSearch = () => {
     try {
       setSearchLoading(true)
       
-      // Convert Shamsi dates to Gregorian for API
       const gregorianCheckIn = shamsiToGregorianString(hotelSearch.checkIn)
       const gregorianCheckOut = shamsiToGregorianString(hotelSearch.checkOut)
       
@@ -352,10 +305,8 @@ const DomesticHotelSearch = () => {
     }
   }
 
-  // Handle date changes from ShamsiDateModal
   const handleCheckInDateChange = (date: string) => {
     setHotelSearch(prev => ({ ...prev, checkIn: date }))
-    // Clear checkIn error when user selects a date
     if (errors.checkIn) {
       setErrors(prev => ({ ...prev, checkIn: undefined }))
     }
@@ -363,15 +314,12 @@ const DomesticHotelSearch = () => {
 
   const handleCheckOutDateChange = (date: string) => {
     setHotelSearch(prev => ({ ...prev, checkOut: date }))
-    // Clear checkOut error when user selects a date
     if (errors.checkOut) {
       setErrors(prev => ({ ...prev, checkOut: undefined }))
     }
   }
 
-  // For hotel search, we don't need trip type, so we'll use a fixed value
   const handleTripTypeChange = (type: string) => {
-    // Not needed for hotel search, but required by the component
     console.log("Trip type changed:", type)
   }
 
@@ -379,7 +327,7 @@ const DomesticHotelSearch = () => {
     if (!errors[field]) return null
     
     return (
-      <div className="flex items-center gap-2 mt-2 text-white text-sm animate-fadeIn">
+      <div className="flex items-center gap-2 mt-2 text-black text-sm">
         <AlertCircle className="h-4 w-4" />
         <span>{errors[field]}</span>
       </div>
@@ -392,18 +340,15 @@ const DomesticHotelSearch = () => {
     return (
       <div 
         ref={suggestionsRef}
-        className="absolute top-full right-0 left-0 bg-white border-2 border-blue-300 rounded-2xl shadow-2xl z-50 max-h-80 overflow-y-auto mt-2 transition-all duration-300 transform origin-top"
-        style={{
-          animation: 'slideDown 0.3s ease-out'
-        }}
+        className="absolute top-full right-0 left-0 bg-white border border-gray-300 z-50 max-h-80 overflow-y-auto mt-1"
       >
         {suggestions.map((suggestion, index) => (
           <div
             key={`${suggestion.id}-${suggestion.type}`}
-            className={`p-4 cursor-pointer border-b border-gray-100 last:border-b-0 transition-all duration-200 ${
+            className={`p-3 cursor-pointer border-b border-gray-300 last:border-b-0 ${
               index === activeSuggestionIndex 
-                ? 'bg-blue-50 border-r-4 border-r-blue-500 scale-[1.02]' 
-                : 'hover:bg-gray-50 hover:scale-[1.01]'
+                ? 'bg-gray-100' 
+                : 'hover:bg-gray-50'
             }`}
             onMouseDown={(e) => {
               e.preventDefault()
@@ -412,25 +357,25 @@ const DomesticHotelSearch = () => {
           >
             <div className="flex justify-between items-start">
               <div className="flex-1 text-right">
-                <div className="flex items-center gap-3 justify-end">
-                  <span className="font-bold text-lg text-gray-800">
+                <div className="flex items-center gap-2 justify-end">
+                  <span className="font-bold text-black">
                     {suggestion.nameFa || suggestion.name}
                   </span>
                   {suggestion.nameFa && (
-                    <span className="text-base text-gray-500">({suggestion.name})</span>
+                    <span className="text-sm text-black">({suggestion.name})</span>
                   )}
                 </div>
-                <div className="flex items-center gap-3 mt-2 justify-end">
-                  <span className={`text-sm px-3 py-1.5 rounded-full font-medium ${
+                <div className="flex items-center gap-2 mt-1 justify-end">
+                  <span className={`text-xs px-2 py-1 font-medium ${
                     suggestion.type === 'domestic' 
-                      ? 'bg-green-100 text-green-800 border border-green-200' 
-                      : 'bg-blue-100 text-blue-800 border border-blue-200'
+                      ? 'bg-gray-200 text-black border border-gray-300' 
+                      : 'bg-gray-200 text-black border border-gray-300'
                   }`}>
                     {suggestion.type === 'domestic' ? 'داخلی' : 'بین‌المللی'}
                   </span>
                   {suggestion.isPopular && (
-                    <span className="text-sm bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-full font-medium border border-yellow-200">
-                      💫 محبوب
+                    <span className="text-xs bg-gray-200 text-black px-2 py-1 font-medium border border-gray-300">
+                      محبوب
                     </span>
                   )}
                 </div>
@@ -448,35 +393,32 @@ const DomesticHotelSearch = () => {
     return (
       <div 
         ref={guestsRoomsRef}
-        className="absolute top-full right-0 left-0 bg-white border-2 border-blue-300 rounded-2xl shadow-2xl z-50 p-6 mt-2 transition-all duration-300 transform origin-top"
-        style={{
-          animation: 'slideDown 0.3s ease-out'
-        }}
+        className="absolute top-full right-0 left-0 bg-white border border-gray-300 z-50 p-4 mt-1"
       >
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Guests Selector */}
           <div className="flex items-center justify-between">
             <div className="text-right">
-              <div className="font-bold text-lg text-gray-800">تعداد مهمان</div>
-              <div className="text-sm text-gray-600 mt-1">حداکثر 10 مهمان</div>
+              <div className="font-bold text-black">تعداد مهمان</div>
+              <div className="text-xs text-black mt-1">حداکثر 10 مهمان</div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <button
                 onClick={() => handleGuestsRoomsChange('guests', 'decrement')}
                 disabled={hotelSearch.guests <= 1}
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 disabled:bg-gray-100 disabled:text-gray-400 transition-all duration-200"
+                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
               >
-                <Minus className="h-5 w-5" />
+                <Minus className="h-4 w-4" />
               </button>
-              <span className="text-2xl font-bold text-gray-800 min-w-8 text-center">
+              <span className="text-lg font-bold text-black min-w-6 text-center">
                 {hotelSearch.guests}
               </span>
               <button
                 onClick={() => handleGuestsRoomsChange('guests', 'increment')}
                 disabled={hotelSearch.guests >= 10}
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 disabled:bg-gray-100 disabled:text-gray-400 transition-all duration-200"
+                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
               >
-                <Plus className="h-5 w-5" />
+                <Plus className="h-4 w-4" />
               </button>
             </div>
           </div>
@@ -484,26 +426,26 @@ const DomesticHotelSearch = () => {
           {/* Rooms Selector */}
           <div className="flex items-center justify-between">
             <div className="text-right">
-              <div className="font-bold text-lg text-gray-800">تعداد اتاق</div>
-              <div className="text-sm text-gray-600 mt-1">حداکثر 5 اتاق</div>
+              <div className="font-bold text-black">تعداد اتاق</div>
+              <div className="text-xs text-black mt-1">حداکثر 5 اتاق</div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <button
                 onClick={() => handleGuestsRoomsChange('rooms', 'decrement')}
                 disabled={hotelSearch.rooms <= 1}
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 disabled:bg-gray-100 disabled:text-gray-400 transition-all duration-200"
+                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
               >
-                <Minus className="h-5 w-5" />
+                <Minus className="h-4 w-4" />
               </button>
-              <span className="text-2xl font-bold text-gray-800 min-w-8 text-center">
+              <span className="text-lg font-bold text-black min-w-6 text-center">
                 {hotelSearch.rooms}
               </span>
               <button
                 onClick={() => handleGuestsRoomsChange('rooms', 'increment')}
                 disabled={hotelSearch.rooms >= 5}
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 disabled:bg-gray-100 disabled:text-gray-400 transition-all duration-200"
+                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
               >
-                <Plus className="h-5 w-5" />
+                <Plus className="h-4 w-4" />
               </button>
             </div>
           </div>
@@ -513,35 +455,33 @@ const DomesticHotelSearch = () => {
   }
 
   return (
-    <div className="rounded-3xl "  style={{direction:'rtl'}}>
+    <div style={{direction:'rtl'}} className="container mx-auto">
       {/* General Error Display */}
       {errors.general && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-3 animate-fadeIn">
-          <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
-          <p className="text-red-700 text-sm font-medium">{errors.general}</p>
+        <div className="mb-4 p-3 bg-red-500 border border-red-700 flex items-center gap-3">
+          <AlertCircle className="h-4 w-4 text-white flex-shrink-0" />
+          <p className="text-white text-sm font-medium">{errors.general}</p>
         </div>
       )}
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {/* City Input - Enhanced with animations */}
-        <div className="space-y-3 relative">
-          <Label htmlFor="hotel-city" className="text-lg font-bold text-white text-right block">شهر مقصد</Label>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {/* City Input */}
+        <div className="space-y-2 relative">
+          <Label htmlFor="hotel-city" className="text-black text-right block">شهر مقصد</Label>
           <div className="relative">
-            <MapPin className="absolute right-4 top-4 h-5 w-5 text-gray-400" />
+            <MapPin className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
             {suggestionLoading && (
-              <Loader2 className="absolute left-4 top-4 h-5 w-5 animate-spin text-blue-600" />
+              <Loader2 className="absolute left-3 top-3 h-4 w-4 animate-spin text-blue-500" />
             )}
             <Input 
               ref={inputRef}
               id="hotel-city" 
               placeholder="تهران، استانبول، دبی..." 
-              className={`pr-12 h-14 rounded-2xl border-2 bg-white text-gray-800 placeholder-gray-500 text-lg font-medium transition-all duration-300 ${
+              className={`pr-10 h-12 border border-gray-300 bg-white text-black placeholder-gray-500 ${
                 errors.city 
-                  ? 'border-red-500 bg-red-50 scale-105 shadow-lg' 
-                  : isCityFocused 
-                  ? 'border-blue-500 scale-105 shadow-lg' 
-                  : 'border-gray-300 hover:border-blue-400'
-              } ${showSuggestions ? 'rounded-b-none border-b-2 border-b-blue-300' : ''}`}
+                  ? 'border-red-500 bg-red-500' 
+                  : 'border-gray-300'
+              }`}
               value={hotelSearch.city}
               onChange={(e) => handleInputChange(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -559,55 +499,55 @@ const DomesticHotelSearch = () => {
           </div>
         </div>
         
-        {/* Check-in Date - Using ShamsiDateModal */}
-        <div className="space-y-3">
+        {/* Check-in Date */}
+        <div className="space-y-2">
+          <Label className="text-black text-right block">تاریخ ورود</Label>
           <ShamsiDateModal
             departureDate={hotelSearch.checkIn}
             returnDate={hotelSearch.checkOut}
-            tripType="roundtrip" // Fixed for hotel search
+            tripType="roundtrip"
             onDepartureDateChange={handleCheckInDateChange}
             onReturnDateChange={handleCheckOutDateChange}
             onTripTypeChange={handleTripTypeChange}
             error={errors.checkIn}
-            normalReturnCal={true}
+            errorColor="black"
           />
         </div>
         
         {/* Check-out Date Display */}
-        <div className="space-y-3">
-          <Label className="text-lg font-bold text-white text-right block">تاریخ خروج</Label>
-          <div className="relative">
-            <CalendarIcon className="absolute right-4 top-4 h-5 w-5 text-gray-400" />
-            <div className={`w-full h-14 rounded-2xl border-2 bg-white text-gray-800 text-lg font-medium flex items-center px-4 pr-12 transition-all duration-300 ${
-              errors.checkOut 
-                ? 'border-red-500 bg-red-50 scale-105 shadow-lg' 
-                : 'border-gray-300'
-            }`}>
-              <span className="text-gray-800">
-                {formatShamsiDate(hotelSearch.checkOut)}
-              </span>
-            </div>
-          </div>
+        <div className="space-y-2">
+          <Label className="text-black text-right block">تاریخ خروج</Label>
+          <ShamsiDateModal
+            departureDate={hotelSearch.checkIn}
+            returnDate={hotelSearch.checkOut}
+            tripType="roundtrip"
+            onDepartureDateChange={handleCheckInDateChange}
+            onReturnDateChange={handleCheckOutDateChange}
+            onTripTypeChange={handleTripTypeChange}
+            error={errors.checkIn}
+            errorColor="black"
+            returnCal={true}
+          />
           {renderError("checkOut")}
         </div>
         
         {/* Guests & Rooms Selector */}
-        <div className="space-y-3 relative">
-          <Label className="text-lg font-bold text-white text-right block">مهمان و اتاق</Label>
+        <div className="space-y-2 relative">
+          <Label className="text-black text-right block">مهمان و اتاق</Label>
           <div 
             className="guests-rooms-trigger cursor-pointer"
             onClick={() => setShowGuestsRooms(!showGuestsRooms)}
           >
-            <div className="relative h-14 rounded-2xl border-2 border-gray-300 bg-white hover:border-blue-400 transition-all duration-300 flex items-center justify-between px-4">
-              <div className="flex items-center gap-4">
-                <Users className="h-5 w-5 text-gray-400" />
-                <Bed className="h-5 w-5 text-gray-400" />
+            <div className="relative h-12 border border-gray-300 bg-white hover:border-gray-400 flex items-center justify-between px-3">
+              <div className="flex items-center gap-3">
+                <Users className="h-4 w-4 text-gray-400" />
+                <Bed className="h-4 w-4 text-gray-400" />
               </div>
               <div className="text-right">
-                <div className="text-gray-800 text-lg font-medium">
+                <div className="text-black text-sm font-medium">
                   {hotelSearch.guests} مهمان
                 </div>
-                <div className="text-gray-500 text-sm">
+                <div className="text-gray-500 text-xs">
                   {hotelSearch.rooms} اتاق
                 </div>
               </div>
@@ -619,37 +559,13 @@ const DomesticHotelSearch = () => {
       
       {/* Search Button */}
       <Button 
-        className="w-full h-16 text-xl font-bold rounded-2xl bg-gradient-to-r from-white to-blue-100 text-emerald-600 hover:from-blue-100 hover:to-white transition-all duration-300 shadow-2xl hover:shadow-3xl hover:scale-105 mt-8"
+        className="w-full h-12 bg-orange-500 text-white hover:bg-orange-600 mt-6"
         onClick={handleHotelSearch}
         disabled={isLoading}
       >
-        <Search className="ml-3 h-6 w-6" />
+        <Search className="ml-2 h-4 w-4" />
         {isLoading ? "در حال جستجو..." : "جستجوی هتل"}
       </Button>
-
-      <style jsx>{`
-        @keyframes slideDown {
-          from {
-            opacity: 0;
-            transform: translateY(-10px) scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-        
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(-5px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </div>
   )
 }

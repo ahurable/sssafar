@@ -3,10 +3,6 @@
 import { useEffect, useRef } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Shield, Clock, CreditCard, Headphones } from "lucide-react"
-import gsap from "gsap"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
-
-gsap.registerPlugin(ScrollTrigger)
 
 const features = [
   {
@@ -33,35 +29,13 @@ const features = [
 
 export function FeaturesSection() {
   const sectionRef = useRef<HTMLElement>(null)
-  const cardsRef = useRef<(HTMLDivElement | null)[]>([])
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      cardsRef.current.forEach((card, index) => {
-        gsap.from(card, {
-          scale: 0.8,
-          opacity: 0,
-          duration: 0.6,
-          ease: "back.out(1.7)",
-          scrollTrigger: {
-            trigger: card,
-            start: "top 85%",
-            end: "top 60%",
-            scrub: 1,
-          },
-        })
-      })
-    }, sectionRef)
-
-    return () => ctx.revert()
-  }, [])
 
   return (
-    <section ref={sectionRef} className="bg-muted/30 py-16 md:py-24">
+    <section ref={sectionRef} className=" py-16">
       <div className="container mx-auto px-4">
         <div className="mb-12 text-center">
-          <h2 className="mb-4 text-3xl font-bold text-balance md:text-4xl text-emerald-400">چرا سفرتودی؟</h2>
-          <p className="mx-auto max-w-2xl leading-relaxed text-emerald-400">
+          <h2 className="mb-4 text-3xl font-bold text-black md:text-4xl">چرا سفرتودی؟</h2>
+          <p className="mx-auto max-w-2xl leading-relaxed text-black">
             ما با ارائه بهترین خدمات و امکانات، سفر شما را به تجربه‌ای فراموش‌نشدنی تبدیل می‌کنیم
           </p>
         </div>
@@ -72,17 +46,14 @@ export function FeaturesSection() {
             return (
               <Card
                 key={index}
-                ref={(el) => {
-                  cardsRef.current[index] = el
-                }}
-                className="border-none shadow-lg transition-shadow hover:shadow-xl"
+                className="border border-gray-300 bg-white shadow-sm"
               >
                 <CardContent className="flex flex-col items-center p-6 text-center">
-                  <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                    <Icon className="h-8 w-8 text-emerald-400" />
+                  <div className="mb-4 flex h-16 w-16 items-center justify-center bg-gray-100">
+                    <Icon className="h-8 w-8 text-black" />
                   </div>
-                  <h3 className="mb-2 text-xl font-bold text-emerald-400">{feature.title}</h3>
-                  <p className="text-sm leading-relaxed text-emerald-400">{feature.description}</p>
+                  <h3 className="mb-2 text-xl font-bold text-black">{feature.title}</h3>
+                  <p className="text-sm leading-relaxed text-black">{feature.description}</p>
                 </CardContent>
               </Card>
             )

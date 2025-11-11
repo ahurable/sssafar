@@ -1,10 +1,6 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import gsap from "gsap"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
-
-gsap.registerPlugin(ScrollTrigger)
 
 const stats = [
   { value: 50000, label: "مسافر راضی", suffix: "+" },
@@ -18,46 +14,40 @@ export function StatsSection() {
   const [animatedValues, setAnimatedValues] = useState(stats.map(() => 0))
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      ScrollTrigger.create({
-        trigger: sectionRef.current,
-        start: "top 70%",
-        onEnter: () => {
-          stats.forEach((stat, index) => {
-            gsap.to(
-              {},
-              {
-                duration: 2,
-                ease: "power2.out",
-                onUpdate: function () {
-                  const progress = this.progress()
-                  setAnimatedValues((prev) => {
-                    const newValues = [...prev]
-                    newValues[index] = Math.floor(stat.value * progress)
-                    return newValues
-                  })
-                },
-              },
-            )
-          })
-        },
-      })
-    }, sectionRef)
-
-    return () => ctx.revert()
+    stats.forEach((stat, index) => {
+      let startTimestamp: number | null = null
+      const duration = 2000 // 2 seconds
+      
+      const step = (timestamp: number) => {
+        if (!startTimestamp) startTimestamp = timestamp
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1)
+        
+        setAnimatedValues(prev => {
+          const newValues = [...prev]
+          newValues[index] = Math.floor(stat.value * progress)
+          return newValues
+        })
+        
+        if (progress < 1) {
+          requestAnimationFrame(step)
+        }
+      }
+      
+      requestAnimationFrame(step)
+    })
   }, [])
 
   return (
-    <section ref={sectionRef} className="bg-emerald-600 py-16 text-emerald-600-foreground md:py-20">
+    <section ref={sectionRef} className=" py-16 md:py-20">
       <div className="container mx-auto px-4">
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat, index) => (
             <div key={index} className="text-center">
-              <div className="mb-2 text-4xl text-white font-bold md:text-5xl">
+              <div className="mb-2 text-4xl font-bold text-black md:text-5xl">
                 {animatedValues[index].toLocaleString("fa-IR")}
                 {stat.suffix}
               </div>
-              <div className="text-lg text-white">{stat.label}</div>
+              <div className="text-lg text-black">{stat.label}</div>
             </div>
           ))}
         </div>

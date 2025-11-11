@@ -52,7 +52,7 @@ export function HeroSlider({ posts }: HeroSliderProps) {
 
   return (
     <div 
-      className="relative lg:h-[750px] lg:max-w-6xl h-screen mx-auto lg:rounded-2xl lg:my-8 w-full overflow-hidden"
+      className="relative lg:h-[550px] lg:w-full h-screen mx-auto lg:rounded-2xl lg:my-8 w-full overflow-hidden"
       onMouseEnter={() => setIsAutoPlaying(false)}
       onMouseLeave={() => setIsAutoPlaying(true)}
     >
@@ -67,7 +67,7 @@ export function HeroSlider({ posts }: HeroSliderProps) {
           >
             {/* Background Image */}
             <div
-              className="absolute top-0 inset-0 bg-center bg-no-repeat bg-cover lg:rounded-2xl h-full w-full"
+              className="absolute top-0 inset-0 bg-center bg-no-repeat bg-cover lg:rounded-lg h-full w-full"
               style={{ backgroundImage: `url(${process.env.NEXT_PUBLIC_APP_URL + post.coverImage})` }}
             >
               <div className="absolute inset-0 bg-black opacity-40" />

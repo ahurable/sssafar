@@ -258,7 +258,6 @@ const DomesticFlightSearch = () => {
                     }
                 }
 
-
                 newValue = Math.min(currentValue + 1, maxValues[type]);
             } else {
                 const minValues = { adults: 1, children: 0, infants: 0 };
@@ -367,7 +366,7 @@ const DomesticFlightSearch = () => {
         if (!errors[field]) return null
         
         return (
-            <div className="flex items-center gap-2 mt-2 text-white text-sm animate-fadeIn">
+            <div className="flex items-center gap-2 mt-2 text-black text-sm">
                 <AlertCircle className="h-4 w-4" />
                 <span>{errors[field]}</span>
             </div>
@@ -380,18 +379,15 @@ const DomesticFlightSearch = () => {
         return (
             <div 
                 ref={suggestionsRef}
-                className="absolute top-full right-0 left-0 bg-white border-2 border-blue-300 rounded-2xl shadow-2xl z-50 max-h-80 overflow-y-auto mt-2 transition-all duration-300 transform origin-top"
-                style={{
-                    animation: 'slideDown 0.3s ease-out'
-                }}
+                className="absolute top-full right-0 left-0 bg-white border border-gray-300 shadow-lg z-50 max-h-80 overflow-y-auto mt-1"
             >
                 {suggestions.map((suggestion, index) => (
                     <div
                         key={`${suggestion.id}-${index}`}
-                        className={`p-4 cursor-pointer border-b border-gray-100 last:border-b-0 transition-all duration-200 ${
+                        className={`p-3 cursor-pointer border-b border-gray-300 last:border-b-0 ${
                             index === activeSuggestionIndex 
-                                ? 'bg-blue-50 border-r-4 border-r-blue-500 scale-[1.02]' 
-                                : 'hover:bg-gray-50 hover:scale-[1.01]'
+                                ? 'bg-gray-100' 
+                                : 'hover:bg-gray-50'
                         }`}
                         onMouseDown={(e) => {
                             e.preventDefault()
@@ -400,20 +396,20 @@ const DomesticFlightSearch = () => {
                     >
                         <div className="flex justify-between items-start">
                             <div className="flex-1 text-right">
-                                <div className="flex items-center gap-3 justify-end">
-                                    <span className="font-bold text-lg text-gray-800">
+                                <div className="flex items-center gap-2 justify-end">
+                                    <span className="font-bold text-black">
                                         {suggestion.city}
                                     </span>
-                                    <span className="text-blue-600 font-bold text-lg">({suggestion.code})</span>
+                                    <span className="text-blue-500 font-bold">({suggestion.code})</span>
                                 </div>
-                                <div className="text-base text-gray-600 mt-1">
+                                <div className="text-sm text-black mt-1">
                                     {suggestion.name}
                                 </div>
-                                <div className="flex items-center gap-3 mt-2 justify-end">
-                                    <span className="text-sm text-gray-500">
+                                <div className="flex items-center gap-2 mt-1 justify-end">
+                                    <span className="text-xs text-black">
                                         ایران
                                     </span>
-                                    <span className="text-sm bg-green-100 text-green-800 px-3 py-1.5 rounded-full font-medium border border-green-200">
+                                    <span className="text-xs bg-gray-200 text-black px-2 py-1 font-medium border border-gray-300">
                                         {suggestion.type === 'airport' ? 'فرودگاه' : 'شهر'}
                                     </span>
                                 </div>
@@ -431,35 +427,32 @@ const DomesticFlightSearch = () => {
         return (
             <div 
                 ref={passengersRef}
-                className="absolute top-full right-0 left-0 bg-white border-2 border-blue-300 rounded-2xl shadow-2xl z-50 p-6 mt-2 transition-all duration-300 transform origin-top"
-                style={{
-                    animation: 'slideDown 0.3s ease-out'
-                }}
+                className="absolute top-full right-0 left-0 bg-white border border-gray-300 shadow-lg z-50 p-4 mt-1"
             >
-                <div className="space-y-6">
+                <div className="space-y-4">
                     {/* Adults Selector */}
                     <div className="flex items-center justify-between">
                         <div className="text-right">
-                            <div className="font-bold text-lg text-gray-800">بزرگسالان</div>
-                            <div className="text-sm text-gray-600 mt-1">(12 سال به بالا)</div>
+                            <div className="font-bold text-black">بزرگسالان</div>
+                            <div className="text-xs text-black mt-1">(12 سال به بالا)</div>
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3">
                             <button
                                 onClick={() => handlePassengerChange('adults', 'decrement')}
                                 disabled={domesticFlightSearch.adults <= 1}
-                                className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 disabled:bg-gray-100 disabled:text-gray-400 transition-all duration-200"
+                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
                             >
-                                <Minus className="h-5 w-5" />
+                                <Minus className="h-4 w-4" />
                             </button>
-                            <span className="text-2xl font-bold text-gray-800 min-w-8 text-center">
+                            <span className="text-lg font-bold text-black min-w-6 text-center">
                                 {domesticFlightSearch.adults}
                             </span>
                             <button
                                 onClick={() => handlePassengerChange('adults', 'increment')}
                                 disabled={domesticFlightSearch.adults >= 9}
-                                className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 disabled:bg-gray-100 disabled:text-gray-400 transition-all duration-200"
+                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
                             >
-                                <Plus className="h-5 w-5" />
+                                <Plus className="h-4 w-4" />
                             </button>
                         </div>
                     </div>
@@ -467,26 +460,26 @@ const DomesticFlightSearch = () => {
                     {/* Children Selector */}
                     <div className="flex items-center justify-between">
                         <div className="text-right">
-                            <div className="font-bold text-lg text-gray-800">کودکان</div>
-                            <div className="text-sm text-gray-600 mt-1">(2 تا 12 سال)</div>
+                            <div className="font-bold text-black">کودکان</div>
+                            <div className="text-xs text-black mt-1">(2 تا 12 سال)</div>
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3">
                             <button
                                 onClick={() => handlePassengerChange('children', 'decrement')}
                                 disabled={domesticFlightSearch.children <= 0}
-                                className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 disabled:bg-gray-100 disabled:text-gray-400 transition-all duration-200"
+                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
                             >
-                                <Minus className="h-5 w-5" />
+                                <Minus className="h-4 w-4" />
                             </button>
-                            <span className="text-2xl font-bold text-gray-800 min-w-8 text-center">
+                            <span className="text-lg font-bold text-black min-w-6 text-center">
                                 {domesticFlightSearch.children}
                             </span>
                             <button
                                 onClick={() => handlePassengerChange('children', 'increment')}
                                 disabled={domesticFlightSearch.children >= 8}
-                                className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 disabled:bg-gray-100 disabled:text-gray-400 transition-all duration-200"
+                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
                             >
-                                <Plus className="h-5 w-5" />
+                                <Plus className="h-4 w-4" />
                             </button>
                         </div>
                     </div>
@@ -494,26 +487,26 @@ const DomesticFlightSearch = () => {
                     {/* Infants Selector */}
                     <div className="flex items-center justify-between">
                         <div className="text-right">
-                            <div className="font-bold text-lg text-gray-800">نوزادان</div>
-                            <div className="text-sm text-gray-600 mt-1">(زیر 2 سال)</div>
+                            <div className="font-bold text-black">نوزادان</div>
+                            <div className="text-xs text-black mt-1">(زیر 2 سال)</div>
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3">
                             <button
                                 onClick={() => handlePassengerChange('infants', 'decrement')}
                                 disabled={domesticFlightSearch.infants <= 0}
-                                className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 disabled:bg-gray-100 disabled:text-gray-400 transition-all duration-200"
+                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
                             >
-                                <Minus className="h-5 w-5" />
+                                <Minus className="h-4 w-4" />
                             </button>
-                            <span className="text-2xl font-bold text-gray-800 min-w-8 text-center">
+                            <span className="text-lg font-bold text-black min-w-6 text-center">
                                 {domesticFlightSearch.infants}
                             </span>
                             <button
                                 onClick={() => handlePassengerChange('infants', 'increment')}
                                 disabled={domesticFlightSearch.infants >= 4}
-                                className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 disabled:bg-gray-100 disabled:text-gray-400 transition-all duration-200"
+                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
                             >
-                                <Plus className="h-5 w-5" />
+                                <Plus className="h-4 w-4" />
                             </button>
                         </div>
                     </div>
@@ -525,35 +518,66 @@ const DomesticFlightSearch = () => {
     const totalPassengers = domesticFlightSearch.adults + domesticFlightSearch.children + domesticFlightSearch.infants
 
     return (
-        <div className="rounded-3xl"  style={{direction:'rtl'}}>
+        <div style={{direction:'rtl'}}>
             {/* General Error Display */}
             {errors.general && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-3 animate-fadeIn">
-                    <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
-                    <p className="text-red-700 text-sm font-medium">{errors.general}</p>
+                <div className="mb-4 p-3 bg-red-500 border border-red-700 flex items-center gap-3">
+                    <AlertCircle className="h-4 w-4 text-white flex-shrink-0" />
+                    <p className="text-white text-sm font-medium">{errors.general}</p>
                 </div>
             )}
-
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {/* From Input */}
-                <div className="space-y-3 relative">
-                    <Label htmlFor="domestic-flight-origin" className="text-lg font-bold text-white text-right block">مبدا (فرودگاه)</Label>
+            <div className="w-full flex gap-2">
+                {/* Trip Type */}
+                <div className="w-[150px]">
+                    <Label htmlFor="domestic-flight-trip-type" className="text-black text-right block mb-2">نوع سفر</Label>
                     <div className="relative">
-                        <MapPin className="absolute right-4 top-4 h-5 w-5 text-gray-400" />
+                        <select 
+                            id="domestic-flight-trip-type"
+                            className="w-full h-12 border rounded-full border-gray-300 bg-white text-black px-3 pr-10 appearance-none"
+                            value={domesticFlightSearch.tripType}
+                            onChange={(e) => setDomesticFlightSearch(prev => ({ ...prev, tripType: e.target.value }))}
+                        >
+                            <option value="oneway">یک طرفه</option>
+                            <option value="roundtrip">رفت و برگشت</option>
+                        </select>
+                        <ChevronDown className="absolute left-3 top-3 h-4 w-4 text-gray-400 pointer-events-none" />
+                    </div>
+                </div>
+                {/* Cabin Class */}
+                <div className="w-[150px]">
+                    <Label htmlFor="domestic-flight-cabin-class" className="text-black text-right block mb-2">کلاس پرواز</Label>
+                    <div className="relative">
+                        <select 
+                            id="domestic-flight-cabin-class"
+                            className="w-full rounded-full h-12 border border-gray-300 bg-white text-black px-3 pr-10 appearance-none"
+                            value={domesticFlightSearch.cabinClass}
+                            onChange={(e) => setDomesticFlightSearch(prev => ({ ...prev, cabinClass: e.target.value }))}
+                        >
+                            <option value="economy">اکونومی</option>
+                            <option value="business">بیزینس</option>
+                        </select>
+                        <ChevronDown className="absolute left-3 top-3 h-4 w-4 text-gray-400 pointer-events-none" />
+                    </div>
+                </div>
+            </div>
+            <div className={`grid gap-4 md:grid-cols-2 relative pt-10 ${ domesticFlightSearch.tripType == "oneway" ? "lg:grid-cols-4" : " lg:grid-cols-5"}`}>
+                {/* From Input */}
+                <div className="space-y-2 col-span-1 relative">
+                    <Label htmlFor="domestic-flight-origin" className="text-black text-right block">مبدا (فرودگاه)</Label>
+                    <div className="relative">
+                        <MapPin className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
                         {suggestionLoading && currentField === "origin" && (
-                            <Loader2 className="absolute left-4 top-4 h-5 w-5 animate-spin text-blue-600" />
+                            <Loader2 className="absolute left-3 top-3 h-4 w-4 animate-spin text-blue-500" />
                         )}
                         <Input 
                             ref={fromInputRef}
                             id="domestic-flight-from" 
                             placeholder="نام فرودگاه، مثال: تهران (IKA)" 
-                            className={`pr-12 h-14 rounded-2xl border-2 bg-white text-gray-800 placeholder-gray-500 text-lg font-medium transition-all duration-300 ${
+                            className={`pr-10 h-12 border border-gray-300 bg-white text-black placeholder-gray-500 ${
                                 errors.origin 
-                                    ? 'border-red-500 bg-red-50 scale-105 shadow-lg' 
-                                    : isFieldFocused === "origin"
-                                    ? 'border-blue-500 scale-105 shadow-lg' 
-                                    : 'border-gray-300 hover:border-blue-400'
-                            } ${showSuggestions && currentField === "origin" ? 'rounded-b-none border-b-2 border-b-blue-300' : ''}`}
+                                    ? 'border-red-500 bg-red-500' 
+                                    : 'border-gray-300'
+                            }`}
                             value={domesticFlightSearch.origin}
                             onChange={(e) => handleInputChange(e.target.value, "origin")}
                             onKeyDown={(e) => handleKeyDown(e, "origin")}
@@ -573,24 +597,22 @@ const DomesticFlightSearch = () => {
                 </div>
                 
                 {/* To Input */}
-                <div className="space-y-3 relative">
-                    <Label htmlFor="domestic-flight-origin" className="text-lg font-bold text-white text-right block">مقصد (فرودگاه)</Label>
+                <div className="space-y-2 col-span-1 relative">
+                    <Label htmlFor="domestic-flight-destination" className="text-black text-right block">مقصد (فرودگاه)</Label>
                     <div className="relative">
-                        <MapPin className="absolute right-4 top-4 h-5 w-5 text-gray-400" />
-                        {suggestionLoading && currentField === "origin" && (
-                            <Loader2 className="absolute left-4 top-4 h-5 w-5 animate-spin text-blue-600" />
+                        <MapPin className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
+                        {suggestionLoading && currentField === "destination" && (
+                            <Loader2 className="absolute left-3 top-3 h-4 w-4 animate-spin text-blue-500" />
                         )}
                         <Input 
                             ref={toInputRef}
                             id="domestic-flight-destination" 
                             placeholder="نام فرودگاه مقصد مثال: مشهد (MHD)" 
-                            className={`pr-12 h-14 rounded-2xl border-2 bg-white text-gray-800 placeholder-gray-500 text-lg font-medium transition-all duration-300 ${
+                            className={`pr-10 h-12 border border-gray-300 bg-white text-black placeholder-gray-500 ${
                                 errors.destination 
-                                    ? 'border-red-500 bg-red-50 scale-105 shadow-lg' 
-                                    : isFieldFocused === "destination"
-                                    ? 'border-blue-500 scale-105 shadow-lg' 
-                                    : 'border-gray-300 hover:border-blue-400'
-                            } ${showSuggestions && currentField === "destination" ? 'rounded-b-none border-b-2 border-b-blue-300' : ''}`}
+                                    ? 'border-red-500 bg-red-500' 
+                                    : 'border-gray-300'
+                            }`}
                             value={domesticFlightSearch.destination}
                             onChange={(e) => handleInputChange(e.target.value, "destination")}
                             onKeyDown={(e) => handleKeyDown(e, "destination")}
@@ -609,27 +631,9 @@ const DomesticFlightSearch = () => {
                     </div>
                 </div>
 
-                {/* Trip Type */}
-                <div className="space-y-3">
-                    <Label htmlFor="domestic-flight-trip-type" className="text-lg font-bold text-white text-right block">نوع سفر</Label>
-                    <div className="relative">
-                        <select 
-                            id="domestic-flight-trip-type"
-                            className="w-full h-14 rounded-2xl border-2 border-gray-300 bg-white text-gray-800 text-lg font-medium px-4 pr-12 focus:border-blue-500 focus:scale-105 focus:shadow-lg transition-all duration-300 appearance-none"
-                            value={domesticFlightSearch.tripType}
-                            onChange={(e) => setDomesticFlightSearch(prev => ({ ...prev, tripType: e.target.value }))}
-                        >
-                            <option value="oneway">یک طرفه</option>
-                            <option value="roundtrip">رفت و برگشت</option>
-                        </select>
-                        <ChevronDown className="absolute left-4 top-4 h-5 w-5 text-gray-400 pointer-events-none" />
-                    </div>
-                </div>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mt-6">
                 {/* Departure Date */}
-                <div className="space-y-3">
+                <div className="space-y-2 col-span-1">
+                    <Label htmlFor="domestic-flight-trip-type" className="text-black text-right block">تاریخ رفت</Label>
                     <ShamsiDateModal
                         departureDate={domesticFlightSearch.departureDate}
                         returnDate={domesticFlightSearch.returnDate || ""}
@@ -638,65 +642,52 @@ const DomesticFlightSearch = () => {
                         onReturnDateChange={(date) => setDomesticFlightSearch(prev => ({ ...prev, returnDate: date }))}
                         onTripTypeChange={(type) => setDomesticFlightSearch(prev => ({ ...prev, tripType: type }))}
                         error={errors.departureDate}
-                        errorColor="white"
+                        errorColor="black"
                     />
                 </div>
 
                 {/* Return Date */}
                 {domesticFlightSearch.tripType === "roundtrip" && (
-                    <div className="space-y-3">
-                        <Label className="text-lg font-bold text-white text-right block">تاریخ برگشت</Label>
+                    <div className="space-y-2 col-span-1">
+                        <Label className="text-black text-right block">تاریخ برگشت</Label>
                         <div className="relative">
-                        <CalendarIcon className="absolute right-4 top-4 h-5 w-5 text-gray-400" />
-                        <div className={`w-full h-14 rounded-2xl border-2 bg-white text-gray-800 text-lg font-medium flex items-center px-4 pr-12 transition-all duration-300 ${
-                            errors.returnDate 
-                                ? 'border-red-500 bg-red-50 scale-105 shadow-lg' 
-                                : 'border-gray-300'
-                        }`}>
-                            <span className="text-gray-800">
-                            {formatShamsiDate(domesticFlightSearch.returnDate)}
-                            </span>
-                        </div>
+                            <CalendarIcon className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
+                            <ShamsiDateModal
+                                departureDate={domesticFlightSearch.departureDate}
+                                returnDate={domesticFlightSearch.returnDate || ""}
+                                tripType={domesticFlightSearch.tripType}
+                                onDepartureDateChange={(date) => setDomesticFlightSearch(prev => ({ ...prev, departureDate: date }))}
+                                onReturnDateChange={(date) => setDomesticFlightSearch(prev => ({ ...prev, returnDate: date }))}
+                                onTripTypeChange={(type) => setDomesticFlightSearch(prev => ({ ...prev, tripType: type }))}
+                                error={errors.departureDate}
+                                errorColor="black"
+                                returnCal={true}
+                            />
                         </div>
                         {renderError("returnDate")}
                     </div>
                 )}
 
-                {/* Cabin Class */}
-                <div className="space-y-3">
-                    <Label htmlFor="domestic-flight-cabin-class" className="text-lg font-bold text-white text-right block">کلاس پرواز</Label>
-                    <div className="relative">
-                        <select 
-                            id="domestic-flight-cabin-class"
-                            className="w-full h-14 rounded-2xl border-2 border-gray-300 bg-white text-gray-800 text-lg font-medium px-4 pr-12 focus:border-blue-500 focus:scale-105 focus:shadow-lg transition-all duration-300 appearance-none"
-                            value={domesticFlightSearch.cabinClass}
-                            onChange={(e) => setDomesticFlightSearch(prev => ({ ...prev, cabinClass: e.target.value }))}
-                        >
-                            <option value="economy">اکونومی</option>
-                            <option value="business">بیزینس</option>
-                        </select>
-                        <ChevronDown className="absolute left-4 top-4 h-5 w-5 text-gray-400 pointer-events-none" />
-                    </div>
-                </div>
+                
 
                 {/* Passengers Selector */}
-                <div className="space-y-3 relative">
-                    <Label className="text-lg font-bold text-white text-right block">مسافران</Label>
+                <div className="space-y-2 col-span-1 relative">
+                    <Label className="text-black text-right block">مسافران</Label>
                     <div 
                         className="passengers-trigger cursor-pointer"
                         onClick={() => setShowPassengers(!showPassengers)}
                     >
-                        <div className="relative h-14 rounded-2xl border-2 border-gray-300 bg-white hover:border-blue-400 transition-all duration-300 flex items-center justify-between px-4">
-                            <div className="flex items-center gap-3">
-                                <Users className="h-5 w-5 text-gray-400" />
-                                <User className="h-5 w-5 text-gray-400" />
-                                <Baby className="h-5 w-5 text-gray-400" />
+                        <div className="relative h-12 border border-gray-300 bg-white hover:border-gray-400 flex items-center justify-between px-3">
+                            <div className="flex items-center gap-2">
+                                <Users className="h-4 w-4 text-gray-400" />
+                                <User className="h-4 w-4 text-gray-400" />
+                                <Baby className="h-4 w-4 text-gray-400" />
                             </div>
                             <div className="text-right">
-                                <div className="text-gray-800 text-lg font-medium">
+                                <div className="text-black text-sm font-medium">
                                     {totalPassengers} مسافر
                                 </div>
-                                <div className="text-gray-500 text-sm">
+                                <div className="text-gray-500 text-xs">
                                     {domesticFlightSearch.adults} بزرگسال, {domesticFlightSearch.children} کودک, {domesticFlightSearch.infants} نوزاد
                                 </div>
                             </div>
@@ -708,42 +699,13 @@ const DomesticFlightSearch = () => {
             
             {/* Search Button */}
             <Button 
-                className="w-full h-16 text-xl font-bold rounded-2xl bg-gradient-origin-r bg-white from-white origin-blue-100 text-red-600 hover:from-blue-100 hover:bg-white transition-all duration-300 shadow-2xl hover:shadow-3xl hover:scale-105 mt-8"
+                className="w-full h-12 bg-orange-500 text-white hover:bg-orange-600 mt-6"
                 onClick={handleDomesticFlightSearch}
                 disabled={isLoading}
             >
-                <Search className="ml-3 h-6 w-6" />
+                <Search className="ml-2 h-4 w-4" />
                 {isLoading ? "در حال جستجو..." : "جستجوی پرواز داخلی"}
             </Button>
-
-            <style jsx>{`
-                @keyframes slideDown {
-                    from {
-                        opacity: 0;
-                        transform: translateY(-10px) scale(0.95);
-                    }
-                    origin {
-                        opacity: 1;
-                        transform: translateY(0) scale(1);
-                    }
-                }
-                
-                @keyframes fadeIn {
-                    from {
-                        opacity: 0;
-                        transform: translateY(-5px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
-                }
-                
-                /* Style the date input for better appearance */
-                input[type="date"] {
-                    color-scheme: light;
-                }
-            `}</style>
         </div>
     )
 }

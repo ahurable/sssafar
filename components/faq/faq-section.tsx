@@ -13,16 +13,6 @@ interface FAQ {
   isActive: boolean
 }
 
-interface GroupedFAQs {
-  HOTEL: FAQ[]
-  AIR: FAQ[]
-  CIP: FAQ[]
-  TOUR: FAQ[]
-  CITY_TOUR: FAQ[]
-  VISA: FAQ[]
-  OTHER: FAQ[]
-}
-
 interface FAQSectionProps {
   initialTab?: string
   showTitle?: boolean
@@ -30,14 +20,14 @@ interface FAQSectionProps {
 }
 
 const TAB_CONFIG = [
-  { key: 'ALL', label: 'همه', icon: '📋' },
-  { key: 'HOTEL', label: 'رزرو هتل', icon: '🏨' },
-  { key: 'AIR', label: 'پرواز', icon: '✈️' },
-  { key: 'CIP', label: 'سیپ', icon: '⭐' },
-  { key: 'TOUR', label: 'تور', icon: '🗺️' },
-  { key: 'CITY_TOUR', label: 'گشت شهری', icon: '🏛️' },
-  { key: 'VISA', label: 'ویزا', icon: '🛂' },
-  { key: 'OTHER', label: 'سایر', icon: '❓' },
+  { key: 'ALL', label: 'همه' },
+  { key: 'HOTEL', label: 'هتل' },
+  { key: 'AIR', label: 'پرواز' },
+  { key: 'CIP', label: 'سیپ' },
+  { key: 'TOUR', label: 'تور' },
+  { key: 'CITY_TOUR', label: 'گشت شهری' },
+  { key: 'VISA', label: 'ویزا' },
+  { key: 'OTHER', label: 'سایر' },
 ] as const
 
 export function FAQSection({ 
@@ -49,9 +39,7 @@ export function FAQSection({
   const [openItemId, setOpenItemId] = useState<string | null>(null)
   const [faqs, setFaqs] = useState<FAQ[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
-  // Fetch FAQs
   useEffect(() => {
     const fetchFAQs = async () => {
       try {
@@ -66,7 +54,6 @@ export function FAQSection({
         setFaqs(data.faqs || [])
       } catch (err) {
         console.error('Error fetching FAQs:', err)
-        setError('خطا در بارگذاری سوالات')
       } finally {
         setLoading(false)
       }
@@ -75,28 +62,15 @@ export function FAQSection({
     fetchFAQs()
   }, [])
 
-  // Group FAQs by type
-  const groupedFAQs: GroupedFAQs = {
-    HOTEL: faqs.filter(faq => faq.type === 'HOTEL' && faq.isActive),
-    AIR: faqs.filter(faq => faq.type === 'AIR' && faq.isActive),
-    CIP: faqs.filter(faq => faq.type === 'CIP' && faq.isActive),
-    TOUR: faqs.filter(faq => faq.type === 'TOUR' && faq.isActive),
-    CITY_TOUR: faqs.filter(faq => faq.type === 'CITY_TOUR' && faq.isActive),
-    VISA: faqs.filter(faq => faq.type === 'VISA' && faq.isActive),
-    OTHER: faqs.filter(faq => faq.type === 'OTHER' && faq.isActive),
-  }
-
-  // Get all active FAQs sorted by order
   const allFAQs = faqs
     .filter(faq => faq.isActive)
     .sort((a, b) => a.order - b.order)
 
-  // Get FAQs for active tab
   const getCurrentFAQs = () => {
     if (activeTab === 'ALL') {
       return allFAQs
     }
-    return groupedFAQs[activeTab as keyof GroupedFAQs] || []
+    return allFAQs.filter(faq => faq.type === activeTab)
   }
 
   const currentFAQs = getCurrentFAQs()
@@ -105,32 +79,10 @@ export function FAQSection({
     setOpenItemId(openItemId === id ? null : id)
   }
 
-  // Count FAQs per category
-  const getTabCount = (tabKey: string) => {
-    if (tabKey === 'ALL') return allFAQs.length
-    return groupedFAQs[tabKey as keyof GroupedFAQs]?.length || 0
-  }
-
   if (loading) {
     return (
       <div className={`text-center py-12 ${className}`}>
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-        <p className="text-muted-foreground mt-4">در حال بارگذاری سوالات...</p>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className={`text-center py-12 ${className}`}>
-        <div className="text-red-600 mb-4">⚠️</div>
-        <p className="text-muted-foreground">{error}</p>
-        <button 
-          onClick={() => window.location.reload()}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-        >
-          تلاش مجدد
-        </button>
+        <div className="text-black text-lg">در حال بارگذاری سوالات...</div>
       </div>
     )
   }
@@ -138,32 +90,23 @@ export function FAQSection({
   if (allFAQs.length === 0) {
     return (
       <div className={`text-center py-12 ${className}`}>
-        <div className="text-4xl mb-4">❓</div>
-        <h3 className="text-lg font-semibold mb-2">سوالی یافت نشد</h3>
-        <p className="text-muted-foreground">هیچ سوال فعالی در سیستم وجود ندارد</p>
+        <div className="text-black text-lg">سوالی یافت نشد</div>
       </div>
     )
   }
 
   return (
-    <div className={`max-w-6xl py-12 mx-auto ${className}`}>
-      {/* Title */}
+    <div className={`max-w-4xl mx-auto py-8 ${className}`}>
       {showTitle && (
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-foreground mb-4">
-            سوالات متداول
-          </h2>
-          <p className="text-lg text-muted-foreground">
-            پاسخ سوالات پرتکرار شما
-          </p>
+          <h2 className="text-3xl font-bold text-black mb-4">سوالات متداول</h2>
         </div>
       )}
 
-      {/* Tabs */}
       <div className="mb-8">
-        <div className="flex gap-2 justify-center overflow-auto">
-          {TAB_CONFIG.map((tab) => {
-            const count = getTabCount(tab.key)
+        <div className="flex justify-center border-b border-gray-300">
+          {TAB_CONFIG.map((tab, index) => {
+            const count = activeTab === 'ALL' ? allFAQs.length : allFAQs.filter(faq => faq.type === tab.key).length
             if (count === 0 && tab.key !== 'ALL') return null
             
             return (
@@ -171,39 +114,24 @@ export function FAQSection({
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
                 className={`
-                  flex items-center gap-2 px-4 py-3 rounded-lg border transition-all duration-200
+                  px-6 py-4 text-lg font-medium
                   ${activeTab === tab.key
-                    ? 'bg-blue-600 text-white border-blue-600 shadow-lg'
-                    : 'bg-white text-foreground border-gray-200 hover:border-blue-300 hover:shadow-md'
+                    ? 'text-red-800 border-b-2 border-red-800'
+                    : 'text-black hover:text-gray-600'
                   }
                 `}
               >
-                <span className="text-lg">{tab.icon}</span>
-                <span className="font-medium">{tab.label}</span>
-                <span className={`
-                  text-xs px-2 py-1 rounded-full
-                  ${activeTab === tab.key
-                    ? 'bg-white text-blue-600'
-                    : 'bg-gray-100 text-gray-600'
-                  }
-                `}>
-                  {count}
-                </span>
+                {tab.label}
               </button>
             )
           })}
         </div>
       </div>
 
-      {/* FAQ Items */}
       <div className="space-y-4">
         {currentFAQs.length === 0 ? (
-          <div className="text-center py-8">
-            <div className="text-4xl mb-4">🔍</div>
-            <h3 className="text-lg font-semibold mb-2">سوالی در این دسته یافت نشد</h3>
-            <p className="text-muted-foreground">
-              هیچ سوال فعالی در دسته "{TAB_CONFIG.find(t => t.key === activeTab)?.label}" وجود ندارد
-            </p>
+          <div className="text-center py-8 text-black text-lg">
+            سوالی در این دسته یافت نشد
           </div>
         ) : (
           currentFAQs.map((faq) => (
@@ -215,13 +143,6 @@ export function FAQSection({
             />
           ))
         )}
-      </div>
-
-      {/* Summary */}
-      <div className="mt-8 text-center text-sm text-muted-foreground">
-        <p>
-          {currentFAQs.length} سوال در دسته "{TAB_CONFIG.find(t => t.key === activeTab)?.label}" نمایش داده می‌شود
-        </p>
       </div>
     </div>
   )

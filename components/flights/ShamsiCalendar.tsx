@@ -7,14 +7,12 @@ import { Calendar as CalendarIcon, X, Globe, AlertCircle } from "lucide-react"
 import { 
   toJalaali, 
   toGregorian, 
-  jalaaliToDateObject, 
   getJalaaliDaysInMonth, 
   getJalaaliFirstDayOfMonth,
   getTodayJalaali,
   getTodayGregorian,
   compareJalaaliDates,
   isJalaaliDateAfterOrEqual,
-  dateToJalaaliString,
   gregorianToShamsiString,
   shamsiToGregorianString
 } from "@/lib/jalaalil"
@@ -28,7 +26,8 @@ interface ShamsiDateModalProps {
   onTripTypeChange: (type: string) => void
   error?: string,
   errorColor?: string,
-  normalReturnCal?: boolean
+  normalReturnCal?: boolean,
+  returnCal?: boolean
 }
 
 const ShamsiDateModal = ({
@@ -40,7 +39,8 @@ const ShamsiDateModal = ({
   onTripTypeChange,
   error,
   errorColor,
-  normalReturnCal
+  normalReturnCal,
+  returnCal
 }: ShamsiDateModalProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedDepartureDate, setSelectedDepartureDate] = useState<string>(departureDate)
@@ -90,7 +90,6 @@ const ShamsiDateModal = ({
     if (calendarType === "shamsi") {
       return date
     } else {
-      // Convert Shamsi to Gregorian for display in Gregorian calendar
       return shamsiToGregorianString(date) || getTodayGregorian()
     }
   }
@@ -100,14 +99,12 @@ const ShamsiDateModal = ({
     if (calendarType === "shamsi") {
       return date
     } else {
-      // Convert Gregorian back to Shamsi for storage
       return gregorianToShamsiString(date) || getTodayJalaali()
     }
   }
 
   const handleDateSelect = (date: string) => {
     const convertedDate = convertDateFromCalendar(date)
-    console.log(selectionMode)
     if (localTripType === "roundtrip" && selectionMode === "departure") {
       setSelectedDepartureDate(convertedDate)
       setSelectionMode('return')
@@ -131,7 +128,7 @@ const ShamsiDateModal = ({
     onReturnDateChange(selectedReturnDate)
     onTripTypeChange(localTripType)
     setIsOpen(false)
-    setSelectionMode("departure") // Reset for next opening
+    setSelectionMode("departure")
   }
 
   const toggleCalendarType = () => {
@@ -143,7 +140,6 @@ const ShamsiDateModal = ({
       const newDate = new Date(prev)
       
       if (calendarType === "shamsi") {
-        // For Shamsi calendar, navigate by 1 month (since we're showing 2 months)
         const jalaali = toJalaali(prev.getFullYear(), prev.getMonth() + 1, prev.getDate())
         let newYear = jalaali.jy
         let newMonth = jalaali.jm
@@ -165,7 +161,6 @@ const ShamsiDateModal = ({
         const gregorian = toGregorian(newYear, newMonth, 1)
         return new Date(gregorian.gy, gregorian.gm - 1, gregorian.gd)
       } else {
-        // For Gregorian calendar, navigate by 1 month
         if (direction === 'prev') {
           newDate.setMonth(newDate.getMonth() - 1)
         } else {
@@ -184,7 +179,7 @@ const ShamsiDateModal = ({
       if (!error) return null
       
       return (
-          <div className={`flex items-center gap-2 mt-2 ${errorColor == "red" ? 'text-red-600' : 'text-white'  } text-sm animate-fadeIn`}>
+          <div className={`flex items-center gap-2 mt-2 ${errorColor === "red" ? 'text-red-800' : 'text-black'} text-sm`}>
               <AlertCircle className="h-4 w-4" />
               <span>{error}</span>
           </div>
@@ -194,16 +189,14 @@ const ShamsiDateModal = ({
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open)
     if (!open) {
-      setSelectionMode("departure") // Reset selection mode when closing
+      setSelectionMode("departure")
     }
   }
 
-  // Get month names for display
   const getDisplayMonthNames = () => {
     if (calendarType === "shamsi") {
       const firstMonthJalaali = toJalaali(currentMonth.getFullYear(), currentMonth.getMonth() + 1, currentMonth.getDate())
       
-      // Calculate second month (next month)
       let secondMonth = firstMonthJalaali.jm + 1
       let secondYear = firstMonthJalaali.jy
       if (secondMonth > 12) {
@@ -242,15 +235,12 @@ const ShamsiDateModal = ({
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <div className="space-y-3 cursor-pointer">
-          <Label htmlFor="departure-date-trigger" className="text-lg font-bold text-white text-right block">
-            تاریخ رفت
-          </Label>
+        <div className="space-y-2 cursor-pointer">
           <div className="relative">
-            <CalendarIcon className="absolute right-4 top-4 h-5 w-5 text-gray-400" />
-            <div className="w-full h-14 rounded-2xl border-2 border-gray-300 bg-white text-gray-800 text-lg font-medium transition-all duration-300 hover:border-blue-400 focus:border-blue-500 flex items-center justify-between px-4 pr-12 cursor-pointer">
-              <span className="text-gray-800">
-                {formatDate(departureDate)}
+            <CalendarIcon className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
+            <div className="w-full h-12 border border-gray-300 bg-white text-black flex items-center justify-between px-3 pr-10 cursor-pointer">
+              <span className="text-black">
+                {returnCal && returnCal ? formatDate(returnDate) : formatDate(departureDate)}
               </span>
             </div>
           </div>
@@ -258,16 +248,16 @@ const ShamsiDateModal = ({
         </div>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-4xl p-0 bg-white rounded-3xl overflow-hidden">
+      <DialogContent className="sm:max-w-4xl p-0 bg-white border border-gray-300">
         {/* Desktop View */}
-        <div className="hidden md:block p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">انتخاب تاریخ</h2>
+        <div className="hidden md:block p-4">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold text-black">انتخاب تاریخ</h2>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 onClick={toggleCalendarType}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 border border-gray-300 bg-white text-black hover:bg-gray-100"
               >
                 <Globe className="h-4 w-4" />
                 {calendarType === "shamsi" ? "تقویم شمسی" : "Gregorian Calendar"}
@@ -276,45 +266,44 @@ const ShamsiDateModal = ({
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsOpen(false)}
-                className="h-8 w-8 p-0 hover:bg-gray-100"
+                className="h-8 w-8 p-0 hover:bg-gray-100 border border-gray-300"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </Button>
             </div>
           </div>
           
           {!normalReturnCal && (
-            <div className="flex items-center gap-4 mb-6">
+            <div className="flex items-center gap-4 mb-4">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={localTripType === "roundtrip"}
                   onChange={(e) => handleTripTypeChange(e.target.checked ? "roundtrip" : "oneway")}
-                  className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                  className="w-4 h-4 text-blue-500"
                 />
-                <span className="text-lg font-medium text-gray-800">رفت و برگشت</span>
+                <span className="text-black">رفت و برگشت</span>
               </label>
             </div>
           )}
 
-          {/* Selection Tabs for Round Trip */}
           {localTripType === "roundtrip" && (
-            <div className="flex bg-gray-100 rounded-lg p-1 mb-6">
+            <div className="flex bg-gray-100 p-1 mb-4">
               <button
-                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
+                className={`flex-1 py-2 px-4 text-sm font-medium ${
                   selectionMode === "departure"
-                    ? "bg-white text-blue-600 shadow-sm"
-                    : "text-gray-600 hover:text-gray-800"
+                    ? "bg-white text-red-800"
+                    : "text-black hover:text-black"
                 }`}
                 onClick={() => setSelectionMode("departure")}
               >
                 تاریخ رفت
               </button>
               <button
-                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
+                className={`flex-1 py-2 px-4 text-sm font-medium ${
                   selectionMode === "return"
-                    ? "bg-white text-blue-600 shadow-sm"
-                    : "text-gray-600 hover:text-gray-800"
+                    ? "bg-white text-red-800"
+                    : "text-black hover:text-black"
                 }`}
                 onClick={() => setSelectionMode("return")}
                 disabled={!selectedDepartureDate}
@@ -324,19 +313,18 @@ const ShamsiDateModal = ({
             </div>
           )}
 
-          {/* Dual Calendar */}
           <div className="space-y-4">
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-2">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => navigateMonths('prev')}
-                className="h-8 w-8 p-0 hover:bg-gray-100 text-lg"
+                className="h-8 w-8 p-0 hover:bg-gray-100 text-lg border border-gray-300"
               >
                 ‹
               </Button>
               
-              <div className="flex gap-4 text-lg font-bold text-gray-800">
+              <div className="flex gap-4 text-md font-bold text-black">
                 <span>{monthNames.firstMonth}</span>
                 <span>—</span>
                 <span>{monthNames.secondMonth}</span>
@@ -346,14 +334,13 @@ const ShamsiDateModal = ({
                 variant="ghost"
                 size="icon"
                 onClick={() => navigateMonths('next')}
-                className="h-8 w-8 p-0 hover:bg-gray-100 text-lg"
+                className="h-8 w-8 p-0 hover:bg-gray-100 text-lg border border-gray-300"
               >
                 ›
               </Button>
             </div>
 
-            <div className="grid grid-cols-2 gap-8">
-              {/* First Month */}
+            <div className="grid grid-cols-2 gap-4">
               <Calendar
                 baseDate={currentMonth}
                 selectedDepartureDate={convertDateForCalendar(selectedDepartureDate)}
@@ -366,7 +353,6 @@ const ShamsiDateModal = ({
                 isFirstMonth={true}
               />
 
-              {/* Second Month */}
               <Calendar
                 baseDate={currentMonth}
                 selectedDepartureDate={convertDateForCalendar(selectedDepartureDate)}
@@ -381,33 +367,33 @@ const ShamsiDateModal = ({
             </div>
           </div>
 
-          <div className="flex gap-4 mt-8">
+          <div className="flex gap-4 mt-4">
             <Button
               onClick={() => setIsOpen(false)}
               variant="outline"
-              className="flex-1 h-12 text-lg font-medium rounded-xl"
+              className="flex-1 h-10 text-black border border-gray-300 bg-white hover:bg-gray-100"
             >
               انصراف
             </Button>
             <Button
               onClick={applyDates}
-              className="flex-1 h-12 text-lg font-medium rounded-xl bg-blue-600 hover:bg-blue-700"
+              className="flex-1 h-10 bg-orange-500 text-white hover:bg-orange-600"
             >
               اعمال تاریخ
             </Button>
           </div>
         </div>
 
-        {/* Mobile View - Fullscreen */}
+        {/* Mobile View */}
         <div className="block md:hidden h-screen bg-white">
-          <div className="flex justify-between items-center p-4 border-b border-gray-200">
-            <h2 className="text-xl font-bold text-gray-800">انتخاب تاریخ</h2>
+          <div className="flex justify-between items-center p-3 border-b border-gray-300">
+            <h2 className="text-lg font-bold text-black">انتخاب تاریخ</h2>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={toggleCalendarType}
-                className="flex items-center gap-1 text-sm"
+                className="flex items-center gap-1 text-sm border border-gray-300 bg-white text-black hover:bg-gray-100"
               >
                 <Globe className="h-3 w-3" />
                 {calendarType === "shamsi" ? "شمسی" : "میلادی"}
@@ -416,44 +402,44 @@ const ShamsiDateModal = ({
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsOpen(false)}
-                className="h-8 w-8 p-0 hover:bg-gray-100"
+                className="h-8 w-8 p-0 hover:bg-gray-100 border border-gray-300"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </Button>
             </div>
           </div>
-          {!normalReturnCal &&
-          <div className="p-4 border-b border-gray-200">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={localTripType === "roundtrip"}
-                onChange={(e) => handleTripTypeChange(e.target.checked ? "roundtrip" : "oneway")}
-                className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
-              />
-              <span className="text-lg font-medium text-gray-800">رفت و برگشت</span>
-            </label>
-          </div>
-          }
+          
+          {!normalReturnCal && (
+            <div className="p-3 border-b border-gray-300">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={localTripType === "roundtrip"}
+                  onChange={(e) => handleTripTypeChange(e.target.checked ? "roundtrip" : "oneway")}
+                  className="w-4 h-4 text-blue-500"
+                />
+                <span className="text-black">رفت و برگشت</span>
+              </label>
+            </div>
+          )}
 
-          {/* Selection Tabs for Mobile */}
           {localTripType === "roundtrip" && (
-            <div className="flex bg-gray-100 p-1 mx-4 mt-4 rounded-lg">
+            <div className="flex bg-gray-100 p-1 mx-3 mt-3">
               <button
-                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
+                className={`flex-1 py-2 px-4 text-sm font-medium ${
                   selectionMode === "departure"
-                    ? "bg-white text-blue-600 shadow-sm"
-                    : "text-gray-600 hover:text-gray-800"
+                    ? "bg-white text-red-800"
+                    : "text-black hover:text-black"
                 }`}
                 onClick={() => setSelectionMode("departure")}
               >
                 تاریخ رفت
               </button>
               <button
-                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
+                className={`flex-1 py-2 px-4 text-sm font-medium ${
                   selectionMode === "return"
-                    ? "bg-white text-blue-600 shadow-sm"
-                    : "text-gray-600 hover:text-gray-800"
+                    ? "bg-white text-red-800"
+                    : "text-black hover:text-black"
                 }`}
                 onClick={() => setSelectionMode("return")}
                 disabled={!selectedDepartureDate}
@@ -464,9 +450,8 @@ const ShamsiDateModal = ({
           )}
 
           <div className="h-[calc(100vh-140px)] overflow-y-auto">
-            {/* Single Calendar for Mobile */}
-            <div className="p-4">
-              <h3 className="text-lg font-bold text-gray-800 text-center mb-4">
+            <div className="p-3">
+              <h3 className="text-md font-bold text-black text-center mb-3">
                 {selectionMode === "departure" ? "تاریخ رفت" : "تاریخ برگشت"}
               </h3>
               <Calendar
@@ -484,10 +469,10 @@ const ShamsiDateModal = ({
             </div>
           </div>
 
-          <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200">
+          <div className="absolute bottom-0 left-0 right-0 p-3 bg-white border-t border-gray-300">
             <Button
               onClick={applyDates}
-              className="w-full h-12 text-lg font-medium rounded-xl bg-blue-600 hover:bg-blue-700"
+              className="w-full h-10 bg-orange-500 text-white hover:bg-orange-600"
             >
               اعمال تاریخ
             </Button>
@@ -546,7 +531,6 @@ const Calendar = ({
     return date
   })
 
-  // Update currentDate when baseDate changes
   useEffect(() => {
     const date = new Date(baseDate)
     if (!isFirstMonth) {
@@ -612,7 +596,7 @@ const Calendar = ({
     if (calendarType === "shamsi") {
       return getJalaaliFirstDayOfMonth(year, month)
     } else {
-      return new Date(year, month - 1, 1).getDay() // 0-6 where 0 is Sunday
+      return new Date(year, month - 1, 1).getDay()
     }
   }
 
@@ -625,7 +609,6 @@ const Calendar = ({
     const calendar = []
     let dayCounter = 1
 
-    // Adjust first day for Gregorian calendar (Sunday = 0)
     const adjustedFirstDay = calendarType === "shamsi" ? firstDay : (firstDay + 1) % 7
 
     for (let week = 0; week < 6; week++) {
@@ -660,7 +643,6 @@ const Calendar = ({
     if (calendarType === "shamsi") {
       const isBeforeMin = !isJalaaliDateAfterOrEqual(dateStr, minDate)
       
-      // For return date selection, also disable dates before departure date
       if (tripType === "roundtrip" && selectionMode === "return" && selectedDepartureDate) {
         const isBeforeDeparture = compareJalaaliDates(dateStr, selectedDepartureDate) < 0
         return isBeforeMin || isBeforeDeparture
@@ -672,7 +654,6 @@ const Calendar = ({
       const minDateObj = new Date(minDate)
       const isBeforeMin = dateObj < minDateObj
       
-      // For return date selection, also disable dates before departure date
       if (tripType === "roundtrip" && selectionMode === "return" && selectedDepartureDate) {
         const departureDateObj = new Date(selectedDepartureDate)
         const isBeforeDeparture = dateObj < departureDateObj
@@ -739,54 +720,42 @@ const Calendar = ({
   const calendar = generateCalendar()
 
   return (
-    <div className={`bg-white rounded-lg ${isMobile ? 'p-2' : 'p-4'}`}>
-      {/* Calendar Header */}
-      <div className="text-center mb-4">
-        <div className="text-lg font-bold text-gray-800">
+    <div className={`bg-white ${isMobile ? 'p-2' : 'p-3'}`}>
+      <div className="text-center mb-3">
+        <div className="text-md font-bold text-black">
           {getMonthName()} {getCurrentYear()}
         </div>
       </div>
 
-      {/* Week Days */}
       <div className="grid grid-cols-7 gap-1 mb-2">
         {weekDays.map((day) => (
-          <div key={day} className="text-center text-sm font-medium text-gray-600 py-2">
+          <div key={day} className="text-center text-xs font-medium text-black py-1">
             {day}
           </div>
         ))}
       </div>
 
-      {/* Calendar Days */}
       <div className="grid grid-cols-7 gap-0">
         {calendar.map((week, weekIndex) =>
           week.map((day, dayIndex) => (
             <button
               key={`${weekIndex}-${dayIndex}`}
-              className={`aspect-square flex items-center justify-center rounded-full text-sm font-medium transition-all relative
+              className={`aspect-square flex items-center justify-center text-xs font-medium relative
                 ${!day 
                   ? 'invisible' 
                   : isDateDisabled(day)
                     ? 'text-gray-300 cursor-not-allowed bg-gray-100'
                     : isDateSelected(day)
-                      ? 'bg-blue-600 text-white shadow-md scale-105 z-10'
+                      ? 'bg-red-800 text-white'
                       : isDateInRange(day)
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'text-gray-700 bg-white hover:bg-blue-50 hover:scale-105 cursor-pointer border border-transparent hover:border-blue-200'
+                        ? 'bg-gray-200 text-black'
+                        : 'text-black bg-white hover:bg-gray-100 cursor-pointer border border-transparent'
                 }
-                ${isStartOfRange(day) && selectedReturnDate.length > 0 ? 'rounded-l-none' : ''}
-                ${isEndOfRange(day) ? 'rounded-r-none' : ''}
-                ${isDateInRange(day) && !isStartOfRange(day) && !isEndOfRange(day) ? 'rounded-none' : ''}
               `}
               onClick={() => day && !isDateDisabled(day) && handleDateClick(day)}
               disabled={!day || isDateDisabled(day)}
             >
               {day}
-              {isStartOfRange(day) && tripType === "roundtrip" && (
-                <div className="absolute top-0 right-0 h-full bg-blue-600 rounded-l-full"></div>
-              )}
-              {isEndOfRange(day) && tripType === "roundtrip" && (
-                <div className="absolute top-0 left-0 h-full bg-blue-600 rounded-r-full"></div>
-              )}
             </button>
           ))
         )}

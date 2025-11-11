@@ -69,7 +69,9 @@ export default function RootLayout({
         <NotificationProvider>
           <FlightProvider>
             <HotelProvider>
-            {children}
+              <div className="container mx-auto">
+              {children}
+              </div>
             </HotelProvider>
           </FlightProvider>
           <NotificationContainer/>
