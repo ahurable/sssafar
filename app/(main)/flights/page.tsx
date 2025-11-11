@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react'
 import { useFlight } from "@/contexts/search/FlightContext"
 
 export default function FlightsPage() {
-  const { flightData, filteredFlights, loading, area } = useFlight()
+  const { flightData, filteredFlights, loading, area, origin, destination } = useFlight()
   const [ flights, setFlights ] = useState(flightData)
 
   useEffect(() => {
@@ -48,10 +48,10 @@ export default function FlightsPage() {
   return (
     <div className="min-h-screen">
       <Header />
-      <main className="py-8">
+      <main className="py-16 lg:py-8">
         <div className="container mx-auto px-4">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">نتایج جستجو</h1>
+            <h1 className="text-3xl font-bold mb-2">نتایج جستجو پرواز {origin} به {destination}</h1>
             <p className="text-muted-foreground">{flights.length} پرواز یافت شد</p>
           </div>
           <div className="grid gap-6 lg:grid-cols-4 grid-cols-1">

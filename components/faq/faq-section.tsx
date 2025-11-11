@@ -17,6 +17,7 @@ interface FAQSectionProps {
   initialTab?: string
   showTitle?: boolean
   className?: string
+  maxHeight?: string
 }
 
 const TAB_CONFIG = [
@@ -33,7 +34,8 @@ const TAB_CONFIG = [
 export function FAQSection({ 
   initialTab = 'ALL', 
   showTitle = true,
-  className = "" 
+  className = "",
+  maxHeight = "600px"
 }: FAQSectionProps) {
   const [activeTab, setActiveTab] = useState<string>(initialTab)
   const [openItemId, setOpenItemId] = useState<string | null>(null)
@@ -62,6 +64,7 @@ export function FAQSection({
     fetchFAQs()
   }, [])
 
+  // Filter only active FAQs and sort by order
   const allFAQs = faqs
     .filter(faq => faq.isActive)
     .sort((a, b) => a.order - b.order)
@@ -87,12 +90,9 @@ export function FAQSection({
     )
   }
 
+  // Show nothing if no active FAQs exist
   if (allFAQs.length === 0) {
-    return (
-      <div className={`text-center py-12 ${className}`}>
-        <div className="text-black text-lg">سوالی یافت نشد</div>
-      </div>
-    )
+    return null
   }
 
   return (
@@ -103,32 +103,59 @@ export function FAQSection({
         </div>
       )}
 
+      {/* Tabs Section */}
       <div className="mb-8">
-        <div className="flex justify-center border-b border-gray-300">
-          {TAB_CONFIG.map((tab, index) => {
-            const count = activeTab === 'ALL' ? allFAQs.length : allFAQs.filter(faq => faq.type === tab.key).length
-            if (count === 0 && tab.key !== 'ALL') return null
-            
-            return (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className={`
-                  px-6 py-4 text-lg font-medium
-                  ${activeTab === tab.key
-                    ? 'text-red-800 border-b-2 border-red-800'
-                    : 'text-black hover:text-gray-600'
-                  }
-                `}
-              >
-                {tab.label}
-              </button>
-            )
-          })}
+        <div className="flex justify-center border-b border-gray-300 overflow-x-auto">
+          <div className="flex min-w-max">
+            {TAB_CONFIG.map((tab) => {
+              // Calculate count for each tab
+              const count = tab.key === 'ALL' 
+                ? allFAQs.length 
+                : allFAQs.filter(faq => faq.type === tab.key).length
+              
+              // Only show tabs that have FAQs or the ALL tab
+              if (count === 0 && tab.key !== 'ALL') return null
+              
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`
+                    px-6 py-4 text-lg font-medium whitespace-nowrap
+                    transition-colors duration-200
+                    ${activeTab === tab.key
+                      ? 'text-blue-800 border-b-2 border-blue-800'
+                      : 'text-black hover:text-gray-600'
+                    }
+                  `}
+                >
+                  {tab.label}
+                  {count > 0 && (
+                    <span className="mr-2 text-sm opacity-70">({count})</span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
         </div>
       </div>
 
-      <div className="space-y-4">
+      {/* FAQ Items Container - Scrollable */}
+      <div 
+        className="space-y-4 overflow-y-auto"
+        style={{ 
+          maxHeight,
+          scrollbarWidth: 'none', // Firefox
+          msOverflowStyle: 'none', // IE and Edge
+        }}
+      >
+        {/* Hide scrollbar for Webkit browsers (Chrome, Safari, Opera) */}
+        <style jsx>{`
+          div::-webkit-scrollbar {
+            display: none;
+          }
+        `}</style>
+
         {currentFAQs.length === 0 ? (
           <div className="text-center py-8 text-black text-lg">
             سوالی در این دسته یافت نشد

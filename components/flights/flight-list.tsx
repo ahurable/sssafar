@@ -190,7 +190,7 @@ export function FlightList({ flights, area, itemsPerPage = 10 }: FlightListProps
             <h3 className="font-bold text-xl text-blue-800">انتخاب تاریخ پرواز</h3>
           </div>
           
-          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-blue-200 scrollbar-track-transparent">
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-blue-200 scrollbar-track-transparent" style={{ scrollbarWidth : 'none' }}>
             {dateOptions.map((date, index) => {
               const dateStr = formatDateForAPI(date)
               const isSelected = selectedDate === dateStr

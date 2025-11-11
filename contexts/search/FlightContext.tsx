@@ -52,8 +52,10 @@ interface FilterState {
 
 interface FlightContextType {
   flightData: any[]
-  setFlightsData: (flights:any, area: string) => void
+  setFlightsData: (flights:any, area: string, from?:string, to?:string) => void
   loading: boolean
+  origin: string
+  destination: string
   searchFlights: (params: any) => any
   clearResults: () => void
   airlineNames: { [iata: string]: string }
@@ -211,6 +213,8 @@ const FlightContext = createContext<FlightContextType | undefined>(undefined)
 
 export function FlightProvider({ children }: { children: ReactNode }) {
   const [flightData, setFlightData] = useState<any[]>([])
+  const [origin, setOrigin] = useState("")
+  const [destination, setDestination] = useState("")
   const [area, setArea] = useState("")
   const [loading, setLoading] = useState(true)
   const [airlineNames, setAirlineNames] = useState<{ [iata: string]: string }>({}) // Add this
@@ -365,9 +369,13 @@ export function FlightProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const setFlightsData = (flights:any, area:string) => {
+  const setFlightsData = (flights:any, area:string, from?:string, to?: string) => {
     setFlightData(flights)
     setArea(area)
+    if (from)
+      setOrigin(from)
+    if (to)
+      setDestination(to)
     setLoading(false)
   }
 
@@ -377,6 +385,8 @@ export function FlightProvider({ children }: { children: ReactNode }) {
       setFlightsData,
       filteredFlights,
       searchFlights,
+      origin,
+      destination,
       loading,
       clearResults,
       airlineNames,

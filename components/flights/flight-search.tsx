@@ -28,11 +28,25 @@ interface FormErrors {
   general?: string
 }
 
+interface FlightSearchState {
+  from: Suggestion | null
+  to: Suggestion | null
+  displayFrom: string
+  displayTo: string
+  departureDate: string
+  returnDate: string
+  adults: number
+  children: number
+  infants: number
+  tripType: string
+  cabinClass: string
+}
+
 const FlightSearch = () => {
     const [isLoading, setIsLoading] = useState(false)
-    const [flightSearch, setFlightSearch] = useState({
-        from: {},
-        to: {},
+    const [flightSearch, setFlightSearch] = useState<FlightSearchState>({
+        from: null,
+        to: null,
         displayFrom: "",
         displayTo: "",
         departureDate: "",
@@ -49,7 +63,7 @@ const FlightSearch = () => {
     const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0)
     const [suggestionLoading, setSuggestionLoading] = useState(false)
     const [currentInput, setCurrentInput] = useState("")
-    const [currentField, setCurrentField] = useState("")
+    const [currentField, setCurrentField] = useState<"from" | "to" | "">("")
     const [isFieldFocused, setIsFieldFocused] = useState("")
     const [errors, setErrors] = useState<FormErrors>({})
 
@@ -91,6 +105,7 @@ const FlightSearch = () => {
             setSuggestionLoading(true)
             try {
                 const data = await getCitySuggestions(currentInput, 'flight')
+                console.log("Suggestions for:", currentInput, data)
                 setSuggestions(data)
                 setShowSuggestions(true)
                 setActiveSuggestionIndex(0)
@@ -138,26 +153,16 @@ const FlightSearch = () => {
         }
     }, [])
 
-    // Extract airport code from the selected value
-    const extractAirportCode = (value: string): string => {
-        const match = value.match(/\(([A-Z]{3})\)/)
-        return match ? match[1] : value
-    }
-
     const validateForm = (): boolean => {
         const newErrors: FormErrors = {}
 
-        // if (!flightSearch.from.trim()) {
-        //     newErrors.from = "لطفا شهر مبداء را انتخاب کنید"
-        // } else if (!extractAirportCode(flightSearch.from)) {
-        //     newErrors.from = "لطفا یک فرودگاه معتبر انتخاب کنید"
-        // }
+        if (!flightSearch.from) {
+            newErrors.from = "لطفا شهر مبداء را انتخاب کنید"
+        }
 
-        // if (!flightSearch.to.trim()) {
-        //     newErrors.to = "لطفا شهر مقصد را انتخاب کنید"
-        // } else if (!extractAirportCode(flightSearch.to)) {
-        //     newErrors.to = "لطفا یک فرودگاه معتبر انتخاب کنید"
-        // }
+        if (!flightSearch.to) {
+            newErrors.to = "لطفا شهر مقصد را انتخاب کنید"
+        }
 
         if (flightSearch.from && flightSearch.to) {
             const originCode = flightSearch.from.code
@@ -187,45 +192,59 @@ const FlightSearch = () => {
         return Object.keys(newErrors).length === 0
     }
 
-    const handleSuggestionClick = (suggestion: Suggestion, field: string, displayField: string) => {
-        let value = ""
+    const handleSuggestionClick = (suggestion: Suggestion, field: "from" | "to") => {
+        let displayValue = ""
         
         if (suggestion.type === 'airport') {
-            value = `${suggestion.city} (${suggestion.code}) - ${suggestion.name}`
+            displayValue = `${suggestion.city} (${suggestion.code}) - ${suggestion.name}`
         } else {
-            value = suggestion.name
+            displayValue = suggestion.name
         }
         
-        if (field === "to") {
-            console.log(flightSearch)
-            if (flightSearch.from.country === suggestion.country) {
-                return
-            }
+        // Validate country match for "to" field
+        if (field === "to" && flightSearch.from?.country === suggestion.country) {
+            setErrors(prev => ({ 
+                ...prev, 
+                to: "شهر مبدا و مقصد نمی‌توانند از یک کشور باشند" 
+            }))
+            return
         }
 
-        setFlightSearch(prev => ({ ...prev, [field]: suggestion, [displayField]: value }))
+        setFlightSearch(prev => ({ 
+            ...prev, 
+            [field]: suggestion,
+            [`display${field.charAt(0).toUpperCase() + field.slice(1)}`]: displayValue
+        }))
         setShowSuggestions(false)
         setCurrentInput("")
-        setIsFieldFocused("")
+        setCurrentField("")
         
-
         // Clear error for this field
         setErrors(prev => ({ ...prev, [field]: undefined }))
+        
+        // If there was a country match error, clear it
+        if (errors.to && field === "to") {
+            setErrors(prev => ({ ...prev, to: undefined }))
+        }
     }
 
-    const handleInputChange = (value: string, field: string) => {
+    const handleInputChange = (value: string, field: "from" | "to") => {
         setCurrentInput(value)
         setCurrentField(field)
-        setFlightSearch(prev => ({ ...prev, [field]: value }))
+        setFlightSearch(prev => ({ 
+            ...prev, 
+            [`display${field.charAt(0).toUpperCase() + field.slice(1)}`]: value,
+            [field]: null // Clear the selected suggestion when user types
+        }))
         
         // Clear error when user starts typing
-        if (errors[field as keyof FormErrors]) {
+        if (errors[field]) {
             setErrors(prev => ({ ...prev, [field]: undefined }))
         }
     }
 
-    const handleKeyDown = (e: React.KeyboardEvent, field: string) => {
-        if (!showSuggestions) return
+    const handleKeyDown = (e: React.KeyboardEvent, field: "from" | "to") => {
+        if (!showSuggestions || currentField !== field) return
 
         if (e.key === "ArrowDown") {
             e.preventDefault()
@@ -242,7 +261,26 @@ const FlightSearch = () => {
             }
         } else if (e.key === "Escape") {
             setShowSuggestions(false)
+            setCurrentField("")
         }
+    }
+
+    const handleFocus = (field: "from" | "to") => {
+        setCurrentField(field)
+        setIsFieldFocused(field)
+        // Only show suggestions if there's text in the input
+        if (flightSearch[`display${field.charAt(0).toUpperCase() + field.slice(1)}` as keyof Pick<FlightSearchState, 'displayFrom' | 'displayTo'>]) {
+            setShowSuggestions(suggestions.length > 0)
+        }
+    }
+
+    const handleBlur = () => {
+        setIsFieldFocused("")
+        // Use timeout to allow click events to register
+        setTimeout(() => {
+            setShowSuggestions(false)
+            setCurrentField("")
+        }, 200)
     }
 
     const handlePassengerChange = (type: 'adults' | 'children' | 'infants', operation: 'increment' | 'decrement') => {
@@ -323,8 +361,8 @@ const FlightSearch = () => {
         setIsLoading(true)
         try {
             // Extract airport codes
-            const originCode = extractAirportCode(flightSearch.from.code)
-            const destinationCode = extractAirportCode(flightSearch.to.code)
+            const originCode = flightSearch.from?.code || ""
+            const destinationCode = flightSearch.to?.code || ""
             const gregorianDepartureDate = shamsiToGregorianString(flightSearch.departureDate)
             
             // Prepare request body for PartoCRS API
@@ -368,7 +406,7 @@ const FlightSearch = () => {
             setFlightRequest(requestBody)
             const response = await searchFlights(requestBody)
             
-            setFlightsData(response.PricedItineraries, "intl")
+            setFlightsData(response.PricedItineraries, "intl", flightSearch.from?.city, flightSearch.to?.city)
             router.push('/flights')
 
         } catch (error) {
@@ -393,26 +431,27 @@ const FlightSearch = () => {
         )
     }
 
-    const renderSuggestions = (field: string) => {
+    const renderSuggestions = (field: "from" | "to") => {
         if (!showSuggestions || suggestions.length === 0 || currentField !== field) return null
 
         return (
             <div 
                 ref={suggestionsRef}
-                className="absolute top-full right-0 left-0 bg-white border border-gray-300 shadow-lg z-50 max-h-80 overflow-y-auto mt-1"
+                className="absolute top-full right-0 left-0 bg-white border border-gray-300 shadow-lg z-50 max-h-80 overflow-y-auto mt-1 rounded-md"
             >
                 {suggestions.map((suggestion, index) => (
                     <div
                         key={`${suggestion.id}-${index}`}
-                        className={`p-3 cursor-pointer border-b border-gray-300 last:border-b-0 ${
+                        className={`p-3 cursor-pointer border-b border-gray-200 last:border-b-0 ${
                             index === activeSuggestionIndex 
-                                ? 'bg-gray-100' 
+                                ? 'bg-blue-50 border-blue-200' 
                                 : 'hover:bg-gray-50'
                         }`}
                         onMouseDown={(e) => {
-                            e.preventDefault()
+                            e.preventDefault() // Prevent input blur
                             handleSuggestionClick(suggestion, field)
                         }}
+                        onMouseEnter={() => setActiveSuggestionIndex(index)}
                     >
                         <div className="flex justify-between items-start">
                             <div className="flex-1 text-right">
@@ -424,14 +463,14 @@ const FlightSearch = () => {
                                             </span>
                                             <span className="text-blue-500 font-bold">({suggestion.code})</span>
                                         </div>
-                                        <div className="text-sm text-black mt-1">
+                                        <div className="text-sm text-gray-600 mt-1">
                                             {suggestion.name}
                                         </div>
                                         <div className="flex items-center gap-2 mt-1 justify-end">
-                                            <span className="text-xs text-black">
+                                            <span className="text-xs text-gray-500">
                                                 {suggestion.country}
                                             </span>
-                                            <span className="text-xs bg-gray-200 text-black px-2 py-1 font-medium border border-gray-300">
+                                            <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded border border-gray-300">
                                                 فرودگاه
                                             </span>
                                         </div>
@@ -442,10 +481,10 @@ const FlightSearch = () => {
                                             {suggestion.name}
                                         </div>
                                         <div className="flex items-center gap-2 mt-1 justify-end">
-                                            <span className="text-xs text-black">
+                                            <span className="text-xs text-gray-500">
                                                 {suggestion.country}
                                             </span>
-                                            <span className="text-xs bg-gray-200 text-black px-2 py-1 font-medium border border-gray-300">
+                                            <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded border border-gray-300">
                                                 شهر
                                             </span>
                                         </div>
@@ -465,20 +504,20 @@ const FlightSearch = () => {
         return (
             <div 
                 ref={passengersRef}
-                className="absolute top-full right-0 left-0 bg-white border border-gray-300 shadow-lg z-50 p-4 mt-1"
+                className="absolute top-full right-0 left-0 bg-white border border-gray-300 shadow-lg z-50 p-4 mt-1 rounded-md"
             >
                 <div className="space-y-4">
                     {/* Adults Selector */}
                     <div className="flex items-center justify-between">
                         <div className="text-right">
                             <div className="font-bold text-black">بزرگسالان</div>
-                            <div className="text-xs text-black mt-1">(12 سال به بالا)</div>
+                            <div className="text-xs text-gray-600 mt-1">(12 سال به بالا)</div>
                         </div>
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={() => handlePassengerChange('adults', 'decrement')}
                                 disabled={flightSearch.adults <= 1}
-                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
+                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
                             >
                                 <Minus className="h-4 w-4" />
                             </button>
@@ -488,7 +527,7 @@ const FlightSearch = () => {
                             <button
                                 onClick={() => handlePassengerChange('adults', 'increment')}
                                 disabled={flightSearch.adults >= 9}
-                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
+                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
                             >
                                 <Plus className="h-4 w-4" />
                             </button>
@@ -499,13 +538,13 @@ const FlightSearch = () => {
                     <div className="flex items-center justify-between">
                         <div className="text-right">
                             <div className="font-bold text-black">کودکان</div>
-                            <div className="text-xs text-black mt-1">(2 تا 12 سال)</div>
+                            <div className="text-xs text-gray-600 mt-1">(2 تا 12 سال)</div>
                         </div>
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={() => handlePassengerChange('children', 'decrement')}
                                 disabled={flightSearch.children <= 0}
-                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
+                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
                             >
                                 <Minus className="h-4 w-4" />
                             </button>
@@ -515,7 +554,7 @@ const FlightSearch = () => {
                             <button
                                 onClick={() => handlePassengerChange('children', 'increment')}
                                 disabled={flightSearch.children >= 8}
-                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
+                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
                             >
                                 <Plus className="h-4 w-4" />
                             </button>
@@ -526,13 +565,13 @@ const FlightSearch = () => {
                     <div className="flex items-center justify-between">
                         <div className="text-right">
                             <div className="font-bold text-black">نوزادان</div>
-                            <div className="text-xs text-black mt-1">(زیر 2 سال)</div>
+                            <div className="text-xs text-gray-600 mt-1">(زیر 2 سال)</div>
                         </div>
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={() => handlePassengerChange('infants', 'decrement')}
                                 disabled={flightSearch.infants <= 0}
-                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
+                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
                             >
                                 <Minus className="h-4 w-4" />
                             </button>
@@ -542,7 +581,7 @@ const FlightSearch = () => {
                             <button
                                 onClick={() => handlePassengerChange('infants', 'increment')}
                                 disabled={flightSearch.infants >= 4}
-                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
+                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
                             >
                                 <Plus className="h-4 w-4" />
                             </button>
@@ -559,7 +598,7 @@ const FlightSearch = () => {
         <div style={{direction:'rtl'}}>
             {/* General Error Display */}
             {errors.general && (
-                <div className="mb-4 p-3 bg-red-500 border border-red-700 flex items-center gap-3">
+                <div className="mb-4 p-3 bg-red-500 border border-red-700 flex items-center gap-3 rounded">
                     <AlertCircle className="h-4 w-4 text-white flex-shrink-0" />
                     <p className="text-white text-sm font-medium">{errors.general}</p>
                 </div>
@@ -572,7 +611,7 @@ const FlightSearch = () => {
                     <div className="relative">
                         <select 
                             id="flight-trip-type"
-                            className="w-full h-12 border rounded-full border-gray-300 bg-white text-black px-3 pr-10 appearance-none"
+                            className="w-full h-12 border rounded-full border-gray-300 bg-white text-black px-3 pr-10 appearance-none focus:outline-none focus:border-blue-500"
                             value={flightSearch.tripType}
                             onChange={(e) => setFlightSearch(prev => ({ ...prev, tripType: e.target.value }))}
                         >
@@ -588,7 +627,7 @@ const FlightSearch = () => {
                     <div className="relative">
                         <select 
                             id="flight-cabin-class"
-                            className="w-full rounded-full h-12 border border-gray-300 bg-white text-black px-3 pr-10 appearance-none"
+                            className="w-full rounded-full h-12 border border-gray-300 bg-white text-black px-3 pr-10 appearance-none focus:outline-none focus:border-blue-500"
                             value={flightSearch.cabinClass}
                             onChange={(e) => setFlightSearch(prev => ({ ...prev, cabinClass: e.target.value }))}
                         >
@@ -614,23 +653,16 @@ const FlightSearch = () => {
                             ref={fromInputRef}
                             id="flight-from" 
                             placeholder="نام فرودگاه، مثال: تهران (IKA)" 
-                            className={`pr-10 h-12 border border-gray-300 bg-white text-black placeholder-gray-500 ${
+                            className={`pr-10 h-12 border bg-white text-black placeholder-gray-500 focus:outline-none ${
                                 errors.from 
-                                    ? 'border-red-500 bg-red-500' 
-                                    : 'border-gray-300'
+                                    ? 'border-red-500 focus:border-red-500' 
+                                    : 'border-gray-300 focus:border-blue-500'
                             }`}
-                            value={flightSearch.from}
+                            value={flightSearch.displayFrom}
                             onChange={(e) => handleInputChange(e.target.value, "from")}
                             onKeyDown={(e) => handleKeyDown(e, "from")}
-                            onFocus={() => {
-                                setCurrentField("from")
-                                setIsFieldFocused("from")
-                                setShowSuggestions(suggestions.length > 0)
-                            }}
-                            onBlur={() => {
-                                setIsFieldFocused("")
-                                setTimeout(() => setShowSuggestions(false), 200)
-                            }}
+                            onFocus={() => handleFocus("from")}
+                            onBlur={handleBlur}
                         />
                         {renderSuggestions("from")}
                         {renderError("from")}
@@ -649,23 +681,16 @@ const FlightSearch = () => {
                             ref={toInputRef}
                             id="flight-to" 
                             placeholder="نام فرودگاه مقصد مثال: استانبول (IST)" 
-                            className={`pr-10 h-12 border border-gray-300 bg-white text-black placeholder-gray-500 ${
+                            className={`pr-10 h-12 border bg-white text-black placeholder-gray-500 focus:outline-none ${
                                 errors.to 
-                                    ? 'border-red-500 bg-red-500' 
-                                    : 'border-gray-300'
+                                    ? 'border-red-500 focus:border-red-500' 
+                                    : 'border-gray-300 focus:border-blue-500'
                             }`}
-                            value={flightSearch.to}
+                            value={flightSearch.displayTo}
                             onChange={(e) => handleInputChange(e.target.value, "to")}
                             onKeyDown={(e) => handleKeyDown(e, "to")}
-                            onFocus={() => {
-                                setCurrentField("to")
-                                setIsFieldFocused("to")
-                                setShowSuggestions(suggestions.length > 0)
-                            }}
-                            onBlur={() => {
-                                setIsFieldFocused("")
-                                setTimeout(() => setShowSuggestions(false), 200)
-                            }}
+                            onFocus={() => handleFocus("to")}
+                            onBlur={handleBlur}
                         />
                         {renderSuggestions("to")}
                         {renderError("to")}
@@ -716,7 +741,9 @@ const FlightSearch = () => {
                         className="passengers-trigger cursor-pointer"
                         onClick={() => setShowPassengers(!showPassengers)}
                     >
-                        <div className="relative h-12 border border-gray-300 bg-white hover:border-gray-400 flex items-center justify-between px-3">
+                        <div className={`relative h-12 border bg-white hover:border-gray-400 flex items-center justify-between px-3 rounded ${
+                            showPassengers ? 'border-blue-500' : 'border-gray-300'
+                        }`}>
                             <div className="flex items-center gap-2">
                                 <Users className="h-4 w-4 text-gray-400" />
                                 <User className="h-4 w-4 text-gray-400" />
@@ -738,7 +765,7 @@ const FlightSearch = () => {
             
             {/* Search Button */}
             <Button 
-                className="w-full h-12 bg-orange-500 text-white hover:bg-orange-600 mt-6"
+                className="w-full h-12 bg-blue-500 text-white hover:bg-blue-900 mt-6"
                 onClick={handleFlightSearch}
                 disabled={isLoading}
             >

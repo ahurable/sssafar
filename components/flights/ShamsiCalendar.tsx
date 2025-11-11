@@ -292,7 +292,7 @@ const ShamsiDateModal = ({
               <button
                 className={`flex-1 py-2 px-4 text-sm font-medium ${
                   selectionMode === "departure"
-                    ? "bg-white text-red-800"
+                    ? "bg-white text-blue-800"
                     : "text-black hover:text-black"
                 }`}
                 onClick={() => setSelectionMode("departure")}
@@ -302,7 +302,7 @@ const ShamsiDateModal = ({
               <button
                 className={`flex-1 py-2 px-4 text-sm font-medium ${
                   selectionMode === "return"
-                    ? "bg-white text-red-800"
+                    ? "bg-white text-blue-800"
                     : "text-black hover:text-black"
                 }`}
                 onClick={() => setSelectionMode("return")}
@@ -377,7 +377,7 @@ const ShamsiDateModal = ({
             </Button>
             <Button
               onClick={applyDates}
-              className="flex-1 h-10 bg-orange-500 text-white hover:bg-orange-600"
+              className="flex-1 h-10 bg-blue-500 text-white hover:bg-blue-900"
             >
               اعمال تاریخ
             </Button>
@@ -428,7 +428,7 @@ const ShamsiDateModal = ({
               <button
                 className={`flex-1 py-2 px-4 text-sm font-medium ${
                   selectionMode === "departure"
-                    ? "bg-white text-red-800"
+                    ? "bg-white text-blue-800"
                     : "text-black hover:text-black"
                 }`}
                 onClick={() => setSelectionMode("departure")}
@@ -438,7 +438,7 @@ const ShamsiDateModal = ({
               <button
                 className={`flex-1 py-2 px-4 text-sm font-medium ${
                   selectionMode === "return"
-                    ? "bg-white text-red-800"
+                    ? "bg-white text-blue-800"
                     : "text-black hover:text-black"
                 }`}
                 onClick={() => setSelectionMode("return")}
@@ -472,7 +472,7 @@ const ShamsiDateModal = ({
           <div className="absolute bottom-0 left-0 right-0 p-3 bg-white border-t border-gray-300">
             <Button
               onClick={applyDates}
-              className="w-full h-10 bg-orange-500 text-white hover:bg-orange-600"
+              className="w-full h-10 bg-blue-500 text-white hover:bg-blue-900"
             >
               اعمال تاریخ
             </Button>
@@ -746,7 +746,7 @@ const Calendar = ({
                   : isDateDisabled(day)
                     ? 'text-gray-300 cursor-not-allowed bg-gray-100'
                     : isDateSelected(day)
-                      ? 'bg-red-800 text-white'
+                      ? 'bg-blue-800 text-white'
                       : isDateInRange(day)
                         ? 'bg-gray-200 text-black'
                         : 'text-black bg-white hover:bg-gray-100 cursor-pointer border border-transparent'
@@ -755,7 +755,7 @@ const Calendar = ({
               onClick={() => day && !isDateDisabled(day) && handleDateClick(day)}
               disabled={!day || isDateDisabled(day)}
             >
-              {day}
+              {day?.toLocaleString('fa-IR')}
             </button>
           ))
         )}

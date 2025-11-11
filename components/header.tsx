@@ -66,7 +66,7 @@ export function Header() {
           // Logged in user menu
           <>
             <div className="flex items-center gap-3 px-3 py-3 mb-2 border border-gray-300 bg-white">
-              <div className="flex h-10 w-10 items-center justify-center bg-orange-500 text-white text-sm font-bold">
+              <div className="flex h-10 w-10 items-center justify-center bg-blue-500 text-white text-sm font-bold">
                 {user.name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'}
               </div>
               <div className="flex-1 min-w-0 text-right">
@@ -116,7 +116,7 @@ export function Header() {
               {user.role === "ADMIN" && (
                 <Link
                   href="/admin"
-                  className="flex items-center gap-3 w-full px-3 py-3 text-sm bg-red-800 text-white text-right font-medium"
+                  className="flex items-center gap-3 w-full px-3 py-3 text-sm bg-blue-800 text-white text-right font-medium"
                   onClick={() => setProfileMenuOpen(false)}
                 >
                   <Settings className="h-5 w-5" />
@@ -126,7 +126,7 @@ export function Header() {
 
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-3 w-full px-3 py-3 text-sm text-red-800 hover:bg-gray-100 text-right font-medium border border-gray-300 mt-2"
+                className="flex items-center gap-3 w-full px-3 py-3 text-sm text-red-600 hover:bg-gray-100 text-right font-medium border border-gray-300 mt-2"
               >
                 <LogOut className="h-5 w-5" />
                 <span className="flex-1">خروج از حساب</span>
@@ -141,7 +141,7 @@ export function Header() {
             </div>
             <Link
               href="/auth/signin"
-              className="flex w-full items-center justify-center gap-2 px-4 py-3 text-sm font-medium bg-orange-500 text-white hover:bg-orange-600 text-right"
+              className="flex w-full items-center justify-center gap-2 px-4 py-3 text-sm font-medium bg-blue-500 text-white hover:bg-blue-900 text-right"
               onClick={() => setProfileMenuOpen(false)}
             >
               <User className="h-5 w-5" />
@@ -170,7 +170,7 @@ export function Header() {
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-300 bg-white">
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center bg-orange-500">
+              <div className="flex h-12 w-12 items-center justify-center bg-blue-500">
                 <Plane className="h-6 w-6 text-white" />
               </div>
               <span className="text-2xl font-black text-black">
@@ -319,7 +319,7 @@ export function Header() {
               <div className="fixed bottom-4 left-4 right-4 space-y-2">
                 <Link
                   href="/auth/signin"
-                  className="flex w-full items-center justify-center gap-3 px-4 py-3 text-md font-bold bg-orange-500 text-white hover:bg-orange-600"
+                  className="flex w-full items-center justify-center gap-3 px-4 py-3 text-md font-bold bg-blue-500 text-white hover:bg-blue-900"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <User className="h-5 w-5" />
@@ -352,7 +352,7 @@ export function Header() {
               href="/" 
               className="flex items-center gap-2"
             >
-              <div className="flex h-9 w-9 items-center justify-center bg-orange-500">
+              <div className="flex h-9 w-9 items-center justify-center bg-blue-500">
                 <Plane className="h-4 w-4 text-white" />
               </div>
               <span className="text-lg font-black text-black">
@@ -407,11 +407,11 @@ export function Header() {
               {loading ? (
                 <div className="h-8 w-8 bg-gray-300 animate-pulse" />
               ) : user ? (
-                <div className="flex h-8 w-8 items-center justify-center bg-orange-500 text-white text-sm font-bold">
+                <div className="flex h-8 w-8 items-center justify-center bg-blue-500 text-white text-sm font-bold">
                   {user.name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'}
                 </div>
               ) : (
-                <div className="flex h-8 w-8 items-center justify-center bg-orange-500">
+                <div className="flex h-8 w-8 items-center justify-center bg-blue-500">
                   <User className="h-4 w-4 text-white" />
                 </div>
               )}

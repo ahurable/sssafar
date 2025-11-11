@@ -310,7 +310,7 @@ const DomesticFlightSearch = () => {
             const originCode = extractAirportCode(domesticFlightSearch.origin)
             const destinationCode = extractAirportCode(domesticFlightSearch.destination)
             const gregorianDepartureDate = shamsiToGregorianString(domesticFlightSearch.departureDate)
-           
+            
             // Prepare request body for Domestic API
             const requestBody = {
                 airline: 'ZV',
@@ -348,7 +348,7 @@ const DomesticFlightSearch = () => {
             setFlightRequest(partoRequestBody)
             const partoResponse = await searchFlights(partoRequestBody)
 
-            setFlightsData(partoResponse.PricedItineraries, "domestic")
+            setFlightsData(partoResponse.PricedItineraries, "domestic", domesticFlightSearch.origin, domesticFlightSearch.destination)
             router.push('/flights')
 
         } catch (error) {
@@ -699,7 +699,7 @@ const DomesticFlightSearch = () => {
             
             {/* Search Button */}
             <Button 
-                className="w-full h-12 bg-orange-500 text-white hover:bg-orange-600 mt-6"
+                className="w-full h-12 bg-blue-500 text-white hover:bg-blue-900 mt-6"
                 onClick={handleDomesticFlightSearch}
                 disabled={isLoading}
             >

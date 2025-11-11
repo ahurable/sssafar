@@ -242,7 +242,7 @@ export default function FinancialManagement() {
         <Card className="py-6">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">تراکنش‌های امروز</CardTitle>
-            <div className="h-4 w-4 bg-orange-500 rounded-full" />
+            <div className="h-4 w-4 bg-blue-500 rounded-full" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">

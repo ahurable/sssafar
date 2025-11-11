@@ -170,7 +170,7 @@ export function UserDetailView({ userId }: { userId: string }) {
       USER: { label: "کاربر", color: "bg-blue-500" },
       ADMIN: { label: "مدیر", color: "bg-purple-500" },
       ACCOUNTANT: { label: "حسابدار", color: "bg-green-500" },
-      ROTO: { label: "نماینده سازمان", color: "bg-orange-500" },
+      ROTO: { label: "نماینده سازمان", color: "bg-blue-500" },
       ORGAN: { label: "ارگان", color: "bg-red-500" },
     }
     return roles[role as keyof typeof roles] || { label: role, color: "bg-gray-500" }

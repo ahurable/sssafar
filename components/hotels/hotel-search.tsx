@@ -557,7 +557,7 @@ const HotelSearch = () => {
       
       {/* Search Button */}
       <Button 
-        className="w-full h-12 bg-orange-500 text-white hover:bg-orange-600 mt-6"
+        className="w-full h-12 bg-blue-500 text-white hover:bg-blue-900 mt-6"
         onClick={handleHotelSearch}
         disabled={isLoading}
       >

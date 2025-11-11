@@ -216,7 +216,7 @@ export default async function VisaDetailPage({ params }: Params) {
                       <div className="space-y-3">
                         {service.documents.map((document: string, index: number) => (
                           <div key={index} className="flex items-center p-3 bg-white border border-orange-200 rounded-lg">
-                            <div className="w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center ml-2 flex-shrink-0">
+                            <div className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center ml-2 flex-shrink-0">
                               {index + 1}
                             </div>
                             <span className="text-gray-700">{document}</span>

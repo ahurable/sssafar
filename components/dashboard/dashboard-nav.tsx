@@ -40,7 +40,6 @@ export function DashboardNav() {
   const [loading, setLoading] = useState<boolean>(true)
   const [lastupdate, setLastupdate] = useState<string | null>()
 
-  // Calculate age from date of birth (Gregorian date string)
   const calculateAge = (dateOfBirth: string): number => {
     if (!dateOfBirth) return 0
     
@@ -50,7 +49,6 @@ export function DashboardNav() {
     let age = today.getFullYear() - birthDate.getFullYear()
     const monthDiff = today.getMonth() - birthDate.getMonth()
     
-    // Adjust age if birthday hasn't occurred this year yet
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
       age--
     }
@@ -91,27 +89,27 @@ export function DashboardNav() {
       setLastupdate(toPersianDate);
     }
   },[me])
+  
   return (
     <div className="sticky top-20">
-      <Card className="text-center p-4">
-        <span>
+      <Card className="text-center p-4 border rounded-lg border-gray-300 bg-white">
+        <span className="text-black">
           اعتبار کیف پول
         </span>
-        <span className="text-3xl font-black">
+        <span className="text-3xl font-black text-black">
           {me?.userCredit.balance.toLocaleString('fa-IR')} ریال
         </span>
-        <span>
+        <span className="text-black">
           آخرین بروزرسانی در: {lastupdate}
         </span>
-        <Link href={'/dashboard/charge'} className="p-4">
-          <Button className="bg-green-400 w-full text-2xl p-8 font-bold">
+        <Link href={'/dashboard/charge'} className="p-4 block">
+          <Button className="bg-blue-600 w-full text-xl p-6 font-bold text-white hover:bg-blue-700">
             شارژ اعتبار
           </Button>
         </Link>
       </Card>
-      <Card className="mt-4">
-        <CardContent className="p-4">
-          <nav className="space-y-1">
+      <div className="mt-4 bg-white">
+          <nav className="space-y-2">
             {navItems.map((item) => {
               const Icon = item.icon
               const isActive = pathname === item.href
@@ -120,10 +118,10 @@ export function DashboardNav() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    "flex gap-3 px-3 items-center py-4 rounded-lg border text-sm font-medium  border-gray-300",
                     isActive
-                      ? "bg-blue-400 text-white"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                      ? "text-blue-950 border-2 border-blue-950 bg-blue-50 font-bold"
+                      : "text-black hover:bg-gray-100",
                   )}
                 >
                   <Icon className="h-4 w-4" />
@@ -136,10 +134,10 @@ export function DashboardNav() {
               <Link
                   href="/dashboard/panels"
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                    pathname == "panels"
-                      ? "bg-blue-400 text-primary-foreground"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                    "flex items-center gap-3 px-3 py-4 text-sm font-medium border-b border-gray-300",
+                    pathname == "/dashboard/panels"
+                      ? "text-blue-950 border-2 border-blue-950 bg-blue-50 font-bold"
+                      : "text-black hover:bg-gray-100",
                   )}
                 >
                   <PanelBottom className="h-4 w-4" />
@@ -151,23 +149,22 @@ export function DashboardNav() {
               <Link
                   href="/dashboard/travelers"
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                    pathname == "panels"
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                    "flex items-center gap-3 px-3 py-4 rounded-lg text-sm font-medium border-b border-gray-300",
+                    pathname == "/dashboard/travelers"
+                      ? "text-blue-800 border-2 border-blue-800 font-bold"
+                      : "text-black hover:bg-gray-100",
                   )}
                 >
                   <Users className="h-4 w-4" />
                     افزودن مسافران
               </Link>
-            }
-            <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10">
+            } 
+            <button className="flex w-full border-2 rounded-lg items-center gap-3 px-3 py-4 text-sm font-bold text-red-800 bg-red-50 border-red-800  hover:bg-gray-100">
               <LogOut className="h-4 w-4" />
               خروج از حساب
             </button>
           </nav>
-        </CardContent>
-      </Card>
+      </div>
     </div>
   )
 }

@@ -358,7 +358,7 @@ const CipSearch = () => {
               variant={cipSearch.serviceType === "departure" ? "default" : "outline"}
               className={`h-12 ${
                 cipSearch.serviceType === "departure" 
-                  ? 'bg-red-800 text-white' 
+                  ? 'bg-blue-800 text-white' 
                   : 'bg-white text-black border border-gray-300'
               }`}
               onClick={() => setCipSearch(prev => ({ ...prev, serviceType: "departure" }))}
@@ -369,7 +369,7 @@ const CipSearch = () => {
               variant={cipSearch.serviceType === "arrival" ? "default" : "outline"}
               className={`h-12 ${
                 cipSearch.serviceType === "arrival" 
-                  ? 'bg-red-800 text-white' 
+                  ? 'bg-blue-800 text-white' 
                   : 'bg-white text-black border border-gray-300'
               }`}
               onClick={() => setCipSearch(prev => ({ ...prev, serviceType: "arrival" }))}
@@ -407,7 +407,7 @@ const CipSearch = () => {
 
       {/* Search Button */}
       <Button 
-        className="w-full h-12 bg-orange-500 text-white hover:bg-orange-600 mt-6"
+        className="w-full h-12 bg-blue-500 text-white hover:bg-blue-900 mt-6"
         onClick={handleSearch}
         disabled={isLoading}
       >

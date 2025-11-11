@@ -50,7 +50,7 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
             onClick={() => handleTabSelect(key)}
             className="flex flex-col items-center justify-center gap-3 h-32 bg-white border border-gray-300 hover:bg-gray-50 transition-colors p-4 group"
           >
-            <div className="p-3 bg-orange-500 group-hover:bg-orange-600 transition-colors">
+            <div className="p-3 bg-blue-500 group-hover:bg-blue-900 transition-colors">
               <Icon className="h-6 w-6 text-white" />
             </div>
             <span className="text-sm font-medium text-black text-center">
@@ -98,7 +98,7 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
               <X className="h-5 w-5 text-black" />
             </button>
             <div className="flex items-center gap-2">
-              <div className="p-2 bg-red-500">
+              <div className="p-2 bg-blue-500">
                 <currentConfig.icon className="h-5 w-5 text-white" />
               </div>
               <h2 className="text-xl font-bold text-black">{currentConfig.label}</h2>
@@ -127,11 +127,11 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
               value={key} 
               className={`flex-1 flex items-center justify-center gap-3 py-4 border-b-2 transition-colors ${
                 isSelected 
-                  ? 'border-b-2 border-red-800 text-red-800' 
+                  ? 'border-b-2 border-blue-900 text-blue-900' 
                   : 'border-b-2 border-transparent text-black hover:text-gray-600'
               }`}
             >
-              <Icon className={`h-5 w-5 ${isSelected ? 'text-red-800' : 'text-black'}`} />
+              <Icon className={`h-5 w-5 ${isSelected ? 'text-blue-900' : 'text-black'}`} />
               <span className=" font-black">{config.label}</span>
             </TabsTrigger>
           )
@@ -168,7 +168,7 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
   return (
     <section ref={cardRef} className=" bg-white">
       <div className="mx-auto">
-        <div className="text-center bg-orange-600 pt-8 pb-20">
+        <div className="text-center bg-blue-900 pt-8 pb-20">
           <h2 className="text-3xl font-bold text-white mb-4">
             سفر بعدی خود را پیدا کنید
           </h2>
