@@ -49,12 +49,12 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
   }
 
   const tabConfig = {
-    cip: { icon: Crown, label: "CIP فرودگاهی", color: "purple" },
-    tour: { icon: Map, label: "گشت شهری", color: "orange" },
+    cip: { icon: Crown, label: "CIP فرودگاهی", color: "purple", className: "rounded-tr-xl" },
+    tour: { icon: Map, label: "گشت شهری", color: "orange", className: "rounded-tl-xl" },
     domesticHotel: { icon: Hotel, label: "هتل داخلی", color: "cyan" },
     hotel: { icon: Hotel, label: "هتل خارجی", color: "emerald" },
-    flight: { icon: Plane, label: "پرواز خارجی", color: "blue" },
-    domesticFlights: { icon: Plane, label: "پرواز داخلی", color: "red" },
+    flight: { icon: Plane, label: "پرواز خارجی", color: "blue", className: "rounded-br-xl" },
+    domesticFlights: { icon: Plane, label: "پرواز داخلی", color: "red", className: "rounded-bl-xl" },
   }
 
   useEffect(() => {
@@ -106,7 +106,8 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
                 onClick={() => handleTabSelect(key)}
                 className={`
                   flex flex-col items-center justify-center gap-3 
-                  h-36 bg-white border-2 border-gray-200 
+                  ${config.className && config.className}
+                  h-36 bg-white border border-gray-200 
                   hover:border-${config.color}-300 hover:shadow-lg 
                   transition-all duration-200 active:scale-95 py-4
                   group
@@ -118,7 +119,7 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
                 <span className="text-sm font-medium text-gray-800 text-center px-2">
                   {config.label}
                 </span>
-                <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-gray-600" />
+                <ArrowRight className="h-4 w-4 text-cyan-500 group-hover:text-gray-600" />
               </button>
             )
           })}
