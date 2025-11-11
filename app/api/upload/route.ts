@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     const uploadsDir = join(process.cwd(), "public/uploads")
     if (!existsSync(uploadsDir)) {
       await mkdir(uploadsDir, { recursive: true })
-    }
+    } 
 
     // Generate unique filename
     const timestamp = Date.now()
@@ -65,6 +65,6 @@ export async function POST(request: NextRequest) {
 
   } catch (error: any) {
     console.error("[v0] Upload error:", error)
-    return NextResponse.json({ error: "خطا در آپلود فایل" }, { status: 500 })
+    return NextResponse.json({ error: `خطا در آپلود فایل ${error}` }, { status: 500 })
   }
 }
