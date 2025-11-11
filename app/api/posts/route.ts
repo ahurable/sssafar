@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { createPostSchema } from "@/lib/validations/post"
+import { generateUniqueSlug, slugify } from "@/lib/slugify"
 import { z } from "zod"
 
 export async function GET(request: NextRequest) {
@@ -71,15 +72,13 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
     const validatedData = createPostSchema.parse(body)
-
+    const exisitngSlugs = await prisma.post.findMany({
+      select: {
+        slug: true
+      }
+    })
     // Generate slug from title
-    const slug = validatedData.title
-      .toLowerCase()
-      .replace(/\s+/g, "-")
-      .replace(/[^\w-]+/g, "")
-      .replace(/--+/g, "-")
-      .trim() + "-" + Date.now()
-
+    const slug = generateUniqueSlug(body.title, exisitngSlugs)
     // Create post with transaction
     const result = await prisma.$transaction(async (tx) => {
       // Create main post (without relations first)

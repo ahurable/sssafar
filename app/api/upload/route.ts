@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     await writeFile(filepath, buffer)
 
     // Return full URL including the domain
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL
     const publicUrl = `${baseUrl}/uploads/${filename}`
 
     return NextResponse.json({

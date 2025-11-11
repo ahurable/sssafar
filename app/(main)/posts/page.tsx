@@ -8,6 +8,7 @@ import { Header } from "@/components/header"
 interface Post {
   id: string
   title: string
+  slug: string
   excerpt: string
   content: string
   coverImage: string
@@ -117,7 +118,7 @@ export default async function PostsPage() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {posts.map((post) => (
             <Card key={post.id} className="group hover:shadow-lg transition-all duration-300">
-              <Link href={`/posts/${post.id}`}>
+              <Link href={`/posts/${post.slug}`}>
                 <CardContent className="p-0">
                   <div className="relative overflow-hidden rounded-t-lg">
                     <img

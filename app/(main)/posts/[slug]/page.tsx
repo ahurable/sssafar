@@ -37,9 +37,9 @@ interface Post {
   }
 }
 
-async function getPost(id: string): Promise<Post | null> {
+async function getPost(slug: string): Promise<Post | null> {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/posts/${id}`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/posts/slug/${slug}`, {
       next: { revalidate: 60 }
     })
     
@@ -55,8 +55,8 @@ async function getPost(id: string): Promise<Post | null> {
   }
 }
 
-export default async function PostDetailPage({ params }: { params: { id: string } }) {
-  const post = await getPost(params.id)
+export default async function PostDetailPage({ params }: { params: { slug: string } }) {
+  const post = await getPost(params.slug)
 
   if (!post || !post.published) {
     notFound()

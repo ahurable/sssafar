@@ -33,7 +33,7 @@ export function PostsManagement() {
 
   const fetchPosts = () => {
     setLoading(true)
-    fetch("/api/posts")
+    fetch("/api/posts?published=false")
       .then((res) => res.json())
       .then((data) => {
         setPosts(data.posts)

@@ -51,7 +51,7 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
   const tabConfig = {
     cip: { icon: Crown, label: "CIP فرودگاهی", color: "purple" },
     tour: { icon: Map, label: "گشت شهری", color: "orange" },
-    domesticHotel: { icon: Building, label: "هتل داخلی", color: "cyan" },
+    domesticHotel: { icon: Hotel, label: "هتل داخلی", color: "cyan" },
     hotel: { icon: Hotel, label: "هتل خارجی", color: "emerald" },
     flight: { icon: Plane, label: "پرواز خارجی", color: "blue" },
     domesticFlights: { icon: Plane, label: "پرواز داخلی", color: "red" },
@@ -94,23 +94,9 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
 
   // Mobile Main Modal - Tab Selection
   const MobileMainModal = () => (
-    <div className="fixed inset-0 z-50 bg-white">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white sticky top-0 z-10">
-        <h2 className="text-xl font-bold text-gray-800">نوع سفر را انتخاب کنید</h2>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleCloseAllModals}
-          className="h-8 w-8"
-        >
-          <X className="h-5 w-5" />
-        </Button>
-      </div>
-
+      <>
       {/* Tab Buttons Grid */}
-      <div className="p-4 overflow-y-auto h-full pb-20">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 rounded-2xl">
           {Object.entries(tabConfig).map(([key, config]) => {
             const Icon = config.icon
             const colorClass = `bg-${config.color}-500`
@@ -120,9 +106,9 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
                 onClick={() => handleTabSelect(key)}
                 className={`
                   flex flex-col items-center justify-center gap-3 
-                  h-40 rounded-2xl bg-white border-2 border-gray-200 
+                  h-36 bg-white border-2 border-gray-200 
                   hover:border-${config.color}-300 hover:shadow-lg 
-                  transition-all duration-200 active:scale-95 py-6
+                  transition-all duration-200 active:scale-95 py-4
                   group
                 `}
               >
@@ -137,8 +123,7 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
             )
           })}
         </div>
-      </div>
-    </div>
+        </>
   )
 
   // Mobile Search Modal - Specific Search Component
@@ -268,18 +253,11 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
         {/* Mobile Version */}
         <div className="block lg:hidden">
           <Card ref={cardRef} className="relative z-30 shadow-none w-full border-0 dark:bg-gray-800/95">
-            <Button 
-              onClick={() => setMobileMainModalOpen(true)}
-              className="w-full h-16 text-lg font-bold rounded-2xl bg-white/20 text-white hover:bg-white/30 transition-all duration-300"
-            >
-              <Search className="ml-2 h-5 w-5" />
-              جستجو در خدمات سفر
-            </Button>
+            <MobileMainModal />
           </Card>
         </div>
 
         {/* Mobile Main Modal */}
-        {mobileMainModalOpen && <MobileMainModal />}
 
         {/* Mobile Search Modal */}
         {mobileSearchModalOpen && <MobileSearchModal />}

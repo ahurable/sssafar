@@ -77,7 +77,7 @@ export function AdminNav() {
   }
 
   return (
-    <aside className="w-64 lg:h-[70vh] sticky top-0 bg-card border-l border-border">
+    <aside className="w-64 lg:h-[80vh] sticky top-0 bg-card border-l border-border">
       <div className="p-6">
         <h2 className="text-xl font-bold text-primary">پنل مدیریت</h2>
       </div>
@@ -108,7 +108,7 @@ export function AdminNav() {
       <div className="absolute bottom-0 w-64 p-3">
         <button
           onClick={handleSignOut}
-          className="flex items-center absolute gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+          className="flex items-center bottom-0 absolute gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
         >
           <LogOut className="h-5 w-5" />
           خروج
