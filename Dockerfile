@@ -1,7 +1,5 @@
 FROM node:18 AS builder
 
-# Use full Node.js image which includes all necessary libraries
-
 WORKDIR /app
 
 COPY package.json ./
@@ -23,16 +21,17 @@ RUN adduser --system --uid 1001 nextjs
 
 WORKDIR /app
 
-
-RUN mkdir -p /app/public/uploads
-RUN chown -R node:node /app/public/uploads
-RUN chmod -R 755 /app/public/uploads
-
+# Copy application files
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+
+# Create uploads directory with proper permissions
+RUN mkdir -p /app/uploads
+RUN chown -R nextjs:nodejs /app/uploads
+RUN chmod -R 755 /app/uploads
 
 USER nextjs
 
