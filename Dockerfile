@@ -30,10 +30,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 
 # Create uploads directory with proper permissions
 RUN mkdir -p /app/uploads
-RUN chown -R nextjs:nodejs /app/uploads
+RUN chown -R node:node /app/uploads
 RUN chmod -R 755 /app/uploads
 
-USER nextjs
+USER node
 
 EXPOSE 3000
 
