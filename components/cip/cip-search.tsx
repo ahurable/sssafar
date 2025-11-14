@@ -9,6 +9,7 @@ import { Search, Plane, Calendar, MapPin, Users, AlertCircle, Loader2 } from "lu
 import ShamsiDateModal from "../flights/ShamsiCalendar"
 import { shamsiToGregorianString } from "@/lib/jalaalil"
 import { useRouter } from "next/navigation"
+import { useCip } from "@/contexts/search/CipContext"
 
 interface AirportSuggestion {
   id: string,
@@ -53,6 +54,8 @@ const CipSearch = () => {
   const router = useRouter()
   const suggestionsRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  const { setSearchData } = useCip()
 
   // Clear errors when user starts typing
   useEffect(() => {
@@ -212,8 +215,10 @@ const CipSearch = () => {
         date: gregorianDate
       }
 
+      setSearchData(searchPayload)
+
       console.log("CIP Search Payload:", searchPayload)
-      router.push(`/cip?airport=${searchPayload.airportId}&date=${searchPayload.date}&passengers=${searchPayload.passengers}`)
+      router.push(`/cip`)
       
     } catch (error) {
       console.error("Error searching CIP services:", error)

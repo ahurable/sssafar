@@ -833,6 +833,7 @@ model CipService {
   deferent     Boolean       @default(false)
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+  faqs         FAQ[]
   reservations Reservation[]
 
   @@map("cip_services")
@@ -848,6 +849,8 @@ model Reservation {
   notes       String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  search      Json?
+  travelers   Json?
 
   service    CipService?  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
   cityTour   CityTour?    @relation(fields: [cityTourId], references: [id])
@@ -910,6 +913,8 @@ model FAQ {
 
   visaId String?
   visa   VisaService? @relation(fields: [visaId], references: [id], onDelete: Cascade)
+  cipId  String?
+  cip    CipService?  @relation(fields: [cipId], references: [id], onDelete: Cascade)
 
   @@map("faqs")
 }

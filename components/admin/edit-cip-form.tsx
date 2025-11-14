@@ -8,15 +8,34 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { Plus, Trash2, Save, Upload, X, Image as ImageIcon, Eye, Star, FormInput, FileOutput, FormInputIcon } from "lucide-react"
+import { Plus, Trash2, Save, Upload, X, Image as ImageIcon, Eye, Star, FormInput, FileOutput, HelpCircle } from "lucide-react"
 import { toast } from "sonner"
+import { string } from "zod"
+
+interface Airport {
+  id: string
+  name: string
+  code: string
+  city: string
+}
+
+interface FAQItem {
+  id?: string
+  question: string
+  answer: string
+  order: number
+  isActive: boolean
+  type: string
+}
 
 interface CipService {
   id: string
   title: string
+  slug: string
   description: string | null
   image: string | null
-  airport: string
+  airportId: string | null
+  airport: Airport | null
   price: number | null
   currency: string
   duration: string | null
@@ -26,13 +45,21 @@ interface CipService {
   priority: number
   published: boolean
   featured: boolean
-  reservations: any[]
   entry: boolean
   deferent: boolean
+  reservations: any[]
+  faqs: FAQItem[]
 }
 
 interface EditCipFormProps {
   service: CipService
+}
+
+interface AirportSuggestion {
+  id: string
+  name: string
+  airportIata: string
+  airportCity: string
 }
 
 export function EditCipForm({ service }: EditCipFormProps) {
@@ -41,12 +68,22 @@ export function EditCipForm({ service }: EditCipFormProps) {
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [airportSuggestions, setAirportSuggestions] = useState<AirportSuggestion[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [airportSearch, setAirportSearch] = useState("")
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     image: "",
-    airport: "",
+    airportId: "",
+    airport: {
+      id: "",
+      name:"",
+      code: "",
+      city: ""
+    },
     price: "",
+    currency: "IRR",
     duration: "",
     features: [""],
     included: [""],
@@ -57,6 +94,7 @@ export function EditCipForm({ service }: EditCipFormProps) {
     entry: false,
     deferent: false
   })
+  const [faqs, setFaqs] = useState<FAQItem[]>([])
 
   // Initialize form with service data
   useEffect(() => {
@@ -64,8 +102,15 @@ export function EditCipForm({ service }: EditCipFormProps) {
       title: service.title,
       description: service.description || "",
       image: service.image || "",
-      airport: service.airport,
+      airportId: service.airportId || "",
+      airport: service.airport || {
+        id: "",
+        name:"",
+        code: "",
+        city: ""
+      },
       price: service.price?.toString() || "",
+      currency: service.currency,
       duration: service.duration || "",
       features: service.features.length > 0 ? service.features : [""],
       included: service.included.length > 0 ? service.included : [""],
@@ -80,7 +125,95 @@ export function EditCipForm({ service }: EditCipFormProps) {
     if (service.image) {
       setImagePreview(service.image)
     }
+
+    // Initialize FAQs
+    if (service.faqs && service.faqs.length > 0) {
+      setFaqs(service.faqs)
+    } else {
+      setFaqs([{ question: "", answer: "", order: 0, isActive: true, type: "CIP" }])
+    }
+
+    // Initialize airport search
+    if (service.airport) {
+      setAirportSearch(`${service.airport.name} (${service.airport.code}) - ${service.airport.city}`)
+    }
   }, [service])
+
+  // Airport search functions
+  const fetchAirportSuggestions = async (q: string) => {
+    if (q.length < 2) {
+      setAirportSuggestions([])
+      setShowSuggestions(false)
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/admin/settings/airports?q=${q}`)
+      if (response.ok) {
+        const data = await response.json()
+        setAirportSuggestions(data)
+        setShowSuggestions(data.length > 0)
+      }
+    } catch (error) {
+      console.error("Error fetching airport suggestions:", error)
+      setAirportSuggestions([])
+      setShowSuggestions(false)
+    }
+  }
+
+  const handleAirportSearchChange = (value: string) => {
+    setAirportSearch(value)
+    if (!value) {
+      setFormData(prev => ({ ...prev, airportId: "" }))
+      setShowSuggestions(false)
+    } else {
+      fetchAirportSuggestions(value)
+    }
+  }
+
+  const handleAirportSelect = (airport: AirportSuggestion) => {
+    setFormData(prev => ({ ...prev, airportId: airport.id }))
+    setAirportSearch(`${airport.name} (${airport.airportIata}) - ${airport.airportCity}`)
+    setShowSuggestions(false)
+    setAirportSuggestions([])
+  }
+
+  const handleClickOutside = (event: MouseEvent) => {
+    const target = event.target as HTMLElement
+    if (!target.closest('.airport-suggestions-container')) {
+      setShowSuggestions(false)
+    }
+  }
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
+
+  const renderAirportSuggestions = () => {
+    if (!showSuggestions || airportSuggestions.length === 0) {
+      return null
+    }
+
+    return (
+      <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto airport-suggestions-container">
+        {airportSuggestions.map((airport) => (
+          <div
+            key={airport.id}
+            className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
+            onClick={() => handleAirportSelect(airport)}
+          >
+            <div className="font-medium text-gray-900">{airport.name}</div>
+            <div className="text-sm text-gray-600">
+              {airport.airportIata} - {airport.airportCity}
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
 
   const handleImageUpload = async (file: File) => {
     setUploading(true)
@@ -89,7 +222,7 @@ export function EditCipForm({ service }: EditCipFormProps) {
       const formData = new FormData()
       formData.append("file", file)
 
-      const response = await fetch("/api/upload", {
+      const response = await fetch("/api/cip/upload/image", {
         method: "POST",
         body: formData,
       })
@@ -131,6 +264,26 @@ export function EditCipForm({ service }: EditCipFormProps) {
     }
   }
 
+  // FAQ Functions
+  const addFaq = () => {
+    setFaqs(prev => [
+      ...prev,
+      { question: "", answer: "", order: prev.length, isActive: true, type: "CIP" }
+    ])
+  }
+
+  const removeFaq = (index: number) => {
+    if (faqs.length > 1) {
+      setFaqs(prev => prev.filter((_, i) => i !== index))
+    }
+  }
+
+  const updateFaq = (index: number, field: keyof FAQItem, value: string | boolean | number) => {
+    setFaqs(prev => prev.map((faq, i) => 
+      i === index ? { ...faq, [field]: value } : faq
+    ))
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -145,8 +298,9 @@ export function EditCipForm({ service }: EditCipFormProps) {
           title: formData.title,
           description: formData.description || undefined,
           image: formData.image || undefined,
-          airport: formData.airport,
+          airportId: formData.airportId || undefined,
           price: formData.price ? parseFloat(formData.price) : undefined,
+          currency: formData.currency,
           duration: formData.duration || undefined,
           features: formData.features.filter(f => f.trim()),
           included: formData.included.filter(f => f.trim()),
@@ -154,6 +308,9 @@ export function EditCipForm({ service }: EditCipFormProps) {
           priority: parseInt(formData.priority),
           published: formData.published,
           featured: formData.featured,
+          entry: formData.entry,
+          deferent: formData.deferent,
+          faqs: faqs.filter(faq => faq.question.trim() && faq.answer.trim())
         }),
       })
 
@@ -196,7 +353,7 @@ export function EditCipForm({ service }: EditCipFormProps) {
   }
 
   const previewService = () => {
-    window.open(`/cip/${service.id}`, '_blank')
+    window.open(`/cip/${service.slug}`, '_blank')
   }
 
   return (
@@ -217,7 +374,7 @@ export function EditCipForm({ service }: EditCipFormProps) {
                 پیش‌نمایش
               </Button>
               <Button asChild>
-                <a href={`/cip/${service.id}`} target="_blank">
+                <a href={`/cip/${service.slug}`} target="_blank">
                   مشاهده در سایت
                 </a>
               </Button>
@@ -241,16 +398,44 @@ export function EditCipForm({ service }: EditCipFormProps) {
                   value={formData.title}
                   onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                   required
+                  placeholder="مثلا: سرویس CIP تجاری"
+                />
+              </div>
+
+              <div className="space-y-2 relative">
+                <Label htmlFor="airport">فرودگاه</Label>
+                <Input
+                  id="airport"
+                  value={airportSearch.length > 0 ? airportSearch : formData.airport.name}
+                  onChange={(e) => handleAirportSearchChange(e.target.value)}
+                  placeholder="مثلا: امام خمینی (تهران)"
+                />
+                {renderAirportSuggestions()}
+                {formData.airportId && (
+                  <input type="hidden" name="airportId" value={formData.airportId} />
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="price">قیمت (ریال)</Label>
+                <Input
+                  id="price"
+                  type="number"
+                  value={formData.price}
+                  onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+                  placeholder="20000000"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="airport">فرودگاه *</Label>
+                <Label htmlFor="duration">مدت زمان</Label>
                 <Input
-                  id="airport"
-                  value={formData.airport}
-                  onChange={(e) => setFormData(prev => ({ ...prev, airport: e.target.value }))}
-                  required
+                  id="duration"
+                  value={formData.duration}
+                  onChange={(e) => setFormData(prev => ({ ...prev, duration: e.target.value }))}
+                  placeholder="2 ساعت"
                 />
               </div>
             </div>
@@ -262,6 +447,7 @@ export function EditCipForm({ service }: EditCipFormProps) {
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                 rows={3}
+                placeholder="توضیح مختصر درباره خدمت..."
               />
             </div>
 
@@ -354,6 +540,207 @@ export function EditCipForm({ service }: EditCipFormProps) {
           </CardContent>
         </Card>
 
+        {/* Features Sections */}
+        <Card className="py-6">
+          <CardHeader>
+            <CardTitle>ویژگی‌ها و خدمات</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Features */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label>ویژگی‌های اصلی</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => addFeature("features")}
+                >
+                  <Plus className="h-4 w-4 ml-1" />
+                  افزودن ویژگی
+                </Button>
+              </div>
+              {formData.features.map((feature, index) => (
+                <div key={index} className="flex gap-2">
+                  <Input
+                    value={feature}
+                    onChange={(e) => updateFeature("features", index, e.target.value)}
+                    placeholder="ویژگی خدمت"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => removeFeature("features", index)}
+                    disabled={formData.features.length === 1}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+
+            {/* Included Services */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label>خدمات شامل شده</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => addFeature("included")}
+                >
+                  <Plus className="h-4 w-4 ml-1" />
+                  افزودن خدمت
+                </Button>
+              </div>
+              {formData.included.map((item, index) => (
+                <div key={index} className="flex gap-2">
+                  <Input
+                    value={item}
+                    onChange={(e) => updateFeature("included", index, e.target.value)}
+                    placeholder="خدمت شامل شده"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => removeFeature("included", index)}
+                    disabled={formData.included.length === 1}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+
+            {/* Not Included Services */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label>خدمات شامل نشده</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => addFeature("notIncluded")}
+                >
+                  <Plus className="h-4 w-4 ml-1" />
+                  افزودن خدمت
+                </Button>
+              </div>
+              {formData.notIncluded.map((item, index) => (
+                <div key={index} className="flex gap-2">
+                  <Input
+                    value={item}
+                    onChange={(e) => updateFeature("notIncluded", index, e.target.value)}
+                    placeholder="خدمت شامل نشده"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => removeFeature("notIncluded", index)}
+                    disabled={formData.notIncluded.length === 1}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* سوالات متداول (FAQ) */}
+        <Card className="py-6">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <HelpCircle className="h-5 w-5 text-blue-600" />
+                سوالات متداول (FAQ)
+              </CardTitle>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm" 
+                onClick={addFaq}
+              >
+                <Plus className="h-4 w-4 ml-1" />
+                افزودن سوال
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {faqs.map((faq, index) => (
+                <Card key={index} className="border border-gray-200">
+                  <CardContent className="p-4 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium text-gray-900">
+                        سوال #{index + 1}
+                      </h4>
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor={`faq-active-${index}`} className="text-sm text-gray-600">
+                            فعال
+                          </Label>
+                          <Switch
+                            id={`faq-active-${index}`}
+                            checked={faq.isActive}
+                            onCheckedChange={(checked) => updateFaq(index, 'isActive', checked)}
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removeFaq(index)}
+                          disabled={faqs.length === 1}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="space-y-2">
+                        <Label htmlFor={`faq-question-${index}`}>سوال</Label>
+                        <Input
+                          id={`faq-question-${index}`}
+                          value={faq.question}
+                          onChange={(e) => updateFaq(index, 'question', e.target.value)}
+                          placeholder="مثلا: چگونه می‌توانم خدمت CIP را رزرو کنم؟"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor={`faq-answer-${index}`}>پاسخ</Label>
+                        <Textarea
+                          id={`faq-answer-${index}`}
+                          value={faq.answer}
+                          onChange={(e) => updateFaq(index, 'answer', e.target.value)}
+                          rows={3}
+                          placeholder="پاسخ کامل به سوال..."
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor={`faq-order-${index}`}>ترتیب نمایش</Label>
+                        <Input
+                          id={`faq-order-${index}`}
+                          type="number"
+                          value={faq.order}
+                          onChange={(e) => updateFaq(index, 'order', parseInt(e.target.value) || 0)}
+                          min="0"
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
         {/* تنظیمات نمایش */}
         <Card className="py-6">
           <CardHeader>
@@ -407,8 +794,8 @@ export function EditCipForm({ service }: EditCipFormProps) {
 
               <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                 <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-full ${formData.entry ? 'bg-purple-100' : 'bg-gray-100'}`}>
-                    <FormInputIcon className={`h-5 w-5 ${formData.entry ? 'text-purple-600' : 'text-gray-400'}`} />
+                  <div className={`p-2 rounded-full ${formData.entry ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                    <FormInput className={`h-5 w-5 ${formData.entry ? 'text-blue-600' : 'text-gray-400'}`} />
                   </div>
                   <div>
                     <Label htmlFor="entry" className="text-base font-medium cursor-pointer">
@@ -428,8 +815,8 @@ export function EditCipForm({ service }: EditCipFormProps) {
 
               <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                 <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-full ${formData.deferent ? 'bg-purple-100' : 'bg-gray-100'}`}>
-                    <FileOutput className={`h-5 w-5 ${formData.deferent ? 'text-purple-600' : 'text-gray-400'}`} />
+                  <div className={`p-2 rounded-full ${formData.deferent ? 'bg-orange-100' : 'bg-gray-100'}`}>
+                    <FileOutput className={`h-5 w-5 ${formData.deferent ? 'text-orange-600' : 'text-gray-400'}`} />
                   </div>
                   <div>
                     <Label htmlFor="deferent" className="text-base font-medium cursor-pointer">
@@ -446,7 +833,6 @@ export function EditCipForm({ service }: EditCipFormProps) {
                   onCheckedChange={(checked) => setFormData(prev => ({ ...prev, deferent: checked }))}
                 />
               </div>
-
             </div>
 
             {/* Priority Setting */}
@@ -471,9 +857,6 @@ export function EditCipForm({ service }: EditCipFormProps) {
             </div>
           </CardContent>
         </Card>
-
-        {/* بقیه بخش‌های فرم */}
-        {/* ... سایر بخش‌های فرم مانند قبل ... */}
 
         {/* دکمه‌های اقدام */}
         <div className="flex gap-4 justify-end pt-6 border-t">

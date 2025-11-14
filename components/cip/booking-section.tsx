@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -16,6 +16,7 @@ import {
   Phone
 } from "lucide-react"
 import { toast } from "sonner"
+import { useCip } from "@/contexts/search/CipContext"
 
 interface BookingSectionProps {
   service: {
@@ -25,6 +26,7 @@ interface BookingSectionProps {
     price: number | null
     currency: string
     duration: string | null
+    search?: {}
   }
 }
 
@@ -34,8 +36,19 @@ export function BookingSection({ service }: BookingSectionProps) {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
-    phoneNumber: ""
+    phoneNumber: "",
+    search: {}
   })
+  const { searchData } = useCip()
+
+  useEffect(() => {
+    if (searchData) {
+      setFormData((prev:any) => ({
+        ...prev,
+        search: searchData
+      }))
+    }
+  },[searchData])
 
   const formatPrice = (price: number | null, currency: string) => {
     if (!price) return "رایگان"
@@ -76,7 +89,9 @@ export function BookingSection({ service }: BookingSectionProps) {
           },
           body: JSON.stringify({
             serviceId: service.id,
-            ...formData
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            search: JSON.stringify(formData.search)
           })
         }
       )
@@ -93,7 +108,8 @@ export function BookingSection({ service }: BookingSectionProps) {
         setFormData({
           firstName: "",
           lastName: "",
-          phoneNumber: ""
+          phoneNumber: "",
+          search:{}
         })
         setShowReservationForm(false)
       

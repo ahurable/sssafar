@@ -7,7 +7,6 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { 
   Star, 
   MapPin, 
@@ -30,20 +29,28 @@ import {
   User,
   ChevronLeft,
   Heart,
-  Share2
+  Share2,
+  Building,
+  CreditCard as CardIcon,
+  Info,
+  AlertTriangle,
+  CheckCircle,
+  XCircle,
+  X,
+  ChevronRight,
+  ChevronLeft as ChevronLeftIcon
 } from "lucide-react"
 import { useHotel } from "@/contexts/search/HotelContext"
 import { useSnack } from "@/hooks/use-notification"
 import { useRouter } from "next/navigation"
-import { HotelImage } from "@prisma/client"
 
 // Types for hotel with fare data
 interface HotelWithFare {
-  HotelId: number
   FareSourceCode: string
   Offer?: string
   Promotion?: string
   NonRefundable: boolean
+  HotelId: number
   HotelPolicy: {
     BeginTime: string
     EndTime: string
@@ -51,15 +58,31 @@ interface HotelWithFare {
     CheckOutTime: string
     Instructions: string
     SpecialInstructions: string
+    MandatoryFee: string
+    OptionalFee: string
+    KnowBeforeYouGo: string
+    PaymentDetail: string
+    LicenseNumber: string
+    KeyCollectionInfo: string
     InstructionsFa: string
     SpecialInstructionsFa: string
     ChildPolicyDescriptionFa: string
+    SingleWomanDescriptionFa: string
+    PetAttribiute: Array<{ name: string }>
   }
+  ExtraCharge: {
+    Excluded: string
+    Included: string
+    MealplanDescription: string
+  }
+  PaymentDeadline: string
   Currency: string
   AvailableRoom: number
-  PlainTextCancellationPolicy?: string
+  PlainTextCancellationPolicy: string
   NetRate: number
   NetRateWithoutDiscount: number
+  ExtraBedRate: number
+  BaseRate: number
   Rooms: Array<{
     RoomId: string
     RoomMapId: string
@@ -81,8 +104,59 @@ interface HotelWithFare {
       CheckOutAmount: number
     }
   }>
+  Surcharges: Array<{
+    Name: string
+    ChargeType: string
+    SupplierAmount: number
+    Amount: number
+    ExclusionType: number
+  }>
+  CancellationPolicies: Array<{
+    Amount: number
+    FromDate: string
+  }>
+  Remarks: string[]
+  RemarksFa: string[]
   Amenities: string[]
   IsReserveOffline: boolean
+  IsBlockout: boolean
+  IsMinStayNight: boolean
+  MinStayNight: number
+  IsMaxStayNight: boolean
+  MaxStayNight: number
+  IsFixStayNight: boolean
+  FixStayNight: number
+  IsBoardPrice: boolean
+  HotelRefundType: string
+  NationalityRule: {
+    IsAll: boolean
+    NationalityCodes: string[]
+    CurrencyCode: number
+  }
+  OtherNationalities: any[]
+  PricedItineraryTransfers: Array<{
+    TransferType: number
+    ServiceType: number
+  }>
+  HotelPricedItineraryMetaDatas: Array<{
+    Offer: string
+    Promotion: string
+    Amenities: string[]
+    NetRate: number
+    SupplierNetRate: number
+    HotelPricedItineraryMetaDataRooms: Array<{
+      ProviderRoomId: string
+      RoomName: string
+      MealType: string
+    }>
+  }>
+  IsFixStay: boolean
+  HotelPricedItineraryFixStayList: Array<{
+    Id: number
+    From: string
+    To: string
+    Amount: number
+  }>
   HotelLabels: string[]
 }
 
@@ -112,27 +186,18 @@ const amenityIcons: Record<string, any> = {
   "Room Service": Coffee,
 }
 
-// Room type images mapping
-const roomTypeImages: Record<string, string> = {
-  "standard": "/rooms/standard-room.jpg",
-  "deluxe": "/rooms/deluxe-room.jpg", 
-  "suite": "/rooms/suite-room.jpg",
-  "executive": "/rooms/executive-room.jpg",
-  "family": "/rooms/family-room.jpg",
-  "presidential": "/rooms/presidential-suite.jpg",
-  "default": "/rooms/hotel-room.jpg"
-}
-
 export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOut }: HotelDetailsProps) {
   const [hotelData, setHotelData] = useState<HotelWithFare | null>(null)
-  const [hotelItinenaries, setHotelItinenaries] = useState<any[]>([])
+  const [hotelItinenaries, setHotelItinenaries] = useState<HotelWithFare[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedImage, setSelectedImage] = useState(0)
-  const [selectedRoomImage, setSelectedRoomImage] = useState<{[key: string]: number}>({})
   const [hotelImages, setHotelImages] = useState<any[]>([])
   const [hotelName, setHotelName] = useState("")
   const [favorites, setFavorites] = useState<Set<number>>(new Set())
-  const [roomImages, setRoomImages] = useState<{[key: number]: any[]}>({})
+  const [roomImages, setRoomImages] = useState<{[key: string]: any[]}>({}) // key: roomMapId
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false)
+  const [modalImageIndex, setModalImageIndex] = useState(0)
+  const [selectedRoom, setSelectedRoom] = useState<string | null>(null)
   const { getHotelImages, getHotelName } = useHotel()
   const { error, success } = useSnack()
   const router = useRouter()
@@ -152,9 +217,6 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
     if (hotelId === 0) return []
 
     try {
-      console.log(currentCheckIn)
-      console.log(currentCheckOut)
-      console.log(hotelId)
       const res = await fetch("/api/hotels/search/list", {
         method: "PUT",
         headers: {
@@ -164,15 +226,14 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
           checkIn: currentCheckIn,
           checkOut: currentCheckOut,
           hotelId: currentHotelId,
-          occupancies: [{ AdultCount: 2, ChildCount: 0, ChildAges: [] }], // Default occupancy
-          cityId: 1 // Default city ID
+          occupancies: [{ AdultCount: 2, ChildCount: 0, ChildAges: [] }],
+          cityId: 1
         })
       })
       
       const data = await res.json()
       
       if (res.ok && Array.isArray(data)) {
-        console.log("Hotels with fare data received:", data)
         setHotelItinenaries(data)
         return data
       }
@@ -184,30 +245,36 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
     }
   }
 
-  // Function to get room images
-  const getRoomImages = async (hotelId: number) => {
+  // Function to get room images using RoomMapId
+  const getRoomImagesByMapId = async (roomMapId: string) => {
     try {
-      const images = await getHotelImages(hotelId)
-      console.log('room images for hotel', hotelId, 'are: ', images)
-      return images
+      if (!roomMapId) return []
+      const images = await getHotelImages(parseInt(currentHotelId), roomMapId)
+      return images || []
     } catch (err) {
-      console.error('Error fetching room images:', err)
+      console.error('Error fetching room images for roomMapId:', roomMapId, err)
       return []
     }
   }
 
-  // Load room images for all itineraries
+  // Load room images for all unique roomMapIds
   useEffect(() => {
     const loadRoomImages = async () => {
       if (hotelItinenaries && hotelItinenaries.length > 0) {
-        const imagesMap: {[key: number]: any[]} = {}
+        const imagesMap: {[key: string]: any[]} = {}
         
-        // Load images for each unique hotel
-        const uniqueHotelIds = [...new Set(hotelItinenaries.map(it => it.HotelId))]
+        // Get all unique roomMapIds from all itineraries
+        const allRoomMapIds = hotelItinenaries.flatMap(it => 
+          it.Rooms?.map(room => room.RoomMapId).filter(Boolean) || []
+        )
+        const uniqueRoomMapIds = [...new Set(allRoomMapIds)]
         
-        for (const hotelId of uniqueHotelIds) {
-          const images = await getRoomImages(hotelId)
-          imagesMap[hotelId] = images
+        // Load images for each unique roomMapId
+        for (const roomMapId of uniqueRoomMapIds) {
+          if (roomMapId) {
+            const images = await getRoomImagesByMapId(roomMapId)
+            imagesMap[roomMapId] = images
+          }
         }
         
         setRoomImages(imagesMap)
@@ -228,23 +295,18 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
         }
 
         const hotelIdNum = parseInt(currentHotelId)
-        
-        // Fetch hotel with fare data
         const hotelsWithFare = await hotelWithFare(hotelIdNum)
         
         if (hotelsWithFare.length > 0) {
           const hotel = hotelsWithFare[0]
           setHotelData(hotel)
           
-          // Fetch hotel name and images
           const [name, imagesData] = await Promise.all([
             getHotelName(hotel.HotelId),
             getHotelImages(hotel.HotelId)
           ])
           
           setHotelName(name)
-          
-          // Extract image URLs
           const images = imagesData.slice(0, 10)
           setHotelImages(images.length > 0 ? images : ['/hotels/hotel-1.jpg'])
           
@@ -287,24 +349,12 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
     return mealTypes[mealType] || mealType
   }
 
-  const getRandomRoomImage = (hotelId: number) => {
-    const images = roomImages[hotelId] || []
-    if (images.length === 0) {
-      return '/rooms/hotel-room.jpg' // Fallback image
+  const getRoomImage = (roomMapId: string) => {
+    const images = roomImages[roomMapId] || []
+    if (images.length > 0) {
+      return images[0]?.imageUrl || '/rooms/hotel-room.jpg'
     }
-    const randomIndex = Math.floor(Math.random() * images.length)
-    return images[randomIndex]?.imageUrl || '/rooms/hotel-room.jpg'
-  }
-
-  const handleRoomImageChange = (roomId: string, direction: 'next' | 'prev') => {
-    setSelectedRoomImage(prev => {
-      const currentIndex = prev[roomId] || 0
-      const newIndex = direction === 'next' ? currentIndex + 1 : currentIndex - 1
-      return {
-        ...prev,
-        [roomId]: newIndex
-      }
-    })
+    return '/rooms/hotel-room.jpg'
   }
 
   const toggleFavorite = (hotelId: number) => {
@@ -321,26 +371,60 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
     })
   }
 
-  const handleReservation = (fareSourceCode:string) => {
+  const handleRoomSelection = (roomMapId: string) => {
+    setSelectedRoom(roomMapId === selectedRoom ? null : roomMapId)
+  }
+
+  const handleReservation = () => {
+    if (!selectedRoom) {
+      error("لطفاً یک اتاق انتخاب کنید")
+      return
+    }
+    
     if (!hotelData) return
     
-    router.push(`/hotels/reservation/${fareSourceCode}?checkIn=${currentCheckIn}&checkOut=${currentCheckOut}`)
+    // Find the selected room details
+    const selectedRoomData = allRooms.find(room => room.RoomMapId === selectedRoom)
+    if (!selectedRoomData) {
+      error("اتاق انتخاب شده یافت نشد")
+      return
+    }
+
+    // Navigate to booking page with room information
+    router.push(`/hotels/reservation/${hotelData.FareSourceCode}?checkIn=${currentCheckIn}&checkOut=${currentCheckOut}&roomMapId=${selectedRoom}&roomName=${encodeURIComponent(selectedRoomData.Name || selectedRoomData.RoomMapName)}`)
+  }
+
+  const openImageModal = (index: number) => {
+    setModalImageIndex(index)
+    setIsImageModalOpen(true)
+  }
+
+  const closeImageModal = () => {
+    setIsImageModalOpen(false)
+  }
+
+  const nextImage = () => {
+    setModalImageIndex((prev) => (prev + 1) % hotelImages.length)
+  }
+
+  const prevImage = () => {
+    setModalImageIndex((prev) => (prev - 1 + hotelImages.length) % hotelImages.length)
   }
 
   if (loading) {
     return (
       <div className="container mx-auto p-4">
         <div className="animate-pulse space-y-6">
-          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-          <div className="h-96 bg-gray-200 rounded"></div>
+          <div className="h-8 bg-blue-200 w-1/3"></div>
+          <div className="h-96 bg-blue-200"></div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-4">
-              <div className="h-6 bg-gray-200 rounded"></div>
-              <div className="h-6 bg-gray-200 rounded"></div>
+              <div className="h-6 bg-blue-200"></div>
+              <div className="h-6 bg-blue-200"></div>
             </div>
             <div className="space-y-4">
-              <div className="h-32 bg-gray-200 rounded"></div>
-              <div className="h-32 bg-gray-200 rounded"></div>
+              <div className="h-32 bg-blue-200"></div>
+              <div className="h-32 bg-blue-200"></div>
             </div>
           </div>
         </div>
@@ -351,7 +435,7 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
   if (!hotelData) {
     return (
       <div className="container mx-auto p-4 text-center">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-8">
+        <div className="bg-red-50 border border-red-200 p-8">
           <h2 className="text-2xl font-bold text-red-800 mb-4">خطا در دریافت اطلاعات</h2>
           <p className="text-red-600">هتل مورد نظر یافت نشد</p>
           <Button className="mt-4" onClick={() => router.back()}>
@@ -367,18 +451,21 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
     ? Math.round(((hotelData.NetRateWithoutDiscount - hotelData.NetRate) / hotelData.NetRateWithoutDiscount) * 100)
     : 0
 
+  // Get all unique rooms from all itineraries
+  const allRooms = hotelItinenaries.flatMap(it => it.Rooms || [])
+
   return (
     <div className="container mx-auto p-4 space-y-6">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 text-white">
+      <div className="bg-blue-900 p-4 text-white">
         <div className="flex justify-between items-start">
           <div className="flex-1">
             <div className="flex items-start justify-between">
               <div>
-                <h1 className="text-3xl font-bold mb-2">{hotelName}</h1>
+                <h1 className="text-2xl font-bold mb-2">{hotelName}</h1>
                 <div className="flex items-center gap-4 text-sm">
                   <div className="flex items-center gap-1">
-                    <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                     <span>5.0</span>
                   </div>
                   <div className="flex items-center gap-1">
@@ -386,7 +473,7 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
                     <span>موقعیت مکانی</span>
                   </div>
                   {hotelData.HotelLabels.map((label, index) => (
-                    <Badge key={index} variant="secondary" className="bg-white/20">
+                    <Badge key={index} className="bg-white/20 border-0">
                       {label}
                     </Badge>
                   ))}
@@ -396,23 +483,16 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
                 <Button
                   variant="secondary"
                   size="icon"
-                  className="h-10 w-10 rounded-full bg-white/20 hover:bg-white/30"
+                  className="h-8 w-8 bg-white/20 hover:bg-white/30 border-0"
                   onClick={() => toggleFavorite(hotelData.HotelId)}
                 >
                   <Heart 
-                    className={`h-5 w-5 ${
+                    className={`h-4 w-4 ${
                       favorites.has(hotelData.HotelId) 
                         ? "fill-red-500 text-red-500" 
                         : "text-white"
                     }`} 
                   />
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  className="h-10 w-10 rounded-full bg-white/20 hover:bg-white/30"
-                >
-                  <Share2 className="h-5 w-5 text-white" />
                 </Button>
               </div>
             </div>
@@ -420,330 +500,529 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
         </div>
       </div>
 
-      {/* Images Gallery */}
+      {/* Images Gallery - New Layout */}
       <Card>
         <CardContent className="p-0">
-          <div className="relative h-96">
-            <Image
-              src={hotelImages[selectedImage]?.imageUrl || '/hotels/hotel-1.jpg'}
-              alt={hotelName}
-              fill
-              className="object-cover rounded-t-lg"
-            />
-            {hotelImages.length > 1 && (
-              <div className="absolute bottom-4 left-4 right-4 flex gap-2 overflow-x-auto">
-                {hotelImages.map((img, index) => (
+          <div className="flex flex-col lg:flex-row h-96">
+            {/* Left Side - 4 Small Images */}
+            <div className="lg:w-1/4 flex lg:flex-col gap-2 p-2 overflow-x-auto lg:overflow-y-auto">
+              {hotelImages.slice(0, 4).map((img, index) => (
+                <button
+                  key={index}
+                  onClick={() => setSelectedImage(index)}
+                  className={`relative h-20 lg:h-1/4 w-20 lg:w-full flex-shrink-0 ${
+                    selectedImage === index ? 'ring-2 ring-blue-500' : ''
+                  }`}
+                >
+                  <Image
+                    src={img.imageUrl}
+                    alt={`${hotelName} ${index + 1}`}
+                    fill
+                    className="object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+            
+            {/* Right Side - Big Image */}
+            <div className="lg:w-3/4 relative flex-1">
+              <button 
+                onClick={() => openImageModal(selectedImage)}
+                className="w-full h-full"
+              >
+                <Image
+                  src={hotelImages[selectedImage]?.imageUrl || '/hotels/hotel-1.jpg'}
+                  alt={hotelName}
+                  fill
+                  className="object-cover hover:opacity-90 transition-opacity"
+                />
+              </button>
+              
+              {/* Navigation Arrows */}
+              {hotelImages.length > 1 && (
+                <>
                   <button
-                    key={index}
-                    onClick={() => setSelectedImage(index)}
-                    className={`relative h-16 w-24 flex-shrink-0 ${
-                      selectedImage === index ? 'ring-2 ring-blue-500' : ''
-                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setSelectedImage((prev) => (prev - 1 + hotelImages.length) % hotelImages.length)
+                    }}
+                    className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 hover:bg-black/70"
                   >
-                    <Image
-                      src={img.imageUrl}
-                      alt={`${hotelName} ${index + 1}`}
-                      fill
-                      className="object-cover rounded"
-                    />
+                    <ChevronLeftIcon className="h-4 w-4" />
                   </button>
-                ))}
-              </div>
-            )}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setSelectedImage((prev) => (prev + 1) % hotelImages.length)
+                    }}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 hover:bg-black/70"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Main Content */}
+      {/* Image Modal */}
+      {isImageModalOpen && (
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center">
+          <button
+            onClick={closeImageModal}
+            className="absolute top-4 right-4 text-white p-2 hover:bg-white/20"
+          >
+            <X className="h-6 w-6" />
+          </button>
+          
+          <button
+            onClick={prevImage}
+            className="absolute left-4 text-white p-2 hover:bg-white/20"
+          >
+            <ChevronLeftIcon className="h-6 w-6" />
+          </button>
+          
+          <button
+            onClick={nextImage}
+            className="absolute right-4 text-white p-2 hover:bg-white/20"
+          >
+            <ChevronRight className="h-6 w-6" />
+          </button>
+          
+          <div className="relative w-full h-full max-w-4xl max-h-4xl">
+            <Image
+              src={hotelImages[modalImageIndex]?.imageUrl || '/hotels/hotel-1.jpg'}
+              alt={`${hotelName} ${modalImageIndex + 1}`}
+              fill
+              className="object-contain"
+            />
+          </div>
+          
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white">
+            {modalImageIndex + 1} / {hotelImages.length}
+          </div>
+        </div>
+      )}
+
+      {/* Main Content - All in one page */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column - Details */}
+        {/* Left Column - All Details */}
         <div className="lg:col-span-2 space-y-6">
-          <Tabs defaultValue="rooms" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="overview">مشخصات</TabsTrigger>
-              <TabsTrigger value="rooms">اتاق‌ها</TabsTrigger>
-              <TabsTrigger value="policies">قوانین</TabsTrigger>
-              <TabsTrigger value="amenities">امکانات</TabsTrigger>
-            </TabsList>
-
-            {/* Overview Tab */}
-            <TabsContent value="overview" className="space-y-4">
-              <Card>
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-bold mb-4">اطلاعات اقامت</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex items-center gap-3">
-                      <Calendar className="h-5 w-5 text-blue-600" />
-                      <div>
-                        <div className="text-sm text-muted-foreground">تاریخ ورود</div>
-                        <div className="font-medium">{formatDate(currentCheckIn)}</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Calendar className="h-5 w-5 text-blue-600" />
-                      <div>
-                        <div className="text-sm text-muted-foreground">تاریخ خروج</div>
-                        <div className="font-medium">{formatDate(currentCheckOut)}</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Clock className="h-5 w-5 text-blue-600" />
-                      <div>
-                        <div className="text-sm text-muted-foreground">ساعت تحویل اتاق</div>
-                        <div className="font-medium">{hotelData.HotelPolicy.BeginTime}</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Clock className="h-5 w-5 text-blue-600" />
-                      <div>
-                        <div className="text-sm text-muted-foreground">ساعت تخلیه اتاق</div>
-                        <div className="font-medium">{hotelData.HotelPolicy.CheckOutTime}</div>
-                      </div>
-                    </div>
+          {/* Basic Information */}
+          <Card>
+            <CardContent className="p-4">
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <Building className="h-5 w-5 text-blue-600" />
+                اطلاعات اصلی هتل
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">تاریخ ورود:</span>
+                    <span className="font-medium">{formatDate(currentCheckIn)}</span>
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">تاریخ خروج:</span>
+                    <span className="font-medium">{formatDate(currentCheckOut)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">ساعت تحویل اتاق:</span>
+                    <span className="font-medium">{hotelData.HotelPolicy.BeginTime}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">ساعت تخلیه اتاق:</span>
+                    <span className="font-medium">{hotelData.HotelPolicy.CheckOutTime}</span>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">حداقل سن:</span>
+                    <span className="font-medium">{hotelData.HotelPolicy.MinAge || "تعیین نشده"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">اتاق‌های موجود:</span>
+                    <span className="font-medium text-green-600">{hotelData.AvailableRoom}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">وضعیت استرداد:</span>
+                    <span className={`font-medium ${hotelData.NonRefundable ? 'text-red-600' : 'text-green-600'}`}>
+                      {hotelData.NonRefundable ? "غیرقابل استرداد" : "قابل استرداد"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">رزرو آفلاین:</span>
+                    <span className="font-medium">{hotelData.IsReserveOffline ? "بله" : "خیر"}</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-              {/* Special Offers */}
-              {(hotelData.Offer || hotelData.Promotion) && (
-                <Card>
-                  <CardContent className="p-6">
-                    <h3 className="text-xl font-bold mb-4">پیشنهادات ویژه</h3>
-                    <div className="space-y-2">
-                      {hotelData.Offer && (
-                        <div className="flex items-center gap-2 text-green-600">
-                          <Badge variant="outline" className="bg-green-50">ویژه</Badge>
-                          <span>{hotelData.Offer}</span>
-                        </div>
-                      )}
-                      {hotelData.Promotion && (
-                        <div className="flex items-center gap-2 text-blue-600">
-                          <Badge variant="outline" className="bg-blue-50">تخفیف</Badge>
-                          <span>{hotelData.Promotion}</span>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </TabsContent>
-
-            {/* Rooms Tab - Enhanced with Images */}
-            <TabsContent value="rooms" className="space-y-6">
-              {hotelItinenaries && hotelItinenaries.map((itinerary, index) => {
-                const room = itinerary.Rooms?.[0]
-                if (!room) return null
-                
-                const roomImageUrl = getRandomRoomImage(itinerary.HotelId)
-                
-                return (
-                  <Card key={itinerary.FareSourceCode} className="overflow-hidden hover:shadow-lg transition-shadow">
-                    <CardContent className="p-0">
+          {/* All Rooms Information */}
+          <Card>
+            <CardContent className="p-4">
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <Bed className="h-5 w-5 text-blue-600" />
+                انتخاب اتاق ({allRooms.length} اتاق)
+              </h2>
+              <div className="space-y-6">
+                {allRooms.map((room, index) => {
+                  const isSelected = selectedRoom === room.RoomId
+                  return (
+                    <div 
+                      key={`${room.RoomId}-${index}`} 
+                      className={`border-2 transition-all duration-200 ${
+                        isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
                       <div className="flex flex-col lg:flex-row">
                         {/* Room Image */}
-                        <div className="lg:w-80 relative h-64 lg:h-auto">
+                        <div className="lg:w-64 relative h-48 lg:h-auto">
                           <div className="relative w-full h-full">
                             <Image
-                              src={roomImageUrl}
-                              alt={room.Name}
+                              src={getRoomImage(room.RoomId)}
+                              alt={room.Name || room.RoomMapName}
                               fill
                               className="object-cover"
-                              priority={index === 0}
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                            <div className="absolute inset-0 bg-black/10"></div>
                             
                             {/* Room Badges */}
-                            <div className="absolute top-3 left-3 flex flex-col gap-1">
+                            <div className="absolute top-2 left-2 flex flex-col gap-1">
                               {room.MealType && (
-                                <Badge className="bg-green-500 text-white px-3 py-1 text-xs">
+                                <Badge className="bg-green-600 text-white px-2 py-1 text-xs border-0">
                                   {getMealTypeText(room.MealType)}
                                 </Badge>
                               )}
-                              {itinerary.NonRefundable && (
-                                <Badge className="bg-red-500 text-white px-3 py-1 text-xs">
+                              {hotelData.NonRefundable && (
+                                <Badge className="bg-red-600 text-white px-2 py-1 text-xs border-0">
                                   غیرقابل استرداد
                                 </Badge>
+                              )}
+                            </div>
+
+                            {/* Selection Indicator */}
+                            <div className="absolute top-2 right-2">
+                              {isSelected && (
+                                <div className="bg-blue-500 text-white p-1 rounded-full">
+                                  <CheckCircle className="h-4 w-4" />
+                                </div>
                               )}
                             </div>
                           </div>
                         </div>
 
                         {/* Room Details */}
-                        <div className="flex-1 p-6">
+                        <div className="flex-1 p-4">
                           <div className="flex flex-col h-full">
                             <div className="flex-1">
-                              <div className="flex justify-between items-start mb-4">
-                                <div className="flex-1">
-                                  <h4 className="text-xl font-bold text-gray-900 mb-2">
-                                    {room.Name}
-                                  </h4>
-                                  <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-                                    <div className="flex items-center gap-1">
-                                      <User className="h-4 w-4" />
-                                      <span>{room.AdultCount} بزرگسال</span>
-                                    </div>
-                                    {room.ChildCount > 0 && (
-                                      <div className="flex items-center gap-1">
-                                        <Baby className="h-4 w-4" />
-                                        <span>{room.ChildCount} کودک</span>
-                                      </div>
-                                    )}
-                                    {room.BedGroups && (
-                                      <div className="flex items-center gap-1">
-                                        <Bed className="h-4 w-4" />
-                                        <span>{room.BedGroups}</span>
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
+                              <div className="flex justify-between items-start mb-2">
+                                <h3 className="font-bold text-lg">{room.Name || room.RoomMapName}</h3>
                                 <div className="text-right">
-                                  <div className="text-2xl font-bold text-green-600 mb-1">
-                                    {formatPrice(itinerary.NetRate, itinerary.Currency)}
-                                  </div>
-                                  <div className="text-sm text-muted-foreground">برای هر شب</div>
+                                  <p className="text-xl font-bold text-green-600">
+                                    {formatPrice(hotelData.NetRate, hotelData.Currency)}
+                                  </p>
+                                  {hasDiscount && (
+                                    <p className="text-xs line-through text-gray-500">
+                                      {formatPrice(hotelData.NetRateWithoutDiscount, hotelData.Currency)}
+                                    </p>
+                                  )}
                                 </div>
                               </div>
-
-                              {/* Room Features */}
+                              
+                              <div className="flex flex-wrap gap-3 text-sm text-gray-600 mb-3">
+                                <div className="flex items-center gap-1">
+                                  <User className="h-4 w-4" />
+                                  <span>{room.AdultCount} بزرگسال</span>
+                                </div>
+                                {room.ChildCount > 0 && (
+                                  <div className="flex items-center gap-1">
+                                    <Baby className="h-4 w-4" />
+                                    <span>{room.ChildCount} کودک</span>
+                                  </div>
+                                )}
+                                {room.ExtraBedCount > 0 && (
+                                  <div className="flex items-center gap-1">
+                                    <span>🛏️ {room.ExtraBedCount} تخت اضافه</span>
+                                  </div>
+                                )}
+                              </div>
+                              
                               {room.BedGroups && (
-                                <div className="bg-blue-50 p-3 rounded-lg mb-4">
-                                  <p className="text-sm text-blue-800 font-medium">
-                                    🛏️ ترتیب تخت: {room.BedGroups}
-                                  </p>
+                                <div className="mb-3">
+                                  <span className="text-sm font-medium text-gray-700">ترتیب تخت: </span>
+                                  <span className="text-sm text-gray-600">{room.BedGroups}</span>
+                                </div>
+                              )}
+
+                              {room.ChildAges && room.ChildAges.length > 0 && (
+                                <div className="mb-3">
+                                  <span className="text-sm font-medium text-gray-700">سن کودکان: </span>
+                                  <span className="text-sm text-gray-600">{room.ChildAges.join('، ')}</span>
+                                </div>
+                              )}
+
+                              {room.HotelRoomEarlyCheckin && (
+                                <div className="flex justify-between items-center text-sm bg-blue-50 p-2">
+                                  <span className="text-blue-700">چک‌این زودهنگام:</span>
+                                  <span className="font-medium">{formatPrice(room.HotelRoomEarlyCheckin.CheckInAmount, hotelData.Currency)}</span>
+                                </div>
+                              )}
+
+                              {room.HotelRoomLateCheckout && (
+                                <div className="flex justify-between items-center text-sm bg-green-50 p-2 mt-2">
+                                  <span className="text-green-700">چک‌اوت دیرهنگام:</span>
+                                  <span className="font-medium">{formatPrice(room.HotelRoomLateCheckout.CheckOutAmount, hotelData.Currency)}</span>
                                 </div>
                               )}
                             </div>
 
                             {/* Room Actions */}
-                            <div className="flex justify-between items-center pt-4 border-t">
-                              <div className="text-sm text-muted-foreground">
-                                {itinerary.AvailableRoom > 0 ? (
-                                  <span className="text-green-600 font-medium">
-                                    {itinerary.AvailableRoom} اتاق موجود
-                                  </span>
-                                ) : (
-                                  <span className="text-red-600 font-medium">
-                                    اتاقی موجود نیست
-                                  </span>
-                                )}
-                              </div>
+                            <div className="flex justify-between items-center pt-3 border-t border-gray-200 mt-3">
+                              {/* <div className="text-xs text-gray-600">
+                                <span className="text-green-600 font-medium">
+                                  {hotelData.AvailableRoom} اتاق موجود
+                                </span>
+                              </div> */}
                               <Button 
-                                onClick={() => handleReservation(itinerary.FareSourceCode)}
-                                disabled={itinerary.AvailableRoom === 0}
-                                className="bg-green-600 hover:bg-green-700"
+                                onClick={() => handleRoomSelection(room.RoomId)}
+                                variant={isSelected ? "default" : "outline"}
+                                className={isSelected 
+                                  ? "bg-blue-600 hover:bg-blue-700 text-white" 
+                                  : "border-blue-600 text-blue-600 hover:bg-blue-50"
+                                }
+                                disabled={hotelData.AvailableRoom === 0}
                               >
-                                رزرو این اتاق
-                                <ChevronLeft className="h-4 w-4 mr-2" />
+                                {isSelected ? "اتاق انتخاب شده" : "انتخاب این اتاق"}
+                                {isSelected && <CheckCircle className="h-3 w-3 mr-1" />}
                               </Button>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </TabsContent>
-
-            {/* Policies Tab */}
-            <TabsContent value="policies" className="space-y-4">
-              <Card>
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-bold mb-4">سیاست کنسلی</h3>
-                  {hotelData.PlainTextCancellationPolicy ? (
-                    <p className="text-sm leading-relaxed">{hotelData.PlainTextCancellationPolicy}</p>
-                  ) : (
-                    <div className="space-y-3">
-                      <div className={`p-3 rounded-lg ${
-                        hotelData.NonRefundable 
-                          ? 'bg-red-50 border border-red-200' 
-                          : 'bg-green-50 border border-green-200'
-                      }`}>
-                        <div className="flex items-center gap-2">
-                          <Badge variant={hotelData.NonRefundable ? "destructive" : "default"}>
-                            {hotelData.NonRefundable ? "غیرقابل استرداد" : "قابل استرداد"}
-                          </Badge>
-                          <span className="text-sm">
-                            {hotelData.NonRefundable 
-                              ? "این رزرو غیرقابل کنسلی است" 
-                              : "امکان کنسلی طبق قوانین هتل وجود دارد"}
-                          </span>
-                        </div>
-                      </div>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
+                  )
+                })}
+              </div>
+            </CardContent>
+          </Card>
 
-              <Card>
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-bold mb-4">قوانین هتل</h3>
-                  <div className="space-y-3 text-sm">
-                    {hotelData.HotelPolicy.InstructionsFa && (
-                      <div>
-                        <strong>دستورالعمل‌ها:</strong>
-                        <p className="mt-1 text-muted-foreground">{hotelData.HotelPolicy.InstructionsFa}</p>
+          {/* Rest of the sections remain the same as before */}
+          {/* Amenities */}
+          {hotelData.Amenities && hotelData.Amenities.length > 0 && (
+            <Card>
+              <CardContent className="p-4">
+                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5 text-blue-600" />
+                  امکانات هتل
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {hotelData.Amenities.map((amenity, index) => {
+                    const Icon = amenityIcons[amenity]
+                    return (
+                      <div key={index} className="flex items-center gap-2 p-2 border border-gray-200">
+                        {Icon && <Icon className="h-4 w-4 text-blue-600" />}
+                        <span className="text-sm font-medium">{amenity}</span>
                       </div>
-                    )}
-                    {hotelData.HotelPolicy.SpecialInstructionsFa && (
-                      <div>
-                        <strong>دستورالعمل‌های ویژه:</strong>
-                        <p className="mt-1 text-muted-foreground">{hotelData.HotelPolicy.SpecialInstructionsFa}</p>
-                      </div>
-                    )}
-                    {hotelData.HotelPolicy.ChildPolicyDescriptionFa && (
-                      <div>
-                        <strong>سیاست کودکان:</strong>
-                        <p className="mt-1 text-muted-foreground">{hotelData.HotelPolicy.ChildPolicyDescriptionFa}</p>
-                      </div>
-                    )}
+                    )
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Hotel Policy */}
+          <Card>
+            <CardContent className="p-4">
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <Info className="h-5 w-5 text-blue-600" />
+                قوانین و مقررات هتل
+              </h2>
+              <div className="space-y-4">
+                {hotelData.HotelPolicy.InstructionsFa && (
+                  <div>
+                    <h4 className="font-bold text-gray-800 mb-2">دستورالعمل‌ها:</h4>
+                    <p className="text-sm text-gray-600 leading-relaxed">{hotelData.HotelPolicy.InstructionsFa}</p>
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
+                )}
+                
+                {hotelData.HotelPolicy.SpecialInstructionsFa && (
+                  <div>
+                    <h4 className="font-bold text-gray-800 mb-2">دستورالعمل‌های ویژه:</h4>
+                    <p className="text-sm text-gray-600 leading-relaxed">{hotelData.HotelPolicy.SpecialInstructionsFa}</p>
+                  </div>
+                )}
 
-            {/* Amenities Tab */}
-            <TabsContent value="amenities" className="space-y-4">
-              <Card>
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-bold mb-4">امکانات هتل</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {hotelData.Amenities && hotelData.Amenities.map((amenity, index) => {
-                      const Icon = amenityIcons[amenity]
-                      return (
-                        <div key={index} className="flex items-center gap-3 p-3 border rounded-lg hover:shadow-md transition-shadow">
-                          {Icon && <Icon className="h-5 w-5 text-blue-600" />}
-                          <span className="text-sm font-medium">{amenity}</span>
+                {hotelData.HotelPolicy.ChildPolicyDescriptionFa && (
+                  <div>
+                    <h4 className="font-bold text-gray-800 mb-2">سیاست کودکان:</h4>
+                    <p className="text-sm text-gray-600 leading-relaxed">{hotelData.HotelPolicy.ChildPolicyDescriptionFa}</p>
+                  </div>
+                )}
+
+                {hotelData.HotelPolicy.SingleWomanDescriptionFa && (
+                  <div>
+                    <h4 className="font-bold text-gray-800 mb-2">سیاست زنان تنها:</h4>
+                    <p className="text-sm text-gray-600 leading-relaxed">{hotelData.HotelPolicy.SingleWomanDescriptionFa}</p>
+                  </div>
+                )}
+
+                {hotelData.HotelPolicy.PetAttribiute && hotelData.HotelPolicy.PetAttribiute.length > 0 && (
+                  <div>
+                    <h4 className="font-bold text-gray-800 mb-2">قوانین حیوانات خانگی:</h4>
+                    <div className="space-y-1">
+                      {hotelData.HotelPolicy.PetAttribiute.map((pet, index) => (
+                        <div key={index} className="flex items-center gap-2 text-sm text-gray-600">
+                          <Dog className="h-4 w-4" />
+                          <span>{pet.name}</span>
                         </div>
-                      )
-                    })}
+                      ))}
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Extra Charges */}
+          <Card>
+            <CardContent className="p-4">
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <CardIcon className="h-5 w-5 text-blue-600" />
+                هزینه‌های اضافی
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-bold text-gray-800 mb-2">شامل:</h4>
+                  <p className="text-sm text-gray-600">{hotelData.ExtraCharge && hotelData.ExtraCharge.Included || "هزینه اضافی شامل نمی‌شود"}</p>
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-800 mb-2">شامل نمی‌شود:</h4>
+                  <p className="text-sm text-gray-600">{hotelData.ExtraCharge && hotelData.ExtraCharge.Excluded || "همه هزینه‌ها شامل شده است"}</p>
+                </div>
+              </div>
+              
+              {hotelData.Surcharges && hotelData.Surcharges.length > 0 && (
+                <div className="mt-4">
+                  <h4 className="font-bold text-gray-800 mb-2">هزینه‌های فوق‌العاده:</h4>
+                  <div className="space-y-2">
+                    {hotelData.Surcharges.map((surcharge, index) => (
+                      <div key={index} className="flex justify-between items-center text-sm bg-gray-50 p-2">
+                        <span>{surcharge.Name}</span>
+                        <span className="font-medium">{formatPrice(surcharge.Amount, hotelData.Currency)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Cancellation Policies */}
+          <Card>
+            <CardContent className="p-4">
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-blue-600" />
+                سیاست‌های کنسلی
+              </h2>
+              {hotelData.PlainTextCancellationPolicy ? (
+                <p className="text-sm text-gray-600 leading-relaxed">{hotelData.PlainTextCancellationPolicy}</p>
+              ) : (
+                <div className="space-y-3">
+                  {hotelData.CancellationPolicies && hotelData.CancellationPolicies.map((policy, index) => (
+                    <div key={index} className="flex justify-between items-center text-sm bg-red-50 p-2">
+                      <span>از تاریخ {formatDate(policy.FromDate)}</span>
+                      <span className="font-medium text-red-600">{formatPrice(policy.Amount, hotelData.Currency)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Additional Information */}
+          <Card>
+            <CardContent className="p-4">
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <Info className="h-5 w-5 text-blue-600" />
+                اطلاعات تکمیلی
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">حداقل اقامت:</span>
+                    <span className="font-medium">{hotelData.IsMinStayNight ? `${hotelData.MinStayNight} شب` : "ندارد"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">حداکثر اقامت:</span>
+                    <span className="font-medium">{hotelData.IsMaxStayNight ? `${hotelData.MaxStayNight} شب` : "ندارد"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">اقامت ثابت:</span>
+                    <span className="font-medium">{hotelData.IsFixStayNight ? `${hotelData.FixStayNight} شب` : "ندارد"}</span>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">قیمت‌گذاری بورد:</span>
+                    <span className="font-medium">{hotelData.IsBoardPrice ? "بله" : "خیر"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">بلاک اوت:</span>
+                    <span className="font-medium">{hotelData.IsBlockout ? "بله" : "خیر"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">اقامت ثابت:</span>
+                    <span className="font-medium">{hotelData.IsFixStay ? "بله" : "خیر"}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Remarks */}
+              {(hotelData.RemarksFa && hotelData.RemarksFa.length > 0) && (
+                <div className="mt-4">
+                  <h4 className="font-bold text-gray-800 mb-2">توضیحات:</h4>
+                  <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
+                    {hotelData.RemarksFa.map((remark, index) => (
+                      <li key={index}>{remark}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
         {/* Right Column - Booking Card */}
         <div className="space-y-4">
-          <Card className="sticky top-20">
-            <CardContent className="p-6">
-              <h3 className="text-xl font-bold mb-4">رزرو هتل</h3>
+          <Card className="sticky top-14 border bg-white border-gray-200">
+            <CardContent className="p-4">
+              <h3 className="text-lg font-bold mb-3">رزرو هتل</h3>
               
-              <div className="space-y-4">
+              {/* Selected Room Info */}
+              {selectedRoom && (
+                <div className="mb-4 p-3 bg-blue-50 border border-blue-200">
+                  <h4 className="font-bold text-sm mb-2">اتاق انتخاب شده:</h4>
+                  {allRooms.find(room => room.RoomId === selectedRoom)?.Name || 
+                   allRooms.find(room => room.RoomId === selectedRoom)?.RoomMapName}
+                </div>
+              )}
+
+              <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span>قیمت نهایی:</span>
+                  <span className="text-sm">قیمت نهایی:</span>
                   <div className="text-right">
                     {hasDiscount && (
-                      <p className="text-sm line-through text-gray-500 mb-1">
+                      <p className="text-xs line-through text-gray-500 mb-1">
                         {formatPrice(hotelData.NetRateWithoutDiscount, hotelData.Currency)}
                       </p>
                     )}
-                    <p className="text-2xl font-bold text-green-600">
+                    <p className="text-xl font-bold text-green-600">
                       {formatPrice(hotelData.NetRate, hotelData.Currency)}
                     </p>
                     {hasDiscount && (
-                      <Badge className="bg-red-500 text-white mt-1">
+                      <Badge className="bg-red-600 text-white mt-1 text-xs border-0">
                         {discountPercentage}% تخفیف
                       </Badge>
                     )}
@@ -751,40 +1030,46 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
                 </div>
 
                 {hotelData.NonRefundable && (
-                  <div className="flex items-center gap-2 text-red-600 text-sm p-2 bg-red-50 rounded-lg">
-                    <Shield className="h-4 w-4" />
+                  <div className="flex items-center gap-2 text-red-600 text-xs p-2 bg-red-50">
+                    <Shield className="h-3 w-3" />
                     <span>غیرقابل استرداد</span>
                   </div>
                 )}
 
-                <div className="flex items-center gap-2 text-sm text-muted-foreground p-2 bg-blue-50 rounded-lg">
-                  <CreditCard className="h-4 w-4 text-blue-600" />
+                <div className="flex items-center gap-2 text-xs text-gray-600 p-2 bg-blue-50">
+                  <CreditCard className="h-3 w-3 text-blue-600" />
                   <span>پرداخت در هتل</span>
                 </div>
 
                 <Button
-                  onClick={() => fareSourceCode && handleReservation(fareSourceCode)}
-                  className="w-full h-12 text-lg bg-green-600 hover:bg-green-700"
-                  size="lg"
-                  disabled={hotelData.AvailableRoom === 0}
+                  onClick={handleReservation}
+                  className="w-full h-10 bg-blue-900 hover:bg-blue-800 text-white border-0"
+                  disabled={hotelData.AvailableRoom === 0 || !selectedRoom}
                 >
-                  {hotelData.AvailableRoom > 0 ? "رزرو الآن" : "اتاقی موجود نیست"}
+                  {!selectedRoom ? "لطفاً اتاق انتخاب کنید" : 
+                   hotelData.AvailableRoom > 0 ? "رزرو الآن" : "اتاقی موجود نیست"}
                 </Button>
 
-                {hotelData.AvailableRoom > 0 && (
-                  <div className="text-center text-sm text-green-600 bg-green-50 p-2 rounded-lg">
-                    {hotelData.AvailableRoom} اتاق موجود
+                {!selectedRoom && (
+                  <div className="text-center text-xs text-red-600 bg-red-50 p-2">
+                    برای ادامه، لطفاً یک اتاق انتخاب کنید
                   </div>
                 )}
+
+                {/* {selectedRoom && hotelData.AvailableRoom > 0 && (
+                  <div className="text-center text-xs text-green-600 bg-green-50 p-2">
+                    {hotelData.AvailableRoom} اتاق موجود
+                  </div>
+                )} */}
               </div>
             </CardContent>
           </Card>
 
           {/* Important Notes */}
           <Card>
-            <CardContent className="p-4">
-              <h4 className="font-bold mb-2">نکات مهم</h4>
-              <ul className="text-sm space-y-1 text-muted-foreground">
+            <CardContent className="p-3">
+              <h4 className="font-bold mb-2 text-sm">نکات مهم</h4>
+              <ul className="text-xs space-y-1 text-gray-600">
                 <li>• قیمت برای هر شب محاسبه شده است</li>
                 <li>• مالیات و عوارض شامل قیمت شده است</li>
                 <li>• امکان کنسلی طبق قوانین هتل وجود دارد</li>

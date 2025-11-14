@@ -96,7 +96,7 @@ async function loadAirlinesFromXLSX(): Promise<{ [iata: string]: string }> {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     const fileUrl = `${baseUrl}/data/Airline.xlsx`
     
-    console.log('🔍 Attempting to fetch airlines file from:', fileUrl)
+    // console.log('🔍 Attempting to fetch airlines file from:', fileUrl)
     
     const response = await fetch(fileUrl, {
       cache: 'force-cache',
@@ -105,14 +105,14 @@ async function loadAirlinesFromXLSX(): Promise<{ [iata: string]: string }> {
       }
     })
     
-    console.log('📄 Airlines response status:', response.status, response.statusText)
+    // console.log('📄 Airlines response status:', response.status, response.statusText)
     
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: Failed to fetch Airlines XLSX file from ${fileUrl}`)
     }
 
     const arrayBuffer = await response.arrayBuffer()
-    console.log('📦 Airlines file size (bytes):', arrayBuffer.byteLength)
+    // console.log('📦 Airlines file size (bytes):', arrayBuffer.byteLength)
     
     if (arrayBuffer.byteLength === 0) {
       throw new Error('Airlines file is empty (0 bytes)')
@@ -120,7 +120,7 @@ async function loadAirlinesFromXLSX(): Promise<{ [iata: string]: string }> {
 
     // Parse the XLSX file
     const workbook = read(arrayBuffer, { type: 'array' })
-    console.log('📋 Airlines sheet names:', workbook.SheetNames)
+    // console.log('📋 Airlines sheet names:', workbook.SheetNames)
     
     if (workbook.SheetNames.length === 0) {
       throw new Error('No sheets found in Airlines XLSX file')
@@ -129,16 +129,16 @@ async function loadAirlinesFromXLSX(): Promise<{ [iata: string]: string }> {
     const worksheet = workbook.Sheets[workbook.SheetNames[0]]
     const data = utils.sheet_to_json(worksheet)
     
-    console.log('📊 Total rows in airlines sheet:', data.length)
+    // console.log('📊 Total rows in airlines sheet:', data.length)
     
     if (data.length === 0) {
       throw new Error('No data found in airlines sheet')
     }
 
     // Log the first row to see column names
-    console.log('🔍 Airlines first row sample:', data[0])
+    // console.log('🔍 Airlines first row sample:', data[0])
     const columnNames = Object.keys(data[0] || {})
-    console.log('🔍 Airlines column names:', columnNames)
+    // console.log('🔍 Airlines column names:', columnNames)
     
     // Find the correct column names for IATA code and airline name
     const iataColumn = columnNames.find(col => 
@@ -152,10 +152,10 @@ async function loadAirlinesFromXLSX(): Promise<{ [iata: string]: string }> {
       col.toLowerCase().includes('airline name')
     )
 
-    console.log('🔍 Detected airlines columns:', {
-      iata: iataColumn,
-      name: nameColumn
-    })
+    // console.log('🔍 Detected airlines columns:', {
+    //   iata: iataColumn,
+    //   name: nameColumn
+    // })
 
     const airlineMap: { [iata: string]: string } = {}
 
@@ -173,8 +173,8 @@ async function loadAirlinesFromXLSX(): Promise<{ [iata: string]: string }> {
       }
     })
 
-    console.log(`✅ Successfully loaded ${Object.keys(airlineMap).length} airlines from XLSX`)
-    console.log('📝 Sample airlines:', Object.entries(airlineMap).slice(0, 5))
+    // console.log(`✅ Successfully loaded ${Object.keys(airlineMap).length} airlines from XLSX`)
+    // console.log('📝 Sample airlines:', Object.entries(airlineMap).slice(0, 5))
     
     return airlineMap
 
@@ -203,7 +203,7 @@ async function loadAirlinesFromXLSX(): Promise<{ [iata: string]: string }> {
       "WY": "عمان ایر",
       "SV": "سعودیا"
     }
-    console.log('🔄 Using fallback airlines data')
+    // console.log('🔄 Using fallback airlines data')
     return fallbackAirlines
   }
 }
@@ -296,7 +296,7 @@ export function FlightProvider({ children }: { children: ReactNode }) {
 
             return true
         })
-        console.log(filtered)
+        // console.log(filtered)
 
       setFilteredFlights(filtered)
     }
@@ -311,7 +311,7 @@ export function FlightProvider({ children }: { children: ReactNode }) {
     const loadAirlines = async () => {
       try {
         const airlines = await loadAirlinesFromXLSX()
-        console.log(airlines)
+        // console.log(airlines)
         setAirlineNames(airlines)
       } catch (error) {
         console.error('Failed to load airlines:', error)
@@ -325,7 +325,7 @@ export function FlightProvider({ children }: { children: ReactNode }) {
     if (!iataCode) return 'نامشخص'
     
     const normalizedCode = iataCode.trim().toUpperCase()
-    console.log(normalizedCode)
+    // console.log(normalizedCode)
     return airlineNames[normalizedCode] || normalizedCode
   }
 
@@ -360,7 +360,7 @@ export function FlightProvider({ children }: { children: ReactNode }) {
         }
       )
       const data = await response.json()
-      console.log(data)
+      // console.log(data)
       if (!response.ok)
         return data
       return data

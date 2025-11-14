@@ -5,6 +5,7 @@ import { NotificationProvider } from "@/contexts/notification/NotificationContex
 import { NotificationContainer } from "@/contexts/notification/NotificationContainer"
 import { FlightProvider } from "@/contexts/search/FlightContext"
 import { HotelProvider } from "@/contexts/search/HotelContext"
+import { CipProvider } from "@/contexts/search/CipContext"
 
 const dana = localFont({
     src: [
@@ -64,14 +65,16 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="fa" dir="rtl" className={`${dana.className}`}>
+    <html lang="fa" dir="rtl" className={`${dana.className} bg-[#fffefe]`}>
       <body dir="rtl">
         <NotificationProvider>
           <FlightProvider>
             <HotelProvider>
-              <div className="container mx-auto">
-              {children}
-              </div>
+              <CipProvider>
+                <div className="container mx-auto">
+                {children}
+                </div>
+              </CipProvider>
             </HotelProvider>
           </FlightProvider>
           <NotificationContainer/>

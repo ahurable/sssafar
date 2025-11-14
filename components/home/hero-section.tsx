@@ -52,7 +52,7 @@ export function HeroSlider({ posts }: HeroSliderProps) {
 
   return (
     <div 
-      className="relative lg:h-[550px] lg:w-full h-screen mx-auto lg:rounded-2xl lg:my-8 w-full overflow-hidden"
+      className="relative lg:h-[450px] lg:w-full h-screen mx-auto lg:rounded-2xl lg:my-8 w-full overflow-hidden"
       onMouseEnter={() => setIsAutoPlaying(false)}
       onMouseLeave={() => setIsAutoPlaying(true)}
     >
@@ -89,10 +89,6 @@ export function HeroSlider({ posts }: HeroSliderProps) {
                   <h2 className="text-5xl md:text-6xl font-bold mb-6 leading-tight drop-shadow-2xl">
                     {post.title}
                   </h2>
-                  
-                  <p className="text-xl md:text-2xl mb-8 text-gray-200 max-w-3xl leading-relaxed drop-shadow-lg">
-                    {post.excerpt}
-                  </p>
 
                   <div className="flex items-center gap-4">
                     <Link href={`/posts/${post.id}`}>

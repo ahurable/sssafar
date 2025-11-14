@@ -2,19 +2,27 @@
 
 import Link from "next/link"
 import { useEffect, useState, useRef } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { User, Plane, LayoutDashboardIcon, LogOut, Settings, CreditCard, Menu, X, Globe, Shield } from "lucide-react"
+import { User, Plane, LayoutDashboardIcon, LogOut, Settings, CreditCard, Menu, X, Globe, Shield, Hotel, ChevronDown } from "lucide-react"
 import { UserType } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 export function Header() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [profileMenuOpen, setProfileMenuOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [user, setUser] = useState<UserType | null>(null)
   const [loading, setLoading] = useState(true)
+  const [activeHoverMenu, setActiveHoverMenu] = useState<string | null>(null)
+  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null)
   
   const profileMenuRef = useRef<HTMLDivElement>(null)
   const mobileMenuRef = useRef<HTMLDivElement>(null)
+  const flightMenuRef = useRef<HTMLDivElement>(null)
+  const hotelMenuRef = useRef<HTMLDivElement>(null)
+  const otherMenuRef = useRef<HTMLDivElement>(null)
 
   // Close menus when clicking outside
   useEffect(() => {
@@ -24,6 +32,15 @@ export function Header() {
       }
       if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
         setMobileMenuOpen(false)
+      }
+      if (flightMenuRef.current && !flightMenuRef.current.contains(event.target as Node)) {
+        setActiveHoverMenu(null)
+      }
+      if (hotelMenuRef.current && !hotelMenuRef.current.contains(event.target as Node)) {
+        setActiveHoverMenu(null)
+      }
+      if (otherMenuRef.current && !otherMenuRef.current.contains(event.target as Node)) {
+        setActiveHoverMenu(null)
       }
     }
 
@@ -58,6 +75,40 @@ export function Header() {
       console.error('Logout failed:', error)
     }
   }
+
+  const handleMenuClick = (menuType: string) => {
+    // Close mobile menu first
+    setMobileMenuOpen(false)
+    
+    // Check if we're already on home page
+    if (window.location.pathname === '/') {
+      // If already on home page, just update the URL with search param
+      const params = new URLSearchParams(searchParams.toString())
+      params.set('search', menuType)
+      router.push(`/?${params.toString()}`, { scroll: false })
+      
+      // Trigger custom event to open modal
+      window.dispatchEvent(new CustomEvent('openSearchModal', { detail: menuType }))
+    } else {
+      // If not on home page, navigate to home page with search param
+      router.push(`/?search=${menuType}`)
+    }
+  }
+
+  const handleMenuHover = (menuType: string) => {
+    if (hoverTimeout) {
+      clearTimeout(hoverTimeout)
+      setHoverTimeout(null)
+    }
+    setActiveHoverMenu(menuType)
+  }
+
+  const handleMenuLeave = () => {
+    const timeout = setTimeout(() => {
+      setActiveHoverMenu(null)
+    }, 200) // Small delay to allow moving to submenu
+    setHoverTimeout(timeout)
+  }   
 
   const ProfileMenu = () => (
     <div className="absolute left-0 lg:left-[-20px] lg:top-[50px] top-full mt-2 w-72 border border-gray-300 bg-white z-50">
@@ -160,7 +211,34 @@ export function Header() {
     </div>
   )
 
-  const MobileMenu = () => (
+  // Desktop Dropdown Menu Component
+  const DesktopDropdownMenu = ({ menuRef, isOpen, items, onSubmenuHover, onSubmenuLeave }: any) => {
+    if (!isOpen) return null
+    console.log(items)
+    return (
+      <div 
+        ref={menuRef}
+        className="absolute top-full right-0 mt-0 w-48 bg-white border border-gray-300 shadow-lg z-40"
+        onMouseEnter={onSubmenuHover}
+        onMouseLeave={onSubmenuLeave}
+      >
+        {items.map((item: any, index: number) => (
+          <button
+            key={index}
+            onClick={() => {
+              handleMenuClick(item.type)
+            }}
+            className="flex items-center gap-3 w-full px-4 py-3 text-sm text-right hover:bg-gray-100 text-black border-b border-gray-100 last:border-b-0"
+          >
+            {item.icon && <item.icon className="h-4 w-4" />}
+            <span className="flex-1">{item.label}</span>
+          </button>
+        ))}
+      </div>
+    )
+  }
+
+   const MobileMenu = () => (
     <div className="fixed inset-0 z-40 h-[100vh] lg:hidden">
       <div 
         ref={mobileMenuRef}
@@ -191,10 +269,68 @@ export function Header() {
             <div className="space-y-2 mb-6">
               <h3 className="text-right text-lg font-bold text-black mb-3">منوی اصلی</h3>
               
-              <Link
-                href="/tours"
+              {/* Flight Menu */}
+              <div className="border border-gray-300 bg-white">
+                <div className="flex items-center gap-4 w-full px-4 py-3 text-right bg-gray-50">
+                  <div className="flex items-center justify-center w-10 h-10 bg-blue-500">
+                    <Plane className="h-5 w-5 text-white" />
+                  </div>
+                  <div className="flex-1 text-right">
+                    <div className="text-md font-bold text-black">پرواز</div>
+                    <div className="text-sm text-black mt-1">پرواز داخلی و خارجی</div>
+                  </div>
+                </div>
+                <div className="border-t border-gray-300">
+                  <button
+                    onClick={() => handleMenuClick('domesticFlights')}
+                    className="flex items-center gap-3 w-full px-4 py-3 text-right hover:bg-gray-100 text-sm text-black border-b border-gray-100"
+                  >
+                    <Plane className="h-4 w-4" />
+                    <span>پرواز داخلی</span>
+                  </button>
+                  <button
+                    onClick={() => handleMenuClick('flight')}
+                    className="flex items-center gap-3 w-full px-4 py-3 text-right hover:bg-gray-100 text-sm text-black"
+                  >
+                    <Plane className="h-4 w-4" />
+                    <span>پرواز خارجی</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Hotel Menu */}
+              <div className="border border-gray-300 bg-white">
+                <div className="flex items-center gap-4 w-full px-4 py-3 text-right bg-gray-50">
+                  <div className="flex items-center justify-center w-10 h-10 bg-green-500">
+                    <Hotel className="h-5 w-5 text-white" />
+                  </div>
+                  <div className="flex-1 text-right">
+                    <div className="text-md font-bold text-black">هتل</div>
+                    <div className="text-sm text-black mt-1">هتل داخلی و خارجی</div>
+                  </div>
+                </div>
+                <div className="border-t border-gray-300">
+                  <button
+                    onClick={() => handleMenuClick('domesticHotel')}
+                    className="flex items-center gap-3 w-full px-4 py-3 text-right hover:bg-gray-100 text-sm text-black border-b border-gray-100"
+                  >
+                    <Hotel className="h-4 w-4" />
+                    <span>هتل داخلی</span>
+                  </button>
+                  <button
+                    onClick={() => handleMenuClick('hotel')}
+                    className="flex items-center gap-3 w-full px-4 py-3 text-right hover:bg-gray-100 text-sm text-black"
+                  >
+                    <Hotel className="h-4 w-4" />
+                    <span>هتل خارجی</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Other Services */}
+              <button
+                onClick={() => handleMenuClick('tour')}
                 className="flex items-center gap-4 w-full px-4 py-3 text-right border border-gray-300 bg-white hover:bg-gray-100 group"
-                onClick={() => setMobileMenuOpen(false)}
               >
                 <div className="flex items-center justify-center w-10 h-10 bg-blue-500">
                   <Globe className="h-5 w-5 text-white" />
@@ -203,12 +339,11 @@ export function Header() {
                   <div className="text-md font-bold text-black">تورها</div>
                   <div className="text-sm text-black mt-1">مشاهده و رزرو تورهای مسافرتی</div>
                 </div>
-              </Link>
+              </button>
 
-              <Link
-                href="/cip"
+              <button
+                onClick={() => handleMenuClick('cip')}
                 className="flex items-center gap-4 w-full px-4 py-3 text-right border border-gray-300 bg-white hover:bg-gray-100 group"
-                onClick={() => setMobileMenuOpen(false)}
               >
                 <div className="flex items-center justify-center w-10 h-10 bg-red-500">
                   <Shield className="h-5 w-5 text-white" />
@@ -217,12 +352,11 @@ export function Header() {
                   <div className="text-md font-bold text-black">خدمات CIP</div>
                   <div className="text-sm text-black mt-1">خدمات فرودگاهی و VIP</div>
                 </div>
-              </Link>
+              </button>
 
-              <Link
-                href="/visa"
+              <button
+                onClick={() => handleMenuClick('visa')}
                 className="flex items-center gap-4 w-full px-4 py-3 text-right border border-gray-300 bg-white hover:bg-gray-100 group"
-                onClick={() => setMobileMenuOpen(false)}
               >
                 <div className="flex items-center justify-center w-10 h-10 bg-blue-500">
                   <Globe className="h-5 w-5 text-white" />
@@ -231,12 +365,11 @@ export function Header() {
                   <div className="text-md font-bold text-black">خدمات ویزا</div>
                   <div className="text-sm text-black mt-1">دریافت ویزای کشورهای مختلف</div>
                 </div>
-              </Link>
+              </button>
 
-              <Link
-                href="/activities"
+              <button
+                onClick={() => handleMenuClick('activities')}
                 className="flex items-center gap-4 w-full px-4 py-3 text-right border border-gray-300 bg-white hover:bg-gray-100 group"
-                onClick={() => setMobileMenuOpen(false)}
               >
                 <div className="flex items-center justify-center w-10 h-10 bg-green-500">
                   <Globe className="h-5 w-5 text-white" />
@@ -245,12 +378,11 @@ export function Header() {
                   <div className="text-md font-bold text-black">گشت شهری</div>
                   <div className="text-sm text-black mt-1">تورهای گردشگری درون شهری</div>
                 </div>
-              </Link>
+              </button>
 
-              <Link
-                href="/organs"
+              <button
+                onClick={() => handleMenuClick('organs')}
                 className="flex items-center gap-4 w-full px-4 py-3 text-right border border-gray-300 bg-white hover:bg-gray-100 group"
-                onClick={() => setMobileMenuOpen(false)}
               >
                 <div className="flex items-center justify-center w-10 h-10 bg-purple-500">
                   <Shield className="h-5 w-5 text-white" />
@@ -259,7 +391,7 @@ export function Header() {
                   <div className="text-md font-bold text-black">پنل سازمانی</div>
                   <div className="text-sm text-black mt-1">خدمات ویژه سازمان‌ها و شرکت‌ها</div>
                 </div>
-              </Link>
+              </button>
             </div>
 
             {/* Secondary Navigation */}
@@ -333,12 +465,31 @@ export function Header() {
     </div>
   )
 
+  // Menu configurations
+  const flightMenuItems = [
+    { label: "پرواز داخلی", type: "domesticFlights", icon: Plane },
+    { label: "پرواز خارجی", type: "flight", icon: Plane }
+  ]
+
+  const hotelMenuItems = [
+    { label: "هتل داخلی", type: "domesticHotel", icon: Hotel },
+    { label: "هتل خارجی", type: "hotel", icon: Hotel }
+  ]
+
+  const otherMenuItems = [
+    { label: "تورها", type: "tour", icon: Globe },
+    { label: "خدمات CIP", type: "cip", icon: Shield },
+    { label: "خدمات ویزا", type: "visa", icon: Globe },
+    { label: "گشت شهری", type: "activities", icon: Globe },
+    { label: "پنل سازمانی", type: "organs", icon: Shield }
+  ]
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-300 bg-white">
       <div className="container mx-auto px-4">
         <div className="flex h-14 items-center justify-between">
           {/* Logo and Mobile Menu Button */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-6"> {/* Increased gap to move menus closer to logo */}
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(true)}
@@ -359,40 +510,71 @@ export function Header() {
                 سفرتودی
               </span>
             </Link>
-          </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-4">
-            <Link
-              href="/tours"
-              className="px-4 py-2 text-black hover:bg-gray-100 font-bold"
-            >
-              تورها
-            </Link>
-            <Link
-              href="/cip"
-              className="px-4 py-2 text-black hover:bg-gray-100 font-bold"
-            >
-              خدمات CIP
-            </Link>
-            <Link
-              href="/visa"
-              className="px-4 py-2 text-black hover:bg-gray-100 font-bold"
-            >
-              خدمات ویزا
-            </Link>
-            <Link
-              href="/activities"
-              className="px-4 py-2 text-black hover:bg-gray-100 font-bold"
-            >
-              گشت شهری
-            </Link>
-            <Link
-              href="/organs"
-              className="px-4 py-2 text-black hover:bg-gray-100 font-bold"
-            >
-              پنل سازمانی
-            </Link>
+            {/* Desktop Navigation - Moved closer to logo */}
+            <div className="hidden lg:flex items-center gap-1">
+              {/* Flight Menu */}
+              <div 
+                className="relative"
+                ref={flightMenuRef}
+                onMouseEnter={() => handleMenuHover('flight')}
+                onMouseLeave={handleMenuLeave}
+              >
+                <button className="flex items-center gap-1 px-3 py-2 text-black hover:bg-gray-100 font-bold rounded-none">
+                  <Plane className="h-4 w-4" />
+                  <span>پرواز</span>
+                  <ChevronDown className="h-3 w-3" />
+                </button>
+                <DesktopDropdownMenu
+                  menuRef={flightMenuRef}
+                  isOpen={activeHoverMenu === 'flight'}
+                  items={flightMenuItems}
+                  onSubmenuHover={() => handleMenuHover('flight')}
+                  onSubmenuLeave={handleMenuLeave}
+                />
+              </div>
+
+              {/* Hotel Menu */}
+              <div 
+                className="relative"
+                ref={hotelMenuRef}
+                onMouseEnter={() => handleMenuHover('hotel')}
+                onMouseLeave={handleMenuLeave}
+              >
+                <button className="flex items-center gap-1 px-3 py-2 text-black hover:bg-gray-100 font-bold rounded-none">
+                  <Hotel className="h-4 w-4" />
+                  <span>هتل</span>
+                  <ChevronDown className="h-3 w-3" />
+                </button>
+                <DesktopDropdownMenu
+                  menuRef={hotelMenuRef}
+                  isOpen={activeHoverMenu === 'hotel'}
+                  items={hotelMenuItems}
+                  onSubmenuHover={() => handleMenuHover('hotel')}
+                  onSubmenuLeave={handleMenuLeave}
+                />
+              </div>
+
+              {/* Other Menu */}
+              <div 
+                className="relative"
+                ref={otherMenuRef}
+                onMouseEnter={() => handleMenuHover('other')}
+                onMouseLeave={handleMenuLeave}
+              >
+                <button className="flex items-center gap-1 px-3 py-2 text-black hover:bg-gray-100 font-bold rounded-none">
+                  <span>سایر</span>
+                  <ChevronDown className="h-3 w-3" />
+                </button>
+                <DesktopDropdownMenu
+                  menuRef={otherMenuRef}
+                  isOpen={activeHoverMenu === 'other'}
+                  items={otherMenuItems}
+                  onSubmenuHover={() => handleMenuHover('other')}
+                  onSubmenuLeave={handleMenuLeave}
+                />
+              </div>
+            </div>
           </div>
 
           {/* Profile Menu */}

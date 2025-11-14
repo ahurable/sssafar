@@ -1,7 +1,7 @@
-// components/search-section.tsx
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Hotel, Plane, Crown, Map, X, ArrowRight } from "lucide-react"
@@ -17,9 +17,40 @@ interface SearchSectionProps {
 }
 
 export function SearchSection({ onSearchResults }: SearchSectionProps) {
+  const searchParams = useSearchParams()
   const [activeTab, setActiveTab] = useState<"hotel" | "flight" | "domesticFlights" | "cip" | "tour" | "domesticHotel">("domesticFlights")
   const [mobileSearchModalOpen, setMobileSearchModalOpen] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
+
+  // Read URL parameter on component mount and when searchParams change
+  useEffect(() => {
+    const searchParam = searchParams.get('search')
+    if (searchParam && ['hotel', 'flight', 'domesticFlights', 'cip', 'tour', 'domesticHotel'].includes(searchParam)) {
+      setActiveTab(searchParam as any)
+      
+      // Auto-open modal on mobile if coming from header navigation
+      if (window.innerWidth < 1024) { // lg breakpoint
+        setMobileSearchModalOpen(true)
+      }
+    }
+  }, [searchParams])
+
+  // Listen for custom events from header
+  useEffect(() => {
+    const handleOpenSearchModal = (event: CustomEvent) => {
+      const menuType = event.detail
+      if (['hotel', 'flight', 'domesticFlights', 'cip', 'tour', 'domesticHotel'].includes(menuType)) {
+        setActiveTab(menuType as any)
+        setMobileSearchModalOpen(true)
+      }
+    }
+
+    window.addEventListener('openSearchModal', handleOpenSearchModal as EventListener)
+    
+    return () => {
+      window.removeEventListener('openSearchModal', handleOpenSearchModal as EventListener)
+    }
+  }, [])
 
   const tabConfig = {
     cip: { icon: Crown, label: "CIP فرودگاهی" },
@@ -37,6 +68,10 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
 
   const handleCloseModal = () => {
     setMobileSearchModalOpen(false)
+    // Clear URL parameter when closing modal
+    const url = new URL(window.location.href)
+    url.searchParams.delete('search')
+    window.history.replaceState({}, '', url.toString())
   }
 
   // Mobile Main Modal - Tab Selection
@@ -116,7 +151,10 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
 
   // Desktop Tabs
   const DesktopTabs = () => (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+    <Tabs value={activeTab} onValueChange={(value) => {
+      setActiveTab(value as any)
+      localStorage.setItem('activeSearchTab', value)
+    }} className="w-full">
       <TabsList className="flex w-full h-max bg-white border-b border-gray-300 p-0">
         {Object.entries(tabConfig).map(([key, config]) => {
           const Icon = config.icon

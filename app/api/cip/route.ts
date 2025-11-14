@@ -1,21 +1,29 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { cipServiceSchema } from "@/lib/validations/cip"
-
+import { cipServiceSchema, cipServiceWithFaqsSchema } from "@/lib/validations/cip"
+import { generateUniqueSlug } from "@/lib/slugify"
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const published = searchParams.get("published")
+    const airport = searchParams.get("airport")
     
     const services = await prisma.cipService.findMany({
-      where: published ? { published: published === "true" } : undefined,
+      where: {
+        ...(published && { published: published === "true" }),
+        ...(airport && { airport: { id: airport } })
+      },
       orderBy: [
         { priority: "desc" },
         { createdAt: "desc" }
       ],
       include: {
-        airport: true
+        airport: true,
+        faqs: {
+          where: { isActive: true },
+          orderBy: { order: "asc" }
+        }
       }
     })
 
@@ -28,6 +36,7 @@ export async function GET(request: NextRequest) {
     )
   }
 }
+
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,26 +51,67 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const validatedData = cipServiceSchema.parse(body)
+    const validatedData = cipServiceWithFaqsSchema.parse(body)
+    
+    const allSlugs = await prisma.cipService.findMany({
+      select: { slug: true }
+    })
+    
+    const slug = generateUniqueSlug(validatedData.title, allSlugs)
+    const { faqs, airportId, ...serviceData } = validatedData
 
-    // Generate slug from title
-    const slug = validatedData.title
-      .toLowerCase()
-      .replace(/\s+/g, "-")
-      .replace(/[^\w-]+/g, "")
-      .replace(/--+/g, "-")
-      .trim() + "-" + Date.now()
+    // Use transaction to ensure both operations succeed or fail together
+    const result = await prisma.$transaction(async (tx) => {
+      // Create CIP service
+      const service = await tx.cipService.create({
+        data: {
+          ...serviceData,
+          slug,
+          airport: airportId ? {
+            connect: { id: airportId }
+          } : undefined,
+        },
+        include: {
+          airport: true
+        }
+      })
 
-    const service = await prisma.cipService.create({
-      data: {
-        ...validatedData,
-        slug,
-      },
+      // Create FAQs individually if provided
+      if (faqs && faqs.length > 0) {
+        await Promise.all(
+          faqs.map(faq => 
+            tx.fAQ.create({
+              data: {
+                question: faq.question,
+                answer: faq.answer,
+                type: "CIP",
+                order: faq.order,
+                isActive: faq.isActive,
+                cip: {
+                  connect: { id: service.id }
+                }
+              }
+            })
+          )
+        )
+      }
+
+      // Return service with FAQs
+      return await tx.cipService.findUnique({
+        where: { id: service.id },
+        include: {
+          airport: true,
+          faqs: {
+            where: { isActive: true },
+            orderBy: { order: "asc" }
+          }
+        }
+      })
     })
 
     return NextResponse.json({
       success: true,
-      service,
+      service: result,
     })
   } catch (error: any) {
     console.error("Create CIP service error:", error)

@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { Plus, Trash2, ArrowRight, Upload, X, Image as ImageIcon } from "lucide-react"
+import { Plus, Trash2, ArrowRight, Upload, X, Image as ImageIcon, HelpCircle } from "lucide-react"
 import { toast } from "sonner"
 
 interface AirportSuggestion {
@@ -16,6 +16,13 @@ interface AirportSuggestion {
   name: string,
   airportIata: string,
   airportCity: string
+}
+
+interface FAQItem {
+  question: string
+  answer: string
+  order: number
+  isActive: boolean
 }
 
 export function CreateCipForm() {
@@ -28,7 +35,7 @@ export function CreateCipForm() {
     title: "",
     description: "",
     image: "",
-    airportId: "", // Changed from airport to airportId
+    airportId: "",
     price: "",
     duration: "",
     features: [""],
@@ -40,6 +47,9 @@ export function CreateCipForm() {
     entry: false,
     deferent: false
   })
+  const [faqs, setFaqs] = useState<FAQItem[]>([
+    { question: "", answer: "", order: 0, isActive: true }
+  ])
   const [airportSuggestions, setAirportSuggestions] = useState<AirportSuggestion[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [airportSearch, setAirportSearch] = useState("")
@@ -168,6 +178,26 @@ export function CreateCipForm() {
     }
   }
 
+  // FAQ Functions
+  const addFaq = () => {
+    setFaqs(prev => [
+      ...prev,
+      { question: "", answer: "", order: prev.length, isActive: true }
+    ])
+  }
+
+  const removeFaq = (index: number) => {
+    if (faqs.length > 1) {
+      setFaqs(prev => prev.filter((_, i) => i !== index))
+    }
+  }
+
+  const updateFaq = (index: number, field: keyof FAQItem, value: string | boolean | number) => {
+    setFaqs(prev => prev.map((faq, i) => 
+      i === index ? { ...faq, [field]: value } : faq
+    ))
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -188,7 +218,7 @@ export function CreateCipForm() {
           title: formData.title,
           description: formData.description || undefined,
           image: formData.image || undefined,
-          airportId: formData.airportId, // Changed from airport to airportId
+          airportId: formData.airportId,
           price: formData.price ? parseFloat(formData.price) : undefined,
           duration: formData.duration || undefined,
           features: formData.features.filter(f => f.trim()),
@@ -198,7 +228,8 @@ export function CreateCipForm() {
           published: formData.published,
           featured: formData.featured,
           entry: formData.entry,
-          deferent: formData.deferent
+          deferent: formData.deferent,
+          faqs: faqs.filter(faq => faq.question.trim() && faq.answer.trim())
         }),
       })
 
@@ -377,7 +408,6 @@ export function CreateCipForm() {
           </CardContent>
         </Card>
 
-        {/* بقیه کامپوننت‌ها بدون تغییر */}
         {/* جزئیات خدمت */}
         <Card className="py-6">
           <CardHeader>
@@ -540,6 +570,97 @@ export function CreateCipForm() {
           </CardContent>
         </Card>
 
+        {/* سوالات متداول (FAQ) */}
+        <Card className="py-6">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <HelpCircle className="h-5 w-5 text-blue-600" />
+                سوالات متداول (FAQ)
+              </CardTitle>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm" 
+                onClick={addFaq}
+              >
+                <Plus className="h-4 w-4 ml-1" />
+                افزودن سوال
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {faqs.map((faq, index) => (
+                <Card key={index} className="border border-gray-200">
+                  <CardContent className="p-4 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium text-gray-900">
+                        سوال #{index + 1}
+                      </h4>
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor={`faq-active-${index}`} className="text-sm text-gray-600">
+                            فعال
+                          </Label>
+                          <Switch
+                            id={`faq-active-${index}`}
+                            checked={faq.isActive}
+                            onCheckedChange={(checked) => updateFaq(index, 'isActive', checked)}
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removeFaq(index)}
+                          disabled={faqs.length === 1}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="space-y-2">
+                        <Label htmlFor={`faq-question-${index}`}>سوال</Label>
+                        <Input
+                          id={`faq-question-${index}`}
+                          value={faq.question}
+                          onChange={(e) => updateFaq(index, 'question', e.target.value)}
+                          placeholder="مثلا: چگونه می‌توانم خدمت CIP را رزرو کنم؟"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor={`faq-answer-${index}`}>پاسخ</Label>
+                        <Textarea
+                          id={`faq-answer-${index}`}
+                          value={faq.answer}
+                          onChange={(e) => updateFaq(index, 'answer', e.target.value)}
+                          rows={3}
+                          placeholder="پاسخ کامل به سوال..."
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor={`faq-order-${index}`}>ترتیب نمایش</Label>
+                        <Input
+                          id={`faq-order-${index}`}
+                          type="number"
+                          value={faq.order}
+                          onChange={(e) => updateFaq(index, 'order', parseInt(e.target.value) || 0)}
+                          min="0"
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
         {/* تنظیمات */}
         <Card className="py-6">
           <CardHeader>
@@ -576,26 +697,26 @@ export function CreateCipForm() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <Label htmlFor="featured" className="text-base">ورودس</Label>
+                  <Label htmlFor="entry" className="text-base">ورودی</Label>
                   <p className="text-sm text-muted-foreground">
                     خدمت برای پرواز های ورودی فعال باشد؟
                   </p>
                 </div>
                 <Switch
-                  id="featured"
+                  id="entry"
                   checked={formData.entry}
                   onCheckedChange={(checked) => setFormData(prev => ({ ...prev, entry: checked }))}
                 />
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <Label htmlFor="featured" className="text-base">خروجی</Label>
+                  <Label htmlFor="deferent" className="text-base">خروجی</Label>
                   <p className="text-sm text-muted-foreground">
                     خدمت برای پرواز های خروجی فعال باشد؟
                   </p>
                 </div>
                 <Switch
-                  id="featured"
+                  id="deferent"
                   checked={formData.deferent}
                   onCheckedChange={(checked) => setFormData(prev => ({ ...prev, deferent: checked }))}
                 />
