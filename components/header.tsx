@@ -84,8 +84,13 @@ export function Header() {
     if (window.location.pathname === '/') {
       // If already on home page, just update the URL with search param
       const params = new URLSearchParams(searchParams.toString())
-      params.set('search', menuType)
-      router.push(`/?${params.toString()}`, { scroll: false })
+      
+      if ( menuType == "flight" || menuType == "domesticFlight" || menuType == "hotel" || menuType == "domesticHotel") {
+        params.set('search', menuType)
+        router.push(`/?${params.toString()}`, { scroll: false })
+      } else {
+        router.push(`/${menuType}`)
+      }
       
       // Trigger custom event to open modal
       window.dispatchEvent(new CustomEvent('openSearchModal', { detail: menuType }))

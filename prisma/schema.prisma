@@ -210,7 +210,6 @@ model Tour {
   endDate     DateTime
   isActive    Boolean         @default(true)
   featured    Boolean         @default(false)
-  city        String?
   // ارتباط با مدل‌های موجود
   prices      TourPrice[]
   itineraries TourItinerary[]
@@ -222,10 +221,26 @@ model Tour {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  tourCity   TourCity? @relation(fields: [tourCityId], references: [id])
+  tourCityId String?
+  cityTour   CityTour? @relation(fields: [cityTourId], references: [id])
+  cityTourId String?
+
+  reservations Reservation[]
+
   @@index([isActive])
   @@index([featured])
   @@index([startDate, endDate])
   @@map("tours")
+}
+
+model TourCity {
+  id          String @id @default(cuid())
+  name        String
+  description String
+  image       String
+
+  tours Tour[]
 }
 
 model TourImage {
@@ -350,6 +365,7 @@ model CityTour {
   bookings    Reservation[]
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
+  tours       Tour[]
 
   @@map("city_tours")
 }
@@ -716,6 +732,7 @@ enum PaymentType {
 }
 
 enum InvoiceKind {
+  CIP
   HOTEL
   FLIGHT
   TRAIN
@@ -857,8 +874,10 @@ model Reservation {
   cityTourId String?
   visa       VisaService? @relation(fields: [visaId], references: [id])
   visaId     String?
+  tour       Tour?        @relation(fields: [tourId], references: [id])
+  tourId     String?
 
-  @@map("cip_reservations")
+  @@map("resrvations")
 }
 
 model VisaService {

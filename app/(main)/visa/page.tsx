@@ -42,11 +42,11 @@ export default async function VisaServicesPage() {
     return (
       <>
         <Header />
-        <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+        <div className="min-h-screen">
           <div className="container mx-auto px-4 py-12">
-            <Card className="border-sky-100 bg-sky-50/50">
+            <Card className=" bg-sky-50/50">
               <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-sky-100">
+                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full ">
                   <Plane className="h-8 w-8 text-sky-600" />
                 </div>
                 <h3 className="mb-2 text-xl font-bold text-sky-800">هنوز خدمات ویزا تعریف نشده</h3>
@@ -66,7 +66,7 @@ export default async function VisaServicesPage() {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      <div className="min-h-screen">
         <div className="container mx-auto px-4 py-12">
           {/* Header */}
           <div className="text-center mb-12">
@@ -160,7 +160,7 @@ export default async function VisaServicesPage() {
                   )}
 
                   <Link href={`/visa/${service.id}`}>
-                    <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3" size="lg">
+                    <Button className="w-full bg-blue-900 hover:bg-blue-700 text-white py-3">
                       مشاهده جزئیات و درخواست
                     </Button>
                   </Link>

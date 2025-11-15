@@ -1,10 +1,8 @@
-// app/admin/tours/[id]/edit/page.tsx
+// app/admin/tours/[id]/edit/page.tsx (Server Component)
 import { redirect } from "next/navigation"
 import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { EditTourForm } from "@/components/admin/edit-tour-form"
-import Link from "next/link"
-import { ArrowRight } from "lucide-react"
+import EditTourPageClient from "./tour-edit-page"
 
 async function getTour(id: string) {
   try {
@@ -24,7 +22,8 @@ async function getTour(id: string) {
         },
         images: {
           orderBy: [{ isPrimary: 'desc' }, { order: 'asc' }]
-        }
+        },
+        reservations: true
       }
     })
     return tour
@@ -51,28 +50,19 @@ export default async function EditTourPage({
     redirect("/admin/tours")
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <Link 
-              href="/admin/tours"
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-            >
-              <ArrowRight className="h-4 w-4" />
-              بازگشت به لیست تورها
-            </Link>
-          </div>
-          
-          <h1 className="text-3xl font-bold text-foreground">ویرایش تور</h1>
-          <p className="text-muted-foreground mt-2">
-            در حال ویرایش: {tour.title}
-          </p>
-        </div>
+  // Convert dates to strings for client component
+  const serializedTour = {
+    ...tour,
+    startDate: tour.startDate.toISOString(),
+    endDate: tour.endDate.toISOString(),
+    createdAt: tour.createdAt.toISOString(),
+    updatedAt: tour.updatedAt.toISOString(),
+    reservations: tour.reservations.map(reservation => ({
+      ...reservation,
+      createdAt: reservation.createdAt.toISOString(),
+      updatedAt: reservation.updatedAt.toISOString(),
+    }))
+  }
 
-        <EditTourForm tour={tour} />
-      </div>
-    </div>
-  )
+  return <EditTourPageClient tour={serializedTour} />
 }

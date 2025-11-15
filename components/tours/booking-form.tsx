@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useRouter } from "next/navigation"
+import { useSnack } from "@/hooks/use-notification"
 
 interface BookingFormProps {
   tour: {
@@ -28,68 +29,27 @@ interface Passenger {
 export function BookingForm({ tour }: BookingFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [passengers, setPassengers] = useState<Passenger[]>([
-    { firstName: '', lastName: '', nationalId: '', dateOfBirth: '', passengerType: 'ADULT' }
-  ])
+  const { success, error } = useSnack()
   const [contactInfo, setContactInfo] = useState({
-    email: '',
+    firstName: '',
+    lastName: '',
     phone: '',
     notes: ''
   })
-
-  const addPassenger = () => {
-    setPassengers([...passengers, { 
-      firstName: '', 
-      lastName: '', 
-      nationalId: '', 
-      dateOfBirth: '', 
-      passengerType: 'ADULT' 
-    }])
-  }
-
-  const removePassenger = (index: number) => {
-    if (passengers.length > 1) {
-      setPassengers(passengers.filter((_, i) => i !== index))
-    }
-  }
-
-  const updatePassenger = (index: number, field: string, value: string) => {
-    const updated = [...passengers]
-    updated[index] = { ...updated[index], [field]: value }
-    setPassengers(updated)
-  }
-
-  const calculateTotal = () => {
-    return passengers.reduce((total, passenger) => {
-      const price = tour.prices.find(p => p.type === passenger.passengerType)
-      return total + (price?.price || 0)
-    }, 0)
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
     try {
-      const response = await fetch('/api/bookings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          tourId: tour.id,
-          passengers,
-          contactInfo,
-          totalPrice: calculateTotal()
-        }),
-      })
+      const response = await fetch(`/api/tours/${tour.id}/book?firstName=${contactInfo.firstName}&lastName=${contactInfo.lastName}&phoneNumber=${contactInfo.phone}`)
 
       const data = await response.json()
 
       if (response.ok) {
-        router.push(`/bookings/${data.booking.id}`)
+        success(data.message)
       } else {
-        alert(data.error || 'خطا در ثبت درخواست')
+        error(data.message)
       }
     } catch (error) {
       console.error('Error submitting booking:', error)
@@ -111,9 +71,9 @@ export function BookingForm({ tour }: BookingFormProps) {
   }
 
   return (
-    <Card className="sticky top-4 py-6  ">
+    <Card className="sticky top-14 py-6  ">
       <CardHeader>
-        <CardTitle className="text-2xl text-blue-600">درخواست رزرو</CardTitle>
+        <CardTitle className="text-2xl text-blue-900">درخواست رزرو</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -123,8 +83,17 @@ export function BookingForm({ tour }: BookingFormProps) {
               <Label>ثبت درخواست</Label>
             </div>
             <div className="grid grid-cols-12">
+                <div className="col-span-12 mb-4">
+                    <Input placeholder="نام خود را وارد کنید" 
+                      value={contactInfo.firstName}
+                      onChange={e => setContactInfo((prev:any) => ({ ...prev, firstName: e.target.value}))}
+                    />
+                </div>
                 <div className="col-span-12">
-                    <Input placeholder="نام و نام خانوادگی خود را وارد کنید" />
+                    <Input placeholder="نام خانوادگی خود را وارد کنید" 
+                      value={contactInfo.lastName}
+                      onChange={e => setContactInfo((prev:any) => ({ ...prev, lastName: e.target.value}))}
+                    />
                 </div>
             </div>
           </div>
@@ -132,16 +101,6 @@ export function BookingForm({ tour }: BookingFormProps) {
           {/* Contact Info */}
           <div className="space-y-4">
             <Label>اطلاعات تماس</Label>
-            
-            <div>
-              <Label>ایمیل</Label>
-              <Input
-                type="email"
-                value={contactInfo.email}
-                onChange={(e) => setContactInfo({ ...contactInfo, email: e.target.value })}
-                required
-              />
-            </div>
 
             <div>
               <Label>شماره تماس</Label>
@@ -168,15 +127,12 @@ export function BookingForm({ tour }: BookingFormProps) {
             <div className="flex justify-between items-center mb-2">
               <span className="text-muted-foreground">قیمت کل:</span>
               <span className="text-2xl font-bold text-green-600">
-                {calculateTotal().toLocaleString('fa-IR')} تومان
+                {tour.prices[0].price.toLocaleString('fa-IR')} تومان
               </span>
             </div>
-            <p className="text-xs text-muted-foreground text-center">
-              {passengers.length} مسافر
-            </p>
           </div>
 
-          <Button type="submit" className="w-full bg-blue-600 text-lg py-6" size="lg" disabled={loading}>
+          <Button type="submit" className="w-full bg-blue-800 text-lg py-6" disabled={loading}>
             {loading ? 'در حال ثبت درخواست...' : 'ثبت درخواست رزرو'}
           </Button>
 

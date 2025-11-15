@@ -2,6 +2,33 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 
+export const GET = async (request: NextRequest, { params } : { params: { id : string }}) => {
+
+  const session = await getSession()
+  if (!session || session.role != "ADMIN")
+    return NextResponse.json({
+      message: "باید ابتدا وارد حساب کاربری خود شوید"
+    }, { status: 401 })
+  
+  try {
+    const tour = await prisma.tour.findUnique({
+      where: {
+        id: params.id
+      }, 
+      include: {
+        reservations: true
+      }
+    })
+    return NextResponse.json(tour)
+  } catch (error) {
+    console.log(error)
+    return NextResponse.json({
+      message: "خطایی در دریافت اطلاعا رخ داد",
+      error: error
+    }, { status: 500 })
+  }
+}
+
 
 export const PUT = async (
   request: NextRequest,

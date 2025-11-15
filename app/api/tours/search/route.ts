@@ -15,16 +15,21 @@ export const GET = async (request: NextRequest) => {
         if (from && to) {
             const tours = await prisma.tour.findMany({
                 where: {
-                    city: city,
+                    tourCityId: city,
                     startDate: from,
                     endDate: to
                 }
             })
-            return NextResponse.json({
-                ...tours
-            }, { status: 200 })
+            return NextResponse.json(tours, { status: 200 })
         }
-        else {
+        else if (city) {
+            const tours = await prisma.tour.findMany({
+                where: {
+                    tourCityId: city
+                }
+            })
+            return NextResponse.json(tours, { status: 200 })
+        } else {
             return NextResponse.json({
                 message: "لطفا تاریخ ورود و خروج خود را معین نمایید"
             }, { status: 400})

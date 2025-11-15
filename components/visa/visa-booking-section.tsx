@@ -118,7 +118,7 @@ export function VisaBookingSection({ service }: VisaBookingSectionProps) {
   }
 
   return (
-    <Card className="sticky top-6 bg-white">
+    <Card className="sticky top-14 bg-white">
       <CardContent className="p-6">
         <div className="text-center mb-6">
           <div className="text-3xl font-bold text-green-600 mb-2">
@@ -165,8 +165,7 @@ export function VisaBookingSection({ service }: VisaBookingSectionProps) {
 
         {!showReservationForm ? (
           <Button 
-            className="w-full" 
-            size="lg"
+            className="w-full bg-blue-900" 
             onClick={handleReserveClick}
           >
             درخواست ویزا
@@ -250,7 +249,7 @@ export function VisaBookingSection({ service }: VisaBookingSectionProps) {
               </Button>
               <Button
                 type="submit"
-                className="flex-1"
+                className="flex-1 bg-blue-900 text-white"
                 disabled={loading}
               >
                 {loading ? (

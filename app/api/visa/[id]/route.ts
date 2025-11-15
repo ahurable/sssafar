@@ -33,79 +33,66 @@ export async function GET(request: NextRequest, { params }: Params) {
   }
 }
 
-export async function PUT(request: NextRequest, { params }: Params) {
-  const session = await getSession()
-  if (!session || session.role != "ADMIN") {
-    return NextResponse.json({
-        message: "ابتدا وارد حساب کاربری خود شوید"
-    }, { status: 401 })
+export const PUT = async (
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) => {
+  const session = await getSession();
+  if (!session || session.role !== "ADMIN") {
+    return NextResponse.json(
+      {
+        message: "لطفا ابتدا وارد حساب کاربری خود شوید"
+      },
+      { status: 403 }
+    );
   }
+
   try {
-    const { id } = params;
     const body = await request.json();
     
-    const {
-      title,
-      description,
-      image,
-      country,
-      city,
-      price,
-      currency,
-      processingTime,
-      validity,
-      entryType,
-      features,
-      requirements,
-      documents,
-      priority,
-      published,
-      featured
-    } = body;
-
-    // Check if service exists
-    const existingService = await prisma.visaService.findUnique({
-      where: { id }
-    });
-
-    if (!existingService) {
-      return NextResponse.json(
-        { error: "خدمت ویزا یافت نشد" },
-        { status: 404 }
-      );
-    }
-
-    const updatedService = await prisma.visaService.update({
-      where: { id },
+    const updatedVisa = await prisma.visaService.update({
+      where: { id: params.id },
       data: {
-        ...(title && { title }),
-        ...(description !== undefined && { description }),
-        ...(image !== undefined && { image }),
-        ...(country && { country }),
-        ...(city && { city }),
-        ...(price !== undefined && { price: price ? parseFloat(price) : null }),
-        ...(currency && { currency }),
-        ...(processingTime !== undefined && { processingTime }),
-        ...(validity !== undefined && { validity }),
-        ...(entryType && { entryType }),
-        ...(features && { features: features.filter((f: string) => f.trim()) }),
-        ...(requirements && { requirements: requirements.filter((r: string) => r.trim()) }),
-        ...(documents && { documents: documents.filter((d: string) => d.trim()) }),
-        ...(priority !== undefined && { priority: parseInt(priority) || 0 }),
-        ...(published !== undefined && { published: Boolean(published) }),
-        ...(featured !== undefined && { featured: Boolean(featured) })
+        title: body.title,
+        description: body.description,
+        image: body.image,
+        country: body.country,
+        city: body.city,
+        price: body.price,
+        currency: body.currency,
+        processingTime: body.processingTime,
+        validity: body.validity,
+        entryType: body.entryType,
+        features: body.features,
+        requirements: body.requirements,
+        documents: body.documents,
+        priceTables: body.priceTables,
+        priority: body.priority,
+        published: body.published,
+        featured: body.featured,
+      },
+      include: {
+        faq: true,
+        bookings: true
       }
     });
 
-    return NextResponse.json(updatedService);
+    return NextResponse.json(
+      { 
+        message: "خدمت ویزا با موفقیت به‌روزرسانی شد",
+        visa: updatedVisa
+      }, 
+      { status: 200 }
+    );
+
   } catch (error) {
     console.error("Error updating visa service:", error);
     return NextResponse.json(
-      { error: "مشکلی در به‌روزرسانی خدمت ویزا پیش آمد" },
+      { error: "خطایی در به‌روزرسانی خدمت ویزا رخ داد" },
       { status: 500 }
     );
   }
-}
+};
 
 export async function DELETE(request: NextRequest, { params }: Params) {
   const session = await getSession()

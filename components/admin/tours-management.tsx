@@ -103,12 +103,20 @@ export function ToursManagement() {
             {tours.length} تور
           </p>
         </div>
-        <Link href="/admin/tours/create">
-          <Button>
-            <Plus className="h-4 w-4 ml-2" />
-            ایجاد تور جدید
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          <Link href="/admin/tours/city/new">
+            <Button variant="outline">
+              <Plus className="h-4 w-4 ml-2" />
+              ایجاد شهر جدید
+            </Button>
+          </Link>
+          <Link href="/admin/tours/create">
+            <Button>
+              <Plus className="h-4 w-4 ml-2" />
+              ایجاد تور جدید
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {tours.length === 0 ? (

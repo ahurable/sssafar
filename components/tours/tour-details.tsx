@@ -101,7 +101,7 @@ export function TourDetails({ tour }: TourDetailsProps) {
       
 
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-700 rounded-2xl p-8 text-white">
+      <div className="bg-gradient-to-r bg-blue-900 p-8 text-white">
         <div className="flex items-start justify-between mb-4">
           <div>
             <div className="flex items-center gap-2 mb-2">
@@ -149,7 +149,7 @@ export function TourDetails({ tour }: TourDetailsProps) {
       {tour.images.length > 0 && (
         <Card className="">
           <CardContent className="p-0">
-            <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
+            <div className="relative aspect-video bg-gray-100 overflow-hidden">
               <img
                 src={currentImage.path}
                 alt={currentImage.altText || tour.title}
@@ -195,7 +195,7 @@ export function TourDetails({ tour }: TourDetailsProps) {
                       key={image.id}
                       className={`flex-shrink-0 w-20 h-16 rounded-md overflow-hidden border-2 ${
                         index === currentImageIndex 
-                          ? 'border-blue-500' 
+                          ? 'border-blue-800' 
                           : 'border-gray-200'
                       }`}
                       onClick={() => setCurrentImageIndex(index)}
@@ -265,7 +265,7 @@ export function TourDetails({ tour }: TourDetailsProps) {
           </CardHeader>
           <CardContent className="space-y-6">
             {tour.itineraries.map((day) => (
-              <div key={day.day} className="border-r-4 border-blue-500 pr-4">
+              <div key={day.day} className="border-r-4 border-blue-800 pr-4">
                 <h3 className="font-semibold text-lg mb-2">روز {day.day}: {day.title}</h3>
                 <p className="text-muted-foreground">{day.description}</p>
               </div>
@@ -285,7 +285,7 @@ export function TourDetails({ tour }: TourDetailsProps) {
               {tour.routes.map((route, index) => (
                 <div key={route.order} className="flex items-start gap-4">
                   <div className="flex flex-col items-center">
-                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                    <div className="w-8 h-8 bg-blue-800 rounded-full flex items-center justify-center text-white font-bold text-sm">
                       {index + 1}
                     </div>
                     {index < tour.routes.length - 1 && (
@@ -390,7 +390,7 @@ export function TourDetails({ tour }: TourDetailsProps) {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {tour.prices.map((price, index) => (
-              <div key={index} className="border rounded-lg p-4 text-center">
+              <div key={index} className="border-2 border-blue-900  hover:bg-blue-900 hover:text-white hover:scale-110 text-blue-900 transition-all p-4 text-center">
                 <div className="font-semibold text-lg mb-2">
                   {price.type === 'ADULT' && 'بزرگسال'}
                   {price.type === 'CHILD' && 'کودک'}
@@ -398,11 +398,11 @@ export function TourDetails({ tour }: TourDetailsProps) {
                   {price.type === 'STUDENT' && 'دانشجو'}
                   {price.type === 'SENIOR' && 'سالمند'}
                 </div>
-                <div className="text-2xl font-bold text-green-600 mb-2">
+                <div className="text-2xl font-bold mb-2">
                   {price.price.toLocaleString('fa-IR')} تومان
                 </div>
                 {price.description && (
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-lg">
                     {price.description}
                   </p>
                 )}

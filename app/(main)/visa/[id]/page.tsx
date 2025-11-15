@@ -75,7 +75,7 @@ export default async function VisaDetailPage({ params }: Params) {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      <div className="min-h-screen">
         <div className="container mx-auto px-4 py-8">
           {/* Breadcrumb */}
           <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-8">
@@ -134,7 +134,7 @@ export default async function VisaDetailPage({ params }: Params) {
                   {/* Key Information */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                     {service.processingTime && (
-                      <div className="flex items-center p-3 bg-blue-50 rounded-lg">
+                      <div className="flex items-center p-3 bg-blue-50">
                         <Clock4 className="h-6 w-6 text-blue-600 ml-2" />
                         <div>
                           <div className="font-semibold text-gray-900">زمان پردازش</div>
@@ -144,7 +144,7 @@ export default async function VisaDetailPage({ params }: Params) {
                     )}
                     
                     {service.validity && (
-                      <div className="flex items-center p-3 bg-green-50 rounded-lg">
+                      <div className="flex items-center p-3 bg-green-50">
                         <Calendar className="h-6 w-6 text-green-600 ml-2" />
                         <div>
                           <div className="font-semibold text-gray-900">مدت اعتبار</div>
@@ -153,7 +153,7 @@ export default async function VisaDetailPage({ params }: Params) {
                       </div>
                     )}
                     
-                    <div className="flex items-center p-3 bg-purple-50 rounded-lg">
+                    <div className="flex items-center p-3 bg-purple-50">
                       <Users className="h-6 w-6 text-purple-600 ml-2" />
                       <div>
                         <div className="font-semibold text-gray-900">نوع ورود</div>
@@ -161,7 +161,7 @@ export default async function VisaDetailPage({ params }: Params) {
                       </div>
                     </div>
                     
-                    <div className="flex items-center p-3 bg-orange-50 rounded-lg">
+                    <div className="flex items-center p-3 bg-orange-50">
                       <Shield className="h-6 w-6 text-orange-600 ml-2" />
                       <div>
                         <div className="font-semibold text-gray-900">وضعیت</div>
@@ -179,7 +179,7 @@ export default async function VisaDetailPage({ params }: Params) {
                       </h2>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {service.features.map((feature: string, index: number) => (
-                          <div key={index} className="flex items-center p-3 bg-white border border-green-200 rounded-lg">
+                          <div key={index} className="flex items-center p-3 bg-white border border-green-200">
                             <Check className="h-5 w-5 text-green-500 ml-2 flex-shrink-0" />
                             <span className="text-gray-700">{feature}</span>
                           </div>
@@ -197,7 +197,7 @@ export default async function VisaDetailPage({ params }: Params) {
                       </h2>
                       <div className="space-y-3">
                         {service.requirements.map((requirement: string, index: number) => (
-                          <div key={index} className="flex items-start p-3 bg-white border border-blue-200 rounded-lg">
+                          <div key={index} className="flex items-start p-3 bg-white border border-blue-200">
                             <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 ml-2 flex-shrink-0" />
                             <span className="text-gray-700 leading-relaxed">{requirement}</span>
                           </div>
@@ -215,7 +215,7 @@ export default async function VisaDetailPage({ params }: Params) {
                       </h2>
                       <div className="space-y-3">
                         {service.documents.map((document: string, index: number) => (
-                          <div key={index} className="flex items-center p-3 bg-white border border-orange-200 rounded-lg">
+                          <div key={index} className="flex items-center p-3 bg-white border border-orange-200">
                             <div className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center ml-2 flex-shrink-0">
                               {index + 1}
                             </div>
@@ -294,26 +294,6 @@ export default async function VisaDetailPage({ params }: Params) {
               
               <VisaBookingSection service={service} />
 
-              {/* Contact Info */}
-              <Card className="mt-6">
-                <CardContent className="p-6">
-                  <h3 className="font-bold text-gray-900 mb-4">اطلاعات تماس</h3>
-                  <div className="space-y-3 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">تلفن:</span>
-                      <span className="font-semibold">۰۲۱-۱۲۳۴۵۶۷۸</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">واتس‌اپ:</span>
-                      <span className="font-semibold">۰۹۱۲۳۴۵۶۷۸۹</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">ایمیل:</span>
-                      <span className="font-semibold">visa@company.com</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
             </div>
           </div>
         </div>

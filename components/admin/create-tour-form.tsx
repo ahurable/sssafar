@@ -1,7 +1,7 @@
 // components/admin/create-tour-form.tsx
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,11 +10,19 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Plus, Trash2, Calendar } from "lucide-react"
+import Link from "next/link"
 
 interface Price {
   type: string
   price: number
   description: string
+}
+
+interface TourCity {
+  id: string
+  name: string
+  description: string
+  image: string
 }
 
 interface Itinerary {
@@ -51,15 +59,37 @@ interface Transport {
 export function CreateTourForm() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [tourCities, setTourCities] = useState<TourCity[]>([])
+  const [citiesLoading, setCitiesLoading] = useState(true)
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    city: "",
     startDate: "",
     endDate: "",
     featured: false,
     isActive: true,
+    tourCityId: "" // Add tourCityId to form data
   })
+
+  // Fetch tour cities on component mount
+  useEffect(() => {
+    const fetchTourCities = async () => {
+      try {
+        const response = await fetch("/api/admin/tours/cities")
+        const data = await response.json()
+        if (response.ok) {
+          setTourCities(data.cities || [])
+        }
+      } catch (error) {
+        console.error("Error fetching tour cities:", error)
+      } finally {
+        setCitiesLoading(false)
+      }
+    }
+
+    fetchTourCities()
+  }, [])
 
   const [prices, setPrices] = useState<Price[]>([
     { type: "ADULT", price: 0, description: "" }
@@ -234,14 +264,28 @@ export function CreateTourForm() {
             />
           </div>
 
-          <div>
-            <Label htmlFor="title">نام شهر *</Label>
-            <Input
-              id="title"
-              value={formData.city}
-              onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-              required
-            />
+           <div>
+            <Label htmlFor="tourCityId">شهر تور</Label>
+            <select
+              id="tourCityId"
+              value={formData.tourCityId}
+              onChange={(e) => setFormData({ ...formData, tourCityId: e.target.value })}
+              className="w-full p-2 border rounded-md"
+            >
+              <option value="">انتخاب شهر (اختیاری)</option>
+              {citiesLoading ? (
+                <option value="" disabled>در حال بارگذاری...</option>
+              ) : (
+                tourCities.map((city) => (
+                  <option key={city.id} value={city.id}>
+                    {city.name}
+                  </option>
+                ))
+              )}
+            </select>
+            <p className="text-sm text-muted-foreground mt-1">
+              اگر شهر مورد نظر در لیست نیست، <Link href="/admin/tours/city/new" className="text-blue-600 hover:underline">از اینجا ایجاد کنید</Link>
+            </p>
           </div>
 
           <div>

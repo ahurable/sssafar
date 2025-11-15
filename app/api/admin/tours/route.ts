@@ -4,7 +4,7 @@ import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
-// Schema برای اعتبارسنجی داده‌های تور
+// Simplified schema - remove cityId requirement for now
 const createTourSchema = z.object({
   title: z.string().min(1, "عنوان تور الزامی است"),
   description: z.string().min(1, "توضیحات تور الزامی است"),
@@ -12,7 +12,7 @@ const createTourSchema = z.object({
   endDate: z.string().min(1, "تاریخ پایان الزامی است"),
   featured: z.boolean().optional().default(false),
   isActive: z.boolean().optional().default(true),
-  
+  tourCityId: z.string().optional(),
   prices: z.array(z.object({
     type: z.enum(["ADULT", "CHILD", "INFANT", "STUDENT", "SENIOR"]),
     price: z.number().min(0, "قیمت باید بیشتر از 0 باشد"),
@@ -52,22 +52,20 @@ const createTourSchema = z.object({
 });
 
 const convertToISO = (datetimeLocal: string): string => {
-  // datetime-local format: "YYYY-MM-DDTHH:mm"
-  // ISO format: "YYYY-MM-DDTHH:mm:ss.sssZ"
   return datetimeLocal ? `${datetimeLocal}:00.000Z` : datetimeLocal;
 };
 
 export const GET = async (request: NextRequest) => {
-  const session = await getSession();
-
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json(
-      { error: "لطفا وارد حساب کاربری خود شوید" },
-      { status: 401 }
-    );
-  }
-
   try {
+    const session = await getSession();
+
+    if (!session || session.role !== "ADMIN") {
+      return NextResponse.json(
+        { error: "لطفا وارد حساب کاربری خود شوید" },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
@@ -92,7 +90,8 @@ export const GET = async (request: NextRequest) => {
         },
         transports: {
           orderBy: { departure: "asc" }
-        }
+        },
+        tourCity: true
       },
       orderBy: {
         createdAt: "desc"
@@ -121,16 +120,16 @@ export const GET = async (request: NextRequest) => {
 };
 
 export const POST = async (request: NextRequest) => {
-  const session = await getSession();
-
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json(
-      { error: "لطفا وارد حساب کاربری خود شوید" },
-      { status: 401 }
-    );
-  }
-
   try {
+    const session = await getSession();
+
+    if (!session || session.role !== "ADMIN") {
+      return NextResponse.json(
+        { error: "لطفا وارد حساب کاربری خود شوید" },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     
     if (!body) {
@@ -139,6 +138,8 @@ export const POST = async (request: NextRequest) => {
         { status: 400 }
       );
     }
+
+    console.log("Received data:", body);
 
     // اعتبارسنجی داده‌ها
     const validatedData = createTourSchema.parse(body);
@@ -154,59 +155,78 @@ export const POST = async (request: NextRequest) => {
       );
     }
 
-    
-    if (endDate <= startDate) {
-      return NextResponse.json(
-        { error: "تاریخ پایان باید بعد از تاریخ شروع باشد" },
-        { status: 400 }
-      );
-    }
-
     const transportsWithISO = validatedData.transports.map(transport => ({
       ...transport,
       departure: new Date(convertToISO(transport.departure)),
       arrival: new Date(convertToISO(transport.arrival))
     }));
 
+    // Find or create a default city
+    let cityId = validatedData.tourCityId;
+    if (!cityId) {
+      const defaultCity = await prisma.tourCity.findFirst();
+      if (!defaultCity) {
+        // Create a default city
+        const newCity = await prisma.tourCity.create({
+          data: {
+            name: "شهر پیش فرض",
+            description: "شهر پیش فرض برای تورها",
+            image: ""
+          }
+        });
+        cityId = newCity.id;
+      } else {
+        cityId = defaultCity.id;
+      }
+    }
+
+    // Prepare tour data
+    const tourData: any = {
+      title: validatedData.title,
+      description: validatedData.description,
+      startDate: startDate,
+      endDate: endDate,
+      featured: validatedData.featured,
+      isActive: validatedData.isActive,
+      
+      // Required city relation
+      tourCityId: validatedData.tourCityId,
+      
+      prices: {
+        create: validatedData.prices
+      },
+      
+      itineraries: {
+        create: validatedData.itineraries.map(itinerary => ({
+          ...itinerary,
+          activities: itinerary.activities || null
+        }))
+      },
+      
+      routes: {
+        create: validatedData.routes
+      },
+      
+      rules: {
+        create: validatedData.rules
+      },
+      
+      transports: {
+        create: transportsWithISO
+      }
+    };
+
+
     // ایجاد تور با تمام داده‌های مرتبط
     const tour = await prisma.tour.create({
-      data: {
-        title: validatedData.title,
-        description: validatedData.description,
-        startDate: startDate,
-        endDate: endDate,
-        featured: validatedData.featured,
-        isActive: validatedData.isActive,
-        
-        prices: {
-          create: validatedData.prices
-        },
-        
-        itineraries: {
-          create: validatedData.itineraries.map(itinerary => ({
-            ...itinerary,
-            activities: itinerary.activities || null
-          }))
-        },
-        
-        routes: {
-          create: validatedData.routes
-        },
-        
-        rules: {
-          create: validatedData.rules
-        },
-        
-        transports: {
-          create: transportsWithISO
-        }
-      },
+      data: tourData,
       include: {
         prices: true,
         itineraries: true,
         routes: true,
         rules: true,
-        transports: true
+        transports: true,
+        tourCity: true
       }
     });
 
@@ -225,7 +245,10 @@ export const POST = async (request: NextRequest) => {
       return NextResponse.json(
         { 
           error: "داده‌های ارسالی معتبر نیستند",
-          details: error.errors
+          details: error.errors.map(err => ({
+            path: err.path.join('.'),
+            message: err.message
+          }))
         },
         { status: 400 }
       );

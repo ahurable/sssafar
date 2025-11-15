@@ -9,9 +9,10 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { Plus, Trash2, Calendar, Save, X } from "lucide-react"
+import { Plus, Trash2, Calendar, Save, X, MapPin } from "lucide-react"
 import { TourImageUpload } from "./tour-image-upload"
 import { toast } from "sonner"
+import Link from "next/link"
 
 interface Price {
   id?: string
@@ -64,6 +65,13 @@ interface TourImage {
   order: number
 }
 
+interface TourCity {
+  id: string
+  name: string
+  description: string
+  image: string
+}
+
 interface EditTourFormProps {
   tour: {
     id: string
@@ -79,6 +87,8 @@ interface EditTourFormProps {
     rules: Rule[]
     transports: Transport[]
     images: TourImage[]
+    tourCity?: TourCity
+    tourCityId?: string
   }
 }
 
@@ -111,6 +121,9 @@ const formatDateTimeForInput = (date: Date): string => {
 export function EditTourForm({ tour }: EditTourFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [tourCities, setTourCities] = useState<TourCity[]>([])
+  const [citiesLoading, setCitiesLoading] = useState(true)
+  
   const [formData, setFormData] = useState({
     title: tour.title,
     description: tour.description,
@@ -118,6 +131,7 @@ export function EditTourForm({ tour }: EditTourFormProps) {
     endDate: formatDateForInput(tour.endDate),
     featured: tour.featured,
     isActive: tour.isActive,
+    tourCityId: tour.tourCityId || "",
   })
 
   const [prices, setPrices] = useState<Price[]>(tour.prices)
@@ -132,6 +146,27 @@ export function EditTourForm({ tour }: EditTourFormProps) {
     }))
   )
   const [images, setImages] = useState<TourImage[]>(tour.images)
+
+  // Fetch tour cities on component mount
+  useEffect(() => {
+    const fetchTourCities = async () => {
+      try {
+        setCitiesLoading(true)
+        const response = await fetch('/api/admin/tours/cities')
+        if (response.ok) {
+          const data = await response.json()
+          setTourCities(data.cities || [])
+        }
+      } catch (error) {
+        console.error('Error fetching tour cities:', error)
+        toast.error("خطا در دریافت لیست شهرها")
+      } finally {
+        setCitiesLoading(false)
+      }
+    }
+
+    fetchTourCities()
+  }, [])
 
   // Convert transport dates for display in form
   const getTransportFormData = () => {
@@ -280,19 +315,22 @@ export function EditTourForm({ tour }: EditTourFormProps) {
     setLoading(true)
 
     try {
+      // Prepare the data for API
+      const submitData = {
+        ...formData,
+        prices: prices.filter(p => p.price > 0),
+        itineraries: itineraries.filter(i => i.title && i.description),
+        routes: routes.filter(r => r.city && r.country),
+        rules: rules.filter(r => r.title && r.description),
+        transports: transports.filter(t => t.fromCity && t.toCity)
+      }
+
       const response = await fetch(`/api/admin/tours/${tour.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          ...formData,
-          prices: prices.filter(p => p.price > 0),
-          itineraries: itineraries.filter(i => i.title && i.description),
-          routes: routes.filter(r => r.city && r.country),
-          rules: rules.filter(r => r.title && r.description),
-          transports: transports.filter(t => t.fromCity && t.toCity)
-        }),
+        body: JSON.stringify(submitData),
       })
 
       const data = await response.json()
@@ -319,7 +357,7 @@ export function EditTourForm({ tour }: EditTourFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* اطلاعات اصلی تور */}
-      <Card>
+      <Card className="py-6">
         <CardHeader>
           <CardTitle>اطلاعات اصلی تور</CardTitle>
         </CardHeader>
@@ -332,6 +370,41 @@ export function EditTourForm({ tour }: EditTourFormProps) {
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               required
             />
+          </div>
+
+          <div>
+            <Label htmlFor="tourCityId">شهر تور</Label>
+            <select
+              id="tourCityId"
+              value={formData.tourCityId}
+              onChange={(e) => setFormData({ ...formData, tourCityId: e.target.value })}
+              className="w-full p-2 border rounded-md"
+              disabled={citiesLoading}
+            >
+              <option value="">انتخاب شهر تور (اختیاری)</option>
+              {citiesLoading ? (
+                <option value="" disabled>در حال بارگذاری شهرها...</option>
+              ) : (
+                tourCities.map((city) => (
+                  <option key={city.id} value={city.id}>
+                    {city.name}
+                  </option>
+                ))
+              )}
+            </select>
+            <p className="text-sm text-muted-foreground mt-1">
+              {tour.tourCity ? (
+                <span className="flex items-center gap-1">
+                  <MapPin className="h-3 w-3" />
+                  شهر فعلی: {tour.tourCity.name}
+                </span>
+              ) : (
+                "اگر شهر مورد نظر در لیست نیست، "
+              )}
+              <Link href="/admin/tours/city/new" className="text-blue-600 hover:underline">
+                از اینجا ایجاد کنید
+              </Link>
+            </p>
           </div>
 
           <div>
@@ -395,7 +468,7 @@ export function EditTourForm({ tour }: EditTourFormProps) {
       />
 
       {/* قیمت‌ها */}
-      <Card>
+      <Card className="py-6">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>قیمت‌ها</CardTitle>
@@ -407,7 +480,7 @@ export function EditTourForm({ tour }: EditTourFormProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           {prices.map((price, index) => (
-            <div key={price.id || index} className="flex gap-4 items-start p-4 border rounded-lg">
+            <div key={price.id || `price-${index}`} className="flex gap-4 items-start p-4 border rounded-lg">
               <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label>نوع قیمت</Label>
@@ -457,7 +530,7 @@ export function EditTourForm({ tour }: EditTourFormProps) {
       </Card>
 
       {/* برنامه سفر */}
-      <Card>
+      <Card className="py-6">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>برنامه سفر</CardTitle>
@@ -469,7 +542,7 @@ export function EditTourForm({ tour }: EditTourFormProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           {itineraries.map((itinerary, index) => (
-            <div key={itinerary.id || index} className="p-4 border rounded-lg space-y-4">
+            <div key={itinerary.id || `itinerary-${index}`} className="p-4 border rounded-lg space-y-4">
               <div className="flex items-center justify-between">
                 <h4 className="font-medium">روز {itinerary.day}</h4>
                 {itineraries.length > 1 && (
@@ -509,7 +582,7 @@ export function EditTourForm({ tour }: EditTourFormProps) {
       </Card>
 
       {/* مسیر تور */}
-      <Card>
+      <Card className="py-6">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>مسیر تور</CardTitle>
@@ -521,7 +594,7 @@ export function EditTourForm({ tour }: EditTourFormProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           {routes.map((route, index) => (
-            <div key={route.id || index} className="p-4 border rounded-lg">
+            <div key={route.id || `route-${index}`} className="p-4 border rounded-lg">
               <div className="flex items-center justify-between mb-4">
                 <h4 className="font-medium">مقصد {index + 1}</h4>
                 {routes.length > 1 && (
@@ -576,7 +649,7 @@ export function EditTourForm({ tour }: EditTourFormProps) {
       </Card>
 
       {/* قوانین تور */}
-      <Card>
+      <Card className="py-6">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>قوانین تور</CardTitle>
@@ -588,7 +661,7 @@ export function EditTourForm({ tour }: EditTourFormProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           {rules.map((rule, index) => (
-            <div key={rule.id || index} className="flex gap-4 items-start p-4 border rounded-lg">
+            <div key={rule.id || `rule-${index}`} className="flex gap-4 items-start p-4 border rounded-lg">
               <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label>عنوان قانون *</Label>
@@ -624,7 +697,7 @@ export function EditTourForm({ tour }: EditTourFormProps) {
       </Card>
 
       {/* حمل و نقل */}
-      <Card>
+      <Card className="py-6">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>حمل و نقل</CardTitle>
@@ -636,7 +709,7 @@ export function EditTourForm({ tour }: EditTourFormProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           {transportFormData.map((transport, index) => (
-            <div key={transport.id || index} className="p-4 border rounded-lg space-y-4">
+            <div key={transport.id || `transport-${index}`} className="p-4 border rounded-lg space-y-4">
               <div className="flex items-center justify-between">
                 <h4 className="font-medium">مسیر حمل و نقل {index + 1}</h4>
                 {transportFormData.length > 1 && (
