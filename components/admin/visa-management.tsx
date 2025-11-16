@@ -164,7 +164,7 @@ export function VisaManagement() {
                     </div>
                     
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" onClick={() => router.push(`/admin/visa/${service.id}`)}>
+                      <Button variant="outline" size="sm" onClick={() => router.push(`/admin/visa/${service.id}/edit`)}>
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button variant="destructive" size="sm" onClick={() => handleDelete(service.id)}>
