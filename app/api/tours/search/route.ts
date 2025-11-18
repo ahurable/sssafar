@@ -15,7 +15,7 @@ export const GET = async (request: NextRequest) => {
         if (from && to) {
             const tours = await prisma.tour.findMany({
                 where: {
-                    tourCityId: city,
+                    cityId: city,
                     startDate: from,
                     endDate: to
                 }
@@ -25,9 +25,10 @@ export const GET = async (request: NextRequest) => {
         else if (city) {
             const tours = await prisma.tour.findMany({
                 where: {
-                    tourCityId: city
+                    cityId: city
                 }
             })
+            console.log(tours)
             return NextResponse.json(tours, { status: 200 })
         } else {
             return NextResponse.json({

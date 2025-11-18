@@ -181,7 +181,7 @@ export default function CipDetailPage({ params }: { params: { slug: string } }) 
                   
                   <div className="flex items-center gap-3 ">
                     {service.featured && (
-                      <Badge className="bg-white text-blue-900">
+                      <Badge className="bg-[#fffefe] text-blue-900">
                         ویژه
                       </Badge>
                     )}

@@ -186,7 +186,7 @@ export function TourImageUpload({ tourId, images, onImagesChange }: TourImageUpl
                     size="sm"
                     variant={image.isPrimary ? "default" : "outline"}
                     onClick={() => handleSetPrimary(image.id)}
-                    className="text-white border-white hover:bg-white hover:text-black"
+                    className="text-white border-white hover:bg-[#fffefe] hover:text-black"
                   >
                     {image.isPrimary ? <Star className="h-4 w-4 fill-current" /> : <StarOff className="h-4 w-4" />}
                   </Button>

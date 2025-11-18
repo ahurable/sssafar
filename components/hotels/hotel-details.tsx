@@ -473,7 +473,7 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
                     <span>موقعیت مکانی</span>
                   </div>
                   {hotelData.HotelLabels.map((label, index) => (
-                    <Badge key={index} className="bg-white/20 border-0">
+                    <Badge key={index} className="bg-[#fffefe]/20 border-0">
                       {label}
                     </Badge>
                   ))}
@@ -483,7 +483,7 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
                 <Button
                   variant="secondary"
                   size="icon"
-                  className="h-8 w-8 bg-white/20 hover:bg-white/30 border-0"
+                  className="h-8 w-8 bg-[#fffefe]/20 hover:bg-[#fffefe]/30 border-0"
                   onClick={() => toggleFavorite(hotelData.HotelId)}
                 >
                   <Heart 
@@ -571,21 +571,21 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
         <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center">
           <button
             onClick={closeImageModal}
-            className="absolute top-4 right-4 text-white p-2 hover:bg-white/20"
+            className="absolute top-4 right-4 text-white p-2 hover:bg-[#fffefe]/20"
           >
             <X className="h-6 w-6" />
           </button>
           
           <button
             onClick={prevImage}
-            className="absolute left-4 text-white p-2 hover:bg-white/20"
+            className="absolute left-4 text-white p-2 hover:bg-[#fffefe]/20"
           >
             <ChevronLeftIcon className="h-6 w-6" />
           </button>
           
           <button
             onClick={nextImage}
-            className="absolute right-4 text-white p-2 hover:bg-white/20"
+            className="absolute right-4 text-white p-2 hover:bg-[#fffefe]/20"
           >
             <ChevronRight className="h-6 w-6" />
           </button>
@@ -996,7 +996,7 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
 
         {/* Right Column - Booking Card */}
         <div className="space-y-4">
-          <Card className="sticky top-14 border bg-white border-gray-200">
+          <Card className="sticky top-14 border bg-[#fffefe] border-gray-200">
             <CardContent className="p-4">
               <h3 className="text-lg font-bold mb-3">رزرو هتل</h3>
               

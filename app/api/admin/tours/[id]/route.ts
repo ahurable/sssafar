@@ -53,6 +53,7 @@ export const PUT = async (
         endDate: new Date(body.endDate),
         featured: body.featured,
         isActive: body.isActive,
+        cityId: body.tourCityId,
       },
       include: {
         prices: true,

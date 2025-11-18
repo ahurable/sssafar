@@ -1,7 +1,7 @@
 // components/admin/create-city-tour-form.tsx
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,12 +9,14 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, Trash2, MapPin } from "lucide-react"
-import  MapSelector  from "@/components/admin/leaflet-map"
+import { Plus, Trash2, MapPin, Calendar, Upload, X } from "lucide-react"
+import MapSelector from "@/components/admin/leaflet-map"
+import Link from "next/link"
 
 interface Price {
   type: string
   price: number
+  date: Date
   currency: string
 }
 
@@ -36,29 +38,60 @@ interface Itinerary {
   duration: number
 }
 
+interface City {
+  id: string
+  name: string
+  description: string
+  image: string
+}
+
 export function CreateCityTourForm() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number; address: string } | null>(null)
   const [selectedMeetingPoint, setSelectedMeetingPoint] = useState<{ lat: number; lng: number; address: string } | null>(null)
 
+  const [cities, setCities] = useState<City[]>([])
+  const [citiesLoading, setCitiesLoading] = useState(true)
+  const [images, setImages] = useState<string[]>([])
+
   const [formData, setFormData] = useState({
     title: "",
-    slug: "",
     description: "",
     shortDescription: "",
+    cityId: "",
     city: "",
     location: "",
     duration: "",
     maxCapacity: "",
     featured: false,
     isActive: true,
-    images: [""]
   })
 
+  useEffect(() => {
+    const fetchTourCities = async () => {
+      try {
+        const response = await fetch("/api/admin/tours/cities")
+        const data = await response.json()
+        if (response.ok) {
+          setCities(data.cities || [])
+        }
+      } catch (error) {
+        console.error("Error fetching tour cities:", error)
+      } finally {
+        setCitiesLoading(false)
+      }
+    }
+
+    fetchTourCities()
+  }, [])
+
+  const today = new Date()
+
   const [prices, setPrices] = useState<Price[]>([
-    { type: "بزرگسال", price: 0, currency: "IRR" },
-    { type: "کودک", price: 0, currency: "IRR" }
+    { type: "بزرگسال", price: 0, currency: "IRR", date:  today },
+    { type: "کودک", price: 0, currency: "IRR", date: today }
   ])
 
   const [inclusions, setInclusions] = useState<Inclusion[]>([{ id: "1", item: "" }])
@@ -67,18 +100,23 @@ export function CreateCityTourForm() {
     { id: "1", order: 1, title: "", description: "", duration: 0 }
   ])
 
+  const formatDate = (date:any) => {
+    if (!date) return "";
+    return new Date(date).toISOString().split("T")[0];
+  };
+
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
-  const handlePriceChange = (index: number, field: keyof Price, value: string | number) => {
+  const handlePriceChange = (index: number, field: keyof Price, value: string | number | Date) => {
     const newPrices = [...prices]
     newPrices[index] = { ...newPrices[index], [field]: value }
     setPrices(newPrices)
   }
 
   const addPrice = () => {
-    setPrices([...prices, { type: "", price: 0, currency: "IRR" }])
+    setPrices([...prices, { type: "", price: 0, currency: "IRR", date: today }])
   }
 
   const removePrice = (index: number) => {
@@ -137,12 +175,46 @@ export function CreateCityTourForm() {
 
   const removeItinerary = (id: string) => {
     if (itineraries.length > 1) {
-      // به روزرسانی ترتیب مراحل باقی مانده
       const filteredItineraries = itineraries
         .filter(item => item.id !== id)
         .map((item, index) => ({ ...item, order: index + 1 }))
       setItineraries(filteredItineraries)
     }
+  }
+
+  // Image upload handler
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+
+    setUploading(true)
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]
+        const formData = new FormData()
+        formData.append('file', file)
+
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          setImages(prev => [...prev, data.url])
+        } else {
+          console.error('Upload failed for file:', file.name)
+        }
+      }
+    } catch (error) {
+      console.error('Error uploading images:', error)
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const removeImage = (index: number) => {
+    setImages(images.filter((_, i) => i !== index))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -165,6 +237,7 @@ export function CreateCityTourForm() {
           meetingLongitude: selectedMeetingPoint?.lng,
           duration: parseInt(formData.duration) || 0,
           maxCapacity: parseInt(formData.maxCapacity) || 0,
+          images: images,
           prices: prices.filter(p => p.type && p.price > 0),
           inclusions: inclusions.filter(i => i.item.trim() !== ""),
           exclusions: exclusions.filter(i => i.item.trim() !== ""),
@@ -175,7 +248,7 @@ export function CreateCityTourForm() {
       })
 
       if (response.ok) {
-        router.push("/admin/city-tours")
+        router.push("/admin/citytours")
         router.refresh()
       } else {
         const error = await response.json()
@@ -192,7 +265,7 @@ export function CreateCityTourForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* اطلاعات اصلی */}
-      <Card>
+      <Card className="py-6">
         <CardHeader>
           <CardTitle>اطلاعات اصلی گشت</CardTitle>
         </CardHeader>
@@ -206,16 +279,6 @@ export function CreateCityTourForm() {
                 onChange={(e) => handleInputChange("title", e.target.value)}
                 required
                 placeholder="مثلا: گشت شهری پاریس"
-              />
-            </div>
-            <div>
-              <Label htmlFor="slug">Slug *</Label>
-              <Input
-                id="slug"
-                value={formData.slug}
-                onChange={(e) => handleInputChange("slug", e.target.value)}
-                required
-                placeholder="paris-city-tour"
               />
             </div>
           </div>
@@ -244,16 +307,29 @@ export function CreateCityTourForm() {
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <Label htmlFor="city">شهر *</Label>
-              <Input
-                id="city"
-                value={formData.city}
-                onChange={(e) => handleInputChange("city", e.target.value)}
-                required
-                placeholder="مثلا: پاریس"
-              />
+              <Label htmlFor="tourCityId">شهر تور</Label>
+              <select
+                id="cityId"
+                value={formData.cityId}
+                onChange={(e) => setFormData({ ...formData, cityId: e.target.value })}
+                className="w-full p-2 border rounded-md"
+              >
+                <option value="">انتخاب شهر (اختیاری)</option>
+                {citiesLoading ? (
+                  <option value="" disabled>در حال بارگذاری...</option>
+                ) : (
+                  cities.map((city) => (
+                    <option key={city.id} value={city.id}>
+                      {city.name}
+                    </option>
+                  ))
+                )}
+              </select>
+              <p className="text-sm text-muted-foreground mt-1">
+                اگر شهر مورد نظر در لیست نیست، <Link href="/admin/tours/city/new" className="text-blue-600 hover:underline">از اینجا ایجاد کنید</Link>
+              </p>
             </div>
             <div>
               <Label htmlFor="duration">مدت زمان (دقیقه) *</Label>
@@ -281,8 +357,68 @@ export function CreateCityTourForm() {
         </CardContent>
       </Card>
 
+      {/* آپلود تصاویر */}
+      <Card className="py-6">
+        <CardHeader>
+          <CardTitle>تصاویر گشت</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label>آپلود تصاویر</Label>
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+              <Input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleImageUpload}
+                disabled={uploading}
+                className="hidden"
+                id="image-upload"
+              />
+              <Label 
+                htmlFor="image-upload" 
+                className="cursor-pointer flex flex-col items-center justify-center space-y-2"
+              >
+                <Upload className="h-8 w-8 text-gray-400" />
+                <span className="text-sm text-gray-600">
+                  {uploading ? "در حال آپلود..." : "برای آپلود تصاویر کلیک کنید یا فایل‌ها را اینجا بکشید"}
+                </span>
+                <span className="text-xs text-gray-500">فرمت‌های مجاز: JPG, PNG, WebP</span>
+              </Label>
+            </div>
+          </div>
+
+          {/* Preview uploaded images */}
+          {images.length > 0 && (
+            <div>
+              <Label>تصاویر آپلود شده:</Label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
+                {images.map((image, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={image}
+                      alt={`Uploaded ${index + 1}`}
+                      className="w-full h-24 object-cover rounded-lg"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => removeImage(index)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* موقعیت مکانی */}
-      <Card>
+      <Card className="py-6">
         <CardHeader>
           <CardTitle>موقعیت مکانی</CardTitle>
         </CardHeader>
@@ -318,7 +454,7 @@ export function CreateCityTourForm() {
       </Card>
 
       {/* قیمت‌ها */}
-      <Card>
+      <Card className="py-6">
         <CardHeader>
           <CardTitle>قیمت‌ها</CardTitle>
         </CardHeader>
@@ -342,17 +478,32 @@ export function CreateCityTourForm() {
                   min="0"
                 />
               </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => removePrice(index)}
-                disabled={prices.length === 1}
-                className="mb-1"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
+              {/* تاریخ شروع و پایان */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="startDate">تاریخ شروع *</Label>
+                  <Input
+                    id={`startDate-${index}`}
+                    type="date"
+                    value={formatDate(price.date)}
+                    onChange={(e) =>
+                      handlePriceChange(index, "date", new Date(e.target.value))
+                    }
+                    required
+                  />
+                </div>
+              </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => removePrice(index)}
+                  disabled={prices.length === 1}
+                  className="mb-1"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
           ))}
           <Button type="button" variant="outline" onClick={addPrice}>
             <Plus className="h-4 w-4 ml-2" />
@@ -363,7 +514,7 @@ export function CreateCityTourForm() {
 
       {/* شامل‌ها و غیر شامل‌ها */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
+        <Card className="py-6">
           <CardHeader>
             <CardTitle>شامل‌ها</CardTitle>
           </CardHeader>
@@ -393,7 +544,7 @@ export function CreateCityTourForm() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="py-6">
           <CardHeader>
             <CardTitle>غیر شامل‌ها</CardTitle>
           </CardHeader>
@@ -425,7 +576,7 @@ export function CreateCityTourForm() {
       </div>
 
       {/* برنامه سفر */}
-      <Card>
+      <Card className="py-6">
         <CardHeader>
           <CardTitle>برنامه سفر</CardTitle>
         </CardHeader>
@@ -484,7 +635,7 @@ export function CreateCityTourForm() {
       </Card>
 
       {/* تنظیمات */}
-      <Card>
+      <Card className="py-6">
         <CardHeader>
           <CardTitle>تنظیمات</CardTitle>
         </CardHeader>
@@ -516,11 +667,11 @@ export function CreateCityTourForm() {
       <div className="flex gap-4 pt-6">
         <Button 
           type="submit" 
-          disabled={loading}
+          disabled={loading || uploading}
           className="flex-1"
           size="lg"
         >
-          {loading ? "در حال ایجاد..." : "ایجاد گشت شهری"}
+          {loading ? "در حال ایجاد..." : uploading ? "در حال آپلود..." : "ایجاد گشت شهری"}
         </Button>
         <Button 
           type="button" 

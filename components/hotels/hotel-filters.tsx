@@ -439,11 +439,11 @@ export function HotelFilters() {
             if (!open) setActiveFilterSection(null)
           }}>
             <SheetTrigger asChild>
-              <Button className="flex-1 shadow-lg bg-white rounded-full border text-black">
+              <Button className="flex-1 shadow-lg bg-[#fffefe] rounded-full border text-black">
                 <Filter className="h-5 w-5 ml-2" />
                 فیلترها
                 {getActiveFiltersCount() > 0 && (
-                  <Badge className="mr-2 bg-white text-emerald-600 px-2 py-1 text-xs">
+                  <Badge className="mr-2 bg-[#fffefe] text-emerald-600 px-2 py-1 text-xs">
                     {getActiveFiltersCount()}
                   </Badge>
                 )}
@@ -481,7 +481,7 @@ export function HotelFilters() {
               <div className="h-max overflow-y-auto py-4">
                 <FilterContent showAllSections={true} />
               </div>
-              <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t">
+              <div className="absolute bottom-0 left-0 right-0 p-4 bg-[#fffefe] border-t">
                 <div className="flex gap-2">
                   <Button 
                     onClick={handleApplyFilters}
@@ -547,7 +547,7 @@ export function HotelFilters() {
             <div className="h-max overflow-y-auto p-4 pb-24">
               <FilterContent showAllSections={false} />
             </div>
-            <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t">
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-[#fffefe] border-t">
               <Button 
                 onClick={handleApplyFilters}
                 className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium h-14 text-lg"

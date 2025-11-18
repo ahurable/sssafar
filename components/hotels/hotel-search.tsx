@@ -338,7 +338,7 @@ const HotelSearch = () => {
     return (
       <div 
         ref={suggestionsRef}
-        className="absolute top-full right-0 left-0 bg-white border border-gray-300 z-50 max-h-80 overflow-y-auto mt-1"
+        className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 z-50 max-h-80 overflow-y-auto mt-1"
       >
         {suggestions.map((suggestion, index) => (
           <div
@@ -391,7 +391,7 @@ const HotelSearch = () => {
     return (
       <div 
         ref={guestsRoomsRef}
-        className="absolute top-full right-0 left-0 bg-white border border-gray-300 z-50 p-4 mt-1"
+        className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 z-50 p-4 mt-1"
       >
         <div className="space-y-4">
           {/* Guests Selector */}
@@ -475,7 +475,7 @@ const HotelSearch = () => {
               ref={inputRef}
               id="hotel-city" 
               placeholder="تهران، استانبول، دبی..." 
-              className={`pr-10 h-12 border border-gray-300 bg-white text-black placeholder-gray-500 ${
+              className={`pr-10 h-12 border border-gray-300 bg-[#fffefe] text-black placeholder-gray-500 ${
                 errors.city 
                   ? 'border-red-500 bg-red-500' 
                   : 'border-gray-300'
@@ -536,7 +536,7 @@ const HotelSearch = () => {
             className="guests-rooms-trigger cursor-pointer"
             onClick={() => setShowGuestsRooms(!showGuestsRooms)}
           >
-            <div className="relative h-12 border border-gray-300 bg-white hover:border-gray-400 flex items-center justify-between px-3">
+            <div className="relative h-12 border border-gray-300 bg-[#fffefe] hover:border-gray-400 flex items-center justify-between px-3">
               <div className="flex items-center gap-3">
                 <Users className="h-4 w-4 text-gray-400" />
                 <Bed className="h-4 w-4 text-gray-400" />

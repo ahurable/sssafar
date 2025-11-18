@@ -71,7 +71,7 @@ const TourSearch = () => {
             <Input 
               id="tour-destination" 
               placeholder="کیش، استانبول، آنتالیا..." 
-              className="pr-10 h-12 border border-gray-300 bg-white text-black placeholder-gray-500"
+              className="pr-10 h-12 border border-gray-300 bg-[#fffefe] text-black placeholder-gray-500"
               value={tourSearch.destination}
               onChange={(e) => setTourSearch(prev => ({ ...prev, destination: e.target.value }))}
             />

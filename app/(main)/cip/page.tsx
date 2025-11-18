@@ -65,9 +65,9 @@ function ServiceModal({
       {/* Modal Container - Full screen on mobile, centered on desktop */}
       <div className="relative w-full h-full md:flex md:items-center md:justify-center md:p-4 z-50">
         {/* Modal Content - Full screen on mobile, contained on desktop */}
-        <div className="bg-white w-full h-full md:w-full md:max-w-2xl md:h-auto md:max-h-[90vh] flex flex-col overflow-hidden">
+        <div className="bg-[#fffefe] w-full h-full md:w-full md:max-w-2xl md:h-auto md:max-h-[90vh] flex flex-col overflow-hidden">
           {/* Header - Sticky */}
-          <div className="flex items-center justify-between p-4 md:p-6 border-b bg-white sticky top-0 z-10">
+          <div className="flex items-center justify-between p-4 md:p-6 border-b bg-[#fffefe] sticky top-0 z-10">
             <h2 className="text-lg md:text-xl font-bold text-gray-900 truncate flex-1 mr-3">
               {service.title}
             </h2>
@@ -164,7 +164,7 @@ function ServiceModal({
           </div>
 
           {/* Footer - Sticky */}
-          <div className="flex gap-3 p-4 md:p-6 border-t bg-white sticky bottom-0 z-10">
+          <div className="flex gap-3 p-4 md:p-6 border-t bg-[#fffefe] sticky bottom-0 z-10">
             <Button 
               variant="outline" 
               onClick={onClose} 

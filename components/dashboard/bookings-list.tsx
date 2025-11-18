@@ -322,7 +322,7 @@ export function BookingsList() {
                 ? "border-red-300 bg-red-50/50 hover:bg-red-50" 
                 : booking.status === "CONFIRMED" 
                   ? "border-sky-300 bg-sky-50/50 hover:bg-sky-50"
-                  : "border-gray-200 bg-white hover:bg-gray-50"
+                  : "border-gray-200 bg-[#fffefe] hover:bg-gray-50"
               }
             `}
           >

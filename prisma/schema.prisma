@@ -221,26 +221,24 @@ model Tour {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tourCity   TourCity? @relation(fields: [tourCityId], references: [id])
-  tourCityId String?
-  cityTour   CityTour? @relation(fields: [cityTourId], references: [id])
-  cityTourId String?
+  city   City?   @relation(fields: [cityId], references: [id])
+  cityId String?
 
   reservations Reservation[]
 
-  @@index([isActive])
   @@index([featured])
   @@index([startDate, endDate])
   @@map("tours")
 }
 
-model TourCity {
+model City {
   id          String @id @default(cuid())
   name        String
   description String
   image       String
 
-  tours Tour[]
+  tours     Tour[]
+  cityTours CityTour[]
 }
 
 model TourImage {
@@ -345,7 +343,6 @@ model CityTour {
   slug             String   @unique
   description      String
   shortDescription String
-  city             String
   location         String
   latitude         Float?
   longitude        Float?
@@ -365,7 +362,8 @@ model CityTour {
   bookings    Reservation[]
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
-  tours       Tour[]
+  city        City?               @relation(fields: [cityId], references: [id])
+  cityId      String?
 
   @@map("city_tours")
 }
@@ -375,6 +373,7 @@ model CityTourPrice {
   type     String // adult, child, infant, etc.
   price    Int
   currency String   @default("IRR")
+  date     DateTime
   tourId   String
   tour     CityTour @relation(fields: [tourId], references: [id], onDelete: Cascade)
 
@@ -738,6 +737,7 @@ enum InvoiceKind {
   TRAIN
   CHARGE
   TOUR
+  ACTIVITY
 }
 
 enum InvoiceState {

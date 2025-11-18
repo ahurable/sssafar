@@ -1,4 +1,4 @@
-// app/admin/city-tours/page.tsx
+// app/admin/citytours/page.tsx
 import { getSession } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { CityToursManagement } from "@/components/admin/city-tours-management"

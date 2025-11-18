@@ -73,7 +73,7 @@ export function TourCard({ tour }: TourCardProps) {
             </Badge>
           )}
           <div className="absolute bottom-3 right-3">
-            <Badge variant="secondary" className="bg-white/90 backdrop-blur-sm">
+            <Badge variant="secondary" className="bg-[#fffefe]/90 backdrop-blur-sm">
               {getDuration()} روز
             </Badge>
           </div>

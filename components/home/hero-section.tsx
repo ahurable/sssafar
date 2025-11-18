@@ -81,7 +81,7 @@ export function HeroSlider({ posts }: HeroSliderProps) {
                     <span className="px-3 py-1 bg-red-500 text-white text-sm rounded-full font-semibold">
                       ویژه
                     </span>
-                    <span className="px-3 py-1 bg-white bg-opacity-20 text-black text-sm rounded-full backdrop-blur-sm">
+                    <span className="px-3 py-1 bg-[#fffefe] bg-opacity-20 text-black text-sm rounded-full backdrop-blur-sm">
                       {post.category}
                     </span>
                   </div>
@@ -94,7 +94,7 @@ export function HeroSlider({ posts }: HeroSliderProps) {
                     <Link href={`/posts/${post.id}`}>
                       <Button 
                         size="lg" 
-                        className="bg-white text-gray-900 hover:bg-gray-100 font-semibold text-lg px-8 py-3 rounded-full shadow-2xl transition-all duration-300 hover:scale-105"
+                        className="bg-[#fffefe] text-gray-900 hover:bg-gray-100 font-semibold text-lg px-8 py-3 rounded-full shadow-2xl transition-all duration-300 hover:scale-105"
                       >
                         مطالعه مقاله
                       </Button>
@@ -103,7 +103,7 @@ export function HeroSlider({ posts }: HeroSliderProps) {
                       <Button 
                         variant="outline" 
                         size="lg"
-                        className="border-white text-black hover:bg-white hover:text-gray-900 font-semibold text-lg px-8 py-3 rounded-full backdrop-blur-sm transition-all duration-300"
+                        className="border-white text-black hover:bg-[#fffefe] hover:text-gray-900 font-semibold text-lg px-8 py-3 rounded-full backdrop-blur-sm transition-all duration-300"
                       >
                         مشاهده همه مقالات
                       </Button>
@@ -121,14 +121,14 @@ export function HeroSlider({ posts }: HeroSliderProps) {
         <>
           <button
             onClick={prevSlide}
-            className="absolute left-2 top-1/2 transform -translate-y-1/2 z-20 bg-white opacity-20 hover:bg-opacity-30 text-black p-3 rounded-full backdrop-blur-sm transition-all duration-300 hover:scale-110"
+            className="absolute left-2 top-1/2 transform -translate-y-1/2 z-20 bg-[#fffefe] opacity-20 hover:bg-opacity-30 text-black p-3 rounded-full backdrop-blur-sm transition-all duration-300 hover:scale-110"
             aria-label="مقاله قبلی"
           >
             <ChevronLeft className="h-6 w-6" />
           </button>
           <button
             onClick={nextSlide}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 z-20 bg-white opacity-20 hover:bg-opacity-30 text-black p-3 rounded-full backdrop-blur-sm transition-all duration-300 hover:scale-110"
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 z-20 bg-[#fffefe] opacity-20 hover:bg-opacity-30 text-black p-3 rounded-full backdrop-blur-sm transition-all duration-300 hover:scale-110"
             aria-label="مقاله بعدی"
           >
             <ChevronRight className="h-6 w-6" />
@@ -145,8 +145,8 @@ export function HeroSlider({ posts }: HeroSliderProps) {
               onClick={() => goToSlide(index)}
               className={`w-3 h-3 rounded-full transition-all duration-300 ${
                 index === currentSlide
-                  ? "bg-white scale-125"
-                  : "bg-white bg-opacity-50 hover:bg-opacity-75"
+                  ? "bg-[#fffefe] scale-125"
+                  : "bg-[#fffefe] bg-opacity-50 hover:bg-opacity-75"
               }`}
               aria-label={`برو به اسلاید ${index + 1}`}
             />
@@ -159,9 +159,9 @@ export function HeroSlider({ posts }: HeroSliderProps) {
 
       {/* Progress Bar */}
       {featuredPosts.length > 1 && isAutoPlaying && (
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-white bg-opacity-20 z-20">
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#fffefe] bg-opacity-20 z-20">
           <div
-            className="h-full bg-white transition-all duration-5000 ease-linear"
+            className="h-full bg-[#fffefe] transition-all duration-5000 ease-linear"
             style={{
               width: `${((currentSlide + 1) / featuredPosts.length) * 100}%`,
             }}

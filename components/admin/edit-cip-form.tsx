@@ -198,7 +198,7 @@ export function EditCipForm({ service }: EditCipFormProps) {
     }
 
     return (
-      <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto airport-suggestions-container">
+      <div className="absolute top-full left-0 right-0 bg-[#fffefe] border border-gray-200 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto airport-suggestions-container">
         {airportSuggestions.map((airport) => (
           <div
             key={airport.id}

@@ -46,7 +46,7 @@ export function FeaturesSection() {
             return (
               <Card
                 key={index}
-                className="border border-gray-300 bg-white shadow-sm"
+                className="border border-gray-300 bg-[#fffefe] shadow-sm"
               >
                 <CardContent className="flex flex-col items-center p-6 text-center">
                   <div className="mb-4 flex h-16 w-16 items-center justify-center bg-gray-100">

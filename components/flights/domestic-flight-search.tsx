@@ -379,7 +379,7 @@ const DomesticFlightSearch = () => {
         return (
             <div 
                 ref={suggestionsRef}
-                className="absolute top-full right-0 left-0 bg-white border border-gray-300 shadow-lg z-50 max-h-80 overflow-y-auto mt-1"
+                className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 shadow-lg z-50 max-h-80 overflow-y-auto mt-1"
             >
                 {suggestions.map((suggestion, index) => (
                     <div
@@ -427,7 +427,7 @@ const DomesticFlightSearch = () => {
         return (
             <div 
                 ref={passengersRef}
-                className="absolute top-full right-0 left-0 bg-white border border-gray-300 shadow-lg z-50 p-4 mt-1"
+                className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 shadow-lg z-50 p-4 mt-1"
             >
                 <div className="space-y-4">
                     {/* Adults Selector */}
@@ -533,7 +533,7 @@ const DomesticFlightSearch = () => {
                     <div className="relative">
                         <select 
                             id="domestic-flight-trip-type"
-                            className="w-full h-12 border rounded-full border-gray-300 bg-white text-black px-3 pr-10 appearance-none"
+                            className="w-full h-12 border rounded-full border-gray-300 bg-[#fffefe] text-black px-3 pr-10 appearance-none"
                             value={domesticFlightSearch.tripType}
                             onChange={(e) => setDomesticFlightSearch(prev => ({ ...prev, tripType: e.target.value }))}
                         >
@@ -549,7 +549,7 @@ const DomesticFlightSearch = () => {
                     <div className="relative">
                         <select 
                             id="domestic-flight-cabin-class"
-                            className="w-full rounded-full h-12 border border-gray-300 bg-white text-black px-3 pr-10 appearance-none"
+                            className="w-full rounded-full h-12 border border-gray-300 bg-[#fffefe] text-black px-3 pr-10 appearance-none"
                             value={domesticFlightSearch.cabinClass}
                             onChange={(e) => setDomesticFlightSearch(prev => ({ ...prev, cabinClass: e.target.value }))}
                         >
@@ -573,7 +573,7 @@ const DomesticFlightSearch = () => {
                             ref={fromInputRef}
                             id="domestic-flight-from" 
                             placeholder="نام فرودگاه، مثال: تهران (IKA)" 
-                            className={`pr-10 h-12 border border-gray-300 bg-white text-black placeholder-gray-500 ${
+                            className={`pr-10 h-12 border border-gray-300 bg-[#fffefe] text-black placeholder-gray-500 ${
                                 errors.origin 
                                     ? 'border-red-500 bg-red-500' 
                                     : 'border-gray-300'
@@ -608,7 +608,7 @@ const DomesticFlightSearch = () => {
                             ref={toInputRef}
                             id="domestic-flight-destination" 
                             placeholder="نام فرودگاه مقصد مثال: مشهد (MHD)" 
-                            className={`pr-10 h-12 border border-gray-300 bg-white text-black placeholder-gray-500 ${
+                            className={`pr-10 h-12 border border-gray-300 bg-[#fffefe] text-black placeholder-gray-500 ${
                                 errors.destination 
                                     ? 'border-red-500 bg-red-500' 
                                     : 'border-gray-300'
@@ -677,7 +677,7 @@ const DomesticFlightSearch = () => {
                         className="passengers-trigger cursor-pointer"
                         onClick={() => setShowPassengers(!showPassengers)}
                     >
-                        <div className="relative h-12 border border-gray-300 bg-white hover:border-gray-400 flex items-center justify-between px-3">
+                        <div className="relative h-12 border border-gray-300 bg-[#fffefe] hover:border-gray-400 flex items-center justify-between px-3">
                             <div className="flex items-center gap-2">
                                 <Users className="h-4 w-4 text-gray-400" />
                                 <User className="h-4 w-4 text-gray-400" />

@@ -89,7 +89,7 @@ export default async function VisaDetailPage({ params }: Params) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content */}
             <div className="lg:col-span-2">
-              <Card className="overflow-hidden bg-white">
+              <Card className="overflow-hidden bg-[#fffefe]">
                 {service.image && (
                   <div className="h-64 md:h-80 overflow-hidden">
                     <img
@@ -179,7 +179,7 @@ export default async function VisaDetailPage({ params }: Params) {
                       </h2>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {service.features.map((feature: string, index: number) => (
-                          <div key={index} className="flex items-center p-3 bg-white border border-green-200">
+                          <div key={index} className="flex items-center p-3 bg-[#fffefe] border border-green-200">
                             <Check className="h-5 w-5 text-green-500 ml-2 flex-shrink-0" />
                             <span className="text-gray-700">{feature}</span>
                           </div>
@@ -197,7 +197,7 @@ export default async function VisaDetailPage({ params }: Params) {
                       </h2>
                       <div className="space-y-3">
                         {service.requirements.map((requirement: string, index: number) => (
-                          <div key={index} className="flex items-start p-3 bg-white border border-blue-200">
+                          <div key={index} className="flex items-start p-3 bg-[#fffefe] border border-blue-200">
                             <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 ml-2 flex-shrink-0" />
                             <span className="text-gray-700 leading-relaxed">{requirement}</span>
                           </div>
@@ -215,7 +215,7 @@ export default async function VisaDetailPage({ params }: Params) {
                       </h2>
                       <div className="space-y-3">
                         {service.documents.map((document: string, index: number) => (
-                          <div key={index} className="flex items-center p-3 bg-white border border-orange-200">
+                          <div key={index} className="flex items-center p-3 bg-[#fffefe] border border-orange-200">
                             <div className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center ml-2 flex-shrink-0">
                               {index + 1}
                             </div>
@@ -261,7 +261,7 @@ export default async function VisaDetailPage({ params }: Params) {
                                     {table.rows.map((row: any, rowIndex: number) => (
                                         <tr 
                                         key={rowIndex} 
-                                        className={rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
+                                        className={rowIndex % 2 === 0 ? 'bg-[#fffefe]' : 'bg-gray-50'}
                                         >
                                         <td className="border border-gray-300 p-3 font-semibold text-right">
                                             {row.label}

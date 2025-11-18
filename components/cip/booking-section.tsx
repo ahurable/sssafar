@@ -137,7 +137,7 @@ export function BookingSection({ service }: BookingSectionProps) {
   }
 
   return (
-    <Card className="sticky top-6 bg-white">
+    <Card className="sticky top-6 bg-[#fffefe]">
       <CardContent className="p-6">
         <div className="text-center mb-6">
           <div className="text-3xl font-bold text-green-600 mb-2">

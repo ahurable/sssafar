@@ -208,7 +208,7 @@ export function EditCityTourForm({ tour }: EditCityTourFormProps) {
       })
 
       if (response.ok) {
-        router.push("/admin/city-tours")
+        router.push("/admin/citytours")
         router.refresh()
       } else {
         const error = await response.json()

@@ -85,7 +85,7 @@ export function Header() {
       // If already on home page, just update the URL with search param
       const params = new URLSearchParams(searchParams.toString())
       
-      if ( menuType == "flight" || menuType == "domesticFlight" || menuType == "hotel" || menuType == "domesticHotel") {
+      if ( menuType == "flight" || menuType == "domesticFlights" || menuType == "hotel" || menuType == "domesticHotel") {
         params.set('search', menuType)
         router.push(`/?${params.toString()}`, { scroll: false })
       } else {
@@ -95,8 +95,15 @@ export function Header() {
       // Trigger custom event to open modal
       window.dispatchEvent(new CustomEvent('openSearchModal', { detail: menuType }))
     } else {
+      const params = new URLSearchParams(searchParams.toString())
       // If not on home page, navigate to home page with search param
-      router.push(`/?search=${menuType}`)
+      if ( menuType == "flight" || menuType == "domesticFlights" || menuType == "hotel" || menuType == "domesticHotel") {
+        params.set('search', menuType)
+        router.push(`/?${params.toString()}`, { scroll: false })
+      } else {
+        console.log(menuType)
+        router.push(`/${menuType}`)
+      }
     }
   }
 
@@ -116,12 +123,12 @@ export function Header() {
   }   
 
   const ProfileMenu = () => (
-    <div className="absolute left-0 lg:left-[-20px] lg:top-[50px] top-full mt-2 w-72 border border-gray-300 bg-white z-50">
+    <div className="absolute left-0 lg:left-[-20px] lg:top-[50px] top-full mt-2 w-72 border border-gray-300 bg-[#fffefe] z-50">
       <div className="p-3">
         {user ? (
           // Logged in user menu
           <>
-            <div className="flex items-center gap-3 px-3 py-3 mb-2 border border-gray-300 bg-white">
+            <div className="flex items-center gap-3 px-3 py-3 mb-2 border border-gray-300 bg-[#fffefe]">
               <div className="flex h-10 w-10 items-center justify-center bg-blue-500 text-white text-sm font-bold">
                 {user.name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'}
               </div>
@@ -223,7 +230,7 @@ export function Header() {
     return (
       <div 
         ref={menuRef}
-        className="absolute top-full right-0 mt-0 w-48 bg-white border border-gray-300 shadow-lg z-40"
+        className="absolute top-full right-0 mt-0 w-48 bg-[#fffefe] border border-gray-300 shadow-lg z-40"
         onMouseEnter={onSubmenuHover}
         onMouseLeave={onSubmenuLeave}
       >
@@ -247,11 +254,11 @@ export function Header() {
     <div className="fixed inset-0 z-40 h-[100vh] lg:hidden">
       <div 
         ref={mobileMenuRef}
-        className="absolute inset-0 bg-white"
+        className="absolute inset-0 bg-[#fffefe]"
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-300 bg-white">
+          <div className="flex items-center justify-between p-4 border-b border-gray-300 bg-[#fffefe]">
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center bg-blue-500">
                 <Plane className="h-6 w-6 text-white" />
@@ -262,20 +269,20 @@ export function Header() {
             </div>
             <button
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-center w-12 h-12 border border-gray-300 bg-white hover:bg-gray-100"
+              className="flex items-center justify-center w-12 h-12 border border-gray-300 bg-[#fffefe] hover:bg-gray-100"
             >
               <X className="h-6 w-6 text-black" />
             </button>
           </div>
 
           {/* Menu Items */}
-          <div className="flex-1 p-4 h-full bg-white overflow-auto">
+          <div className="flex-1 p-4 h-full bg-[#fffefe] overflow-auto">
             {/* Main Navigation */}
             <div className="space-y-2 mb-6">
               <h3 className="text-right text-lg font-bold text-black mb-3">منوی اصلی</h3>
               
               {/* Flight Menu */}
-              <div className="border border-gray-300 bg-white">
+              <div className="border border-gray-300 bg-[#fffefe]">
                 <div className="flex items-center gap-4 w-full px-4 py-3 text-right bg-gray-50">
                   <div className="flex items-center justify-center w-10 h-10 bg-blue-500">
                     <Plane className="h-5 w-5 text-white" />
@@ -304,7 +311,7 @@ export function Header() {
               </div>
 
               {/* Hotel Menu */}
-              <div className="border border-gray-300 bg-white">
+              <div className="border border-gray-300 bg-[#fffefe]">
                 <div className="flex items-center gap-4 w-full px-4 py-3 text-right bg-gray-50">
                   <div className="flex items-center justify-center w-10 h-10 bg-green-500">
                     <Hotel className="h-5 w-5 text-white" />
@@ -335,7 +342,7 @@ export function Header() {
               {/* Other Services */}
               <button
                 onClick={() => handleMenuClick('tour')}
-                className="flex items-center gap-4 w-full px-4 py-3 text-right border border-gray-300 bg-white hover:bg-gray-100 group"
+                className="flex items-center gap-4 w-full px-4 py-3 text-right border border-gray-300 bg-[#fffefe] hover:bg-gray-100 group"
               >
                 <div className="flex items-center justify-center w-10 h-10 bg-blue-500">
                   <Globe className="h-5 w-5 text-white" />
@@ -348,7 +355,7 @@ export function Header() {
 
               <button
                 onClick={() => handleMenuClick('cip')}
-                className="flex items-center gap-4 w-full px-4 py-3 text-right border border-gray-300 bg-white hover:bg-gray-100 group"
+                className="flex items-center gap-4 w-full px-4 py-3 text-right border border-gray-300 bg-[#fffefe] hover:bg-gray-100 group"
               >
                 <div className="flex items-center justify-center w-10 h-10 bg-red-500">
                   <Shield className="h-5 w-5 text-white" />
@@ -361,7 +368,7 @@ export function Header() {
 
               <button
                 onClick={() => handleMenuClick('visa')}
-                className="flex items-center gap-4 w-full px-4 py-3 text-right border border-gray-300 bg-white hover:bg-gray-100 group"
+                className="flex items-center gap-4 w-full px-4 py-3 text-right border border-gray-300 bg-[#fffefe] hover:bg-gray-100 group"
               >
                 <div className="flex items-center justify-center w-10 h-10 bg-blue-500">
                   <Globe className="h-5 w-5 text-white" />
@@ -374,7 +381,7 @@ export function Header() {
 
               <button
                 onClick={() => handleMenuClick('activities')}
-                className="flex items-center gap-4 w-full px-4 py-3 text-right border border-gray-300 bg-white hover:bg-gray-100 group"
+                className="flex items-center gap-4 w-full px-4 py-3 text-right border border-gray-300 bg-[#fffefe] hover:bg-gray-100 group"
               >
                 <div className="flex items-center justify-center w-10 h-10 bg-green-500">
                   <Globe className="h-5 w-5 text-white" />
@@ -387,7 +394,7 @@ export function Header() {
 
               <button
                 onClick={() => handleMenuClick('organs')}
-                className="flex items-center gap-4 w-full px-4 py-3 text-right border border-gray-300 bg-white hover:bg-gray-100 group"
+                className="flex items-center gap-4 w-full px-4 py-3 text-right border border-gray-300 bg-[#fffefe] hover:bg-gray-100 group"
               >
                 <div className="flex items-center justify-center w-10 h-10 bg-purple-500">
                   <Shield className="h-5 w-5 text-white" />
@@ -482,7 +489,7 @@ export function Header() {
   ]
 
   const otherMenuItems = [
-    { label: "تورها", type: "tour", icon: Globe },
+    { label: "تورها", type: "tours", icon: Globe },
     { label: "خدمات CIP", type: "cip", icon: Shield },
     { label: "خدمات ویزا", type: "visa", icon: Globe },
     { label: "گشت شهری", type: "activities", icon: Globe },
@@ -490,7 +497,7 @@ export function Header() {
   ]
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-300 bg-white">
+    <header className="sticky top-0 z-50 w-full border-b border-gray-300 bg-[#fffefe]">
       <div className="container mx-auto px-4">
         <div className="flex h-14 items-center justify-between">
           {/* Logo and Mobile Menu Button */}
@@ -498,7 +505,7 @@ export function Header() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden flex items-center justify-center w-9 h-9 border border-gray-300 bg-white hover:bg-gray-100"
+              className="lg:hidden flex items-center justify-center w-9 h-9 border border-gray-300 bg-[#fffefe] hover:bg-gray-100"
             >
               <Menu className="h-4 w-4 text-black" />
             </button>
@@ -587,7 +594,7 @@ export function Header() {
             <button
               onClick={() => setProfileMenuOpen(!profileMenuOpen)}
               className={cn(
-                "flex items-center justify-center border border-gray-300 bg-white",
+                "flex items-center justify-center border border-gray-300 bg-[#fffefe]",
                 profileMenuOpen && "border-black"
               )}
             >

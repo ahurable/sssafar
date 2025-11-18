@@ -83,7 +83,7 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
           <button
             key={key}
             onClick={() => handleTabSelect(key)}
-            className="flex flex-col items-center justify-center gap-3 h-32 bg-white border border-gray-300 hover:bg-gray-50 transition-colors p-4 group"
+            className="flex flex-col items-center justify-center gap-3 h-32 bg-[#fffefe] border border-gray-300 hover:bg-gray-50 transition-colors p-4 group"
           >
             <div className="p-3 bg-blue-500 group-hover:bg-blue-900 transition-colors">
               <Icon className="h-6 w-6 text-white" />
@@ -122,9 +122,9 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
     const currentConfig = tabConfig[activeTab]
 
     return (
-      <div className="fixed inset-0 z-50 bg-white">
+      <div className="fixed inset-0 z-50 bg-[#fffefe]">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-300 bg-white">
+        <div className="flex items-center justify-between p-4 border-b border-gray-300 bg-[#fffefe]">
           <div className="flex items-center gap-3">
             <button
               onClick={handleCloseModal}
@@ -155,7 +155,7 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
       setActiveTab(value as any)
       localStorage.setItem('activeSearchTab', value)
     }} className="w-full">
-      <TabsList className="flex w-full h-max bg-white border-b border-gray-300 p-0">
+      <TabsList className="flex w-full h-max bg-[#fffefe] border-b border-gray-300 p-0">
         {Object.entries(tabConfig).map(([key, config]) => {
           const Icon = config.icon
           const isSelected = activeTab === key
@@ -177,34 +177,34 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
       </TabsList>
 
       {/* Tab Contents */}
-      <TabsContent value="hotel" className="p-6 bg-white">
+      <TabsContent value="hotel" className="p-6 bg-[#fffefe]">
         <HotelSearch />
       </TabsContent>
 
-      <TabsContent value="flight" className="p-6 bg-white">
+      <TabsContent value="flight" className="p-6 bg-[#fffefe]">
         <FlightSearch />
       </TabsContent>
 
-      <TabsContent value="domesticFlights" className="p-6 bg-white">
+      <TabsContent value="domesticFlights" className="p-6 bg-[#fffefe]">
         <DomesticFlightSearch />
       </TabsContent>
 
-      <TabsContent value="cip" className="p-6 bg-white">
+      <TabsContent value="cip" className="p-6 bg-[#fffefe]">
         <CipSearch />
       </TabsContent>
 
-      <TabsContent value="tour" className="p-6 bg-white">
+      <TabsContent value="tour" className="p-6 bg-[#fffefe]">
         <TourSearch />
       </TabsContent>
 
-      <TabsContent value="domesticHotel" className="p-6 bg-white">
+      <TabsContent value="domesticHotel" className="p-6 bg-[#fffefe]">
         <DomesticHotelSearch />
       </TabsContent>
     </Tabs>
   )
 
   return (
-    <section ref={cardRef} className=" bg-white">
+    <section ref={cardRef} className=" bg-[#fffefe]">
       <div className="mx-auto">
         <div className="text-center bg-blue-900 pt-8 pb-20">
           <h2 className="text-3xl font-bold text-white mb-4">
@@ -217,14 +217,14 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
 
         {/* Desktop Version - Tabs */}
         <div className="hidden lg:block mt-[-50px]">
-          <div className="bg-white border rounded-lg px-8 border-gray-300">
+          <div className="bg-[#fffefe] border rounded-lg px-8 border-gray-300">
             <DesktopTabs />
           </div>
         </div>
 
         {/* Mobile Version - Grid Buttons */}
         <div className="block lg:hidden">
-          <div className="bg-white border border-gray-300">
+          <div className="bg-[#fffefe] border border-gray-300">
             <MobileMainModal />
           </div>
         </div>

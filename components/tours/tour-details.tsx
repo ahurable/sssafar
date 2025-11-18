@@ -110,7 +110,7 @@ export function TourDetails({ tour }: TourDetailsProps) {
                   ویژه
                 </Badge>
               )}
-              <Badge variant="outline" className="bg-white/20 text-white border-white/30">
+              <Badge variant="outline" className="bg-[#fffefe]/20 text-white border-white/30">
                 {getDuration()} روزه
               </Badge>
             </div>

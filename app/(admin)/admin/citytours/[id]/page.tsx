@@ -82,7 +82,7 @@ export default function EditCityTourPage({
         
         if (!response.ok) {
           if (response.status === 404) {
-            router.push("/admin/city-tours")
+            router.push("/admin/citytours")
             return
           }
           throw new Error('Failed to fetch tour')
@@ -126,7 +126,7 @@ export default function EditCityTourPage({
               <Button onClick={() => window.location.reload()}>
                 تلاش مجدد
               </Button>
-              <Link href="/admin/city-tours">
+              <Link href="/admin/citytours">
                 <Button variant="outline">
                   بازگشت به لیست گشت‌ها
                 </Button>
@@ -146,7 +146,7 @@ export default function EditCityTourPage({
             <div className="text-4xl mb-4">🔍</div>
             <h2 className="text-xl font-semibold mb-2">گشت یافت نشد</h2>
             <p className="text-muted-foreground mb-6">گشت مورد نظر وجود ندارد یا حذف شده است</p>
-            <Link href="/admin/city-tours">
+            <Link href="/admin/citytours">
               <Button>
                 بازگشت به لیست گشت‌ها
               </Button>
@@ -163,7 +163,7 @@ export default function EditCityTourPage({
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-4">
             <Link 
-              href="/admin/city-tours"
+              href="/admin/citytours"
               className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
             >
               <ArrowRight className="h-4 w-4 ml-2" />

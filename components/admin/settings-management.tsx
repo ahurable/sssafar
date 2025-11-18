@@ -28,7 +28,7 @@ export function SettingsManagement() {
   }
 
   return (
-    <div className="bg-white rounded-xl border shadow-sm">
+    <div className="bg-[#fffefe] rounded-xl border shadow-sm">
       {/* Tabs Header */}
       <div className="border-b">
         <div className="flex overflow-x-auto">

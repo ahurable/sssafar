@@ -35,7 +35,7 @@ interface Tour {
     altText: string
   }[]
   transports: any[]
-  tourCity?: {
+  city?: {
     id: string
     name: string
     description: string
@@ -81,7 +81,7 @@ function TourCityCard({
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         <div className="absolute bottom-4 left-4 right-4">
           <h3 className="text-white font-bold text-xl mb-2">{city.name}</h3>
-          <Badge className="bg-white/20 text-white border-none backdrop-blur-sm">
+          <Badge className="bg-[#fffefe]/20 text-white border-none backdrop-blur-sm">
             {city._count.tours} تور
           </Badge>
         </div>

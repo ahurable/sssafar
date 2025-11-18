@@ -194,7 +194,7 @@ export function HotelList() {
     return (
       <div className="grid gap-4">
         {[1, 2, 3].map((item) => (
-          <div key={item} className="bg-white border border-gray-200 overflow-hidden">
+          <div key={item} className="bg-[#fffefe] border border-gray-200 overflow-hidden">
             <div className="flex flex-col lg:flex-row">
               <div className="lg:w-80 h-64 bg-gray-200 animate-pulse" />
               <div className="flex-1 p-4 space-y-4">
@@ -288,7 +288,7 @@ export function HotelList() {
           return (
             <Card 
               key={hotel.FareSourceCode || index} 
-              className="overflow-hidden hover:shadow-md transition-all duration-200 border border-gray-200 bg-white"
+              className="overflow-hidden hover:shadow-md transition-all duration-200 border border-gray-200 bg-[#fffefe]"
             >
               <CardContent className="p-0">
                 <div className="flex flex-col xl:flex-row">
@@ -328,7 +328,7 @@ export function HotelList() {
                         <Button
                           variant="secondary"
                           size="icon"
-                          className="h-8 w-8 bg-white/90 hover:bg-white shadow-sm border-0"
+                          className="h-8 w-8 bg-[#fffefe]/90 hover:bg-[#fffefe] shadow-sm border-0"
                           onClick={() => toggleFavorite(hotel.HotelId)}
                         >
                           <Heart 
@@ -381,7 +381,7 @@ export function HotelList() {
                                       {room.Name || room.RoomMapName}
                                     </h4>
                                     <div className="flex flex-wrap items-center gap-2 text-xs">
-                                      <span className="bg-white px-2 py-1 text-gray-700 font-medium border border-gray-300">
+                                      <span className="bg-[#fffefe] px-2 py-1 text-gray-700 font-medium border border-gray-300">
                                         {getMealTypeText(room.MealType)}
                                       </span>
                                       <div className="flex items-center gap-1 text-gray-700">
@@ -428,7 +428,7 @@ export function HotelList() {
                               return (
                                 <Badge 
                                   key={amenityIndex} 
-                                  className="flex items-center gap-1 text-xs px-3 py-1 bg-white border border-gray-300 text-gray-700 font-medium"
+                                  className="flex items-center gap-1 text-xs px-3 py-1 bg-[#fffefe] border border-gray-300 text-gray-700 font-medium"
                                 >
                                   {Icon && <Icon className="h-3 w-3 text-gray-500" />}
                                   {amenity}
@@ -490,7 +490,7 @@ export function HotelList() {
             ) : (
               <span className="flex items-center gap-2">
                 نمایش هتل‌های بیشتر
-                <span className="bg-white/20 text-white px-2 py-1 text-xs font-medium">
+                <span className="bg-[#fffefe]/20 text-white px-2 py-1 text-xs font-medium">
                   +{Math.min(HOTELS_PER_PAGE, allHotelIds.length - displayedHotels.length)}
                 </span>
               </span>

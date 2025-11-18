@@ -305,7 +305,7 @@ export default function HotelReservation() {
             {/* Left Section - Hotel Details & Amenities */}
             <div className="space-y-6">
               {/* Hotel Summary */}
-              <Card className="bg-white/95 py-6 backdrop-blur-sm">
+              <Card className="bg-[#fffefe]/95 py-6 backdrop-blur-sm">
                 <CardHeader className=" text-indigo-600 rounded-t-lg">
                   <CardTitle className="flex items-center gap-2">
                     <Hotel className="h-6 w-6" />
@@ -451,7 +451,7 @@ export default function HotelReservation() {
 
               {/* Hotel Amenities */}
               {hotel.Amenities && hotel.Amenities.length > 0 && (
-                <Card className="py-6 bg-white/95 backdrop-blur-sm">
+                <Card className="py-6 bg-[#fffefe]/95 backdrop-blur-sm">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Wifi className="h-5 w-5" />
@@ -488,7 +488,7 @@ export default function HotelReservation() {
             {/* Right Section - Traveler Information & Booking Summary */}
             <div className="space-y-6">
               {/* Traveler Information */}
-              <Card className="py-6 bg-white/95 backdrop-blur-sm">
+              <Card className="py-6 bg-[#fffefe]/95 backdrop-blur-sm">
                 <CardHeader className="bg-gradient-to-r text-emerald-600 rounded-t-lg">
                   <CardTitle className="flex items-center gap-2">
                     <Users className="h-6 w-6" />
@@ -512,7 +512,7 @@ export default function HotelReservation() {
 
               {/* Booking Summary */}
               {selectedTravelers.length > 0 && (
-                <Card className="bg-white/95 backdrop-blur-sm py-6">
+                <Card className="bg-[#fffefe]/95 backdrop-blur-sm py-6">
                   <CardHeader className="bg-gradient-to-r text-pink-600 rounded-t-lg">
                     <CardTitle>خلاصه رزرو</CardTitle>
                   </CardHeader>

@@ -13,21 +13,25 @@ import { Button } from "../ui/button"
 const navItems = [
   {
     title: "اطلاعات شخصی",
+    description: "وارد کردن اطلاعات هویت",
     href: "/dashboard",
     icon: User,
   },
   {
     title: "رزروهای من",
+    description: "مشاهده وضعیت رزرو های شما",
     href: "/dashboard/bookings",
     icon: Ticket,
   },
   {
     title: "تنظیمات",
+    description: "تغییر رمز عبور",
     href: "/dashboard/settings",
     icon: Settings,
   },
   {
     title: "صورت حساب ها",
+    description: "وضعیت خرید های  شما",
     href: "/dashboard/invoices",
     icon: File
   }
@@ -92,7 +96,7 @@ export function DashboardNav() {
   
   return (
     <div className="sticky top-20">
-      <Card className="text-center p-4 border rounded-lg border-gray-300 bg-white">
+      <Card className="text-center p-4 border border-gray-300 bg-[#fffefe]">
         <span className="text-black">
           اعتبار کیف پول
         </span>
@@ -108,7 +112,7 @@ export function DashboardNav() {
           </Button>
         </Link>
       </Card>
-      <div className="mt-4 bg-white">
+      <div className="mt-4 bg-[#fffefe]">
           <nav className="space-y-2">
             {navItems.map((item) => {
               const Icon = item.icon
@@ -118,14 +122,19 @@ export function DashboardNav() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex gap-3 px-3 items-center py-4 rounded-lg border text-sm font-medium  border-gray-300",
+                    "flex gap-3 px-3 items-center py-4 border text-sm font-medium  border-gray-300",
                     isActive
                       ? "text-blue-950 border-2 border-blue-950 bg-blue-50 font-bold"
                       : "text-black hover:bg-gray-100",
                   )}
                 >
                   <Icon className="h-4 w-4" />
-                  {item.title}
+                  <div>
+                    <p className="block font-bold">
+                    {item.title}
+                    </p>
+                    <span className="text-xs font-medium">{item.description}</span>
+                  </div>
                 </Link>
               )
             })}
@@ -149,7 +158,7 @@ export function DashboardNav() {
               <Link
                   href="/dashboard/travelers"
                   className={cn(
-                    "flex items-center gap-3 px-3 py-4 rounded-lg text-sm font-medium border-b border-gray-300",
+                    "flex items-center gap-3 px-3 py-4 text-sm font-medium border-b border-gray-300",
                     pathname == "/dashboard/travelers"
                       ? "text-blue-800 border-2 border-blue-800 font-bold"
                       : "text-black hover:bg-gray-100",
@@ -159,7 +168,7 @@ export function DashboardNav() {
                     افزودن مسافران
               </Link>
             } 
-            <button className="flex w-full border-2 rounded-lg items-center gap-3 px-3 py-4 text-sm font-bold text-red-800 bg-red-50 border-red-800  hover:bg-gray-100">
+            <button className="flex w-full border-2 items-center gap-3 px-3 py-4 text-sm font-bold text-red-800 bg-red-50 border-red-800  hover:bg-gray-100">
               <LogOut className="h-4 w-4" />
               خروج از حساب
             </button>

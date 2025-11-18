@@ -91,7 +91,7 @@ export const GET = async (request: NextRequest) => {
         transports: {
           orderBy: { departure: "asc" }
         },
-        tourCity: true
+        city: true
       },
       orderBy: {
         createdAt: "desc"
@@ -164,10 +164,10 @@ export const POST = async (request: NextRequest) => {
     // Find or create a default city
     let cityId = validatedData.tourCityId;
     if (!cityId) {
-      const defaultCity = await prisma.tourCity.findFirst();
+      const defaultCity = await prisma.city.findFirst();
       if (!defaultCity) {
         // Create a default city
-        const newCity = await prisma.tourCity.create({
+        const newCity = await prisma.city.create({
           data: {
             name: "شهر پیش فرض",
             description: "شهر پیش فرض برای تورها",
@@ -226,7 +226,7 @@ export const POST = async (request: NextRequest) => {
         routes: true,
         rules: true,
         transports: true,
-        tourCity: true
+        city: true
       }
     });
 

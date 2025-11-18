@@ -432,7 +432,7 @@ export function FlightFilters() {
       </div>
 
       {/* Mobile Filter Buttons */}
-      <div className="lg:hidden absolute top-14 right-0 w-full bg-white py-2 px-2 z-40" >
+      <div className="lg:hidden absolute top-14 right-0 w-full bg-[#fffefe] py-2 px-2 z-40" >
         <div className="flex items-center gap-2 overflow-x-auto pb-2" style={{scrollbarWidth: 'none'}}>
           {/* Main Filters Button */}
           <Sheet open={isSheetOpen && !activeFilterSection} onOpenChange={(open) => {
@@ -440,11 +440,11 @@ export function FlightFilters() {
             if (!open) setActiveFilterSection(null)
           }}>
             <SheetTrigger asChild>
-              <Button className="shadow-lg py-2 px-4 text-lg font-medium text-black bg-white border-black border rounded-full">
+              <Button className="shadow-lg py-2 px-4 text-lg font-medium text-black bg-[#fffefe] border-black border rounded-full">
                 <Filter className="h-5 w-5 ml-2" />
                 فیلترها
                 {getActiveFiltersCount() > 0 && (
-                  <Badge className="mr-2 bg-white text-black px-2 py-1 text-xs">
+                  <Badge className="mr-2 bg-[#fffefe] text-black px-2 py-1 text-xs">
                     {getActiveFiltersCount()}
                   </Badge>
                 )}
@@ -474,7 +474,7 @@ export function FlightFilters() {
               <div className="h-max overflow-y-auto py-4">
                 <FilterContent showAllSections={true} />
               </div>
-              <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t">
+              <div className="absolute bottom-0 left-0 right-0 p-4 bg-[#fffefe] border-t">
                 <Button 
                   onClick={handleApplyFilters}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium h-14 text-lg"
@@ -533,7 +533,7 @@ export function FlightFilters() {
             <div className="h-max overflow-y-auto p-4 pb-24">
               <FilterContent showAllSections={false} />
             </div>
-            <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t">
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-[#fffefe] border-t">
               <Button 
                 onClick={handleApplyFilters}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium h-14 text-lg"

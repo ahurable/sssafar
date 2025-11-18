@@ -2,7 +2,7 @@
 import { notFound } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { CityTourDetails } from "@/components/activities/city-tour-details"
-import { CityTourBookingForm } from "@/components/activities/city-tour-booking-form"
+import { CityProceedToBook } from "@/components/activities/city-tour-booking-form"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 
@@ -54,7 +54,7 @@ export default async function CityTourDetailPage({
 
             {/* Booking Sidebar */}
             <div className="lg:col-span-1">
-              <CityTourBookingForm tour={tour} />
+              <CityProceedToBook tour={tour} />
             </div>
           </div>
         </div>

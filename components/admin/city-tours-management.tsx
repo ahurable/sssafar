@@ -92,7 +92,7 @@ export function CityToursManagement() {
   }
 
   const getPriceRange = (prices: { price: number }[]) => {
-    if (!prices.length) return "تعیین نشده"
+    if (!prices || !prices.length) return "تعیین نشده"
     const minPrice = Math.min(...prices.map(p => p.price))
     const maxPrice = Math.max(...prices.map(p => p.price))
     return minPrice === maxPrice 
@@ -117,7 +117,7 @@ export function CityToursManagement() {
             {tours.length} گشت شهری
           </p>
         </div>
-        <Link href="/admin/city-tours/create">
+        <Link href="/admin/citytours/create">
           <Button>
             <Plus className="h-4 w-4 ml-2" />
             ایجاد گشت جدید
@@ -189,7 +189,7 @@ export function CityToursManagement() {
                 </div>
 
                 <div className="flex gap-2 pt-4 border-t">
-                  <Link href={`/admin/city-tours/${tour.id}`} className="flex-1">
+                  <Link href={`/admin/citytours/${tour.id}`} className="flex-1">
                     <Button variant="outline" size="sm" className="w-full">
                       <Edit className="h-4 w-4 ml-1" />
                       ویرایش

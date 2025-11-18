@@ -76,7 +76,7 @@ export default function PaymentSuccessPage() {
             <div className="absolute -top-20 -left-20 w-40 h-40 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
             <div className="absolute -bottom-20 -right-20 w-40 h-40 bg-emerald-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse delay-1000"></div>
             
-            <Card className="border-green-200 bg-white/80 backdrop-blur-sm shadow-2xl relative overflow-hidden">
+            <Card className="border-green-200 bg-[#fffefe]/80 backdrop-blur-sm shadow-2xl relative overflow-hidden">
               {/* Animated Background Gradient */}
               <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-green-400 to-emerald-500 animate-pulse"></div>
               

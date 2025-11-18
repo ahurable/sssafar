@@ -118,7 +118,7 @@ export function VisaBookingSection({ service }: VisaBookingSectionProps) {
   }
 
   return (
-    <Card className="sticky top-14 bg-white">
+    <Card className="sticky top-14 bg-[#fffefe]">
       <CardContent className="p-6">
         <div className="text-center mb-6">
           <div className="text-3xl font-bold text-green-600 mb-2">

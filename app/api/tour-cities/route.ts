@@ -4,16 +4,13 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   try {
-    const cities = await prisma.tourCity.findMany({
+    const cities = await prisma.city.findMany({
       include: {
         _count: {
           select: {
-            tours: {
+            cityTours: {
               where: {
-                isActive: true,
-                startDate: {
-                  gte: new Date()
-                }
+                isActive: true
               }
             }
           }

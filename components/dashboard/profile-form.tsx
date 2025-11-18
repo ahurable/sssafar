@@ -367,7 +367,7 @@ export function ProfileForm() {
   return (
     <>
     {hasPhone === false ?
-    <Card className="p-4 my-4">
+    <Card className="p-4 mb-4">
       <CardTitle>افزودن شماره همراه</CardTitle>
       <CardDescription>برای استفاده از خدمات سایت باید شماره همراه خود را اضافه کنید</CardDescription>
       <CardContent>

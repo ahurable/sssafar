@@ -238,7 +238,7 @@ const ShamsiDateModal = ({
         <div className="space-y-2 cursor-pointer">
           <div className="relative">
             <CalendarIcon className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
-            <div className="w-full h-12 border border-gray-300 bg-white text-black flex items-center justify-between px-3 pr-10 cursor-pointer">
+            <div className="w-full h-12 border border-gray-300 bg-[#fffefe] text-black flex items-center justify-between px-3 pr-10 cursor-pointer">
               <span className="text-black">
                 {returnCal && returnCal ? formatDate(returnDate) : formatDate(departureDate)}
               </span>
@@ -248,7 +248,7 @@ const ShamsiDateModal = ({
         </div>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-4xl p-0 bg-white border border-gray-300">
+      <DialogContent className="sm:max-w-4xl p-0 bg-[#fffefe] border border-gray-300">
         {/* Desktop View */}
         <div className="hidden md:block p-4">
           <div className="flex justify-between items-center mb-4">
@@ -257,7 +257,7 @@ const ShamsiDateModal = ({
               <Button
                 variant="outline"
                 onClick={toggleCalendarType}
-                className="flex items-center gap-2 border border-gray-300 bg-white text-black hover:bg-gray-100"
+                className="flex items-center gap-2 border border-gray-300 bg-[#fffefe] text-black hover:bg-gray-100"
               >
                 <Globe className="h-4 w-4" />
                 {calendarType === "shamsi" ? "تقویم شمسی" : "Gregorian Calendar"}
@@ -292,7 +292,7 @@ const ShamsiDateModal = ({
               <button
                 className={`flex-1 py-2 px-4 text-sm font-medium ${
                   selectionMode === "departure"
-                    ? "bg-white text-blue-800"
+                    ? "bg-[#fffefe] text-blue-800"
                     : "text-black hover:text-black"
                 }`}
                 onClick={() => setSelectionMode("departure")}
@@ -302,7 +302,7 @@ const ShamsiDateModal = ({
               <button
                 className={`flex-1 py-2 px-4 text-sm font-medium ${
                   selectionMode === "return"
-                    ? "bg-white text-blue-800"
+                    ? "bg-[#fffefe] text-blue-800"
                     : "text-black hover:text-black"
                 }`}
                 onClick={() => setSelectionMode("return")}
@@ -371,7 +371,7 @@ const ShamsiDateModal = ({
             <Button
               onClick={() => setIsOpen(false)}
               variant="outline"
-              className="flex-1 h-10 text-black border border-gray-300 bg-white hover:bg-gray-100"
+              className="flex-1 h-10 text-black border border-gray-300 bg-[#fffefe] hover:bg-gray-100"
             >
               انصراف
             </Button>
@@ -385,7 +385,7 @@ const ShamsiDateModal = ({
         </div>
 
         {/* Mobile View */}
-        <div className="block md:hidden h-screen bg-white">
+        <div className="block md:hidden h-screen bg-[#fffefe]">
           <div className="flex justify-between items-center p-3 border-b border-gray-300">
             <h2 className="text-lg font-bold text-black">انتخاب تاریخ</h2>
             <div className="flex items-center gap-2">
@@ -393,7 +393,7 @@ const ShamsiDateModal = ({
                 variant="outline"
                 size="sm"
                 onClick={toggleCalendarType}
-                className="flex items-center gap-1 text-sm border border-gray-300 bg-white text-black hover:bg-gray-100"
+                className="flex items-center gap-1 text-sm border border-gray-300 bg-[#fffefe] text-black hover:bg-gray-100"
               >
                 <Globe className="h-3 w-3" />
                 {calendarType === "shamsi" ? "شمسی" : "میلادی"}
@@ -428,7 +428,7 @@ const ShamsiDateModal = ({
               <button
                 className={`flex-1 py-2 px-4 text-sm font-medium ${
                   selectionMode === "departure"
-                    ? "bg-white text-blue-800"
+                    ? "bg-[#fffefe] text-blue-800"
                     : "text-black hover:text-black"
                 }`}
                 onClick={() => setSelectionMode("departure")}
@@ -438,7 +438,7 @@ const ShamsiDateModal = ({
               <button
                 className={`flex-1 py-2 px-4 text-sm font-medium ${
                   selectionMode === "return"
-                    ? "bg-white text-blue-800"
+                    ? "bg-[#fffefe] text-blue-800"
                     : "text-black hover:text-black"
                 }`}
                 onClick={() => setSelectionMode("return")}
@@ -469,7 +469,7 @@ const ShamsiDateModal = ({
             </div>
           </div>
 
-          <div className="absolute bottom-0 left-0 right-0 p-3 bg-white border-t border-gray-300">
+          <div className="absolute bottom-0 left-0 right-0 p-3 bg-[#fffefe] border-t border-gray-300">
             <Button
               onClick={applyDates}
               className="w-full h-10 bg-blue-500 text-white hover:bg-blue-900"
@@ -720,7 +720,7 @@ const Calendar = ({
   const calendar = generateCalendar()
 
   return (
-    <div className={`bg-white ${isMobile ? 'p-2' : 'p-3'}`}>
+    <div className={`bg-[#fffefe] ${isMobile ? 'p-2' : 'p-3'}`}>
       <div className="text-center mb-3">
         <div className="text-md font-bold text-black">
           {getMonthName()} {getCurrentYear()}
@@ -749,7 +749,7 @@ const Calendar = ({
                       ? 'bg-blue-800 text-white'
                       : isDateInRange(day)
                         ? 'bg-gray-200 text-black'
-                        : 'text-black bg-white hover:bg-gray-100 cursor-pointer border border-transparent'
+                        : 'text-black bg-[#fffefe] hover:bg-gray-100 cursor-pointer border border-transparent'
                 }
               `}
               onClick={() => day && !isDateDisabled(day) && handleDateClick(day)}

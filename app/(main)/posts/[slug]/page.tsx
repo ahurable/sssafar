@@ -83,7 +83,7 @@ export default async function PostDetailPage({ params }: { params: { slug: strin
                 </Button>
               </Link>
               <div className="flex flex-wrap items-center gap-4 mb-4">
-                <Badge variant="secondary" className="bg-white bg-opacity-20 text-white">
+                <Badge variant="secondary" className="bg-[#fffefe] bg-opacity-20 text-white">
                   {post.category}
                 </Badge>
                 {post.featured && (

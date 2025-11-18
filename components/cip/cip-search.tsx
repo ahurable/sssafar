@@ -255,7 +255,7 @@ const CipSearch = () => {
     return (
       <div 
         ref={suggestionsRef}
-        className="absolute top-full right-0 left-0 bg-white border border-gray-300 z-50 max-h-80 overflow-y-auto mt-1"
+        className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 z-50 max-h-80 overflow-y-auto mt-1"
       >
         {suggestions.map((suggestion, index) => (
           <div
@@ -316,7 +316,7 @@ const CipSearch = () => {
               ref={inputRef}
               id="cip-airport" 
               placeholder="فرودگاه بین المللی امام خمینی..." 
-              className={`pr-10 h-12 border border-gray-300 bg-white text-black placeholder-gray-500 ${
+              className={`pr-10 h-12 border border-gray-300 bg-[#fffefe] text-black placeholder-gray-500 ${
                 errors.airport 
                   ? 'border-red-500 bg-red-500' 
                   : 'border-gray-300'
@@ -364,7 +364,7 @@ const CipSearch = () => {
               className={`h-12 ${
                 cipSearch.serviceType === "departure" 
                   ? 'bg-blue-800 text-white' 
-                  : 'bg-white text-black border border-gray-300'
+                  : 'bg-[#fffefe] text-black border border-gray-300'
               }`}
               onClick={() => setCipSearch(prev => ({ ...prev, serviceType: "departure" }))}
             >
@@ -375,7 +375,7 @@ const CipSearch = () => {
               className={`h-12 ${
                 cipSearch.serviceType === "arrival" 
                   ? 'bg-blue-800 text-white' 
-                  : 'bg-white text-black border border-gray-300'
+                  : 'bg-[#fffefe] text-black border border-gray-300'
               }`}
               onClick={() => setCipSearch(prev => ({ ...prev, serviceType: "arrival" }))}
             >
@@ -394,7 +394,7 @@ const CipSearch = () => {
               id="cip-passengers" 
               min="1"
               max="10"
-              className={`pr-10 h-12 border border-gray-300 bg-white text-black ${
+              className={`pr-10 h-12 border border-gray-300 bg-[#fffefe] text-black ${
                 errors.passengers 
                   ? 'border-red-500 bg-red-500' 
                   : 'border-gray-300'

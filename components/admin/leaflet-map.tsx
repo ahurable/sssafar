@@ -275,7 +275,7 @@ export default function MapSelector({ onLocationSelect, selectedLocation }: MapS
         {isDialogOpen && (
           <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
             <div className="fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%] w-full max-w-4xl">
-              <div className="bg-white rounded-lg border shadow-lg flex flex-col max-h-[90vh]">
+              <div className="bg-[#fffefe] rounded-lg border shadow-lg flex flex-col max-h-[90vh]">
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b">
                   <h2 className="text-lg font-semibold">انتخاب موقعیت روی نقشه</h2>

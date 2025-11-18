@@ -1102,7 +1102,7 @@ export function TravelerForm({
             <div className="space-y-4">
               <h3 className="font-medium text-lg">مسافران جدید ({newTravelers.length})</h3>
               {newTravelers.map((traveler) => (
-                <div key={traveler.id} className="border rounded-lg p-4 bg-white">
+                <div key={traveler.id} className="border rounded-lg p-4 bg-[#fffefe]">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="bg-blue-100 p-2 rounded-full">

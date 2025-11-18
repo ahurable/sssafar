@@ -437,7 +437,7 @@ const FlightSearch = () => {
         return (
             <div 
                 ref={suggestionsRef}
-                className="absolute top-full right-0 left-0 bg-white border border-gray-300 shadow-lg z-50 max-h-80 overflow-y-auto mt-1 rounded-md"
+                className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 shadow-lg z-50 max-h-80 overflow-y-auto mt-1 rounded-md"
             >
                 {suggestions.map((suggestion, index) => (
                     <div
@@ -504,7 +504,7 @@ const FlightSearch = () => {
         return (
             <div 
                 ref={passengersRef}
-                className="absolute top-full right-0 left-0 bg-white border border-gray-300 shadow-lg z-50 p-4 mt-1 rounded-md"
+                className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 shadow-lg z-50 p-4 mt-1 rounded-md"
             >
                 <div className="space-y-4">
                     {/* Adults Selector */}
@@ -611,7 +611,7 @@ const FlightSearch = () => {
                     <div className="relative">
                         <select 
                             id="flight-trip-type"
-                            className="w-full h-12 border rounded-full border-gray-300 bg-white text-black px-3 pr-10 appearance-none focus:outline-none focus:border-blue-500"
+                            className="w-full h-12 border rounded-full border-gray-300 bg-[#fffefe] text-black px-3 pr-10 appearance-none focus:outline-none focus:border-blue-500"
                             value={flightSearch.tripType}
                             onChange={(e) => setFlightSearch(prev => ({ ...prev, tripType: e.target.value }))}
                         >
@@ -627,7 +627,7 @@ const FlightSearch = () => {
                     <div className="relative">
                         <select 
                             id="flight-cabin-class"
-                            className="w-full rounded-full h-12 border border-gray-300 bg-white text-black px-3 pr-10 appearance-none focus:outline-none focus:border-blue-500"
+                            className="w-full rounded-full h-12 border border-gray-300 bg-[#fffefe] text-black px-3 pr-10 appearance-none focus:outline-none focus:border-blue-500"
                             value={flightSearch.cabinClass}
                             onChange={(e) => setFlightSearch(prev => ({ ...prev, cabinClass: e.target.value }))}
                         >
@@ -653,7 +653,7 @@ const FlightSearch = () => {
                             ref={fromInputRef}
                             id="flight-from" 
                             placeholder="نام فرودگاه، مثال: تهران (IKA)" 
-                            className={`pr-10 h-12 border bg-white text-black placeholder-gray-500 focus:outline-none ${
+                            className={`pr-10 h-12 border bg-[#fffefe] text-black placeholder-gray-500 focus:outline-none ${
                                 errors.from 
                                     ? 'border-red-500 focus:border-red-500' 
                                     : 'border-gray-300 focus:border-blue-500'
@@ -681,7 +681,7 @@ const FlightSearch = () => {
                             ref={toInputRef}
                             id="flight-to" 
                             placeholder="نام فرودگاه مقصد مثال: استانبول (IST)" 
-                            className={`pr-10 h-12 border bg-white text-black placeholder-gray-500 focus:outline-none ${
+                            className={`pr-10 h-12 border bg-[#fffefe] text-black placeholder-gray-500 focus:outline-none ${
                                 errors.to 
                                     ? 'border-red-500 focus:border-red-500' 
                                     : 'border-gray-300 focus:border-blue-500'
@@ -741,7 +741,7 @@ const FlightSearch = () => {
                         className="passengers-trigger cursor-pointer"
                         onClick={() => setShowPassengers(!showPassengers)}
                     >
-                        <div className={`relative h-12 border bg-white hover:border-gray-400 flex items-center justify-between px-3 rounded ${
+                        <div className={`relative h-12 border bg-[#fffefe] hover:border-gray-400 flex items-center justify-between px-3 rounded ${
                             showPassengers ? 'border-blue-500' : 'border-gray-300'
                         }`}>
                             <div className="flex items-center gap-2">
