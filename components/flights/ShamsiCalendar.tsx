@@ -49,6 +49,7 @@ const ShamsiDateModal = ({
   const [calendarType, setCalendarType] = useState<"shamsi" | "gregorian">("shamsi")
   const [selectionMode, setSelectionMode] = useState<"departure" | "return">("departure")
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date())
+  const [mobileCurrentMonth, setMobileCurrentMonth] = useState<Date>(new Date())
 
   // Initialize with current date if no date is selected
   useEffect(() => {
@@ -171,6 +172,42 @@ const ShamsiDateModal = ({
     })
   }
 
+  const navigateMobileMonths = (direction: 'prev' | 'next') => {
+    setMobileCurrentMonth(prev => {
+      const newDate = new Date(prev)
+      
+      if (calendarType === "shamsi") {
+        const jalaali = toJalaali(prev.getFullYear(), prev.getMonth() + 1, prev.getDate())
+        let newYear = jalaali.jy
+        let newMonth = jalaali.jm
+
+        if (direction === 'prev') {
+          newMonth -= 1
+          if (newMonth < 1) {
+            newMonth = 12
+            newYear--
+          }
+        } else {
+          newMonth += 1
+          if (newMonth > 12) {
+            newMonth = 1
+            newYear++
+          }
+        }
+
+        const gregorian = toGregorian(newYear, newMonth, 1)
+        return new Date(gregorian.gy, gregorian.gm - 1, gregorian.gd)
+      } else {
+        if (direction === 'prev') {
+          newDate.setMonth(newDate.getMonth() - 1)
+        } else {
+          newDate.setMonth(newDate.getMonth() + 1)
+        }
+        return newDate
+      }
+    })
+  }
+
   const getTodayDate = (): string => {
     return calendarType === "shamsi" ? getTodayJalaali() : getTodayGregorian()
   }
@@ -230,7 +267,45 @@ const ShamsiDateModal = ({
     }
   }
 
+  const getMobileMonthNames = () => {
+    if (calendarType === "shamsi") {
+      const firstMonthJalaali = toJalaali(mobileCurrentMonth.getFullYear(), mobileCurrentMonth.getMonth() + 1, mobileCurrentMonth.getDate())
+      
+      let secondMonth = firstMonthJalaali.jm + 1
+      let secondYear = firstMonthJalaali.jy
+      if (secondMonth > 12) {
+        secondMonth = 1
+        secondYear++
+      }
+      
+      const shamsiMonths = [
+        "فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور",
+        "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"
+      ]
+      
+      return {
+        firstMonth: `${shamsiMonths[firstMonthJalaali.jm - 1]} ${firstMonthJalaali.jy}`,
+        secondMonth: `${shamsiMonths[secondMonth - 1]} ${secondYear}`
+      }
+    } else {
+      const firstMonth = mobileCurrentMonth
+      const secondMonth = new Date(mobileCurrentMonth)
+      secondMonth.setMonth(secondMonth.getMonth() + 1)
+      
+      const gregorianMonths = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+      ]
+      
+      return {
+        firstMonth: `${gregorianMonths[firstMonth.getMonth()]} ${firstMonth.getFullYear()}`,
+        secondMonth: `${gregorianMonths[secondMonth.getMonth()]} ${secondMonth.getFullYear()}`
+      }
+    }
+  }
+
   const monthNames = getDisplayMonthNames()
+  const mobileMonthNames = getMobileMonthNames()
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
@@ -385,8 +460,8 @@ const ShamsiDateModal = ({
         </div>
 
         {/* Mobile View */}
-        <div className="block md:hidden h-screen bg-[#fffefe]">
-          <div className="flex justify-between items-center p-3 border-b border-gray-300">
+        <div className="block md:hidden max-h-[90vh] bg-[#fffefe] flex flex-col">
+          <div className="flex justify-between items-center p-3 border-b border-gray-300 sticky top-0 bg-[#fffefe] z-10">
             <h2 className="text-lg font-bold text-black">انتخاب تاریخ</h2>
             <div className="flex items-center gap-2">
               <Button
@@ -449,33 +524,87 @@ const ShamsiDateModal = ({
             </div>
           )}
 
-          <div className="h-[calc(100vh-140px)] overflow-y-auto">
-            <div className="p-3">
-              <h3 className="text-md font-bold text-black text-center mb-3">
-                {selectionMode === "departure" ? "تاریخ رفت" : "تاریخ برگشت"}
-              </h3>
-              <Calendar
-                baseDate={new Date()}
-                selectedDepartureDate={convertDateForCalendar(selectedDepartureDate)}
-                selectedReturnDate={convertDateForCalendar(selectedReturnDate)}
-                onDateSelect={handleDateSelect}
-                minDate={getTodayDate()}
-                calendarType={calendarType}
-                selectionMode={selectionMode}
-                tripType={localTripType}
-                isFirstMonth={true}
-                isMobile={true}
-              />
+          {/* Mobile Calendar Navigation */}
+          <div className="flex justify-between items-center p-3 border-b border-gray-300">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigateMobileMonths('prev')}
+              className="h-8 w-8 p-0 hover:bg-gray-100 text-lg border border-gray-300"
+            >
+              ‹
+            </Button>
+            
+            <div className="flex flex-col items-center text-sm font-bold text-black">
+              <span>{mobileMonthNames.firstMonth}</span>
+              <span className="text-xs text-gray-500">و</span>
+              <span>{mobileMonthNames.secondMonth}</span>
+            </div>
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigateMobileMonths('next')}
+              className="h-8 w-8 p-0 hover:bg-gray-100 text-lg border border-gray-300"
+            >
+              ›
+            </Button>
+          </div>
+
+          {/* Mobile Calendar Grid - Two months stacked vertically */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="space-y-4 p-3">
+              {/* First Month */}
+              <div className="bg-white rounded-lg border border-gray-200">
+                <Calendar
+                  baseDate={mobileCurrentMonth}
+                  selectedDepartureDate={convertDateForCalendar(selectedDepartureDate)}
+                  selectedReturnDate={convertDateForCalendar(selectedReturnDate)}
+                  onDateSelect={handleDateSelect}
+                  minDate={getTodayDate()}
+                  calendarType={calendarType}
+                  selectionMode={selectionMode}
+                  tripType={localTripType}
+                  isFirstMonth={true}
+                  isMobile={true}
+                />
+              </div>
+
+              {/* Second Month */}
+              <div className="bg-white rounded-lg border border-gray-200">
+                <Calendar
+                  baseDate={mobileCurrentMonth}
+                  selectedDepartureDate={convertDateForCalendar(selectedDepartureDate)}
+                  selectedReturnDate={convertDateForCalendar(selectedReturnDate)}
+                  onDateSelect={handleDateSelect}
+                  minDate={getTodayDate()}
+                  calendarType={calendarType}
+                  selectionMode={selectionMode}
+                  tripType={localTripType}
+                  isFirstMonth={false}
+                  isMobile={true}
+                />
+              </div>
             </div>
           </div>
 
-          <div className="absolute bottom-0 left-0 right-0 p-3 bg-[#fffefe] border-t border-gray-300">
-            <Button
-              onClick={applyDates}
-              className="w-full h-10 bg-blue-500 text-white hover:bg-blue-900"
-            >
-              اعمال تاریخ
-            </Button>
+          {/* Action Buttons */}
+          <div className="p-3 border-t border-gray-300 bg-[#fffefe]">
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setIsOpen(false)}
+                variant="outline"
+                className="flex-1 h-10 text-black border border-gray-300 bg-[#fffefe] hover:bg-gray-100"
+              >
+                انصراف
+              </Button>
+              <Button
+                onClick={applyDates}
+                className="flex-1 h-10 bg-blue-500 text-white hover:bg-blue-900"
+              >
+                اعمال تاریخ
+              </Button>
+            </div>
           </div>
         </div>
       </DialogContent>
@@ -721,11 +850,14 @@ const Calendar = ({
 
   return (
     <div className={`bg-[#fffefe] ${isMobile ? 'p-2' : 'p-3'}`}>
-      <div className="text-center mb-3">
-        <div className="text-md font-bold text-black">
-          {getMonthName()} {getCurrentYear()}
+      {/* Only show month name in desktop view */}
+      {!isMobile && (
+        <div className="text-center mb-3">
+          <div className="text-md font-bold text-black">
+            {getMonthName()} {getCurrentYear()}
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="grid grid-cols-7 gap-1 mb-2">
         {weekDays.map((day) => (
