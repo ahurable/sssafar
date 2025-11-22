@@ -24,8 +24,7 @@ services:
       EMAIL_FROM: "safartoday <ahura.alipur19@yahoo.com>"
       APP_NAME: "safartoday"
     depends_on:
-      db:
-        condition: service_healthy
+      - db
     volumes:
       - ./public:/app/public
       - ./prisma:/app/prisma
@@ -36,22 +35,22 @@ services:
       retries: 5
       start_period: 40s
 
-    db:
-      image: postgres:18
-      ports:
-        - "5432:5432"
-      environment:
-        - POSTGRES_USER=postgres
-        - POSTGRES_PASSWORD=12345
-        - POSTGRES_DB=postgres
-      volumes:
-        - postgres_data:/var/lib/postgresql # CHANGED from /var/lib/postgresql/data
-      healthcheck:
-        test: ["CMD-SHELL", "pg_isready -U postgres"]
-        interval: 10s
-        timeout: 5s
-        retries: 10
-        start_period: 30s
+  db:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=12345
+      - POSTGRES_DB=postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql # CHANGED: removed /data from the path
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -64,8 +63,7 @@ services:
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:
-      db:
-        condition: service_healthy
+      - db
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:80/misc/ping"]
       interval: 30s
