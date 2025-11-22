@@ -669,6 +669,7 @@ const FlightSearch = () => {
                             onKeyDown={(e) => handleKeyDown(e, "from")}
                             onFocus={() => handleFocus("from")}
                             onBlur={handleBlur}
+                            autoComplete="off"
                         />
                         {renderSuggestions("from")}
                         {renderError("from")}
@@ -697,6 +698,7 @@ const FlightSearch = () => {
                             onKeyDown={(e) => handleKeyDown(e, "to")}
                             onFocus={() => handleFocus("to")}
                             onBlur={handleBlur}
+                            autoComplete="off"
                         />
                         {renderSuggestions("to")}
                         {renderError("to")}

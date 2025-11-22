@@ -491,6 +491,7 @@ const HotelSearch = () => {
                 setIsCityFocused(false)
                 setTimeout(() => setShowSuggestions(false), 200)
               }}
+              autoComplete="off"
             />
             {renderSuggestions()}
             {renderError("city")}

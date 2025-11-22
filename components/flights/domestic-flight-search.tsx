@@ -597,6 +597,7 @@ const DomesticFlightSearch = () => {
                                 setIsFieldFocused("")
                                 setTimeout(() => setShowSuggestions(false), 200)
                             }}
+                            autoComplete="off"
                         />
                         {renderSuggestions("origin")}
                         {renderError("origin")}
@@ -632,6 +633,7 @@ const DomesticFlightSearch = () => {
                                 setIsFieldFocused("")
                                 setTimeout(() => setShowSuggestions(false), 200)
                             }}
+                            autoComplete="off"
                         />
                         {renderSuggestions("destination")}
                         {renderError("destination")}

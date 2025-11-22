@@ -329,6 +329,7 @@ const CipSearch = () => {
                 setIsAirportFocused(false)
                 setTimeout(() => setShowSuggestions(false), 200)
               }}
+              autoComplete="off"
             />
             {renderSuggestions()}
             {renderError("airport")}

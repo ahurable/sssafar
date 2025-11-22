@@ -246,16 +246,7 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
   }
 
   // Function to get room images using RoomMapId
-  const getRoomImagesByMapId = async (roomMapId: string) => {
-    try {
-      if (!roomMapId) return []
-      const images = await getHotelImages(parseInt(currentHotelId), roomMapId)
-      return images || []
-    } catch (err) {
-      console.error('Error fetching room images for roomMapId:', roomMapId, err)
-      return []
-    }
-  }
+  
 
   // Load room images for all unique roomMapIds
   useEffect(() => {
@@ -263,21 +254,8 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
       if (hotelItinenaries && hotelItinenaries.length > 0) {
         const imagesMap: {[key: string]: any[]} = {}
         
-        // Get all unique roomMapIds from all itineraries
-        const allRoomMapIds = hotelItinenaries.flatMap(it => 
-          it.Rooms?.map(room => room.RoomMapId).filter(Boolean) || []
-        )
-        const uniqueRoomMapIds = [...new Set(allRoomMapIds)]
         
-        // Load images for each unique roomMapId
-        for (const roomMapId of uniqueRoomMapIds) {
-          if (roomMapId) {
-            const images = await getRoomImagesByMapId(roomMapId)
-            imagesMap[roomMapId] = images
-          }
-        }
-        
-        setRoomImages(imagesMap)
+        setRoomImages(hotelImages[0])
       }
     }
 
@@ -350,11 +328,8 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
   }
 
   const getRoomImage = (roomMapId: string) => {
-    const images = roomImages[roomMapId] || []
-    if (images.length > 0) {
-      return images[0]?.imageUrl || '/rooms/hotel-room.jpg'
-    }
-    return '/rooms/hotel-room.jpg'
+    
+    return hotelImages[0]
   }
 
   const toggleFavorite = (hotelId: number) => {
