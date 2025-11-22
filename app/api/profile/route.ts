@@ -25,7 +25,11 @@ export async function GET() {
       }
     })
 
-    return NextResponse.json({ user })
+    const serializedUser = JSON.parse(JSON.stringify(user, (key, value) => {
+      return typeof value === 'bigint' ? parseInt(value.toString()) : value;
+    }));
+
+    return NextResponse.json({user: serializedUser})
   } catch (error: any) {
     console.error("Get profile error:", error)
     return NextResponse.json({ error: "خطا در دریافت پروفایل" }, { status: 500 })
@@ -79,9 +83,13 @@ export async function PUT(request: NextRequest) {
       }
     })
 
+    const serializedUser = JSON.parse(JSON.stringify(user, (key, value) => {
+      return typeof value === 'bigint' ? parseInt(value.toString()) : value;
+    }));
+
     return NextResponse.json({
       success: true,
-      user,
+      user: serializedUser,
     })
   } catch (error: any) {
     console.error("[v0] Update profile error:", error)

@@ -50,10 +50,10 @@ export default function ChargeCreditPage() {
   ]
 
   const presetAmounts = [
-    { value: "100000", label: "۱۰۰,۰۰۰ تومان" },
-    { value: "500000", label: "۵۰۰,۰۰۰ تومان" },
-    { value: "1000000", label: "۱,۰۰۰,۰۰۰ تومان" },
-    { value: "2000000", label: "۲,۰۰۰,۰۰۰ تومان" }
+    { value: "100000000", label: "۱۰۰,۰۰۰,۰۰۰ ریال" },
+    { value: "500000000", label: "۵۰۰,۰۰۰,۰۰۰ ریال" },
+    { value: "1000000000", label: "۱,۰۰۰,۰,۰۰۰,۰۰۰ ریال" },
+    { value: "2000000000", label: "۲,۰۰۰,۰۰۰,۰۰۰ ریال" }
   ]
 
   const handleAmountSelect = (value: string) => {
@@ -68,7 +68,7 @@ export default function ChargeCreditPage() {
 
     const amountNumber = parseInt(amount)
     if (amountNumber < 100000) {
-      error("حداقل مبلغ شارژ ۱۰۰,۰۰۰ تومان می‌باشد")
+      error("حداقل مبلغ شارژ ۱۰۰,۰۰۰ ریال می‌باشد")
       return
     }
 
@@ -81,7 +81,7 @@ export default function ChargeCreditPage() {
         userId: "current-user-id", // You should get this from your auth context
         userEmail: "user@example.com", // You should get this from your auth context
         userPhone: "09123456789", // You should get this from user profile
-        description: `شارژ اعتبار به مبلغ ${amountNumber.toLocaleString('fa-IR')} تومان`,
+        description: `شارژ اعتبار به مبلغ ${amountNumber.toLocaleString('fa-IR')} ریال`,
       }
 
       console.log('Sending payment request:', paymentData)
@@ -121,16 +121,15 @@ export default function ChargeCreditPage() {
     }
   }
 
-  const formatAmount = (value: string) => {
-    if (!value) return ""
-    return parseInt(value).toLocaleString('fa-IR')
-  }
 
   const handleCustomAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/,/g, '')
-    if (/^\d*$/.test(value)) {
-      setAmount(value)
-    }
+    const value = e.target.value.replace(/[^\d]/g, '');
+    setAmount(value);
+  }
+
+  const formatAmount = (value: string) => {
+    if (!value) return '';
+    return value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   }
 
   return (
@@ -209,16 +208,16 @@ export default function ChargeCreditPage() {
                             id="customAmount"
                             type="text"
                             placeholder="مبلغ مورد نظر را وارد کنید"
-                            value={formatAmount(amount)}
-                            onChange={handleCustomAmountChange}
+                            value={formatAmount(amount)} // Display formatted with commas
+                            onChange={handleCustomAmountChange} // Handles raw input
                             className="pl-12 text-left font-medium text-lg"
                           />
                           <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-                            <span className="text-muted-foreground">تومان</span>
+                            <span className="text-muted-foreground">ریال</span>
                           </div>
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          حداقل مبلغ شارژ: ۱۰۰,۰۰۰ تومان
+                          حداقل مبلغ شارژ: ۱۰۰,۰۰۰ ریال
                         </p>
                       </div>
                     </CardContent>
@@ -277,7 +276,7 @@ export default function ChargeCreditPage() {
                 {/* Summary Sidebar */}
                 <div className="space-y-6">
                   {/* Order Summary */}
-                  <Card className="border shadow-sm hover:shadow-md transition-shadow sticky top-6 py-6">
+                  <Card className="border shadow-sm hover:shadow-md transition-shadow sticky top-6 py-6 bg-white">
                     <CardHeader>
                       <CardTitle>خلاصه شارژ</CardTitle>
                     </CardHeader>
@@ -286,20 +285,20 @@ export default function ChargeCreditPage() {
                         <div className="flex justify-between items-center">
                           <span className="text-muted-foreground">مبلغ شارژ:</span>
                           <span className="font-medium">
-                            {amount ? `${formatAmount(amount)} تومان` : "---"}
+                            {amount ? `${formatAmount(amount)} ریال` : "---"}
                           </span>
                         </div>
                         
                         <div className="flex justify-between items-center">
                           <span className="text-muted-foreground">کارمزد:</span>
-                          <span className="font-medium">۰ تومان</span>
+                          <span className="font-medium">۰ ریال</span>
                         </div>
                         
                         <div className="pt-3 border-t">
                           <div className="flex justify-between items-center">
                             <span className="font-medium">مبلغ قابل پرداخت:</span>
                             <span className="text-2xl font-bold text-green-600">
-                              {amount ? `${formatAmount(amount)} تومان` : "---"}
+                              {amount ? `${formatAmount(amount)} ریال` : "---"}
                             </span>
                           </div>
                         </div>

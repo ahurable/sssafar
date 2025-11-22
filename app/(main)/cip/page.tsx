@@ -10,6 +10,7 @@ import Link from "next/link"
 import { useState, useEffect } from "react"
 import { useCip } from "@/contexts/search/CipContext"
 import { useRouter } from "next/navigation"
+import { useSnack } from "@/hooks/use-notification"
 
 interface CipService {
   id: string
@@ -574,8 +575,10 @@ function ServiceRow({ service, onViewService }: {
 // Main Content Component
 function CipServicesContent() {
   const { searchData } = useCip()
+  const { error } = useSnack()
   const [services, setServices] = useState<CipService[]>([])
   const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState<any|null>(null)
   const [hasSearchParams, setHasSearchParams] = useState(false)
   const [selectedService, setSelectedService] = useState<CipService | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -623,6 +626,28 @@ function CipServicesContent() {
     fetchCipServices()
   }, [searchData])
 
+  useEffect(() => {
+    console.log(`[CIP] You search data is : ${searchData}`)
+
+    const getUser = async () => {
+      const res = await fetch("/api/auth/me")
+      const data = await res.json()
+      if (res.ok) {
+        if (data.user.phoneVerified && data.user.emailVerified && data.user.firstName && data.user.lastName)
+          setUser(data.user)
+        else {
+          setUser(null)
+          error("شما ابتدا باید اطلاعات پروفایل خود را تکمیل کنید")
+        }
+      } else {
+        error("شما باید ابتدا وارد حساب خود شوید")
+        setUser(null)
+      }
+    }
+
+    getUser()
+  }, [])
+
   const handleViewService = (service: CipService) => {
     setSelectedService(service)
     setIsModalOpen(true)
@@ -634,6 +659,16 @@ function CipServicesContent() {
   }
 
   const handleCreateInvoice = async (service: CipService) => {
+    if (!user) {
+      error("شما ابتدا باید وارد حساب کاربری خود شوید")
+      return
+    } 
+    if (!searchData) {
+      error("شما ابتدا باید سرویس مورد نظر خود را جستجو کنید")
+      return
+    }
+
+    console.log(searchData)
     try {
       // Create invoice data
       const invoiceData = {
@@ -642,10 +677,10 @@ function CipServicesContent() {
         travelers: [
           {
             // You might want to get this from user input or context
-            firstName: "کاربر",
-            lastName: "سیستم",
-            phoneNumber: "09123456789",
-            email: "user@example.com"
+            firstName: user.firstName,
+            lastName: user.lastName,
+            phoneNumber: user.phone,
+            email: user.email
           }
         ],
         order: {
@@ -657,7 +692,10 @@ function CipServicesContent() {
           included: service.included,
           notIncluded: service.notIncluded,
           price: service.price,
-          currency: service.currency
+          currency: service.currency,
+          date: searchData?.date,
+          passengers: searchData?.passengers,
+          serviceType: searchData.serviceType || ""
         }
       }
 

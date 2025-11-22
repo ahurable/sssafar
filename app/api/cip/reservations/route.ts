@@ -4,10 +4,10 @@ import { prisma } from "@/lib/prisma"
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { serviceId, firstName, lastName, phoneNumber } = body
+    const { serviceId, firstName, lastName, phone, order } = body
 
     // Validate required fields
-    if (!serviceId || !firstName || !lastName || !phoneNumber) {
+    if (!serviceId || !firstName || !lastName || !phone || !order) {
       return NextResponse.json(
         { error: "تمامی فیلدهای ضروری باید پر شوند" },
         { status: 400 }
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
 
     // Validate phone number format
     const phoneRegex = /^09[0-9]{9}$/
-    if (!phoneRegex.test(phoneNumber)) {
+    if (!phoneRegex.test(phone)) {
       return NextResponse.json(
         { error: "شماره موبایل معتبر نیست" },
         { status: 400 }
@@ -41,7 +41,8 @@ export async function POST(request: NextRequest) {
         serviceId,
         firstName,
         lastName,
-        phoneNumber,
+        phoneNumber:phone,
+        search: JSON.stringify(order) || order,
         status: "PENDING"
       }
     })

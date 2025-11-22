@@ -190,7 +190,7 @@ export const POST = async (request: NextRequest) => {
       isActive: validatedData.isActive,
       
       // Required city relation
-      tourCityId: validatedData.tourCityId,
+      cityId: validatedData.tourCityId,
       
       prices: {
         create: validatedData.prices

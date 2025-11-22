@@ -273,7 +273,10 @@ const DomesticFlightSearch = () => {
         const cabinMap: { [key: string]: string } = {
             economy: "Y",
             business: "C",
-            first: "F"
+            first: "F",
+            premiumEconomy: "S",             // Premium Economy            
+            premiumBussiness: "J",           // Premium Business              
+            premiumFirst: "P"  
         }
         return cabinMap[cabinClass] || "Y"
     }
@@ -555,6 +558,10 @@ const DomesticFlightSearch = () => {
                         >
                             <option value="economy">اکونومی</option>
                             <option value="business">بیزینس</option>
+                            <option value="first">فرست کلاس</option>
+                            <option value="premiumEconomy">پرمیوم اکونومی</option>
+                            <option value="premiumBussiness">پرمیوم بیزینس</option>
+                            <option value="premiumFirst">پرمیوم فرست کلاس</option>
                         </select>
                         <ChevronDown className="absolute left-3 top-3 h-4 w-4 text-gray-400 pointer-events-none" />
                     </div>

@@ -1,4 +1,6 @@
+import { getSession } from '@/lib/auth';
 import { flightSessionService } from '@/lib/flight-session';
+import { prisma } from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 
 // Types for incoming request body
@@ -39,7 +41,9 @@ interface IncomingBookRequest {
   travelers: Traveler[];
   checkIn: string;
   checkOut: string;
+  invoiceId: string;
   rooms: Room[];
+  straightPayment?: boolean;
 }
 
 // Types for external API request
@@ -74,8 +78,25 @@ interface ExternalBookRequest {
 }
 
 export async function POST(request: NextRequest) {
+  const session = await getSession()
+
+  const bookData: IncomingBookRequest = await request.json();
+
+  if (!session && !bookData.straightPayment) {
+    return NextResponse.json({
+      message: "ابتدا وارد حساب کاربری خود شوید"
+    }, {status: 401})
+  }
+
   try {
-    const bookData: IncomingBookRequest = await request.json();
+    const invoice = await prisma.invoice.findUnique({ where: { id: bookData.invoiceId } })
+    
+    if (!invoice) {
+      return NextResponse.json({
+        message: "صورت حساب شما یافت نشد"
+      }, { status: 400 })
+    }
+    
     console.log('Received booking request:', bookData);
 
     const sessionId = await flightSessionService.getSession();
@@ -181,12 +202,17 @@ export async function POST(request: NextRequest) {
       };
     });
 
+    const userPhone = await prisma.user.findUnique({
+      where: { id: invoice.userId},
+      select: { phone: true }
+    })
+
     // Transform to external API format
     const externalRequest: ExternalBookRequest = {
       SessionId: sessionId,
       FareSourceCode: bookData.fareSourceCode,
       ClientUniqueId: clientUniqueId,
-      PhoneNumber: primaryTraveler.phoneNumber || "123456789",
+      PhoneNumber: userPhone && userPhone.phone || "123456789",
       Email: primaryTraveler.email || "IT@Partocrs.com",
       Rooms: bookData.rooms.map(room => ({
         Passengers: passengers, // All passengers in each room (adjust if needed)
@@ -213,41 +239,58 @@ export async function POST(request: NextRequest) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        // Add any required headers for authentication
-        // 'Authorization': 'Bearer your-token-here'
       },
       body: JSON.stringify(externalRequest)
     });
 
+    // Read the response once and store it
+    const responseText = await response.text();
+    
+    let externalResponse;
+    try {
+      externalResponse = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('Failed to parse external API response:', parseError);
+      externalResponse = { error: 'Invalid JSON response', raw: responseText };
+    }
+
+    // Create reservation regardless of API response status
+    const makeReservationAnyWay = await prisma.booking.create({
+      data: {
+        bookingCode: invoice.id,
+        type: "HOTEL",
+        bookingInformation: JSON.stringify(invoice.order) || JSON.stringify({error:"صورت حساب یافت نشد"}),
+        data: externalResponse,
+        totalPrice: invoice && parseInt(invoice.amount) || 0,
+        status: response.ok ? "CONFIRMED" : "CANCELLED",
+        userId: invoice.userId
+      }
+    })
+
     if (!response.ok) {
-      const errorText = await response.text();
       console.error('External API error:', {
         status: response.status,
         statusText: response.statusText,
-        error: errorText
+        error: responseText
       });
       
       return NextResponse.json(
         { 
           success: false, 
-          error: {
-            id: "EXTERNAL_API_ERROR",
-            message: `External API returned ${response.status}: ${response.statusText}`
-          }
+          message: `${response.status}: ${response.statusText}`,
+          externalError: externalResponse
         },
         { status: response.status }
       );
     }
 
-    const externalResponse = await response.json();
-    
     console.log('Booking response received:', {
       success: externalResponse.Success,
       bookingId: externalResponse.BookingId,
       error: externalResponse.Error
     });
 
-    // Return the external API response directly
+    // Return the external API response
     return NextResponse.json(externalResponse);
 
   } catch (error) {

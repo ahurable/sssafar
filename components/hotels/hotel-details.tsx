@@ -384,7 +384,7 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
     if (!hotelData) return
     
     // Find the selected room details
-    const selectedRoomData = allRooms.find(room => room.RoomMapId === selectedRoom)
+    const selectedRoomData = allRooms.find(room => room.RoomId === selectedRoom)
     if (!selectedRoomData) {
       error("اتاق انتخاب شده یافت نشد")
       return

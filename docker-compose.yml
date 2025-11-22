@@ -16,7 +16,7 @@ services:
       FLIGHT_API_USERNAME: api
       FLIGHT_API_PASSWORD: LrW1Y0J)Kv6h
       ZIBAL_MERCHANT_ID: zibal
-      NEXT_PUBLIC_APP_URL: http://37.32.14.157:3000
+      NEXT_PUBLIC_APP_URL: http://185.192.113.199:3000
       SMTP_HOST: smtp.mail.yahoo.com
       SMTP_PORT: 587
       SMTP_USER: ahura.alipur19@yahoo.com

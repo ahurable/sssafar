@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { AlertCircle, Clock, Plane, User, CreditCard, Building, Wallet, Hotel, MapPin, Calendar, Star, Bed, UtensilsCrossed, Loader2, RefreshCw, Info, Shield, Building2, Map, Users, Landmark } from "lucide-react"
 import { useSnack } from "@/hooks/use-notification"
 import { useRouter } from "next/navigation"
+import { gregorianToShamsiString } from "@/lib/jalaalil"
 
 interface Traveler {
   id: string
@@ -160,6 +161,9 @@ interface CIPOrder {
   notIncluded: string[]
   price: number
   currency: string
+  date?: string
+  passengers?: string
+  serviceType?: string
 }
 
 // Activity Order Interface
@@ -241,62 +245,7 @@ export function InvoiceComponent({
   const cipOrder = isCIPInvoice ? invoice.order as CIPOrder : null
   const activityOrder = isActivityInvoice ? invoice.order as ActivityOrder : null
 
-  // Revalidate hotel data before showing invoice
-  useEffect(() => {
-    const revalidateHotel = async () => {
-      if (!isHotelInvoice || !hotelOrder || hotelOrderWithRevalidation) return
-
-      try {
-        setRevalidatingHotel(true)
-        console.log("Revalidating hotel data for invoice...")
-
-        const revalidateResponse = await fetch('/api/hotels/details', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            FareSourceCode: hotelOrder.FareSourceCode,
-            FixStayId: null,
-            Nationality: null
-          })
-        })
-
-        if (!revalidateResponse.ok) {
-          throw new Error('Failed to revalidate hotel')
-        }
-
-        const revalidateResult = await revalidateResponse.json()
-        console.log("Hotel revalidation result:", revalidateResult)
-
-        if (revalidateResult.Success) {
-          // Update hotel order with revalidated data
-          const updatedHotelOrder: HotelOrder = {
-            ...hotelOrder,
-            RevalidatedData: revalidateResult.data
-          }
-          setHotelOrderWithRevalidation(updatedHotelOrder)
-          success("اطلاعات هتل با موفقیت بروزرسانی شد")
-        } else {
-          error(revalidateResult.Error?.Message || "خطا در بروزرسانی اطلاعات هتل")
-          // Fallback to original data
-          setHotelOrderWithRevalidation(hotelOrder)
-        }
-      } catch (err) {
-        console.error('Error revalidating hotel:', err)
-        error("خطا در دریافت اطلاعات بروز هتل")
-        // Fallback to original data
-        setHotelOrderWithRevalidation(hotelOrder)
-      } finally {
-        setRevalidatingHotel(false)
-      }
-    }
-
-    if (isHotelInvoice && hotelOrder && !hotelOrderWithRevalidation) {
-      revalidateHotel()
-    }
-  }, [isHotelInvoice, hotelOrder, hotelOrderWithRevalidation, success, error])
-
+  
   // Manual revalidation function
   const handleManualRevalidate = async () => {
     if (!isHotelInvoice || !hotelOrder) return
@@ -522,6 +471,7 @@ export function InvoiceComponent({
             travelers: invoice.travelers,
             checkIn: currentHotelOrder.CheckIn,
             checkOut: currentHotelOrder.CheckOut,
+            invoiceId: invoice.id,
             rooms: currentHotelOrder.Rooms
           })
         }
@@ -536,7 +486,7 @@ export function InvoiceComponent({
       }
     } else if (isCIPInvoice && cipOrder) {
       const res = await fetch(
-        '/api/cip/book',
+        '/api/cip/reservations',
         {
           method: "POST",
           headers: {
@@ -546,7 +496,8 @@ export function InvoiceComponent({
             invoiceId: invoice.id,
             serviceId: cipOrder.serviceId,
             travelers: invoice.travelers,
-            type: invoice.type || "NO"
+            type: invoice.type || "NO",
+            order: invoice.order
           })
         }
       )
@@ -848,7 +799,116 @@ export function InvoiceComponent({
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* ... (keep existing CIP content) */}
+                {/* Basic Information */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <Label className="text-sm text-blue-700 font-medium">عنوان سرویس</Label>
+                    <p className="font-bold text-blue-900 mt-1">{cipOrder.title}</p>
+                  </div>
+                  
+                  <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                    <Label className="text-sm text-green-700 font-medium">فرودگاه</Label>
+                    <p className="font-bold text-green-900 mt-1">{cipOrder.airport}</p>
+                  </div>
+
+                  <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                    <Label className="text-sm text-purple-700 font-medium">مدت زمان</Label>
+                    <p className="font-bold text-purple-900 mt-1">{cipOrder.duration} ساعت</p>
+                  </div>
+
+                  <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                    <Label className="text-sm text-orange-700 font-medium">نوع سرویس</Label>
+                    <p className="font-bold text-orange-900 mt-1">{getCIPTypeText(invoice.type || "NO")}</p>
+                  </div>
+
+                  <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                    <Label className="text-sm text-purple-700 font-medium">تاریخ</Label>
+                    <p className="font-bold text-purple-900 mt-1">{cipOrder.date && gregorianToShamsiString(cipOrder.date)} </p>
+                  </div>
+
+                  <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                    <Label className="text-sm text-purple-700 font-medium">تعداد مهمان</Label>
+                    <p className="font-bold text-purple-900 mt-1">{cipOrder.passengers} </p>
+                  </div>
+
+                  <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                    <Label className="text-sm text-purple-700 font-medium">نوع پرواز</Label>
+                    <p className="font-bold text-purple-900 mt-1">{cipOrder.serviceType} </p>
+                  </div>
+                </div>
+
+                {/* Features */}
+                {cipOrder.features && cipOrder.features.length > 0 && (
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <Label className="text-sm font-medium mb-3 block">ویژگی‌های سرویس</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {cipOrder.features.map((feature, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span className="text-sm">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Included Services */}
+                {cipOrder.included && cipOrder.included.length > 0 && (
+                  <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                    <Label className="text-sm font-medium text-green-700 mb-3 block">خدمات شامل شده</Label>
+                    <div className="space-y-2">
+                      {cipOrder.included.map((service, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span className="text-sm text-green-800">{service}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Not Included Services */}
+                {cipOrder.notIncluded && cipOrder.notIncluded.length > 0 && (
+                  <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                    <Label className="text-sm font-medium text-red-700 mb-3 block">خدمات شامل نشده</Label>
+                    <div className="space-y-2">
+                      {cipOrder.notIncluded.map((service, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                          <span className="text-sm text-red-800">{service}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Price Information */}
+                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-lg border border-blue-200">
+                  <Label className="text-lg text-blue-800 font-bold mb-4">جزئیات قیمت</Label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center">
+                      <p className="text-sm text-blue-600">قیمت پایه</p>
+                      <p className="text-xl font-bold text-blue-800">
+                        {formatPrice(cipOrder.price, cipOrder.currency)}
+                      </p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm text-green-600">مدت سرویس</p>
+                      <p className="text-lg font-bold text-green-800">
+                        {cipOrder.duration} ساعت
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Service ID */}
+                <div className="bg-gray-100 p-4 rounded-lg border">
+                  <Label className="text-sm font-medium mb-2 block">اطلاعات فنی</Label>
+                  <div className="text-xs">
+                    <span className="text-muted-foreground">شناسه سرویس: </span>
+                    <span className="font-mono">{cipOrder.serviceId}</span>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           )}
@@ -863,69 +923,330 @@ export function InvoiceComponent({
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* ... (keep existing flight content) */}
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {/* Flight Type */}
+                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                      <Label className="text-sm text-blue-700 font-medium">نوع پرواز</Label>
+                      <p className="font-bold text-blue-900 mt-1">
+                        {invoice.flightType === "one-way" ? "یک طرفه" : "رفت و برگشت"}
+                      </p>
+                    </div>
+
+                    {/* Booking Code */}
+                    <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                      <Label className="text-sm text-green-700 font-medium">کد رزرو</Label>
+                      <p className="font-mono font-bold text-green-900 mt-1">
+                        {invoice.order.FareSourceCode?.substring(0, 16)}...
+                      </p>
+                    </div>
+
+                    {/* Airline */}
+                    <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                      <Label className="text-sm text-purple-700 font-medium">شرکت هواپیمایی</Label>
+                      <p className="font-bold text-purple-900 mt-1">
+                        {invoice.order.ValidatingAirlineCode}
+                      </p>
+                    </div>
+
+                    {/* Payment Status */}
+                    <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                      <Label className="text-sm text-orange-700 font-medium">وضعیت پرداخت</Label>
+                      <p className="font-bold text-orange-900 mt-1">
+                        {invoice.order.PayLater?.HasPayLater ? "پرداخت بعدی" : "پرداخت کامل"}
+                      </p>
+                    </div>
+
+                    {/* Reservation Status */}
+                    <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                      <Label className="text-sm text-red-700 font-medium">وضعیت رزرو</Label>
+                      <p className="font-bold text-red-900 mt-1">
+                        {invoice.order.IsClosed ? "بسته شده" : "فعال"}
+                      </p>
+                    </div>
+
+                    {/* Refund Policy */}
+                    <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-200">
+                      <Label className="text-sm text-indigo-700 font-medium">سیاست استرداد</Label>
+                      <p className="font-bold text-indigo-900 mt-1">
+                        {invoice.order.NonRefundableType === 0 ? "قابل استرداد" : "غیرقابل استرداد"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Additional Flight Information */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    {/* Flight Details */}
+                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                      <Label className="text-sm text-gray-700 font-medium mb-3">جزئیات پرواز</Label>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">سرویس غذا:</span>
+                          <span className="text-sm font-medium">
+                            {invoice.order.IsMealServiceMandatory ? "الزامی" : "اختیاری"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">انتخاب صندلی:</span>
+                          <span className="text-sm font-medium">
+                            {invoice.order.IsSeatServiceMandatory ? "الزامی" : "اختیاری"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">رزرو خودکار:</span>
+                          <span className="text-sm font-medium">
+                            {invoice.order.IsAutoReserved ? "فعال" : "غیرفعال"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Passenger Requirements */}
+                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                      <Label className="text-sm text-gray-700 font-medium mb-3">الزامات مسافر</Label>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">پاسپورت الزامی:</span>
+                          <span className="text-sm font-medium">
+                            {invoice.order.IsPassportMandatory ? "بله" : "خیر"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">تاریخ صدور پاسپورت:</span>
+                          <span className="text-sm font-medium">
+                            {invoice.order.IsPassportIssueDateMandatory ? "الزامی" : "اختیاری"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">آدرس مقصد:</span>
+                          <span className="text-sm font-medium">
+                            {invoice.order.IsDestinationAddressMandatory ? "الزامی" : "اختیاری"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Price Breakdown */}
+                  {invoice.order.AirItineraryPricingInfo?.ItinTotalFare && (
+                    <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-lg border border-blue-200 mt-4">
+                      <Label className="text-lg text-blue-800 font-bold mb-4">جزئیات قیمت</Label>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="text-center">
+                          <p className="text-sm text-blue-600">قیمت کل</p>
+                          <p className="text-xl font-bold text-blue-800">
+                            {invoice.order.AirItineraryPricingInfo.ItinTotalFare.TotalFare?.toLocaleString('fa-IR')}
+                          </p>
+                          <p className="text-xs text-blue-500">
+                            {invoice.order.AirItineraryPricingInfo.ItinTotalFare.Currency}
+                          </p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm text-green-600">قیمت پایه</p>
+                          <p className="text-lg font-bold text-green-800">
+                            {invoice.order.AirItineraryPricingInfo.ItinTotalFare.BaseFare?.toLocaleString('fa-IR')}
+                          </p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm text-red-600">مالیات</p>
+                          <p className="text-lg font-bold text-red-800">
+                            {invoice.order.AirItineraryPricingInfo.ItinTotalFare.TotalTax?.toLocaleString('fa-IR')}
+                          </p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm text-purple-600">نوع کرایه</p>
+                          <p className="text-lg font-bold text-purple-800">
+                            {invoice.order.AirItineraryPricingInfo.FareType === 2 ? "عادی" : "ویژه"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Additional Features */}
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    {invoice.order.HasCancellationGuarantee && (
+                      <Badge className="bg-green-100 text-green-800 border-green-200 px-3 py-1">
+                        ✅ تضمین کنسلی
+                      </Badge>
+                    )}
+                    {invoice.order.HasAmenities && (
+                      <Badge className="bg-blue-100 text-blue-800 border-blue-200 px-3 py-1">
+                        🎁 امکانات ویژه
+                      </Badge>
+                    )}
+                    {invoice.order.HasFareFamilies && (
+                      <Badge className="bg-purple-100 text-purple-800 border-purple-200 px-3 py-1">
+                        👨‍👩‍👧‍👦 خانواده کرایه
+                      </Badge>
+                    )}
+                    {invoice.order.RefundMethod === 0 && (
+                      <Badge className="bg-orange-100 text-orange-800 border-orange-200 px-3 py-1">
+                        💰 روش استرداد: اعتبار
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              
+              {invoice.selectedServices && invoice.selectedServices.length > 0 && (
+                <div>
+                  <Label className="text-sm text-muted-foreground">خدمات اضافی</Label>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {invoice.selectedServices.map((service, index) => (
+                      <Badge key={index} variant="secondary">
+                        {service.name}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               </CardContent>
             </Card>
           )}
 
           {/* Hotel Information with Revalidated Data */}
-          {isHotelInvoice && currentHotelOrder && (
-            <>
-              <Card className="py-6">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center gap-2">
-                      <Hotel className="h-5 w-5" />
-                      اطلاعات رزرو هتل
-                      {revalidatedHotel && (
-                        <Badge className="bg-green-100 text-green-800">بروزرسانی شده</Badge>
-                      )}
-                      {revalidatingHotel && (
-                        <Badge className="bg-blue-100 text-blue-800">
-                          <Loader2 className="h-3 w-3 animate-spin ml-1" />
-                          در حال بروزرسانی
-                        </Badge>
-                      )}
-                    </CardTitle>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleManualRevalidate}
-                      disabled={revalidatingHotel}
-                    >
-                      <RefreshCw className={`h-4 w-4 ml-2 ${revalidatingHotel ? 'animate-spin' : ''}`} />
-                      بروزرسانی اطلاعات
-                    </Button>
+          {isHotelInvoice && hotelOrder && (
+            <Card className="py-6">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Hotel className="h-5 w-5" />
+                  اطلاعات رزرو هتل
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Hotel Basic Info */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <Label className="text-sm text-blue-700 font-medium">نام هتل</Label>
+                    <p className="font-bold text-blue-900 mt-1">
+                      {hotelOrder.HotelName || `هتل ${hotelOrder.HotelId}`}
+                    </p>
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* ... (keep existing hotel content) */}
-                </CardContent>
-              </Card>
+                  
+                  <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                    <Label className="text-sm text-green-700 font-medium">اتاق‌های موجود</Label>
+                    <p className="font-bold text-green-900 mt-1">
+                      {hotelOrder.AvailableRoom} اتاق
+                    </p>
+                  </div>
+                </div>
 
-              {/* Revalidation Data Section */}
-              {revalidatedHotel && (
-                <Card className="py-6">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Info className="h-5 w-5 text-blue-600" />
-                      اطلاعات بروزرسانی شده
-                      {hasDataChanges && (
-                        <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-                          تغییرات شناسایی شد
+                {/* Check-in/Check-out */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center gap-3 p-4 border rounded-lg">
+                    <Calendar className="h-5 w-5 text-blue-600" />
+                    <div>
+                      <Label className="text-sm text-muted-foreground">تاریخ ورود</Label>
+                      <p className="font-medium">{formatDate(hotelOrder.CheckIn)}</p>
+                      <p className="text-xs text-muted-foreground">
+                        ساعت: {hotelOrder.HotelPolicy.BeginTime}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-3 p-4 border rounded-lg">
+                    <Calendar className="h-5 w-5 text-green-600" />
+                    <div>
+                      <Label className="text-sm text-muted-foreground">تاریخ خروج</Label>
+                      <p className="font-medium">{formatDate(hotelOrder.CheckOut)}</p>
+                      <p className="text-xs text-muted-foreground">
+                        ساعت: {hotelOrder.HotelPolicy.CheckOutTime}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Rooms Information */}
+                <div>
+                  <Label className="text-sm font-medium mb-3 block">اتاق‌های رزرو شده</Label>
+                  <div className="space-y-4">
+                    {hotelOrder.Rooms.map((room, index) => (
+                      <div key={index} className="border rounded-lg p-4">
+                        <div className="flex justify-between items-start mb-3">
+                          <h4 className="font-medium">{room.Name || room.RoomMapName}</h4>
+                          <Badge variant="outline">
+                            {getMealTypeText(room.MealType)}
+                          </Badge>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <Label className="text-muted-foreground">بزرگسالان</Label>
+                            <p>{room.AdultCount} نفر</p>
+                          </div>
+                          {room.ChildCount > 0 && (
+                            <div>
+                              <Label className="text-muted-foreground">کودکان</Label>
+                              <p>{room.ChildCount} نفر</p>
+                            </div>
+                          )}
+                          {room.BedGroups && (
+                            <div>
+                              <Label className="text-muted-foreground">تخت‌ها</Label>
+                              <p>{room.BedGroups}</p>
+                            </div>
+                          )}
+                          {room.ExtraBedCount > 0 && (
+                            <div>
+                              <Label className="text-muted-foreground">تخت اضافه</Label>
+                              <p>{room.ExtraBedCount} عدد</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Hotel Policies */}
+                {hotelOrder.HotelPolicy.InstructionsFa && (
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <Label className="text-sm font-medium mb-2 block">قوانین هتل</Label>
+                    <p className="text-sm text-muted-foreground">
+                      {hotelOrder.HotelPolicy.InstructionsFa}
+                    </p>
+                  </div>
+                )}
+
+                {/* Amenities */}
+                {hotelOrder.Amenities && hotelOrder.Amenities.length > 0 && (
+                  <div>
+                    <Label className="text-sm font-medium mb-2 block">امکانات هتل</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {hotelOrder.Amenities.slice(0, 8).map((amenity, index) => (
+                        <Badge key={index} variant="secondary">
+                          {amenity}
+                        </Badge>
+                      ))}
+                      {hotelOrder.Amenities.length > 8 && (
+                        <Badge variant="outline">
+                          +{hotelOrder.Amenities.length - 8} بیشتر
                         </Badge>
                       )}
-                    </CardTitle>
-                    <CardDescription>
-                      اطلاعات اخذ شده از سیستم رزرو در تاریخ {formatDateTime(new Date().toISOString())}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    {/* ... (keep existing revalidation content) */}
-                  </CardContent>
-                </Card>
-              )}
-            </>
+                    </div>
+                  </div>
+                )}
+
+                {/* Cancellation Policy */}
+                <div className={`p-4 rounded-lg border ${
+                  hotelOrder.NonRefundable 
+                    ? 'bg-red-50 border-red-200' 
+                    : 'bg-green-50 border-green-200'
+                }`}>
+                  <div className="flex items-center gap-2">
+                    <Badge variant={hotelOrder.NonRefundable ? "destructive" : "default"}>
+                      {hotelOrder.NonRefundable ? "غیرقابل استرداد" : "قابل استرداد"}
+                    </Badge>
+                    <span className="text-sm text-muted-foreground">
+                      {hotelOrder.NonRefundable 
+                        ? "این رزرو غیرقابل کنسلی است" 
+                        : "امکان کنسلی طبق قوانین هتل وجود دارد"}
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           )}
 
           {/* Travelers Information */}

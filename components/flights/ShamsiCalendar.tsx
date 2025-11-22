@@ -105,13 +105,27 @@ const ShamsiDateModal = ({
   }
 
   const handleDateSelect = (date: string) => {
-    const convertedDate = convertDateFromCalendar(date)
-    if (localTripType === "roundtrip" && selectionMode === "departure") {
-      setSelectedDepartureDate(convertedDate)
-      setSelectionMode('return')
-    } else if (localTripType === "roundtrip" && selectionMode === "return") {
-      setSelectedReturnDate(convertedDate)
+  const convertedDate = convertDateFromCalendar(date)
+    
+    if (localTripType === "roundtrip") {
+      // If both dates are already selected, reset to departure selection
+      if (selectedDepartureDate && selectedReturnDate) {
+        setSelectedDepartureDate(convertedDate)
+        setSelectedReturnDate("")
+        setSelectionMode('return')
+      } 
+      // If only departure is selected, set return date
+      else if (selectedDepartureDate && !selectedReturnDate) {
+        setSelectedReturnDate(convertedDate)
+        setSelectionMode('departure') // Cycle back to departure for next click
+      }
+      // If no dates selected, start with departure
+      else {
+        setSelectedDepartureDate(convertedDate)
+        setSelectionMode('return')
+      }
     } else {
+      // For one-way trips, just set departure date
       setSelectedDepartureDate(convertedDate)
     }
   }
@@ -335,7 +349,7 @@ const ShamsiDateModal = ({
                 className="flex items-center gap-2 border border-gray-300 bg-[#fffefe] text-black hover:bg-gray-100"
               >
                 <Globe className="h-4 w-4" />
-                {calendarType === "shamsi" ? "تقویم شمسی" : "Gregorian Calendar"}
+                {calendarType === "shamsi" ? "تقویم میلادی" : "Shamsi Calendar"}
               </Button>
               <Button
                 variant="ghost"
@@ -850,14 +864,12 @@ const Calendar = ({
 
   return (
     <div className={`bg-[#fffefe] ${isMobile ? 'p-2' : 'p-3'}`}>
-      {/* Only show month name in desktop view */}
-      {!isMobile && (
-        <div className="text-center mb-3">
-          <div className="text-md font-bold text-black">
-            {getMonthName()} {getCurrentYear()}
-          </div>
+    
+      <div className="text-center mb-3">
+        <div className="text-md font-bold text-black">
+          {getMonthName()} {getCurrentYear()}
         </div>
-      )}
+      </div>
 
       <div className="grid grid-cols-7 gap-1 mb-2">
         {weekDays.map((day) => (

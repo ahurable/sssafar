@@ -123,12 +123,14 @@ export async function POST(request: NextRequest) {
           );
       }
 
+      console.log(`[Zibal] Verification Results: ${verificationResult.verified}`)
+
 
       // If verification was successful, process the payment based on type
       if (verificationResult.verified) {
         await processSuccessfulPayment(verificationData, verificationResult, invoice.id, invoice.userId);
       } else if (!verificationResult.verified) {
-        await processFailedPayment(verificationData, verificationResult);
+        await processFailedPayment(verificationData, verificationResult, invoice.userId);
       }
     
 
@@ -188,7 +190,10 @@ async function verifyZibalPayment(verificationData: PaymentVerificationRequest):
     }
 
     const zibalResult: ZibalVerifyResponse = await verifyResponse.json();
-    
+    const invoice = await prisma.invoice.findUnique({
+      where: { id: zibalResult.orderId},
+      select: { state: true }
+    })
     console.log('Zibal verification response:', zibalResult);
 
     if (zibalResult.result === RESULT_CODES.SUCCESS) {
@@ -281,6 +286,7 @@ async function processSuccessfulPayment(
       
       case 'HOTEL':
         await processInvoicePayment(verificationData, verificationResult, invoiceId);
+        console.log('[Hotel] it\'s a hotel payment , proceeded')
         break;
       
       case 'FLIGHT':
@@ -358,16 +364,18 @@ async function bookFlight(invoiceId:string, userId:string) {
 // Process failed payment
 async function processFailedPayment(
   verificationData: PaymentVerificationRequest,
-  verificationResult: PaymentVerificationResponse
+  verificationResult: PaymentVerificationResponse,
+  userId: string
 ) {
   try {
     // Create failed transaction record
+    // console.log(verificationData)
     await prisma.userTransaction.create({
       data: {
         type: 'DEPOSIT', // Still DEPOSIT type but we'll mark it as failed in description
         amount: verificationResult.amount || 0,
         description: `FAILED - ${verificationResult.message} - trackId:${verificationData.trackId} - gateway:${verificationData.gateway}`,
-        userId: verificationData.userId || 'unknown'
+        userId: userId || 'unknown'
       }
     });
 
@@ -426,7 +434,7 @@ async function processCreditCharge(
       }, { status: 404 })
     }
 
-    await prisma.credit.update({
+    const updateCredit = await prisma.credit.update({
       where: { userId: invoice.userId },
       data: {
         balance: {
@@ -434,16 +442,25 @@ async function processCreditCharge(
         }
       }
     });
-
-    await prisma.invoice.update({
-      where: {
-        id: verificationData.orderId
-      },
-      data: {
-        state: "PAID"
-      }
-    })
-    
+    if (updateCredit) {
+      await prisma.invoice.update({
+        where: {
+          id: verificationData.orderId
+        },
+        data: {
+          state: "PAID"
+        }
+      })
+    } else {
+      await prisma.invoice.update({
+        where: {
+          id: verificationData.orderId
+        },
+        data: {
+          state: "CANCELLED"
+        }
+      })
+    }
     console.log(`Added ${verificationResult.amount} credit to user ${verificationData.userId}`);
   }
 }
@@ -451,22 +468,93 @@ async function processCreditCharge(
 async function processInvoicePayment(
   verificationData: PaymentVerificationRequest,
   verificationResult: PaymentVerificationResponse,
-  invoiceId:string
+  invoiceId: string
 ) {
-  // Mark invoice as paid
-  console.log(verificationData.invoiceId)
-  if (invoiceId) {
-
-    await prisma.invoice.update({
-      where: {
-        id: invoiceId
-      },
-      data: {
-        state: "PAID"
-      }
-    });
+  try {
+    console.log(verificationData.invoiceId);
     
-    console.log(`Marked invoice ${verificationData.invoiceId} as paid`);
+    if (invoiceId) {
+      const invoice = await prisma.invoice.update({
+        where: {
+          id: invoiceId
+        },
+        data: {
+          state: "PAID"
+        }
+      });
+
+      console.log(`[Hotel] the type of order is : ${typeof invoice.order}`);
+      console.log(`[Hotel] the type of travelers is : ${typeof invoice.travelers}`);
+      
+      if (!invoice.order) {
+        console.log('the order doesnt exists');
+        return NextResponse.json({
+          message: "اطلاعات سفارش یافت نشد"
+        }, { status: 400 });
+      }
+
+      if (!invoice.travelers) {
+        console.log('the travelers doesnt exists');
+        return NextResponse.json({
+          message: "اطلاعات مسافران یافت نشد"
+        }, { status: 400 });
+      }
+
+      // Both should be objects since they're stored the same way
+      const orderData = invoice.order as any;
+      const travelersData = invoice.travelers as any;
+
+      console.log('Order data:', orderData);
+      console.log('Travelers data:', travelersData);
+
+      // Prepare booking request
+      const requestForBook = {
+        fareSourceCode: orderData.FareSourceCode || orderData.fareSourceCode,
+        hotelId: orderData.HotelId || orderData.hotelId,
+        travelers: travelersData,
+        checkIn: orderData.CheckIn || orderData.checkIn,
+        checkOut: orderData.CheckOut || orderData.checkOut,
+        invoiceId: invoice.id,
+        rooms: orderData.Rooms || orderData.rooms
+      };
+
+      console.log('Sending booking request:', requestForBook);
+
+      // Make booking request
+      const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/hotels/book`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({...requestForBook, straightPayment: true})
+      });
+
+      const data = await response.json();
+      console.log(`[Hotel Payment Process] Booking response:`, data);
+      
+      if (response.ok) {
+        return NextResponse.json({
+          message: "عملیات رزرو با موفقیت انجام شد",
+          bookingData: data
+        });
+      } else {
+        console.error('Booking failed:', data);
+        return NextResponse.json({
+          message: "در انجام عملیات رزرو خطایی رخ داد",
+          error: data
+        }, { status: 500 });
+      }
+    }
+
+    return NextResponse.json({
+      message: "Invoice ID not provided"
+    }, { status: 400 });
+
+  } catch (error) {
+    console.error('Error in processInvoicePayment:', error);
+    return NextResponse.json({
+      message: "خطای داخلی در پردازش پرداخت"
+    }, { status: 500 });
   }
 }
 

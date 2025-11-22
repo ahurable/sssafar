@@ -183,9 +183,9 @@ export function FlightList({ flights, area, itemsPerPage = 10 }: FlightListProps
   return (
     <div className="space-y-6">
       {/* Date Selection Section */}
-      <Card className="border-2 border-blue-100 bg-gradient-to-br from-blue-50 to-white shadow-lg overflow-hidden rounded-2xl">
-        <CardContent className="p-6">
-          <div className="flex items-center gap-3 mb-6">
+      <Card className="border-2 border-blue-100 bg-gradient-to-br from-blue-50 to-white shadow-lg overflow-hidden">
+        <CardContent className="py-6">
+          <div className="flex items-center gap-3 mb-6 px-6">
             <Calendar className="h-6 w-6 text-blue-600" />
             <h3 className="font-bold text-xl text-blue-800">انتخاب تاریخ پرواز</h3>
           </div>
@@ -202,7 +202,7 @@ export function FlightList({ flights, area, itemsPerPage = 10 }: FlightListProps
                   variant={isSelected ? "default" : "outline"}
                   className={`
                     flex flex-col items-center justify-center gap-2 
-                    min-w-[100px] h-20 px-4 py-3 rounded-2xl
+                    min-w-[100px] h-20 px-4 py-3
                     flex-shrink-0 relative
                     transition-all duration-300 ease-out
                     hover:scale-105 active:scale-95
@@ -411,7 +411,7 @@ export function FlightList({ flights, area, itemsPerPage = 10 }: FlightListProps
                     {user && user.phoneVerified && user.emailVerified && (
                       <Button 
                         onClick={() => handleBookFlight(flight.FareSourceCode, area)}
-                        className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-xl font-bold shadow-md hover:shadow-lg transition-all"
+                        className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 font-bold shadow-md hover:shadow-lg transition-all"
                       >
                         خرید بلیط
                       </Button>
@@ -420,7 +420,7 @@ export function FlightList({ flights, area, itemsPerPage = 10 }: FlightListProps
                     {!user && (
                       <Button 
                         onClick={() => router.push('/auth/signin')}
-                        className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-xl font-bold shadow-md hover:shadow-lg transition-all"
+                        className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 font-bold shadow-md hover:shadow-lg transition-all"
                       >
                         برای خرید بلیط وارد حساب شوید
                       </Button>
@@ -429,7 +429,7 @@ export function FlightList({ flights, area, itemsPerPage = 10 }: FlightListProps
                     {user && (!user.phoneVerified || !user.emailVerified) && (
                       <Button 
                         onClick={() => router.push('/dashboard')}
-                        className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-xl font-bold shadow-md hover:shadow-lg transition-all"
+                        className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 font-bold shadow-md hover:shadow-lg transition-all"
                       >
                         {!user.phoneVerified && !user.emailVerified 
                           ? "ایمیل و موبایل خود را تایید کنید" 

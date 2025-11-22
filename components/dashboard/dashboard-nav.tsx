@@ -143,14 +143,19 @@ export function DashboardNav() {
               <Link
                   href="/dashboard/panels"
                   className={cn(
-                    "flex items-center gap-3 px-3 py-4 text-sm font-medium border-b border-gray-300",
+                    "flex items-center gap-3 px-3 py-4 text-sm font-medium border border-gray-300",
                     pathname == "/dashboard/panels"
                       ? "text-blue-950 border-2 border-blue-950 bg-blue-50 font-bold"
                       : "text-black hover:bg-gray-100",
                   )}
                 >
                   <PanelBottom className="h-4 w-4" />
-                    پنل ها
+                  <div>
+                    <p className="block font-bold">
+                      پنل ها
+                    </p>
+                    <span className="text-xs font-medium">مشاهده پنل های سازمانی</span>
+                  </div>
               </Link>
             }
             {
@@ -158,14 +163,17 @@ export function DashboardNav() {
               <Link
                   href="/dashboard/travelers"
                   className={cn(
-                    "flex items-center gap-3 px-3 py-4 text-sm font-medium border-b border-gray-300",
+                    "flex items-center gap-3 px-3 py-4 text-sm font-medium border border-gray-300",
                     pathname == "/dashboard/travelers"
                       ? "text-blue-800 border-2 border-blue-800 font-bold"
                       : "text-black hover:bg-gray-100",
                   )}
                 >
                   <Users className="h-4 w-4" />
-                    افزودن مسافران
+                    <div>
+                      <p className="block font-bold">افزودن مسافران</p>
+                      <span className="text-xs font-medium">اطلاعات مسافران را وارد کنید همیشه استفاده کنید</span>
+                    </div>
               </Link>
             } 
             <button className="flex w-full border-2 items-center gap-3 px-3 py-4 text-sm font-bold text-red-800 bg-red-50 border-red-800  hover:bg-gray-100">

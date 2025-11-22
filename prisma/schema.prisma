@@ -668,7 +668,7 @@ model PanelStats {
 
 model Credit {
   id        String   @id @default(cuid())
-  balance   Int      @default(0)
+  balance   BigInt   @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

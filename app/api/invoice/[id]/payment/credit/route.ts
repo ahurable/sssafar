@@ -35,7 +35,7 @@ export const POST = async (request: NextRequest, { params } : { params : { id: s
 
     if (userCredit && invoice) {
 
-        const balance = userCredit.balance
+        const balance = parseInt(userCredit.balance.toString())
         const price = parseInt(invoice.amount)
 
         if ( balance > price ) {

@@ -15,6 +15,7 @@ export const POST = async (request: NextRequest) => {
         const body = await request.json()
         console.log("✅ RAW travelers data received:", JSON.stringify(body.travelers, null, 2))
         console.log("✅ Order data:", body.order)
+        console.log("✅ Full request body:", JSON.stringify(body, null, 2)) // Add this for debugging
 
         // Validate required fields
         if (!body.kind) {
@@ -55,6 +56,20 @@ export const POST = async (request: NextRequest) => {
             }, { status: 400 })
         }
 
+        // CIP-specific validation
+        if (body.kind === "CIP") {
+            if (!body.order?.serviceId) {
+                return NextResponse.json({
+                    error: "شناسه سرویس CIP در دسترس نیست"
+                }, { status: 400 })
+            }
+            if (!body.order?.date) {
+                return NextResponse.json({
+                    error: "تاریخ سرویس CIP در دسترس نیست"
+                }, { status: 400 })
+            }
+        }
+
         const expireAt = new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
 
         // Validate travelers based on invoice type
@@ -82,7 +97,29 @@ export const POST = async (request: NextRequest) => {
                     }, { status: 400 })
                 }
             }
+
+            // CIP-specific validations
+            if (body.kind === "CIP") {
+                if (!traveler.firstName || !traveler.lastName) {
+                    return NextResponse.json({
+                        message: "نام و نام خانوادگی مسافر برای سرویس CIP الزامی است"
+                    }, { status: 400 })
+                }
+            }
         }
+
+        // Log the exact order data before saving
+        console.log("📝 Order data to be saved:", {
+            serviceId: body.order?.serviceId,
+            title: body.order?.title,
+            airport: body.order?.airport,
+            date: body.order?.date,
+            passengers: body.order?.passengers,
+            serviceType: body.order?.serviceType,
+            duration: body.order?.duration,
+            price: body.order?.price,
+            currency: body.order?.currency
+        })
 
         // Create invoice
         const createdInvoice = await prisma.invoice.create({
@@ -90,7 +127,7 @@ export const POST = async (request: NextRequest) => {
                 kind: body.kind,
                 amount: body.amount.toString(),
                 travelers: body.travelers,
-                order: body.order, // This contains hotel details for hotel invoices
+                order: body.order, // This contains CIP service details
                 state: "WAITING",
                 flightSourceCode: body.flightSourceCode || null,
                 flightType: body.flightType || null,

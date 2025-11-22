@@ -55,7 +55,7 @@ const CipSearch = () => {
   const suggestionsRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const { setSearchData } = useCip()
+  const { setSearchData, searchData } = useCip()
 
   // Clear errors when user starts typing
   useEffect(() => {
@@ -208,16 +208,13 @@ const CipSearch = () => {
 
     setIsLoading(true)
     try {
-      const gregorianDate = shamsiToGregorianString(cipSearch.date)
-      
+
       const searchPayload = {
-        ...cipSearch,
-        date: gregorianDate
+        ...cipSearch
       }
 
       setSearchData(searchPayload)
-
-      console.log("CIP Search Payload:", searchPayload)
+      
       router.push(`/cip`)
       
     } catch (error) {

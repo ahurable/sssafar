@@ -263,7 +263,7 @@ export default function HotelReservation() {
 
   if (loading && !hotelDetails) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-black to-white flex items-center justify-center">
+      <div className="min-h-screen  flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-white mx-auto mb-4" />
           <p className="text-white text-lg">در حال دریافت اطلاعات هتل...</p>
@@ -274,7 +274,7 @@ export default function HotelReservation() {
 
   if (!hotelDetails) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-black to-white flex items-center justify-center">
+      <div className="min-h-screen  flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
           <p className="text-white text-lg">خطا در دریافت اطلاعات هتل</p>
@@ -290,7 +290,7 @@ export default function HotelReservation() {
   const nights = calculateNights()
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black to-white">
+    <div className="min-h-screen">
       <Header />
 
       <div className="container mx-auto px-4 py-8">
@@ -332,7 +332,7 @@ export default function HotelReservation() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-2xl font-bold text-green-600">
+                        <p className="text-2xl font-bold text-blue-800">
                           {formatPrice(hotel.NetRate, hotel.Currency)}
                         </p>
                         <p className="text-sm text-gray-600">برای هر شب</p>
@@ -348,10 +348,10 @@ export default function HotelReservation() {
                         <p className="text-sm text-blue-600">ساعت: {hotel.HotelPolicy.BeginTime}</p>
                       </div>
                       <div className="text-center">
-                        <Calendar className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                        <p className="font-bold text-green-900">تاریخ خروج</p>
+                        <Calendar className="h-8 w-8 text-blue-800 mx-auto mb-2" />
+                        <p className="font-bold text-blue-900">تاریخ خروج</p>
                         <p className="text-lg font-semibold">{formatDate(hotelDetails.CheckOut)}</p>
-                        <p className="text-sm text-green-600">ساعت: {hotel.HotelPolicy.CheckOutTime}</p>
+                        <p className="text-sm text-blue-600">ساعت: {hotel.HotelPolicy.CheckOutTime}</p>
                       </div>
                     </div>
 
@@ -402,7 +402,7 @@ export default function HotelReservation() {
                               )}
                               <div>
                                 <Label className="text-muted-foreground">وضعیت</Label>
-                                <p className="font-medium text-green-600">تأیید شده</p>
+                                <p className="font-medium text-blue-600">تأیید شده</p>
                               </div>
                             </div>
                           </div>
@@ -432,7 +432,7 @@ export default function HotelReservation() {
                     <div className={`p-4 rounded-lg border ${
                       hotel.NonRefundable 
                         ? 'bg-red-50 border-red-200' 
-                        : 'bg-green-50 border-green-200'
+                        : 'bg-blue-50 border-blue-200'
                     }`}>
                       <div className="flex items-center gap-2">
                         <Badge variant={hotel.NonRefundable ? "destructive" : "default"}>
@@ -489,12 +489,12 @@ export default function HotelReservation() {
             <div className="space-y-6">
               {/* Traveler Information */}
               <Card className="py-6 bg-[#fffefe]/95 backdrop-blur-sm">
-                <CardHeader className="bg-gradient-to-r text-emerald-600 rounded-t-lg">
+                <CardHeader className="bg-gradient-to-r text-blue-600 rounded-t-lg">
                   <CardTitle className="flex items-center gap-2">
                     <Users className="h-6 w-6" />
                     اطلاعات مسافران
                   </CardTitle>
-                  <CardDescription className="text-green-100">
+                  <CardDescription className="text-blue-400">
                     مسافران خود را انتخاب یا اضافه کنید (حداکثر ۹ نفر)
                   </CardDescription>
                 </CardHeader>
@@ -540,14 +540,14 @@ export default function HotelReservation() {
                     
                     <div className="flex justify-between items-center text-lg font-bold">
                       <span>مبلغ قابل پرداخت:</span>
-                      <span className="text-green-600">
+                      <span className="text-blue-600">
                         {formatPrice(calculateTotalPrice(), hotel.Currency)}
                       </span>
                     </div>
                     
                     <Button 
                       onClick={handleSubmit}
-                      className="w-full bg-green-600 hover:bg-green-700 h-12 text-lg mt-4"
+                      className="w-full bg-blue-600 hover:bg-blue-700 h-12 text-lg mt-4"
                       disabled={loading}
                     >
                       {loading ? (
