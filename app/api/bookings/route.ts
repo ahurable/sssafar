@@ -18,6 +18,9 @@ export const GET = async (request: NextRequest) => {
         const bookings = await prisma.booking.findMany({
             where: {
                 userId: session.userId
+            },
+            orderBy: {
+                createdAt: 'desc'
             }
         })
 

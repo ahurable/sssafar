@@ -28,6 +28,8 @@ const TourSearch = () => {
   const [errors, setErrors] = useState<FormErrors>({})
   const router = useRouter()
 
+  const [openCalendarId, setOpenCalendarId] = useState<string | null>(null)
+
   useEffect(() => {
       if (errors.city && tourSearch.destination) {
         setErrors(prev => ({ ...prev, destination: undefined }))
@@ -79,10 +81,13 @@ const TourSearch = () => {
         </div>
 
         {/* Start Date */}
-        <div className="space-y-2">
+        <div className="space-y-2 relative">
           <Label className="text-black text-right block mb-2">تاریخ ورود</Label>
 
           <ShamsiDateModal
+            calendarId="calendar1"
+            onOpenChange={setOpenCalendarId}
+            isOpen={openCalendarId == "calendar1"}
             departureDate={tourSearch.startDate}
             returnDate={tourSearch.endDate}
             tripType="roundtrip"
@@ -96,10 +101,13 @@ const TourSearch = () => {
         </div>
 
         {/* End Date */}
-        <div className="space-y-2">
+        <div className="space-y-2 relative">
           <Label className="text-black text-right block mb-2">تاریخ خروج</Label>
 
           <ShamsiDateModal
+            calendarId="calendar2"
+            isOpen={openCalendarId == "calendar2"}
+            onOpenChange={setOpenCalendarId}
             departureDate={tourSearch.startDate}
             returnDate={tourSearch.endDate}
             tripType="roundtrip"

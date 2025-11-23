@@ -50,6 +50,7 @@ const DomesticFlightSearch = () => {
     const [currentField, setCurrentField] = useState("")
     const [isFieldFocused, setIsFieldFocused] = useState("")
     const [errors, setErrors] = useState<FormErrors>({})
+    const [openCalendarId, setOpenCalendarId] = useState<string | null>(null)
 
     // Passengers popover state
     const [showPassengers, setShowPassengers] = useState(false)
@@ -641,9 +642,12 @@ const DomesticFlightSearch = () => {
                 </div>
 
                 {/* Departure Date */}
-                <div className="space-y-2 col-span-1">
+                <div className="space-y-2 col-span-1 relative">
                     <Label htmlFor="domestic-flight-trip-type" className="text-black text-right block">تاریخ رفت</Label>
                     <ShamsiDateModal
+                        calendarId="calendar1"
+                        onOpenChange={setOpenCalendarId}
+                        isOpen={openCalendarId === "calendar1"}
                         departureDate={domesticFlightSearch.departureDate}
                         returnDate={domesticFlightSearch.returnDate || ""}
                         tripType={domesticFlightSearch.tripType}
@@ -657,11 +661,14 @@ const DomesticFlightSearch = () => {
 
                 {/* Return Date */}
                 {domesticFlightSearch.tripType === "roundtrip" && (
-                    <div className="space-y-2 col-span-1">
+                    <div className="space-y-2 col-span-1 relative">
                         <Label className="text-black text-right block">تاریخ برگشت</Label>
                         <div className="relative">
                             <CalendarIcon className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
                             <ShamsiDateModal
+                                calendarId="calendar2"
+                                onOpenChange={setOpenCalendarId}
+                                isOpen={openCalendarId === "calendar2"}
                                 departureDate={domesticFlightSearch.departureDate}
                                 returnDate={domesticFlightSearch.returnDate || ""}
                                 tripType={domesticFlightSearch.tripType}

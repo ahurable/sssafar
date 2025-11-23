@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get session ID
-    const sessionId = await flightSessionService.getSession();
+    const sessionId = await flightSessionService.forceRefresh();
 
     // Prepare the request for external API
     const externalRequest = {

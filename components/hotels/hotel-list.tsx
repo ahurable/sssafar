@@ -5,7 +5,7 @@ import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Star, MapPin, Wifi, Coffee, Car, Dumbbell, Utensils, Snowflake, Tv, Users, ChevronLeft, Heart, Share2, Clock, User, Child } from "lucide-react"
+import { Star, MapPin, Wifi, Coffee, Car, Dumbbell, Utensils, Snowflake, Tv, Users, ChevronLeft, Heart, Share2, Clock, User } from "lucide-react"
 import { useHotel } from "@/contexts/search/HotelContext"
 import Link from "next/link"
 

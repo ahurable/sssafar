@@ -337,10 +337,11 @@ const CipSearch = () => {
         </div>
 
         {/* Date Input */}
-        <div className="space-y-2">
+        <div className="space-y-2 relative">
           <Label className="text-black text-right block">تاریخ</Label>
 
           <ShamsiDateModal
+            calendarId="calendar1"
             departureDate={cipSearch.date}
             returnDate={""}
             tripType={'OneWay'}

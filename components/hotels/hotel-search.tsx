@@ -64,6 +64,7 @@ const HotelSearch = () => {
   const [suggestionLoading, setSuggestionLoading] = useState(false)
   const [currentInput, setCurrentInput] = useState("")
   const [isCityFocused, setIsCityFocused] = useState(false)
+  const [openCalendarId, setOpenCalendarId] = useState<string | null>(null)
 
   const { setHotelsData, setRequest } = useHotel()
 
@@ -499,9 +500,12 @@ const HotelSearch = () => {
         </div>
         
         {/* Check-in Date */}
-        <div className="space-y-2">
+        <div className="space-y-2 relative">
           <Label className="text-black text-right block">تاریخ ورود</Label>
           <ShamsiDateModal
+            calendarId="calendar1"
+            onOpenChange={setOpenCalendarId}
+            isOpen={openCalendarId === "calendar1"}
             departureDate={hotelSearch.checkIn}
             returnDate={hotelSearch.checkOut}
             tripType="roundtrip"
@@ -514,9 +518,12 @@ const HotelSearch = () => {
         </div>
         
         {/* Check-out Date Display */}
-        <div className="space-y-2">
+        <div className="space-y-2 relative">
           <Label className="text-black text-right block">تاریخ خروج</Label>
           <ShamsiDateModal
+            calendarId="calendar2"
+            onOpenChange={setOpenCalendarId}
+            isOpen={openCalendarId === "calendar2"}
             departureDate={hotelSearch.checkIn}
             returnDate={hotelSearch.checkOut}
             tripType="roundtrip"

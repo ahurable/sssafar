@@ -26,6 +26,8 @@ enum BookingType {
   HOTEL
   FLIGHT
   TRAIN
+  CIP
+  ACTIVITY
 }
 
 model User {

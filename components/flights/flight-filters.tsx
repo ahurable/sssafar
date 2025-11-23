@@ -25,6 +25,7 @@ import {
   ChevronUp
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import Image from "next/image"
 
 interface FilterState {
   priceRange: [number, number]
@@ -57,10 +58,13 @@ export function FlightFilters() {
 
   // Get unique airlines from flight data
   const availableAirlines = Array.from(
-    new Set(
-      flightData.map(flight => getAirlineName(flight.ValidatingAirlineCode))
-    )
-  ).sort()
+    new Map(
+      flightData.map(flight => [
+        flight.ValidatingAirlineCode, 
+        [getAirlineName(flight.ValidatingAirlineCode), flight.ValidatingAirlineCode]
+      ])
+    ).values()
+  ).sort((a, b) => a[0].localeCompare(b[0]));
 
   // Get available price range from data
   const availablePriceRange = flightData.length > 0 ? [
@@ -176,6 +180,25 @@ export function FlightFilters() {
     }
   }
 
+  const FlightLogo = ({ airlineCode = "", width = 8, height = 8 }) => {
+      const [logoError, setLogoError] = useState(false);
+  
+      const handleImageError = () => {
+        setLogoError(true);
+      };
+  
+      return (
+        <Image 
+          src={logoError ? `/assets/airline/logos/default.png` : `/assets/airline/logos/${airlineCode}.png`}
+          alt={`${airlineCode} airline logo`}
+          width={100}
+          height={100}
+          className={`w-${width} h-${height}`}
+          onError={handleImageError}
+        />
+      );
+    };
+
   const FilterSection = ({ 
     title, 
     sectionKey, 
@@ -241,8 +264,8 @@ export function FlightFilters() {
               className="mt-2"
             />
             <div className="flex justify-between text-xs text-gray-500">
-              <span>{availablePriceRange[0].toLocaleString('fa-IR')}</span>
               <span>{availablePriceRange[1].toLocaleString('fa-IR')}</span>
+              <span>{availablePriceRange[0].toLocaleString('fa-IR')}</span>
             </div>
           </div>
         </FilterSection>
@@ -253,12 +276,16 @@ export function FlightFilters() {
         <FilterSection title="ایرلاین‌ها" sectionKey="airlines" icon={Plane}>
           <div className="space-y-3 max-h-48 overflow-y-auto">
             {availableAirlines.map((airline) => (
-              <div key={airline} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+              <div key={airline[0]} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                
+                <div>
+                  <FlightLogo airlineCode={airline[1]} />
+                </div>
                 <Checkbox 
                   id={`airline-${airline}`}
-                  checked={filters.airlines.includes(airline)}
+                  checked={filters.airlines.includes(airline[0])}
                   onCheckedChange={(checked) => 
-                    handleAirlineChange(airline, checked as boolean)
+                    handleAirlineChange(airline[0], checked as boolean)
                   }
                 />
                 <label 
@@ -400,8 +427,8 @@ export function FlightFilters() {
     <>
       {/* Desktop Sidebar */}
       <div className="hidden lg:block">
-        <Card className="sticky top-20 shadow-sm border-0">
-          <CardHeader className="pb-3 border-b">
+        <Card className="sticky top-20 shadow-sm border-0 lg:overflow-auto" style={{ scrollbarWidth: 'none' }}>
+          <CardHeader className="pb-3  lg:pt-6 border-b">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg flex items-center gap-2">
                 <Filter className="h-5 w-5" />

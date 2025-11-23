@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Plane, Clock, ChevronDown, ChevronLeft, ChevronRight, Calendar } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useFlight } from "@/contexts/search/FlightContext"
+import Image from "next/image"
 
 // Types based on your API response
 interface FlightSegment {
@@ -95,6 +96,25 @@ export function FlightList({ flights, area, itemsPerPage = 10 }: FlightListProps
       setUserLoading(false)
     }
   }
+
+  const FlightLogo = ({ airlineCode = "", width = 8, height = 8 }) => {
+    const [logoError, setLogoError] = useState(false);
+
+    const handleImageError = () => {
+      setLogoError(true);
+    };
+
+    return (
+      <Image 
+        src={logoError ? `/assets/airline/logos/default.png` : `/assets/airline/logos/${airlineCode}.png`}
+        alt={`${airlineCode} airline logo`}
+        width={100}
+        height={100}
+        className={`w-${width} h-${height}`}
+        onError={handleImageError}
+      />
+    );
+  };
 
   const dateOptions = generateDates()
 
@@ -310,8 +330,8 @@ export function FlightList({ flights, area, itemsPerPage = 10 }: FlightListProps
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                        <Plane className="h-6 w-6 text-primary" />
+                      <div className="flex h-12 w-12 items-center justify-center">
+                        <FlightLogo airlineCode={flight.ValidatingAirlineCode} />
                       </div>
                       <div>
                         <h3 className="font-bold text-lg">
