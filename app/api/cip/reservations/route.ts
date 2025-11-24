@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
             id: invoice.userId
           }
         },
-        data: JSON.stringify({invoice: invoiceId})
+        data: JSON.stringify({invoice: invoiceId, Success: true})
       }
     })
 

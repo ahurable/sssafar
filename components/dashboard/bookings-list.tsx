@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation"
 interface Booking {
   id: string
   userId: string
-  type: "HOTEL" | "FLIGHT" | "TRAIN"
+  type: "HOTEL" | "FLIGHT" | "TRAIN" | "CIP" | "ACTIVITY"
   status: "CONFIRMED" | "PENDING" | "CANCELLED"
   bookingCode: string
   totalPrice: number
@@ -127,7 +127,10 @@ const getBookingTitle = (booking: Booking): string => {
     
     case "TRAIN":
       return `قطار ${booking.bookingCode}`
-    
+    case "CIP":
+      return `CIP فرودگاهی  ${booking.bookingCode}`
+    case "ACTIVITY":
+      return `گشت شهری ${booking.bookingCode}`
     default:
       return `رزرو ${booking.bookingCode}`
   }
@@ -428,7 +431,7 @@ export function BookingsList() {
                         <Download className="ml-2 h-4 w-4" />
                         دانلود بلیط
                       </Button>
-                      {booking.type === "HOTEL" && booking.data.CanExtendPaymentDeadline && (
+                      {/* {booking.type === "HOTEL" && booking.data.CanExtendPaymentDeadline && (
                         <Button 
                           variant="outline" 
                           size="sm"
@@ -436,7 +439,7 @@ export function BookingsList() {
                         >
                           تمدید پرداخت
                         </Button>
-                      )}
+                      )} */}
                     </div>
                   )}
                 </div>
