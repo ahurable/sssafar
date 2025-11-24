@@ -479,7 +479,7 @@ export function CityProceedToBook({ tour }: BookingFormProps) {
   return (
     <>
       {/* Desktop View */}
-      <div className="hidden lg:block">
+      <div className="hidden lg:block lg:sticky lg:top-16">
         <Card className="sticky py-6 top-4 border border-gray-300">
           <CardHeader className="border-b border-gray-300">
             <CardTitle className="text-xl text-blue-900">رزرو گشت شهری</CardTitle>

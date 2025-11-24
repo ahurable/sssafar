@@ -649,6 +649,9 @@ const DomesticFlightSearch = () => {
                         onOpenChange={setOpenCalendarId}
                         isOpen={openCalendarId === "calendar1"}
                         departureDate={domesticFlightSearch.departureDate}
+                        calendarFor="FLIGHT"
+                        origin={extractAirportCode(domesticFlightSearch.origin)}
+                        destination={extractAirportCode(domesticFlightSearch.destination)}
                         returnDate={domesticFlightSearch.returnDate || ""}
                         tripType={domesticFlightSearch.tripType}
                         onDepartureDateChange={(date) => setDomesticFlightSearch(prev => ({ ...prev, departureDate: date }))}
@@ -669,6 +672,9 @@ const DomesticFlightSearch = () => {
                                 calendarId="calendar2"
                                 onOpenChange={setOpenCalendarId}
                                 isOpen={openCalendarId === "calendar2"}
+                                calendarFor="FLIGHT"
+                                origin={extractAirportCode(domesticFlightSearch.origin)}
+                                destination={extractAirportCode(domesticFlightSearch.destination)}
                                 departureDate={domesticFlightSearch.departureDate}
                                 returnDate={domesticFlightSearch.returnDate || ""}
                                 tripType={domesticFlightSearch.tripType}

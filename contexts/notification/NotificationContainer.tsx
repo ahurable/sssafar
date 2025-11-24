@@ -40,7 +40,7 @@ export function NotificationContainer() {
   }
 
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-2 w-80 max-w-full">
+    <div className="fixed top-4 right-4 z-[10000] space-y-2 w-80 max-w-full">
       {notifications.map((notification) => (
         <div
           key={notification.id}

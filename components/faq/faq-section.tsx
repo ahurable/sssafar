@@ -35,7 +35,7 @@ export function FAQSection({
   initialTab = 'ALL', 
   showTitle = true,
   className = "",
-  maxHeight = "600px"
+  maxHeight = ""
 }: FAQSectionProps) {
   const [activeTab, setActiveTab] = useState<string>(initialTab)
   const [openItemId, setOpenItemId] = useState<string | null>(null)
@@ -96,7 +96,7 @@ export function FAQSection({
   }
 
   return (
-    <div className={`max-w-4xl mx-auto py-8 ${className}`}>
+    <div className={`w-full mx-auto py-8 ${className}`}>
       {showTitle && (
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-black mb-4">سوالات متداول</h2>
@@ -105,7 +105,7 @@ export function FAQSection({
 
       {/* Tabs Section */}
       <div className="mb-8">
-        <div className="flex justify-center border-b border-gray-300 overflow-x-auto">
+        <div className="flex justify-start border-b border-gray-300 overflow-x-auto">
           <div className="flex min-w-max">
             {TAB_CONFIG.map((tab) => {
               // Calculate count for each tab

@@ -16,6 +16,7 @@ import {
   gregorianToShamsiString,
   shamsiToGregorianString
 } from "@/lib/jalaalil"
+import { shamsiToGregorian } from "./utils"
 
 interface ShamsiDateModalProps {
   departureDate: string
@@ -30,6 +31,9 @@ interface ShamsiDateModalProps {
   returnCal?: boolean
   // New props for multi-calendar management
   calendarId: string
+  origin?: string
+  destination?: string
+  calendarFor?: string
   isOpen?: boolean
   onOpenChange?: (calendarId: string | null) => void
 }
@@ -46,6 +50,9 @@ const ShamsiDateModal = ({
   normalReturnCal,
   returnCal,
   calendarId,
+  origin,
+  destination,
+  calendarFor,
   isOpen: externalIsOpen,
   onOpenChange
 }: ShamsiDateModalProps) => {
@@ -70,13 +77,33 @@ const ShamsiDateModal = ({
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date())
   const [mobileCurrentMonth, setMobileCurrentMonth] = useState<Date>(new Date())
   const [hoverTooltip, setHoverTooltip] = useState({ show: false, text: "", x: 0, y: 0 })
-
+  const [flightLowerPricesPerDay, setFlightLowerPricesPerDay] = useState()
   // Sync internal state with props
   useEffect(() => {
     setSelectedDepartureDate(departureDate)
     setSelectedReturnDate(returnDate)
     setLocalTripType(tripType)
   }, [departureDate, returnDate, tripType])
+
+  useEffect(() => {
+    if (calendarFor) {
+      if ( calendarFor === "HOTEL") {
+
+      } else if ( calendarFor === "FLIGHT" && origin && destination) {
+        const getFlightsLowerPricesPerDay = async (origin:string, destination:string) => {
+          const response = await fetch(`/api/flights/lowerPricePerDay?origin=${origin}&destination=${destination}`, {
+            headers: {
+              "Content-Type" : "application/json"
+            }
+          })
+          const data = await response.json()
+          console.log(data)
+          setFlightLowerPricesPerDay(data)
+        }
+        getFlightsLowerPricesPerDay(origin, destination)
+      }
+    }
+  }, [origin, destination])
 
   useEffect(() => {
     if (tripType === "roundtrip")
@@ -103,7 +130,7 @@ const ShamsiDateModal = ({
           return num.split('').map(char => persianNumbers[parseInt(char)] || char).join('')
         }
         
-        return `${formatNumber(day)}/${formatNumber(month)}/${formatNumber(year)}`
+        return `${formatNumber(year)}/${formatNumber(month)}/${formatNumber(day)}`
       } else {
         const [year, month, day] = date.split('-')
         const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹']
@@ -112,7 +139,7 @@ const ShamsiDateModal = ({
           return num.split('').map(char => persianNumbers[parseInt(char)] || char).join('')
         }
         
-        return `${formatNumber(day)}/${formatNumber(month)}/${formatNumber(year)}`
+        return `${formatNumber(year)}/${formatNumber(month)}/${formatNumber(day)}`
       }
     } catch (error) {
       return "تاریخ نامعتبر"
@@ -139,44 +166,53 @@ const ShamsiDateModal = ({
 
   const handleDateSelect = (date: string) => {
     const convertedDate = convertDateFromCalendar(date)
-    
+
     if (localTripType === "roundtrip") {
       if (!selectedDepartureDate) {
         setSelectedDepartureDate(convertedDate)
         setSelectionMode('return')
+        // Auto-apply departure date immediately
+        onDepartureDateChange(convertedDate)
       }
       else if (selectedDepartureDate && !selectedReturnDate) {
         setSelectedReturnDate(convertedDate)
+        setSelectionMode('departure')
+        // Auto-apply return date and close modal
+        onReturnDateChange(convertedDate)
+        handleOpenChange(false)
         setSelectionMode('departure')
       }
       else {
         setSelectedDepartureDate(convertedDate)
         setSelectedReturnDate("")
         setSelectionMode('return')
+        // Auto-apply new departure date immediately
+        onDepartureDateChange(convertedDate)
+        onReturnDateChange("")
       }
     } else {
+      // One-way trip: select date and close modal immediately
       setSelectedDepartureDate(convertedDate)
+      onDepartureDateChange(convertedDate)
+      handleOpenChange(false)
     }
   }
 
   const handleTripTypeChange = (type: string) => {
     setLocalTripType(type)
+    onTripTypeChange(type)
+    
     if (type === "oneway") {
       setSelectedReturnDate("")
       setSelectionMode("departure")
+      onReturnDateChange("")
     } else {
       setSelectedDepartureDate("")
       setSelectedReturnDate("")
       setSelectionMode("departure")
+      onDepartureDateChange("")
+      onReturnDateChange("")
     }
-  }
-
-  const applyDates = () => {
-    onDepartureDateChange(selectedDepartureDate)
-    onReturnDateChange(selectedReturnDate)
-    onTripTypeChange(localTripType)
-    handleOpenChange(false)
-    setSelectionMode("departure")
   }
 
   const toggleCalendarType = () => {
@@ -263,7 +299,7 @@ const ShamsiDateModal = ({
       if (!error) return null
       
       return (
-          <div className={`flex items-center gap-2 mt-2 ${errorColor === "red" ? 'text-red-800' : 'text-black'} text-sm`}>
+          <div className={`flex items-center gap-2 mt-2 ${errorColor === "red" ? 'text-red-800' : 'text-blue-900'} text-sm`}>
               <AlertCircle className="h-4 w-4" />
               <span>{error}</span>
           </div>
@@ -370,9 +406,9 @@ const ShamsiDateModal = ({
   return (
     <>
       {/* Hover Tooltip for Desktop */}
-      {hoverTooltip.show && (
+      {isOpen && hoverTooltip.show && (
         <div 
-          className="fixed z-50 px-3 py-2 text-sm bg-gray-800 text-white rounded-lg shadow-lg pointer-events-none transition-opacity duration-200 hidden md:block"
+          className="fixed z-40 px-3 py-2 text-sm bg-gray-800 text-white rounded-lg shadow-lg pointer-events-none transition-opacity duration-200 hidden md:block"
           style={{
             left: hoverTooltip.x + 15,
             top: hoverTooltip.y - 40,
@@ -392,7 +428,7 @@ const ShamsiDateModal = ({
           <div className="relative">
             <CalendarIcon className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
             <div 
-              className="w-full h-12 border border-gray-300 bg-[#fffefe] text-black flex items-center justify-between px-3 pr-10 cursor-pointer"
+              className="w-full h-12 border border-gray-300 bg-[#fffefe] text-blue-900 flex items-center justify-between px-3 pr-10 cursor-pointer"
               onClick={() => handleOpenChange(!isOpen)}
             >
               <span className="text-black">
@@ -405,15 +441,15 @@ const ShamsiDateModal = ({
 
         {/* Desktop Absolute Calendar Box */}
         {isOpen && (
-          <div className="absolute top-full left-0 mt-1 w-[720px] z-50 bg-[#fffefe] border-gray-300 shadow-lg">
+          <div className="absolute top-full left-0 mt-1 w-[720px] z-30 bg-[#fffefe] border-gray-300 shadow-lg">
             <div className="p-4">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-bold text-black">انتخاب تاریخ</h2>
+                <h2 className="text-lg font-bold text-blue-900">انتخاب تاریخ</h2>
                 <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     onClick={toggleCalendarType}
-                    className="flex items-center gap-2 border border-gray-300 bg-[#fffefe] text-black hover:bg-gray-100 text-xs h-8 px-2"
+                    className="flex items-center gap-2 border border-gray-300 bg-[#fffefe] text-blue-900 hover:bg-gray-100 text-xs h-8 px-2"
                   >
                     <Globe className="h-3 w-3" />
                     {calendarType === "shamsi" ? "تقویم میلادی" : "Shamsi Calendar"}
@@ -438,7 +474,7 @@ const ShamsiDateModal = ({
                       onChange={(e) => handleTripTypeChange(e.target.checked ? "roundtrip" : "oneway")}
                       className="w-4 h-4 text-blue-500"
                     />
-                    <span className="text-black text-sm">رفت و برگشت</span>
+                    <span className="text-blue-900 text-sm">رفت و برگشت</span>
                   </label>
                 </div>
               )}
@@ -449,7 +485,7 @@ const ShamsiDateModal = ({
                     className={`flex-1 py-1 px-3 text-xs font-medium rounded ${
                       selectionMode === "departure"
                         ? "bg-[#fffefe] text-blue-800 shadow-sm"
-                        : "text-black hover:text-black"
+                        : "text-blue-900 hover:text-blue-950"
                     }`}
                     onClick={() => setSelectionMode("departure")}
                   >
@@ -459,7 +495,7 @@ const ShamsiDateModal = ({
                     className={`flex-1 py-1 px-3 text-xs font-medium rounded ${
                       selectionMode === "return"
                         ? "bg-[#fffefe] text-blue-800 shadow-sm"
-                        : "text-black hover:text-black"
+                        : "text-blue-900 hover:text-blue-950"
                     } ${!selectedDepartureDate ? "opacity-50 cursor-not-allowed" : ""}`}
                     onClick={() => selectedDepartureDate && setSelectionMode("return")}
                     disabled={!selectedDepartureDate}
@@ -480,7 +516,7 @@ const ShamsiDateModal = ({
                     ‹
                   </Button>
                   
-                  <div className="flex gap-2 text-sm font-bold text-black">
+                  <div className="flex gap-2 text-sm font-bold text-blue-900">
                     <span>{monthNames.firstMonth}</span>
                     <span>—</span>
                     <span>{monthNames.secondMonth}</span>
@@ -510,6 +546,7 @@ const ShamsiDateModal = ({
                     onDateHover={handleDateHover}
                     onDateHoverLeave={handleDateHoverLeave}
                     isDesktop={true}
+                    flightLowestPricesWithDate={flightLowerPricesPerDay}
                   />
 
                   <Calendar
@@ -525,25 +562,12 @@ const ShamsiDateModal = ({
                     onDateHover={handleDateHover}
                     onDateHoverLeave={handleDateHoverLeave}
                     isDesktop={true}
+                    flightLowestPricesWithDate={flightLowerPricesPerDay}
                   />
                 </div>
               </div>
 
-              <div className="flex gap-2 mt-4">
-                <Button
-                  onClick={() => handleOpenChange(false)}
-                  variant="outline"
-                  className="flex-1 h-8 text-black border border-gray-300 bg-[#fffefe] hover:bg-gray-100 text-xs"
-                >
-                  انصراف
-                </Button>
-                <Button
-                  onClick={applyDates}
-                  className="flex-1 h-8 bg-blue-500 text-white hover:bg-blue-900 text-xs"
-                >
-                  اعمال تاریخ
-                </Button>
-              </div>
+              {/* REMOVED APPLY BUTTON SECTION */}
             </div>
           </div>
         )}
@@ -555,8 +579,8 @@ const ShamsiDateModal = ({
           <div className="block md:hidden space-y-2 cursor-pointer">
             <div className="relative">
               <CalendarIcon className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
-              <div className="w-full h-12 border border-gray-300 bg-[#fffefe] text-black flex items-center justify-between px-3 pr-10 cursor-pointer">
-                <span className="text-black">
+              <div className="w-full h-12 border border-gray-300 bg-[#fffefe] text-blue-900 flex items-center justify-between px-3 pr-10 cursor-pointer">
+                <span className="text-blue-900">
                   {returnCal && returnCal ? formatDate(returnDate) : formatDate(departureDate)}
                 </span>
               </div>
@@ -566,15 +590,15 @@ const ShamsiDateModal = ({
         </DialogTrigger>
 
         <DialogContent className="sm:max-w-4xl p-0 bg-[#fffefe] border border-gray-300">
-          <div className="block md:hidden max-h-[90vh] bg-[#fffefe] flex flex-col">
+          <div className="md:hidden max-h-[90vh] bg-[#fffefe] flex flex-col">
             <div className="flex justify-between items-center p-3 border-b border-gray-300 sticky top-0 bg-[#fffefe] z-10">
-              <h2 className="text-lg font-bold text-black">انتخاب تاریخ</h2>
+              <h2 className="text-lg font-bold text-blue-900">انتخاب تاریخ</h2>
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={toggleCalendarType}
-                  className="flex items-center gap-1 text-sm border border-gray-300 bg-[#fffefe] text-black hover:bg-gray-100"
+                  className="flex items-center gap-1 text-sm border border-gray-300 bg-[#fffefe] text-blue-900 hover:bg-gray-100"
                 >
                   <Globe className="h-3 w-3" />
                   {calendarType === "shamsi" ? "شمسی" : "میلادی"}
@@ -599,7 +623,7 @@ const ShamsiDateModal = ({
                     onChange={(e) => handleTripTypeChange(e.target.checked ? "roundtrip" : "oneway")}
                     className="w-4 h-4 text-blue-500"
                   />
-                  <span className="text-black">رفت و برگشت</span>
+                  <span className="text-blue-900">رفت و برگشت</span>
                 </label>
               </div>
             )}
@@ -610,7 +634,7 @@ const ShamsiDateModal = ({
                   className={`flex-1 py-2 px-4 text-sm font-medium ${
                     selectionMode === "departure"
                       ? "bg-[#fffefe] text-blue-800"
-                      : "text-black hover:text-black"
+                      : "text-blue-900 hover:text-blue-950"
                   }`}
                   onClick={() => setSelectionMode("departure")}
                 >
@@ -620,7 +644,7 @@ const ShamsiDateModal = ({
                   className={`flex-1 py-2 px-4 text-sm font-medium ${
                     selectionMode === "return"
                       ? "bg-[#fffefe] text-blue-800"
-                      : "text-black hover:text-black"
+                      : "text-blue-900 hover:text-blue-950"
                   } ${!selectedDepartureDate ? "opacity-50 cursor-not-allowed" : ""}`}
                   onClick={() => selectedDepartureDate && setSelectionMode("return")}
                   disabled={!selectedDepartureDate}
@@ -641,7 +665,7 @@ const ShamsiDateModal = ({
                 ‹
               </Button>
               
-              <div className="flex flex-col items-center text-sm font-bold text-black">
+              <div className="flex flex-col items-center text-sm font-bold text-blue-900">
                 <span>{mobileMonthNames.firstMonth}</span>
                 <span className="text-xs text-gray-500">و</span>
                 <span>{mobileMonthNames.secondMonth}</span>
@@ -673,6 +697,7 @@ const ShamsiDateModal = ({
                     tripType={localTripType}
                     isFirstMonth={true}
                     isMobile={true}
+                    flightLowestPricesWithDate={flightLowerPricesPerDay}
                   />
                 </div>
 
@@ -689,29 +714,13 @@ const ShamsiDateModal = ({
                     tripType={localTripType}
                     isFirstMonth={false}
                     isMobile={true}
+                    flightLowestPricesWithDate={flightLowerPricesPerDay}
                   />
                 </div>
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="p-3 border-t border-gray-300 bg-[#fffefe]">
-              <div className="flex gap-2">
-                <Button
-                  onClick={() => handleOpenChange(false)}
-                  variant="outline"
-                  className="flex-1 h-10 text-black border border-gray-300 bg-[#fffefe] hover:bg-gray-100"
-                >
-                  انصراف
-                </Button>
-                <Button
-                  onClick={applyDates}
-                  className="flex-1 h-10 bg-blue-500 text-white hover:bg-blue-900"
-                >
-                  اعمال تاریخ
-                </Button>
-              </div>
-            </div>
+            {/* REMOVED ACTION BUTTONS SECTION */}
           </div>
         </DialogContent>
       </Dialog>
@@ -734,6 +743,7 @@ interface CalendarProps {
   isDesktop?: boolean
   onDateHover?: (event: React.MouseEvent, day: number | null) => void
   onDateHoverLeave?: () => void
+  flightLowestPricesWithDate?: any
 }
 
 const Calendar = ({
@@ -749,7 +759,8 @@ const Calendar = ({
   isMobile = false,
   isDesktop = false,
   onDateHover,
-  onDateHoverLeave
+  onDateHoverLeave,
+  flightLowestPricesWithDate
 }: CalendarProps) => {
   const [currentDate, setCurrentDate] = useState<Date>(() => {
     const date = new Date(baseDate)
@@ -772,6 +783,10 @@ const Calendar = ({
     }
     return date
   })
+
+  useEffect(() => {
+    
+  }, [flightLowestPricesWithDate])
 
   useEffect(() => {
     const date = new Date(baseDate)
@@ -877,6 +892,24 @@ const Calendar = ({
     onDateSelect(date)
   }
 
+  const getTheIsoDate = (day: number) => {
+    const year = getCurrentYear()
+    const month = getCurrentMonth()
+    const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+    
+    // Convert to Date object and then to ISO string to match your price data format
+    if (calendarType === "shamsi") {
+      // For Shamsi dates, convert to Gregorian first, then to ISO
+      const gregorianDate = toGregorian(year, month, day)
+      const dateObj = new Date(gregorianDate.gy, gregorianDate.gm - 1, gregorianDate.gd)
+      return dateObj.toISOString().split('T')[0] // Returns "2025-12-05" format
+    } else {
+      // For Gregorian dates, directly create ISO string
+      const dateObj = new Date(year, month - 1, day)
+      return dateObj.toISOString().split('T')[0] // Returns "2025-12-05" format
+    }
+  }
+
   const isDateDisabled = (day: number): boolean => {
     const year = getCurrentYear()
     const month = getCurrentMonth()
@@ -977,14 +1010,14 @@ const Calendar = ({
     <div className={`bg-[#fffefe] ${isMobile ? 'p-2' : isDesktop ? 'p-1' : 'p-3'}`}>
     
       <div className="text-center mb-2">
-        <div className={`font-bold text-black ${isDesktop ? 'text-sm' : 'text-md'}`}>
+        <div className={`font-bold text-blue-900 ${isDesktop ? 'text-sm' : 'text-md'}`}>
           {getMonthName()} {getCurrentYear()}
         </div>
       </div>
 
       <div className={`grid grid-cols-7 gap-0 mb-1 ${isDesktop ? 'text-xs' : 'text-sm'}`}>
         {weekDays.map((day) => (
-          <div key={day} className={`text-center font-medium text-black py-1 ${isDesktop ? 'text-xs' : 'text-xs'}`}>
+          <div key={day} className={`text-center font-medium text-blue-900 py-1 ${isDesktop ? 'text-xs' : 'text-xs'}`}>
             {day}
           </div>
         ))}
@@ -995,7 +1028,7 @@ const Calendar = ({
           week.map((day, dayIndex) => (
             <button
               key={`${weekIndex}-${dayIndex}`}
-              className={`aspect-square flex items-center justify-center font-medium relative
+              className={`aspect-square flex flex-col items-center justify-center font-medium relative
                 ${isDesktop ? 'text-xs' : 'text-xs'}
                 ${!day 
                   ? 'invisible' 
@@ -1004,8 +1037,8 @@ const Calendar = ({
                     : isDateSelected(day)
                       ? 'bg-blue-800 text-white'
                       : isDateInRange(day)
-                        ? 'bg-gray-200 text-black'
-                        : 'text-black bg-[#fffefe] hover:bg-gray-100 cursor-pointer border border-transparent'
+                        ? 'bg-gray-200 text-blue-900'
+                        : 'text-blue-900 bg-[#fffefe] hover:bg-gray-100 cursor-pointer border border-transparent'
                 }
               `}
               onClick={() => day && !isDateDisabled(day) && handleDateClick(day)}
@@ -1013,7 +1046,27 @@ const Calendar = ({
               onMouseLeave={handleDateMouseLeave}
               disabled={!day || isDateDisabled(day)}
             >
-              {day?.toLocaleString('fa-IR')}
+              <span className="block">
+                {day?.toLocaleString('fa-IR')}
+              </span>
+              {
+                day && flightLowestPricesWithDate && 
+                (() => {
+                  const currentDate = getTheIsoDate(day);
+                  const matchingPrice = flightLowestPricesWithDate.find(
+                    (priceItem: any) => {
+                      const priceDate = new Date(priceItem.date).toISOString().split('T')[0];
+                      const compareDate = new Date(currentDate).toISOString().split('T')[0];
+                      return priceDate === compareDate;
+                    }
+                  );
+                  return matchingPrice ? (
+                    <span className="block text-[8px] text-blue-400">
+                      {parseInt(matchingPrice.lowestPrice).toLocaleString('fa-IR')}
+                    </span>
+                  ) : null;
+                })()
+              }
             </button>
           ))
         )}

@@ -6,6 +6,7 @@ import { NotificationContainer } from "@/contexts/notification/NotificationConta
 import { FlightProvider } from "@/contexts/search/FlightContext"
 import { HotelProvider } from "@/contexts/search/HotelContext"
 import { CipProvider } from "@/contexts/search/CipContext"
+import { TourProvider } from "@/contexts/search/TourContext"
 
 const dana = localFont({
     src: [
@@ -71,9 +72,11 @@ export default function RootLayout({
           <FlightProvider>
             <HotelProvider>
               <CipProvider>
-                <div className="container mx-auto">
-                {children}
-                </div>
+                <TourProvider>
+                  <div className="container mx-auto">
+                  {children}
+                  </div>
+                </TourProvider>
               </CipProvider>
             </HotelProvider>
           </FlightProvider>

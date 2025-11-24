@@ -243,6 +243,21 @@ model City {
   cityTours CityTour[]
 }
 
+model FlightLowPriceStorePerDay {
+  id          String   @id @default(cuid())
+  origin      String
+  destination String
+  date        DateTime
+  lowestPrice String
+}
+
+model HotelLowPriceStorePerDay {
+  id          String   @id @default(cuid())
+  destination String
+  date        DateTime
+  lowestPrice String
+}
+
 model TourImage {
   id        String  @id @default(cuid())
   tourId    String
@@ -938,4 +953,29 @@ model FAQ {
   cip    CipService?  @relation(fields: [cipId], references: [id], onDelete: Cascade)
 
   @@map("faqs")
+}
+
+model CorporateRequest {
+  id            String        @id @default(cuid())
+  companyName   String
+  companyType   String
+  email         String
+  phone         String
+  address       String
+  contactPerson String
+  employeeCount Int
+  needs         String?
+  status        RequestStatus @default(PENDING)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@map("corporate_requests")
+}
+
+enum RequestStatus {
+  PENDING
+  CONTACTED
+  APPROVED
+  REJECTED
+  COMPLETED
 }

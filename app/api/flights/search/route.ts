@@ -1,5 +1,7 @@
 // app/api/flights/search/route.ts
 import { flightSessionService } from '@/lib/flight-session'
+import { getLowestPriceFromSearchResponse } from '@/lib/get-lowest-price-per-date'
+import { prisma } from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
@@ -46,7 +48,22 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await response.json()
-
+    const lowestPrice = getLowestPriceFromSearchResponse(data)
+    const lowestObject = {
+        origin: requestBody.OriginDestinationInformations[0].OriginLocationCode,
+        destination: requestBody.OriginDestinationInformations[0].DestinationLocationCode,
+        date: requestBody.OriginDestinationInformations[0].DepartureDateTime.split('T')[0]
+      }
+    // console.log(lowestObject)
+    if (lowestPrice !== null)
+      await prisma.flightLowPriceStorePerDay.create({
+        data: {
+          origin: requestBody.OriginDestinationInformations[0].OriginLocationCode,
+          destination: requestBody.OriginDestinationInformations[0].DestinationLocationCode,
+          date: requestBody.OriginDestinationInformations[0].DepartureDateTime,
+          lowestPrice: lowestPrice.toString()
+        }
+      })
     return NextResponse.json(data)
   } catch (error) {
     console.error('Flight search error:', error)

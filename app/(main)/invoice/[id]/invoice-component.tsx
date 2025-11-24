@@ -518,10 +518,7 @@ export function InvoiceComponent({
           },
           body: JSON.stringify({
             invoiceId: invoice.id,
-            tourId: activityOrder.tourId,
-            selectedPrices: activityOrder.selectedPrices,
-            travelers: invoice.travelers,
-            totalAmount: activityOrder.totalAmount
+            travelers: invoice.travelers
           })
         }
       )

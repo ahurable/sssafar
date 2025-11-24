@@ -130,10 +130,10 @@ export function Header() {
           <>
             <div className="flex items-center gap-3 px-3 py-3 mb-2 border border-gray-300 bg-[#fffefe]">
               <div className="flex h-10 w-10 items-center justify-center bg-blue-500 text-white text-sm font-bold">
-                {user.name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'}
+                {user.firstName?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'}
               </div>
               <div className="flex-1 min-w-0 text-right">
-                <p className="text-sm font-bold text-black truncate">{user.name || 'کاربر'}</p>
+                <p className="text-sm font-bold text-black truncate">{user.firstName || 'کاربر'}</p>
                 <p className="text-xs text-black truncate">{user.email}</p>
               </div>
             </div>
@@ -497,7 +497,7 @@ export function Header() {
   ]
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-300 bg-[#fffefe]">
+    <header className="sticky top-0 z-[10000] w-full border-b border-gray-300 bg-[#fffefe]">
       <div className="container mx-auto px-4">
         <div className="flex h-14 items-center justify-between">
           {/* Logo and Mobile Menu Button */}
@@ -602,7 +602,7 @@ export function Header() {
                 <div className="h-8 w-8 bg-gray-300 animate-pulse" />
               ) : user ? (
                 <div className="flex h-8 w-8 items-center justify-center bg-blue-500 text-white text-sm font-bold">
-                  {user.name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'}
+                  {user.firstName?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'}
                 </div>
               ) : (
                 <div className="flex h-8 w-8 items-center justify-center bg-blue-500">

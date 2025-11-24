@@ -104,9 +104,9 @@ export function CityTourDetails({ tour }: CityTourDetailsProps) {
   ]
 
   return (
-    <div className="space-y-6 bg-[#fffefe] p-4">
+    <div className="space-y-6 bg-[#fffefe] p-4 lg:p-0">
       {/* Navigation */}
-      <Card className="sticky top-4 z-10 bg-[#fffefe] border border-gray-300 shadow-sm">
+      <Card className="sticky top-16 z-[10000] bg-[#fffefe] border border-gray-300 shadow-sm">
         <CardContent className="p-4">
           <div className="flex flex-wrap gap-2 justify-center">
             {sections.map((section) => (
@@ -185,7 +185,7 @@ export function CityTourDetails({ tour }: CityTourDetailsProps) {
 
       {/* Image Gallery */}
       {tour.images.length > 0 && (
-        <Card className="border border-gray-300 py-6">
+        <Card className="border border-gray-300">
           <CardContent className="p-0">
             <div className="relative h-96 bg-gray-100 overflow-hidden">
               <Image
@@ -407,14 +407,14 @@ export function CityTourDetails({ tour }: CityTourDetailsProps) {
                   <div className="font-semibold text-lg text-gray-900 mb-2">
                     {price.type}
                   </div>
-                  <div className="text-2xl font-bold text-green-700 mb-3">
+                  <div className="text-2xl font-bold text-blue-700 mb-3">
                     {price.price.toLocaleString('fa-IR')} {price.currency}
                   </div>
-                  <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
+                  <div className="flex items-center justify-center gap-2 text-sm text-blue-600">
                     <Calendar className="h-4 w-4" />
                     <span>تاریخ: {formatDate(price.date)}</span>
                   </div>
-                  <div className="text-xs text-gray-500 mt-2">
+                  <div className="text-xs text-blue-500 mt-2">
                     آخرین بروزرسانی: {formatDateTime(price.date)}
                   </div>
                 </CardContent>
