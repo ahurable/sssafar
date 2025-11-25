@@ -716,6 +716,8 @@ const FlightSearch = () => {
                         departureDate={flightSearch.departureDate}
                         returnDate={flightSearch.returnDate || ""}
                         tripType={flightSearch.tripType}
+                        origin={flightSearch.from?.code}
+                        destination={flightSearch.to?.code}
                         onDepartureDateChange={(date) => setFlightSearch(prev => ({ ...prev, departureDate: date }))}
                         onReturnDateChange={(date) => setFlightSearch(prev => ({ ...prev, returnDate: date }))}
                         onTripTypeChange={(type) => setFlightSearch(prev => ({ ...prev, tripType: type }))}

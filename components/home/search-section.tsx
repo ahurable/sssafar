@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
-import { Hotel, Plane, Crown, Map, X, ArrowRight } from "lucide-react"
+import { Hotel, Plane, Crown, Map, X, ArrowRight, Building } from "lucide-react"
 import FlightSearch from "../flights/flight-search"
 import HotelSearch from "../hotels/hotel-search"
 import DomesticFlightSearch from "../flights/domestic-flight-search"
@@ -76,14 +76,14 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
 
   // Mobile Main Modal - Tab Selection
   const MobileMainModal = () => (
-    <div className="grid grid-cols-2 w-full">
+    <div className="grid grid-cols-3 w-full">
       {Object.entries(tabConfig).map(([key, config]) => {
         const Icon = config.icon
         return (
           <button
             key={key}
             onClick={() => handleTabSelect(key)}
-            className="flex flex-col items-center justify-center gap-3 h-32 bg-[#fffefe] border border-gray-300 hover:bg-gray-50 transition-colors p-4 group"
+            className="flex flex-col items-center justify-center gap-3 h-32 bg-[#fffefe] border-gray-300 hover:bg-gray-50 transition-colors p-4 group"
           >
             <div className="p-3 bg-blue-500 group-hover:bg-blue-900 transition-colors">
               <Icon className="h-6 w-6 text-white" />
@@ -122,7 +122,7 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
     const currentConfig = tabConfig[activeTab]
 
     return (
-      <div className="fixed inset-0 z-50 bg-[#fffefe]">
+      <div className="fixed inset-0 z-[100000] bg-[#fffefe]">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-300 bg-[#fffefe]">
           <div className="flex items-center gap-3">
@@ -206,7 +206,7 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
   return (
     <section ref={cardRef} className=" bg-[#fffefe]">
       <div className="mx-auto">
-        <div className="text-center bg-blue-900 pt-8 pb-20">
+        <div className="text-center bg-blue-900 md:pt-8 md:pb-20 py-8">
           <h2 className="text-3xl font-bold text-white mb-4">
             سفر بعدی خود را پیدا کنید
           </h2>
@@ -231,6 +231,179 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
 
         {/* Mobile Search Modal */}
         {mobileSearchModalOpen && <MobileSearchModal />}
+      </div>
+    </section>
+  )
+}
+
+
+export function FlightSearchSection({ onSearchResults }: SearchSectionProps) {
+  const searchParams = useSearchParams()
+  const [activeTab, setActiveTab] = useState<"flight" | "domesticFlights">("domesticFlights")
+  const [mobileSearchModalOpen, setMobileSearchModalOpen] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
+
+  // Read URL parameter on component mount and when searchParams change
+  useEffect(() => {
+    const searchParam = searchParams.get('search')
+    if (searchParam && ['hotel', 'flight', 'domesticFlights', 'cip', 'tour', 'domesticHotel'].includes(searchParam)) {
+      setActiveTab(searchParam as any)
+      
+      // Auto-open modal on mobile if coming from header navigation
+      if (window.innerWidth < 1024) { // lg breakpoint
+        setMobileSearchModalOpen(true)
+      }
+    }
+  }, [searchParams])
+
+  
+
+  const tabConfig = {
+    flight: { icon: Plane, label: "پرواز خارجی" },
+    domesticFlights: { icon: Plane, label: "پرواز داخلی" },
+  }
+
+  // Desktop Tabs
+  const DesktopTabs = () => (
+    <Tabs value={activeTab} onValueChange={(value) => {
+      setActiveTab(value as any)
+      localStorage.setItem('activeSearchTab', value)
+    }} className="w-full">
+      <TabsList className="flex w-full h-max bg-[#fffefe] border-b border-gray-300 p-0">
+        {Object.entries(tabConfig).map(([key, config]) => {
+          const Icon = config.icon
+          const isSelected = activeTab === key
+          return (
+            <TabsTrigger 
+              key={key}
+              value={key} 
+              className={`flex-1 flex items-center justify-center gap-3 py-4 border-b-2 transition-colors ${
+                isSelected 
+                  ? 'border-b-2 border-blue-900 text-blue-900' 
+                  : 'border-b-2 border-transparent text-black hover:text-gray-600'
+              }`}
+            >
+              <Icon className={`h-5 w-5 ${isSelected ? 'text-blue-900' : 'text-black'}`} />
+              <span className=" font-black">{config.label}</span>
+            </TabsTrigger>
+          )
+        })}
+      </TabsList>
+
+      {/* Tab Contents */}
+
+      <TabsContent value="flight" className="p-6 bg-[#fffefe]">
+        <FlightSearch />
+      </TabsContent>
+
+      <TabsContent value="domesticFlights" className="p-6 bg-[#fffefe]">
+        <DomesticFlightSearch />
+      </TabsContent>
+    </Tabs>
+  )
+
+  return (
+    <section ref={cardRef} className=" bg-[#fffefe]">
+      <div className="mx-auto">
+        <div className="text-center bg-blue-900 md:pt-8 md:pb-20 py-8">
+          <h2 className="text-3xl font-bold text-white mb-4">
+            سفر بعدی خود را پیدا کنید
+          </h2>
+          <p className="text-lg text-white max-w-2xl mx-auto">
+            بهترین هتل ها، پروازها، CIP، تورها و قطارها را با بهترین قیمت ها کشف کنید
+          </p>
+        </div>
+
+        {/* Desktop Version - Tabs */}
+        <div className="block mt-[-50px]">
+          <div className="bg-[#fffefe] border rounded-lg px-8 border-gray-300">
+            <DesktopTabs />
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+
+export function HotelSearchSection({ onSearchResults }: SearchSectionProps) {
+  const searchParams = useSearchParams()
+  const [activeTab, setActiveTab] = useState<"hotel" | "domesticHotel">("domesticHotel")
+  const [mobileSearchModalOpen, setMobileSearchModalOpen] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
+
+  // Read URL parameter on component mount and when searchParams change
+  useEffect(() => {
+    const searchParam = searchParams.get('search')
+    if (searchParam && ['hotel', 'domesticHotel'].includes(searchParam)) {
+      setActiveTab(searchParam as any)
+    }
+  }, [searchParams])
+
+
+  const tabConfig = {
+    hotel: { icon: Building, label: "هتل خارجی" },
+    domesticHotel: { icon: Building, label: "هتل داخلی" },
+  }
+
+
+  // Desktop Tabs
+  const DesktopTabs = () => (
+    <Tabs value={activeTab} onValueChange={(value) => {
+      setActiveTab(value as any)
+      localStorage.setItem('activeSearchTab', value)
+    }} className="w-full">
+      <TabsList className="flex w-full h-max bg-[#fffefe] border-b border-gray-300 p-0">
+        {Object.entries(tabConfig).map(([key, config]) => {
+          const Icon = config.icon
+          const isSelected = activeTab === key
+          return (
+            <TabsTrigger 
+              key={key}
+              value={key} 
+              className={`flex-1 flex items-center justify-center gap-3 py-4 border-b-2 transition-colors ${
+                isSelected 
+                  ? 'border-b-2 border-blue-900 text-blue-900' 
+                  : 'border-b-2 border-transparent text-black hover:text-gray-600'
+              }`}
+            >
+              <Icon className={`h-5 w-5 ${isSelected ? 'text-blue-900' : 'text-black'}`} />
+              <span className=" font-black">{config.label}</span>
+            </TabsTrigger>
+          )
+        })}
+      </TabsList>
+
+      {/* Tab Contents */}
+
+      <TabsContent value="hotel" className="p-6 bg-[#fffefe]">
+        <HotelSearch />
+      </TabsContent>
+
+      <TabsContent value="domesticHotel" className="p-6 bg-[#fffefe]">
+        <DomesticHotelSearch />
+      </TabsContent>
+    </Tabs>
+  )
+
+  return (
+    <section ref={cardRef} className=" bg-[#fffefe]">
+      <div className="mx-auto">
+        <div className="text-center bg-blue-900 md:pt-8 md:pb-20 py-8">
+          <h2 className="text-3xl font-bold text-white mb-4">
+            سفر بعدی خود را پیدا کنید
+          </h2>
+          <p className="text-lg text-white max-w-2xl mx-auto">
+            بهترین هتل ها، پروازها، CIP، تورها و قطارها را با بهترین قیمت ها کشف کنید
+          </p>
+        </div>
+
+        {/* Desktop Version - Tabs */}
+        <div className="block mt-[-50px]">
+          <div className="bg-[#fffefe] border rounded-lg px-8 border-gray-300">
+            <DesktopTabs />
+          </div>
+        </div>
       </div>
     </section>
   )

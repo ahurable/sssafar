@@ -43,9 +43,9 @@ export const POST = async (request: NextRequest) => {
                 bookingInformation: JSON.stringify(invoice.order),
                 type: "ACTIVITY",
                 status: "PENDING",
-                data: JSON.stringify({
+                data: {
                     Success: true
-                })
+                }
             }
         })
 

@@ -8,6 +8,8 @@ import { Plane, Clock, ChevronDown, ChevronLeft, ChevronRight, Calendar } from "
 import { useRouter } from "next/navigation"
 import { useFlight } from "@/contexts/search/FlightContext"
 import Image from "next/image"
+import { Checkbox } from "@radix-ui/react-checkbox"
+import { previousDay } from "date-fns"
 
 // Types based on your API response
 interface FlightSegment {
@@ -52,18 +54,47 @@ interface FlightListProps {
   itemsPerPage?: number
 }
 
+interface FilterState {
+  airlines: string[]
+}
+
+
 export function FlightList({ flights, area, itemsPerPage = 10 }: FlightListProps) {
   const [currentPage, setCurrentPage] = useState(1)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const [selectedDate, setSelectedDate] = useState<string>("")
   const [userLoading, setUserLoading] = useState(true)
   const router = useRouter()
-  const { getAirlineName, flightRequest, setFlightRequest, searchFlights } = useFlight()
+  const { getAirlineName, flightRequest, setFlightRequest, searchFlights, applyFilters, flightData } = useFlight()
+  const [filters, setFilters] = useState<FilterState>({
+    airlines: [],
+  })
   const [user, setUser] = useState<any>(null)
   // Calculate pagination
   const totalPages = Math.ceil(flights.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
   const currentFlights = flights
+
+  const handleAirlineChange = (airline: string) => {
+    setFilters((prev) => {
+      // Check if airline is already selected
+      if (prev.airlines.includes(airline)) {
+        // Remove airline if already selected
+        return {
+          ...prev,
+          airlines: prev.airlines.filter(a => a !== airline)
+        }
+      } else {
+        // Add airline if not selected
+        return {
+          ...prev,
+          airlines: [...prev.airlines, airline]
+        }
+      }
+    })
+    handleApplyFilters()
+  }
+
 
   // Generate dates for the next 7 days
   const generateDates = () => {
@@ -78,6 +109,15 @@ export function FlightList({ flights, area, itemsPerPage = 10 }: FlightListProps
     
     return dates
   }
+
+  const availableAirlines = Array.from(
+    new Map(
+      flightData.map(flight => [
+        flight.ValidatingAirlineCode, 
+        [getAirlineName(flight.ValidatingAirlineCode), flight.ValidatingAirlineCode]
+      ])
+    ).values()
+  ).sort((a, b) => a[0].localeCompare(b[0]));
 
   useEffect(() => {
     getUser()
@@ -117,6 +157,10 @@ export function FlightList({ flights, area, itemsPerPage = 10 }: FlightListProps
   };
 
   const dateOptions = generateDates()
+
+  const handleApplyFilters = () => {
+    applyFilters(filters)
+  }
 
   // Format date for display
   const formatDateDisplay = (date: Date) => {
@@ -203,14 +247,14 @@ export function FlightList({ flights, area, itemsPerPage = 10 }: FlightListProps
   return (
     <div className="space-y-6">
       {/* Date Selection Section */}
-      <Card className="border-2 border-blue-100 bg-gradient-to-br from-blue-50 to-white shadow-lg overflow-hidden">
+      <Card className="border border-blue-900 bg-[#fffefe] shadow-sm overflow-hidden">
         <CardContent className="py-6">
-          <div className="flex items-center gap-3 mb-6 px-6">
-            <Calendar className="h-6 w-6 text-blue-600" />
-            <h3 className="font-bold text-xl text-blue-800">انتخاب تاریخ پرواز</h3>
+          <div className="flex items-center gap-3 mb-6">
+            <Calendar className="h-6 w-6 text-blue-900" />
+            <h3 className="font-bold text-xl text-blue-900">انتخاب تاریخ پرواز</h3>
           </div>
           
-          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-blue-200 scrollbar-track-transparent" style={{ scrollbarWidth : 'none' }}>
+          <div className="flex overflow-x-auto gap-1 scrollbar-thin scrollbar-thumb-blue-200 scrollbar-track-transparent" style={{ scrollbarWidth: 'none' }}>
             {dateOptions.map((date, index) => {
               const dateStr = formatDateForAPI(date)
               const isSelected = selectedDate === dateStr
@@ -224,14 +268,13 @@ export function FlightList({ flights, area, itemsPerPage = 10 }: FlightListProps
                     flex flex-col items-center justify-center gap-2 
                     min-w-[100px] h-20 px-4 py-3
                     flex-shrink-0 relative
-                    transition-all duration-300 ease-out
-                    hover:scale-105 active:scale-95
+                    transition-all duration-200
                     ${isSelected 
-                      ? "bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-200 border-0" 
-                      : "bg-white text-gray-700 border-2 border-blue-100 hover:border-blue-300 hover:bg-blue-25"
+                      ? "bg-blue-800 text-white border-2 border-blue-900" 
+                      : "bg-[#fffefe] text-blue-900 border-2 border-blue-800 hover:border-blue-900"
                     }
                     ${isToday && !isSelected 
-                      ? "border-2 border-blue-400 bg-gradient-to-br from-blue-25 to-blue-50 ring-2 ring-blue-100" 
+                      ? "border-2 border-blue-800 bg-[#fffefe]" 
                       : ""
                     }
                   `}
@@ -241,17 +284,17 @@ export function FlightList({ flights, area, itemsPerPage = 10 }: FlightListProps
                   {isToday && (
                     <div className={`absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
                       ${isSelected 
-                        ? "bg-white text-blue-600" 
-                        : "bg-blue-500 text-white"
+                        ? "bg-white text-blue-800" 
+                        : "bg-blue-800 text-white"
                       }`}>
                       ام
                     </div>
                   )}
                   
-                  {/* Day number - larger and more prominent */}
+                  {/* Day number */}
                   <span className={`
-                    text-2xl font-extrabold leading-none
-                    ${isSelected ? "text-white" : "text-gray-800"}
+                    text-2xl font-bold leading-none
+                    ${isSelected ? "text-white" : "text-blue-900"}
                   `}>
                     {date.toLocaleDateString('fa-IR', { day: 'numeric' })}
                   </span>
@@ -260,15 +303,15 @@ export function FlightList({ flights, area, itemsPerPage = 10 }: FlightListProps
                     {/* Weekday */}
                     <span className={`
                       text-xs font-semibold
-                      ${isSelected ? "text-blue-100" : "text-gray-600"}
+                      ${isSelected ? "text-blue-100" : "text-blue-800"}
                     `}>
                       {date.toLocaleDateString('fa-IR', { weekday: 'short' })}
                     </span>
                     
                     {/* Date string */}
                     <span className={`
-                      text-xs font-medium
-                      ${isSelected ? "text-blue-100" : "text-gray-500"}
+                      text-xs
+                      ${isSelected ? "text-blue-200" : "text-blue-700"}
                     `}>
                       {formatDateDisplay(date)}
                     </span>
@@ -276,6 +319,28 @@ export function FlightList({ flights, area, itemsPerPage = 10 }: FlightListProps
                 </Button>
               )
             })}
+          </div>
+          <div className="border-t border-blue-900 mt-4 pt-4">
+            <div className="w-full overflow-X-auto flex">
+              {availableAirlines.map((airline) => (
+                <button key={airline[0]} className="flex flex-col w-40 items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors"
+                onClick={() => {
+                  handleAirlineChange(airline[0])
+                }}
+                >
+                  
+                  <div>
+                    <FlightLogo airlineCode={airline[1]} />
+                  </div>
+                  <label 
+                    htmlFor={`airline-${airline}`} 
+                    className="text-sm cursor-pointer flex-1 text-right"
+                  >
+                    {airline}
+                  </label>
+                </button>
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -325,7 +390,7 @@ export function FlightList({ flights, area, itemsPerPage = 10 }: FlightListProps
 
 
           return (
-            <Card key={flightId} className="hover:shadow-lg transition-shadow border-2">
+            <Card key={flightId} className="hover:shadow-lg transition-shadow border border-blue-900 text-blue-900">
               <CardContent className="p-6">
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div className="flex-1">
@@ -345,7 +410,7 @@ export function FlightList({ flights, area, itemsPerPage = 10 }: FlightListProps
 
                     <div className="grid grid-cols-3 gap-4 items-center">
                       <div className="text-center">
-                        <p className="text-2xl font-bold text-gray-900">{departureInfo.time}</p>
+                        <p className="text-2xl font-bold text-blue-900">{departureInfo.time}</p>
                         <p className="text-sm text-muted-foreground font-medium">
                           {firstSegment.DepartureAirportLocationCode}
                         </p>
@@ -363,7 +428,7 @@ export function FlightList({ flights, area, itemsPerPage = 10 }: FlightListProps
                         <p className="text-xs text-gray-500 mt-1">مدت پرواز</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-2xl font-bold text-gray-900">{arrivalInfo.time}</p>
+                        <p className="text-2xl font-bold text-blue-900">{arrivalInfo.time}</p>
                         <p className="text-sm text-muted-foreground font-medium">
                           {firstSegment.ArrivalAirportLocationCode}
                         </p>
@@ -416,12 +481,12 @@ export function FlightList({ flights, area, itemsPerPage = 10 }: FlightListProps
 
                   <div className="flex flex-col items-end gap-4 md:border-r md:pr-6">
                     <div className="text-left">
-                      <p className="text-sm text-muted-foreground">قیمت هر نفر</p>
-                      <p className="text-2xl font-bold text-primary">
+                      <p className="text-sm text-blue-900">قیمت هر نفر</p>
+                      <p className="text-2xl font-bold text-blue-900">
                         {formatCurrency(totalPrice, currency)}{" "}
                         <span className="text-sm font-normal">تومان</span>
                       </p>
-                      <p className="text-xs text-green-600 font-medium mt-1">
+                      <p className="text-xs text-blue-600 font-medium mt-1">
                         قیمت نهایی شامل مالیات
                       </p>
                     </div>

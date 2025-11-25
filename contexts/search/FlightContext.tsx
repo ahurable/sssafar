@@ -43,12 +43,12 @@ export interface DomesticFlightSearchRequest {
 }
 
 interface FilterState {
-  priceRange: [number, number]
+  priceRange?: [number, number]
   airlines: string[]
-  flightClasses: string[]
-  flightTimes: string[]
-  stops: string[]
-}
+  flightClasses?: string[]
+  flightTimes?: string[]
+  stops?: string[]
+} 
 
 interface FlightContextType {
   flightData: any[]
@@ -263,7 +263,7 @@ export function FlightProvider({ children }: { children: ReactNode }) {
     const filtered = flightData.filter(flight => {
         // Price filter
             const price = flight.AirItineraryPricingInfo.ItinTotalFare.TotalFare / 10 // Convert to Toman
-            if (price < filters.priceRange[0] || price > filters.priceRange[1]) {
+            if (filters.priceRange && price < filters.priceRange[0] || filters.priceRange && price > filters.priceRange[1]) {
             return false
             }
 
@@ -276,7 +276,7 @@ export function FlightProvider({ children }: { children: ReactNode }) {
             }
 
             // Flight time filter
-            if (filters.flightTimes.length > 0) {
+            if (filters.flightTimes && filters.flightTimes.length > 0) {
             const departureTime = flight.OriginDestinationOptions[0]?.FlightSegments[0]?.DepartureDateTime
             const timeRange = getTimeRange(departureTime)
             if (!filters.flightTimes.includes(timeRange)) {
@@ -285,7 +285,7 @@ export function FlightProvider({ children }: { children: ReactNode }) {
             }
 
             // Stops filter
-            if (filters.stops.length > 0) {
+            if (filters.stops && filters.stops.length > 0) {
             const stopsCount = flight.OriginDestinationOptions[0]?.FlightSegments?.length - 1
             const stopType = stopsCount === 0 ? "direct" : 
                             stopsCount === 1 ? "1-stop" : "2-stops"

@@ -70,7 +70,9 @@ export function HotelList() {
   const [hotelNames, setHotelNames] = useState<HotelName[]>([])
   const [hotelImages, setHotelImages] = useState<HotelImageData[]>([])
   const [favorites, setFavorites] = useState<Set<number>>(new Set())
-  
+  if (!hotelData) {
+    return "no hotel found"
+  }
   // Get all available hotel IDs
   const allHotelIds = (filteredHotels || (hotelData?.Success ? hotelData.PricedItineraries : [])).map(hotel => hotel.HotelId)
   

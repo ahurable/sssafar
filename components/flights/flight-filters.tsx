@@ -427,7 +427,7 @@ export function FlightFilters() {
     <>
       {/* Desktop Sidebar */}
       <div className="hidden lg:block">
-        <Card className="sticky top-20 shadow-sm border-0 lg:overflow-auto" style={{ scrollbarWidth: 'none' }}>
+        <Card className="sticky top-20 border border-blue-900 lg:overflow-auto text-blue-900" style={{ scrollbarWidth: 'none' }}>
           <CardHeader className="pb-3  lg:pt-6 border-b">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg flex items-center gap-2">

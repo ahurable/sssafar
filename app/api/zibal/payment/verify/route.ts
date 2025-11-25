@@ -251,7 +251,7 @@ async function processSuccessfulPayment(
   userId: string
 ) {
   try {
-    console.log('Processing successful payment:', {
+    console.log('Processing successful payment: ', {
       // paymentType: verificationData.paymentType,
       trackId: verificationData.trackId,
       amount: verificationResult.amount
@@ -292,12 +292,17 @@ async function processSuccessfulPayment(
       case 'FLIGHT':
         await bookFlight(invoiceId, userId);
         break;
-      // case 'SERVICE_PAYMENT':
-      //   await processServicePayment(verificationData, verificationResult);
-      //   break;
-      
+
+      case 'ACTIVITY':
+        await processActivityPayment(invoiceId, verificationData, verificationResult);
+        break;
+
+      case 'CIP':
+        await processCipPayment(invoiceId, verificationData, verificationResult);
+        break;
+
       default:
-        console.warn('Unknown payment type:', invoice.kind);
+        console.warn('Unknown payment type: ', invoice.kind);
     }
 
     console.log('Successfully processed payment for trackId:', verificationData.trackId);
@@ -558,12 +563,72 @@ async function processInvoicePayment(
   }
 }
 
-async function processServicePayment(
+async function processCipPayment(
+  invoiceId: string,
   verificationData: PaymentVerificationRequest,
   verificationResult: PaymentVerificationResponse
 ) {
   // Handle service-specific payment processing
   console.log('Processing service payment:', verificationData);
+
+  const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/cip/reservations`, {
+    method: 'POST',
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      invoiceId: invoiceId
+    })
+  })
+
+  const data = await res.json()
+
+  console.log(data)
+
+  if (res.ok) {
+     return NextResponse.json({
+        message: "عملیات رزرو با موفقیت انجام شد",
+        bookingData: data
+     });
+  } else {
+    return NextResponse.json({
+      message: "خطا در پردازش عملیات رزرو"
+    }, { status: 500 })
+  }
+}
+
+async function processActivityPayment(
+  invoiceId: string,
+  verificationData: PaymentVerificationRequest,
+  verificationResult: PaymentVerificationResponse
+) {
+  // Handle service-specific payment processing
+  console.log('Processing service payment:', verificationData);
+
+  const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/activities/booking`, {
+    method: 'POST',
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      invoiceId: invoiceId
+    })
+  })
+
+  const data = await res.json()
+
+  console.log(data)
+
+  if (res.ok) {
+     return NextResponse.json({
+        message: "عملیات رزرو با موفقیت انجام شد",
+        bookingData: data
+     });
+  } else {
+    return NextResponse.json({
+      message: "خطا در پردازش عملیات رزرو"
+    }, { status: 500 })
+  }
 }
 
 // Helper Functions

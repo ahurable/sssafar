@@ -385,7 +385,7 @@ export function ProfileForm() {
       </CardContent>
     </Card>
     :
-    <Card className="p-4 my-4">
+    <Card className="p-4 mb-4">
       <CardTitle>شماره همراه</CardTitle>
       <CardContent>
         <div className="grid grid-cols-4 w-full">

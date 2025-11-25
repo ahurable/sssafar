@@ -1,17 +1,31 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
+
+interface Order {
+  serviceId: string
+  date: string
+  price: number
+  title: string
+  serviceType: string
+  passengers: number
+  airport: string
+}
+
+interface Traveler {
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  passengerType: string;
+  nationalId: string;
+}
 export async function POST(request: NextRequest) {
   try {
-    const { invoiceId, serviceId, travelers, type, order } = await request.json()
+    const { invoiceId } = await request.json()
     console.log(`
-      invoiceId: ${invoiceId},
-      serviceId: ${serviceId},
-      travelers: ${travelers},
-      type: ${type},
-      order: ${order}
+      invoiceId: ${invoiceId}
       `)
-    if (!invoiceId || !serviceId || !travelers || !type || !order ) {
+    if (!invoiceId ) {
       return NextResponse.json({
         message: "خطا! اطلاعات وارد شده ناقص میباشد"
       }, { status: 400 })
@@ -23,9 +37,24 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    if (!invoice || !invoice.order || !invoice.travelers) {
+      return NextResponse.json({
+        message: "اطلاعات وارد شده ناقص است"
+      }, { status: 400 })
+    }
+
+    const order = typeof invoice.order === "string" ?
+    JSON.stringify(invoice.order) as unknown as Order
+    : invoice.order as unknown as Order
+
+    const travelers = typeof invoice.travelers === "string" ?
+    JSON.stringify(invoice.travelers) as unknown as Traveler[]
+    : invoice.travelers as unknown as Traveler[]
+
+
     const service = await prisma.cipService.findUnique({
       where: {
-        id: serviceId
+        id: order.serviceId,
       }
     })
 
@@ -40,14 +69,14 @@ export async function POST(request: NextRequest) {
         firstName: travelers[0].firstName,
         lastName: travelers[0].lastName,
         phoneNumber: travelers[0].phoneNumber,
-        serviceId: serviceId,
-        search: order
+        serviceId: order.serviceId,
+        search: JSON.stringify(order)
       }
     })
 
     const book = await prisma.booking.create({
       data: {
-        bookingCode: serviceId,
+        bookingCode: invoiceId,
         bookingInformation: JSON.stringify({
           traveler: travelers[0], 
           order: {...order, service: service.title}, 
@@ -62,7 +91,7 @@ export async function POST(request: NextRequest) {
             id: invoice.userId
           }
         },
-        data: JSON.stringify({invoice: invoiceId, Success: true})
+        data: {invoice: invoiceId, Success: true}
       }
     })
 

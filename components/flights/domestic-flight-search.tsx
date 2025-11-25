@@ -20,26 +20,51 @@ interface DomesticSuggestion {
 }
 
 interface FormErrors {
-  origin?: string
-  destination?: string
+  from?: string
+  to?: string
   departureDate?: string
   returnDate?: string
   general?: string
 }
 
+interface Suggestion {
+  id: string
+  name: string
+  country: string
+  code?: string
+  city?: string
+  type: 'city' | 'airport'
+}
+
+interface FlightSearchState {
+  from: Suggestion | null
+  to: Suggestion | null
+  displayFrom: string
+  displayTo: string
+  departureDate: string
+  returnDate: string
+  adults: number
+  children: number
+  infants: number
+  tripType: string
+  cabinClass: string
+}
+
+
 const DomesticFlightSearch = () => {
     const [isLoading, setIsLoading] = useState(false)
-    const [domesticFlightSearch, setDomesticFlightSearch] = useState({
-        airline: 'ZV',
-        origin: '',
-        destination: '',
+    const [domesticFlightSearch, setDomesticFlightSearch] = useState<FlightSearchState>({
+        from: null,
+        to: null,
+        displayFrom: "",
+        displayTo: "",
+        departureDate: "",
+        returnDate: "",
         adults: 1,
         children: 0,
-        departureDate: '',
-        cabinClass: '',
-        returnDate: '',
-        tripType: 'oneway',
-        infants: 0
+        infants: 0,
+        tripType: "oneway",
+        cabinClass: "economy"
     })
     
     const [suggestions, setSuggestions] = useState<DomesticSuggestion[]>([])
@@ -65,11 +90,11 @@ const DomesticFlightSearch = () => {
 
     // Clear errors when user starts typing
     useEffect(() => {
-        if (errors.origin && domesticFlightSearch.origin) {
-            setErrors(prev => ({ ...prev, origin: undefined }))
+        if (errors.from && domesticFlightSearch.from) {
+            setErrors(prev => ({ ...prev, from: undefined }))
         }
-        if (errors.destination && domesticFlightSearch.destination) {
-            setErrors(prev => ({ ...prev, destination: undefined }))
+        if (errors.to && domesticFlightSearch.to) {
+            setErrors(prev => ({ ...prev, to: undefined }))
         }
         if (errors.departureDate && domesticFlightSearch.departureDate) {
             setErrors(prev => ({ ...prev, departureDate: undefined }))
@@ -77,7 +102,7 @@ const DomesticFlightSearch = () => {
         if (errors.returnDate && domesticFlightSearch.returnDate) {
             setErrors(prev => ({ ...prev, returnDate: undefined }))
         }
-    }, [domesticFlightSearch.origin, domesticFlightSearch.destination, domesticFlightSearch.departureDate, domesticFlightSearch.returnDate, errors])
+    }, [domesticFlightSearch.from, domesticFlightSearch.to, domesticFlightSearch.departureDate, domesticFlightSearch.returnDate, errors])
 
     useEffect(() => {
         const fetchSuggestions = async () => {
@@ -146,23 +171,18 @@ const DomesticFlightSearch = () => {
     const validateForm = (): boolean => {
         const newErrors: FormErrors = {}
 
-        if (!domesticFlightSearch.origin.trim()) {
-            newErrors.origin = "لطفا شهر مبداء را انتخاب کنید"
-        } else if (!extractAirportCode(domesticFlightSearch.origin)) {
-            newErrors.origin = "لطفا یک فرودگاه معتبر انتخاب کنید"
+        if (!domesticFlightSearch.from) {
+            newErrors.from = "لطفا شهر مبداء را انتخاب کنید"
         }
 
-        if (!domesticFlightSearch.destination.trim()) {
-            newErrors.destination = "لطفا شهر مقصد را انتخاب کنید"
-        } else if (!extractAirportCode(domesticFlightSearch.destination)) {
-            newErrors.destination = "لطفا یک فرودگاه معتبر انتخاب کنید"
+        if (!domesticFlightSearch.to) {
+            newErrors.to = "لطفا شهر مقصد را انتخاب کنید"
         }
-
-        if (domesticFlightSearch.origin && domesticFlightSearch.destination) {
-            const originCode = extractAirportCode(domesticFlightSearch.origin)
-            const destinationCode = extractAirportCode(domesticFlightSearch.destination)
+        if (domesticFlightSearch.from && domesticFlightSearch.to) {
+            const originCode = domesticFlightSearch.from.code
+            const destinationCode = domesticFlightSearch.to.code
             if (originCode === destinationCode) {
-                newErrors.destination = "شهر مبدا و مقصد نمی‌توانند یکسان باشند"
+                newErrors.to = "شهر مبدا و مقصد نمی‌توانند یکسان باشند"
             }
         }
 
@@ -186,10 +206,21 @@ const DomesticFlightSearch = () => {
         return Object.keys(newErrors).length === 0
     }
 
-    const handleSuggestionClick = (suggestion: DomesticSuggestion, field: string) => {
-        const value = `${suggestion.city} (${suggestion.code}) - ${suggestion.name}`
+    const handleSuggestionClick = (suggestion: DomesticSuggestion, field: "from" | "to") => {
+        let displayValue = ""
         
-        setDomesticFlightSearch(prev => ({ ...prev, [field]: value }))
+        if (suggestion.type === 'airport') {
+            displayValue = `${suggestion.city} (${suggestion.code}) - ${suggestion.name}`
+        } else {
+            displayValue = suggestion.name
+        }
+        
+        
+        setDomesticFlightSearch(prev => ({ 
+            ...prev, 
+            [field]: suggestion,
+            [`display${field.charAt(0).toUpperCase() + field.slice(1)}`]: displayValue
+        }))
         setShowSuggestions(false)
         setCurrentInput("")
         setIsFieldFocused("")
@@ -201,7 +232,11 @@ const DomesticFlightSearch = () => {
     const handleInputChange = (value: string, field: string) => {
         setCurrentInput(value)
         setCurrentField(field)
-        setDomesticFlightSearch(prev => ({ ...prev, [field]: value }))
+        setDomesticFlightSearch(prev => ({ 
+            ...prev, 
+            [`display${field.charAt(0).toUpperCase() + field.slice(1)}`]: value,
+            [field]: null // Clear the selected suggestion when user types
+        }))
         
         // Clear error when user starts typing
         if (errors[field as keyof FormErrors]) {
@@ -209,7 +244,7 @@ const DomesticFlightSearch = () => {
         }
     }
 
-    const handleKeyDown = (e: React.KeyboardEvent, field: string) => {
+    const handleKeyDown = (e: React.KeyboardEvent, field: "from" | "to") => {
         if (!showSuggestions) return
 
         if (e.key === "ArrowDown") {
@@ -300,9 +335,9 @@ const DomesticFlightSearch = () => {
         // Validate form
         if (!validateForm()) {
             // Focus on first error field
-            if (errors.origin) {
+            if (errors.from) {
                 fromInputRef.current?.focus()
-            } else if (errors.destination) {
+            } else if (errors.to) {
                 toInputRef.current?.focus()
             }
             return
@@ -311,8 +346,8 @@ const DomesticFlightSearch = () => {
         setIsLoading(true)
         try {
             // Extract airport codes
-            const originCode = extractAirportCode(domesticFlightSearch.origin)
-            const destinationCode = extractAirportCode(domesticFlightSearch.destination)
+            const originCode = domesticFlightSearch.from?.code || ""
+            const destinationCode = domesticFlightSearch.to?.code || ""
             const gregorianDepartureDate = shamsiToGregorianString(domesticFlightSearch.departureDate)
             
             // Prepare request body for Domestic API
@@ -349,10 +384,21 @@ const DomesticFlightSearch = () => {
                 IsGenuine: false
             }
 
+            if (domesticFlightSearch.tripType === "roundtrip" && domesticFlightSearch.returnDate) {
+                const gregorianReturnDate = shamsiToGregorianString(domesticFlightSearch.returnDate)
+                partoRequestBody.OriginDestinationInformations.push({
+                    DepartureDateTime: `${gregorianReturnDate}T00:00:00.0000000+03:30`,
+                    DestinationLocationCode: originCode,
+                    DestinationType: 0,
+                    OriginLocationCode: destinationCode,
+                    OriginType: 0
+                })
+            }
+
             setFlightRequest(partoRequestBody)
             const partoResponse = await searchFlights(partoRequestBody)
 
-            setFlightsData(partoResponse.PricedItineraries, "domestic", domesticFlightSearch.origin, domesticFlightSearch.destination)
+            setFlightsData(partoResponse.PricedItineraries, "domestic", domesticFlightSearch.from?.city, domesticFlightSearch.to?.city)
             router.push('/flights')
 
         } catch (error) {
@@ -377,7 +423,7 @@ const DomesticFlightSearch = () => {
         )
     }
 
-    const renderSuggestions = (field: string) => {
+    const renderSuggestions = (field: "from" | "to") => {
         if (!showSuggestions || suggestions.length === 0 || currentField !== field) return null
 
         return (
@@ -574,7 +620,7 @@ const DomesticFlightSearch = () => {
                     <Label htmlFor="domestic-flight-origin" className="text-black text-right block">مبدا (فرودگاه)</Label>
                     <div className="relative">
                         <MapPin className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
-                        {suggestionLoading && currentField === "origin" && (
+                        {suggestionLoading && currentField === "from" && (
                             <Loader2 className="absolute left-3 top-3 h-4 w-4 animate-spin text-blue-500" />
                         )}
                         <Input 
@@ -582,16 +628,16 @@ const DomesticFlightSearch = () => {
                             id="domestic-flight-from" 
                             placeholder="نام فرودگاه، مثال: تهران (IKA)" 
                             className={`pr-10 h-12 border border-gray-300 bg-[#fffefe] text-black placeholder-gray-500 ${
-                                errors.origin 
+                                errors.from 
                                     ? 'border-red-500 bg-red-500' 
                                     : 'border-gray-300'
                             }`}
-                            value={domesticFlightSearch.origin}
-                            onChange={(e) => handleInputChange(e.target.value, "origin")}
-                            onKeyDown={(e) => handleKeyDown(e, "origin")}
+                            value={domesticFlightSearch.displayFrom}
+                            onChange={(e) => handleInputChange(e.target.value, "from")}
+                            onKeyDown={(e) => handleKeyDown(e, "from")}
                             onFocus={() => {
-                                setCurrentField("origin")
-                                setIsFieldFocused("origin")
+                                setCurrentField("from")
+                                setIsFieldFocused("from")
                                 setShowSuggestions(suggestions.length > 0)
                             }}
                             onBlur={() => {
@@ -600,8 +646,8 @@ const DomesticFlightSearch = () => {
                             }}
                             autoComplete="off"
                         />
-                        {renderSuggestions("origin")}
-                        {renderError("origin")}
+                        {renderSuggestions("from")}
+                        {renderError("from")}
                     </div>
                 </div>
                 
@@ -610,7 +656,7 @@ const DomesticFlightSearch = () => {
                     <Label htmlFor="domestic-flight-destination" className="text-black text-right block">مقصد (فرودگاه)</Label>
                     <div className="relative">
                         <MapPin className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
-                        {suggestionLoading && currentField === "destination" && (
+                        {suggestionLoading && currentField === "to" && (
                             <Loader2 className="absolute left-3 top-3 h-4 w-4 animate-spin text-blue-500" />
                         )}
                         <Input 
@@ -618,16 +664,16 @@ const DomesticFlightSearch = () => {
                             id="domestic-flight-destination" 
                             placeholder="نام فرودگاه مقصد مثال: مشهد (MHD)" 
                             className={`pr-10 h-12 border border-gray-300 bg-[#fffefe] text-black placeholder-gray-500 ${
-                                errors.destination 
+                                errors.to 
                                     ? 'border-red-500 bg-red-500' 
                                     : 'border-gray-300'
                             }`}
-                            value={domesticFlightSearch.destination}
-                            onChange={(e) => handleInputChange(e.target.value, "destination")}
-                            onKeyDown={(e) => handleKeyDown(e, "destination")}
+                            value={domesticFlightSearch.displayTo}
+                            onChange={(e) => handleInputChange(e.target.value, "to")}
+                            onKeyDown={(e) => handleKeyDown(e, "to")}
                             onFocus={() => {
-                                setCurrentField("destination")
-                                setIsFieldFocused("destination")
+                                setCurrentField("to")
+                                setIsFieldFocused("to")
                                 setShowSuggestions(suggestions.length > 0)
                             }}
                             onBlur={() => {
@@ -636,8 +682,8 @@ const DomesticFlightSearch = () => {
                             }}
                             autoComplete="off"
                         />
-                        {renderSuggestions("destination")}
-                        {renderError("destination")}
+                        {renderSuggestions("to")}
+                        {renderError("to")}
                     </div>
                 </div>
 
@@ -650,8 +696,8 @@ const DomesticFlightSearch = () => {
                         isOpen={openCalendarId === "calendar1"}
                         departureDate={domesticFlightSearch.departureDate}
                         calendarFor="FLIGHT"
-                        origin={extractAirportCode(domesticFlightSearch.origin)}
-                        destination={extractAirportCode(domesticFlightSearch.destination)}
+                        origin={domesticFlightSearch.from?.code}
+                        destination={domesticFlightSearch.to?.code}
                         returnDate={domesticFlightSearch.returnDate || ""}
                         tripType={domesticFlightSearch.tripType}
                         onDepartureDateChange={(date) => setDomesticFlightSearch(prev => ({ ...prev, departureDate: date }))}
@@ -673,8 +719,8 @@ const DomesticFlightSearch = () => {
                                 onOpenChange={setOpenCalendarId}
                                 isOpen={openCalendarId === "calendar2"}
                                 calendarFor="FLIGHT"
-                                origin={extractAirportCode(domesticFlightSearch.origin)}
-                                destination={extractAirportCode(domesticFlightSearch.destination)}
+                                origin={domesticFlightSearch.from?.code}
+                                destination={domesticFlightSearch.to?.code}
                                 departureDate={domesticFlightSearch.departureDate}
                                 returnDate={domesticFlightSearch.returnDate || ""}
                                 tripType={domesticFlightSearch.tripType}
