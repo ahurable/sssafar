@@ -321,7 +321,7 @@ export function FlightList({ flights, area, itemsPerPage = 10 }: FlightListProps
             })}
           </div>
           <div className="border-t border-blue-900 mt-4 pt-4">
-            <div className="w-full overflow-X-auto flex">
+            <div className="w-full overflow-x-auto flex scrollbar-thin scrollbar-thumb-blue-200 scrollbar-track-transparent" style={{ scrollbarWidth: 'none' }}>
               {availableAirlines.map((airline) => (
                 <button key={airline[0]} className="flex flex-col w-40 items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors"
                 onClick={() => {

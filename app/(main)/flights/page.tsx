@@ -40,7 +40,7 @@ export default function FlightsPage() {
       <Header />
       <main className="py-16 lg:py-8">
         <div className="container mx-auto px-4">
-          <div className="mb-8">
+          <div className="md:mb-4">
             <h1 className="text-xl text-blue-900 font-bold mb-2">نتایج جستجو پرواز {origin} به {destination}</h1>
             <p className="text-muted-foreground">{flights.length} پرواز یافت شد</p>
           </div>
