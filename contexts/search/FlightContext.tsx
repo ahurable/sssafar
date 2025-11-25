@@ -216,7 +216,7 @@ export function FlightProvider({ children }: { children: ReactNode }) {
   const [origin, setOrigin] = useState("")
   const [destination, setDestination] = useState("")
   const [area, setArea] = useState("")
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [airlineNames, setAirlineNames] = useState<{ [iata: string]: string }>({}) // Add this
   const [filteredFlights, setFilteredFlights] = useState<any[]>([])
   const [flightRequest, setFlightRequest] = useState<FlightSearchRequest>({
@@ -350,6 +350,7 @@ export function FlightProvider({ children }: { children: ReactNode }) {
 
   const searchDomesticFlights = async (params: any) => {
     try {
+      setLoading(true)
       const response = await fetch('/api/flights/search/nira', 
         {
           method: 'POST',

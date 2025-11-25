@@ -81,7 +81,7 @@ const DomesticFlightSearch = () => {
     const [showPassengers, setShowPassengers] = useState(false)
 
     const { getCitySuggestions } = useSearch()
-    const { searchDomesticFlights, setDomesticFlightRequest, setFlightRequest, searchFlights, setFlightsData } = useFlight()
+    const { searchDomesticFlights, setDomesticFlightRequest, setFlightRequest, searchFlights, setFlightsData, loading, origin, destination } = useFlight()
     
     const suggestionsRef = useRef<HTMLDivElement>(null)
     const passengersRef = useRef<HTMLDivElement>(null)
@@ -569,6 +569,21 @@ const DomesticFlightSearch = () => {
 
     return (
         <div style={{direction:'rtl'}}>
+            { loading && 
+                <div className="w-full h-full fixed top-0 z-[9999999] right-0">
+                    <div className="w-full h-full bg-black opacity-40 absolute z-[9999999]"></div>
+                    <div className="w-full flex items-center justify-center h-screen z-[9999999] py-8 px-4 text-center my-auto top-0 bottom-0 absolute">
+                        <div className="p-10 bg-white">
+                            <span className="font-black text-2xl block bg-white p-10">
+                                 در حال جستجو
+                            </span>
+                            <span className="font-black text-sm block bg-white p-10">
+                                پرواز {domesticFlightSearch.from?.city} به مقصد {domesticFlightSearch.to?.city} 
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            }
             {/* General Error Display */}
             {errors.general && (
                 <div className="mb-4 p-3 bg-red-500 border border-red-700 flex items-center gap-3">

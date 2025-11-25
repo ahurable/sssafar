@@ -54,6 +54,7 @@ export async function POST(request: NextRequest) {
         destination: requestBody.OriginDestinationInformations[0].DestinationLocationCode,
         date: requestBody.OriginDestinationInformations[0].DepartureDateTime.split('T')[0]
       }
+    console.log(lowestObject)
     // console.log(lowestObject)
     if (lowestPrice !== null)
       await prisma.flightLowPriceStorePerDay.create({

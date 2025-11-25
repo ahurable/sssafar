@@ -72,7 +72,7 @@ const FlightSearch = () => {
     const [showPassengers, setShowPassengers] = useState(false)
 
     const { getCitySuggestions } = useSearch()
-    const { searchFlights, setFlightsData, setFlightRequest } = useFlight()
+    const { searchFlights, setFlightsData, setFlightRequest, loading, origin, destination } = useFlight()
     
     const suggestionsRef = useRef<HTMLDivElement>(null)
     const passengersRef = useRef<HTMLDivElement>(null)
@@ -510,6 +510,19 @@ const FlightSearch = () => {
                 ref={passengersRef}
                 className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 shadow-lg z-50 p-4 mt-1 rounded-md"
             >
+                { loading && 
+                    <div className="w-full h-full absolute top-0 right-0">
+                        <div className="w-full h-full bg-black opacity-40 absolute z-[100000]"></div>
+                        <div className="w-full flex items-center justify-center h-screen z-[100000] py-8 px-4 text-center my-auto top-0 bottom-0 absolute">
+                            <span className="font-black text-2xl block bg-white p-10">
+                                در حال جستجو
+                            </span>
+                            <span className="font-black text-sm block bg-white p-10">
+                                پرواز ${origin} به مقصد ${destination}
+                            </span>
+                        </div>
+                    </div>
+                }
                 <div className="space-y-4">
                     {/* Adults Selector */}
                     <div className="flex items-center justify-between">
@@ -600,6 +613,21 @@ const FlightSearch = () => {
 
     return (
         <div style={{direction:'rtl'}}>
+            { loading && 
+                <div className="w-full h-full fixed top-0 z-[9999999] right-0">
+                    <div className="w-full h-full bg-black opacity-40 absolute z-[9999999]"></div>
+                    <div className="w-full flex items-center justify-center h-screen z-[9999999] py-8 px-4 text-center my-auto top-0 bottom-0 absolute">
+                        <div className="p-10 bg-white">
+                            <span className="font-black text-2xl block bg-white p-10">
+                                 در حال جستجو
+                            </span>
+                            <span className="font-black text-sm block bg-white p-10">
+                                پرواز {flightSearch.from?.city} به مقصد {flightSearch.to?.city} 
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            }
             {/* General Error Display */}
             {errors.general && (
                 <div className="mb-4 p-3 bg-red-500 border border-red-700 flex items-center gap-3 rounded">

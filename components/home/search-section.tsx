@@ -11,6 +11,7 @@ import DomesticFlightSearch from "../flights/domestic-flight-search"
 import CipSearch from "../cip/cip-search"
 import TourSearch from "../tours/tour-search"
 import DomesticHotelSearch from "../hotels/domestic-hotel-search"
+import { useFlight } from "@/contexts/search/FlightContext"
 
 interface SearchSectionProps {
   onSearchResults: (results: any, type: string) => void
@@ -256,7 +257,7 @@ export function FlightSearchSection({ onSearchResults }: SearchSectionProps) {
     }
   }, [searchParams])
 
-  
+  const { loading, origin, destination } = useFlight()
 
   const tabConfig = {
     flight: { icon: Plane, label: "پرواز خارجی" },
@@ -304,6 +305,7 @@ export function FlightSearchSection({ onSearchResults }: SearchSectionProps) {
 
   return (
     <section ref={cardRef} className=" bg-[#fffefe]">
+      
       <div className="mx-auto">
         <div className="text-center bg-blue-900 md:pt-8 md:pb-20 py-8">
           <h2 className="text-3xl font-bold text-white mb-4">
@@ -315,8 +317,8 @@ export function FlightSearchSection({ onSearchResults }: SearchSectionProps) {
         </div>
 
         {/* Desktop Version - Tabs */}
-        <div className="block mt-[-50px]">
-          <div className="bg-[#fffefe] border rounded-lg px-8 border-gray-300">
+        <div className="block lg:mt-[-50px]">
+          <div className="bg-[#fffefe] border rounded-lg lg:px-8 border-gray-300">
             <DesktopTabs />
           </div>
         </div>
@@ -399,8 +401,8 @@ export function HotelSearchSection({ onSearchResults }: SearchSectionProps) {
         </div>
 
         {/* Desktop Version - Tabs */}
-        <div className="block mt-[-50px]">
-          <div className="bg-[#fffefe] border rounded-lg px-8 border-gray-300">
+        <div className="block lg:mt-[-50px]">
+          <div className="bg-[#fffefe] border rounded-lg lg:px-8 border-gray-300">
             <DesktopTabs />
           </div>
         </div>

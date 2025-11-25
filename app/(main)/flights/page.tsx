@@ -41,7 +41,7 @@ export default function FlightsPage() {
       <main className="py-16 lg:py-8">
         <div className="container mx-auto px-4">
           <div className="md:mb-4">
-            <h1 className="text-xl text-blue-900 font-bold mb-2">نتایج جستجو پرواز {origin} به {destination}</h1>
+            <h1 className="text-xl text-gray-900 font-bold mb-2">نتایج جستجو پرواز {origin} به {destination}</h1>
             <p className="text-muted-foreground">{flights.length} پرواز یافت شد</p>
           </div>
           <div className="grid gap-6 lg:grid-cols-4 grid-cols-1">
