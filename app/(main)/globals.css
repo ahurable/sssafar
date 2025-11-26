@@ -129,3 +129,19 @@ html {
 ::-webkit-scrollbar-thumb:hover {
   background: #0a5a5d;
 }
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+  66% {
+    transform: translateY(-5px) rotate(-1deg);
+  }
+}
+
+.floating-element {
+  animation: float 3s ease-in-out infinite;
+}

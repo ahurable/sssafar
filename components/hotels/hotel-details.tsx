@@ -543,7 +543,7 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
 
       {/* Image Modal */}
       {isImageModalOpen && (
-        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 h-screen bg-black/70 z-[100001] flex items-center justify-center">
           <button
             onClick={closeImageModal}
             className="absolute top-4 right-4 text-white p-2 hover:bg-[#fffefe]/20"
@@ -656,7 +656,7 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
                         <div className="lg:w-64 relative h-48 lg:h-auto">
                           <div className="relative w-full h-full">
                             <Image
-                              src={getRoomImage(room.RoomId)}
+                              src={hotelImages[Math.floor(Math.random() * hotelImages.length)].imageUrl}
                               alt={room.Name || room.RoomMapName}
                               fill
                               className="object-cover"

@@ -15,12 +15,10 @@ const RequestCorporateForm = () => {
 
         const formData = new FormData(e.currentTarget)
         
-        // برای دیباگ می‌توانید ببینید چه داده‌هایی جمع‌آوری شده
         const formDataObject: any = {}
         for (let [key, value] of formData.entries()) {
             formDataObject[key] = value
         }
-        // console.log('FormData collected:', formDataObject)
 
         const data = {
             companyName: formData.get('companyName') as string,
@@ -32,8 +30,6 @@ const RequestCorporateForm = () => {
             employeeCount: formData.get('employeeCount') as string,
             needs: formData.get('needs') as string
         }
-
-        // console.log('Data to send:', data)
 
         try {
             const response = await fetch('/api/companies/request', {
@@ -48,13 +44,11 @@ const RequestCorporateForm = () => {
 
             if (response.ok) {
                 success('درخواست شما با موفقیت ثبت شد. کارشناسان ما در کمتر از ۲۴ ساعت با شما تماس خواهند گرفت.')
-                // ریست فرم
                 e.currentTarget.reset()
             } else {
                 error(result.error || 'خطایی در ارسال فرم رخ داده است.')
             }
         } catch (err) {
-            // console.log(err)
             error('خطای شبکه. لطفا مجددا تلاش کنید.')
         } finally {
             setIsSubmitting(false)
@@ -62,154 +56,153 @@ const RequestCorporateForm = () => {
     }
 
     return (
-        <form className="space-y-8" onSubmit={handleSubmit}>
-            <div className="grid md:grid-cols-2 gap-8">
+        <form className="space-y-6" onSubmit={handleSubmit}>
+            <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                    <label htmlFor="companyName" className="block text-lg font-semibold text-gray-700 mb-3">
+                    <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-2">
                         نام کامل شرکت <span className="text-red-500">*</span>
                     </label>
                     <Input
                         id="companyName"
-                        name="companyName" // اضافه کردن name attribute
+                        name="companyName"
                         type="text"
                         placeholder="نام کامل شرکت به فارسی"
-                        className="h-12 text-lg"
+                        className="h-11"
                         required
                     />
                 </div>
 
                 <div>
-                    <label htmlFor="companyType" className="block text-lg font-semibold text-gray-700 mb-3">
+                    <label htmlFor="companyType" className="block text-sm font-medium text-gray-700 mb-2">
                         نوع فعالیت شرکت <span className="text-red-500">*</span>
                     </label>
                     <Input
                         id="companyType"
-                        name="companyType" // اضافه کردن name attribute
+                        name="companyType"
                         type="text"
-                        placeholder="مانند: بازرگانی، تولیدی، خدماتی، استارتاپ و ..."
-                        className="h-12 text-lg"
+                        placeholder="مانند: بازرگانی، تولیدی، خدماتی"
+                        className="h-11"
                         required
                     />
                 </div>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                    <label htmlFor="email" className="block text-lg font-semibold text-gray-700 mb-3">
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                         ایمیل رسمی شرکت <span className="text-red-500">*</span>
                     </label>
                     <Input
                         id="email"
-                        name="email" // اضافه کردن name attribute
+                        name="email"
                         type="email"
                         placeholder="email@company.com"
-                        className="h-12 text-lg"
+                        className="h-11"
                         required
                     />
                 </div>
 
                 <div>
-                    <label htmlFor="phone" className="block text-lg font-semibold text-gray-700 mb-3">
+                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
                         تلفن تماس شرکت <span className="text-red-500">*</span>
                     </label>
                     <Input
                         id="phone"
-                        name="phone" // اضافه کردن name attribute
+                        name="phone"
                         type="tel"
                         placeholder="شماره تلفن ثابت شرکت"
-                        className="h-12 text-lg"
+                        className="h-11"
                         required
                     />
                 </div>
             </div>
 
             <div>
-                <label htmlFor="address" className="block text-lg font-semibold text-gray-700 mb-3">
+                <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
                     آدرس کامل شرکت <span className="text-red-500">*</span>
                 </label>
                 <Textarea
                     id="address"
-                    name="address" // اضافه کردن name attribute
+                    name="address"
                     placeholder="آدرس کامل شرکت به همراه کد پستی"
                     rows={3}
-                    className="text-lg"
+                    className="bg-white"
                     required
                 />
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                    <label htmlFor="contactPerson" className="block text-lg font-semibold text-gray-700 mb-3">
-                        شخص رابط (مدیر منابع انسانی/مالی) <span className="text-red-500">*</span>
+                    <label htmlFor="contactPerson" className="block text-sm font-medium text-gray-700 mb-2">
+                        شخص رابط <span className="text-red-500">*</span>
                     </label>
                     <Input
                         id="contactPerson"
-                        name="contactPerson" // اضافه کردن name attribute
+                        name="contactPerson"
                         type="text"
                         placeholder="نام و نام خانوادگی شخص رابط"
-                        className="h-12 text-lg"
+                        className="h-11"
                         required
                     />
                 </div>
 
                 <div>
-                    <label htmlFor="employeeCount" className="block text-lg font-semibold text-gray-700 mb-3">
+                    <label htmlFor="employeeCount" className="block text-sm font-medium text-gray-700 mb-2">
                         تعداد کارکنان <span className="text-red-500">*</span>
                     </label>
                     <Input
                         id="employeeCount"
-                        name="employeeCount" // اضافه کردن name attribute
+                        name="employeeCount"
                         type="number"
                         placeholder="تعداد تقریبی کارکنان"
                         min="1"
-                        className="h-12 text-lg"
+                        className="h-11"
                         required
                     />
                 </div>
             </div>
 
             <div>
-                <label htmlFor="needs" className="block text-lg font-semibold text-gray-700 mb-3">
-                    نیازهای سفر شرکت و انتظارات شما
+                <label htmlFor="needs" className="block text-sm font-medium text-gray-700 mb-2">
+                    نیازهای سفر شرکت
                 </label>
                 <Textarea
                     id="needs"
-                    name="needs" // اضافه کردن name attribute
-                    placeholder="نیازهای سفر شرکت خود را شرح دهید (مانند: سفرهای داخلی، خارجی، تعداد سفرهای ماهانه، خدمات مورد نیاز و ...)"
-                    rows={4}
-                    className="text-lg"
+                    name="needs"
+                    placeholder="نیازهای سفر شرکت خود را شرح دهید"
+                    rows={3}
+                    className="bg-white"
                 />
             </div>
 
-            <div className="flex items-start p-4 bg-blue-50 rounded-xl">
+            <div className="flex items-start p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <input
                     id="agreement"
-                    name="agreement" // اضافه کردن name attribute
+                    name="agreement"
                     type="checkbox"
-                    className="h-5 w-5 text-blue-600 border-gray-300 rounded ml-3 mt-1"
+                    className="h-4 w-4 text-blue-900 border-gray-300 rounded ml-2 mt-1"
                     required
                 />
-                <label htmlFor="agreement" className="text-lg text-gray-700 leading-relaxed">
+                <label htmlFor="agreement" className="text-sm text-gray-700 leading-relaxed">
                     با شرایط و قوانین استفاده از پنل سازمانی موافقم. می‌پذیرم که اطلاعات ارائه شده 
-                    توسط کارشناسان ما بررسی شده و برای فعال‌سازی پنل، نیاز به انعقاد قرارداد رسمی 
-                    و واریز اعتبار اولیه می‌باشد.
+                    توسط کارشناسان ما بررسی شده و برای فعال‌سازی پنل، نیاز به انعقاد قرارداد رسمی می‌باشد.
                 </label>
             </div>
 
             <Button 
                 type="submit" 
                 disabled={isSubmitting}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 text-xl font-semibold h-16 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-blue-900 hover:bg-blue-800 text-white py-3 font-medium h-12 disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 {isSubmitting ? (
                     <>
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white ml-2"></div>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white ml-2"></div>
                         در حال ارسال...
                     </>
                 ) : (
                     <>
-                        <FileText className="ml-2 h-6 w-6" />
-                        ارسال درخواست و تماس کارشناس
+                        <FileText className="ml-2 h-4 w-4" />
+                        ارسال درخواست
                     </>
                 )}
             </Button>
