@@ -11,7 +11,7 @@ export default function SignInPage() {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-black mb-4 bg-gradient-to-br from-blue-600 to-purple-950 bg-clip-text text-transparent">
-              به سفرتودی خوش آمدید
+              به اُمسافر خوش آمدید
             </h1>
             <p className="text-blue-600 text-lg">لطفا برای ادامه وارد حساب کاربری خود شوید</p>
           </div>

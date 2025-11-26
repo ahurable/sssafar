@@ -125,10 +125,10 @@ async function loadAirportsFromXLSX(): Promise<Airport[]> {
     )
 
     // console.log('🔍 Detected columns:', {
-      iata: iataColumn,
-      name: nameColumn,
-      city: cityColumn
-    })
+    //   iata: iataColumn,
+    //   name: nameColumn,
+    //   city: cityColumn
+    // })
 
     const airports: Airport[] = data.map((row: any, index: number) => {
       // Use detected columns or fallback to first columns

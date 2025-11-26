@@ -7,6 +7,8 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { FAQSection } from "@/components/faq/faq-section"
 import { env } from "process"
+import ServiceCardsSection from "@/components/home/cards-section"
+import ToursSection from "@/components/home/tours-section"
 
 interface Post {
   id: string
@@ -48,9 +50,9 @@ export default async function HomePage() {
       <Header />
       <main>
         <SearchSection />
+        <ServiceCardsSection />
         <HeroSlider posts={posts} />
-        <FeaturesSection />
-        <StatsSection />
+        <ToursSection />
         <FAQSection />
       </main>
       <Footer />

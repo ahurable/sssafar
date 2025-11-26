@@ -54,12 +54,12 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
   }, [])
 
   const tabConfig = {
-    cip: { icon: Crown, label: "CIP فرودگاهی" },
-    tour: { icon: Map, label: "گشت شهری" },
+    domesticFlights: { icon: Plane, label: "پرواز داخلی" },
+    flight: { icon: Plane, label: "پرواز خارجی" },
     domesticHotel: { icon: Hotel, label: "هتل داخلی" },
     hotel: { icon: Hotel, label: "هتل خارجی" },
-    flight: { icon: Plane, label: "پرواز خارجی" },
-    domesticFlights: { icon: Plane, label: "پرواز داخلی" },
+    cip: { icon: Crown, label: "فرودگاهی CIP" },
+    tour: { icon: Map, label: "گشت شهری" },
   }
 
   const handleTabSelect = (tab: string) => {
@@ -156,7 +156,10 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
       setActiveTab(value as any)
       localStorage.setItem('activeSearchTab', value)
     }} className="w-full">
-      <TabsList className="flex w-full h-max bg-[#fffefe] border-b border-gray-300 p-0">
+      <TabsList className="flex w-full h-max bg-[#fffefe] border-b border-gray-300 p-0"
+              style={{
+                direction: "rtl"
+              }}>
         {Object.entries(tabConfig).map(([key, config]) => {
           const Icon = config.icon
           const isSelected = activeTab === key
@@ -207,7 +210,7 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
   return (
     <section ref={cardRef} className=" bg-[#fffefe]">
       <div className="mx-auto">
-        <div className="text-center bg-blue-900 md:pt-8 md:pb-20 py-8">
+        <div className="text-center bg-blue-950 md:pt-8 md:pb-20 py-8">
           <h2 className="text-3xl font-bold text-white mb-4">
             سفر بعدی خود را پیدا کنید
           </h2>

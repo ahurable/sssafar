@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { Phone, Mail, MapPin, Instagram, Twitter } from "lucide-react"
+import Image from "next/image"
 
 export function Footer() {
   return (
@@ -8,9 +9,9 @@ export function Footer() {
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           {/* About */}
           <div>
-            <h3 className="mb-4 text-lg font-bold">درباره سفرتودی</h3>
+            <h3 className="mb-4 text-lg font-bold">درباره اُمسافر</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              سفرتودی بزرگترین پلتفرم رزرو آنلاین هتل، بلیط هواپیما و قطار در ایران است. ما با ارائه بهترین قیمت‌ها و
+              اُمسافر پلتفرم رزرو آنلاین هتل، بلیط هواپیما و تور در ایران است. ما با ارائه بهترین قیمت‌ها و
               خدمات، سفر شما را راحت‌تر می‌کنیم.
             </p>
           </div>
@@ -30,43 +31,65 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/trains" className="text-muted-foreground hover:text-primary transition-colors">
-                  خرید بلیط قطار
+                <Link href="/visa" className="text-muted-foreground hover:text-primary transition-colors">
+                  خدمات ویزا
                 </Link>
               </li>
+              
               <li>
-                <Link href="/blog" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link href="/tours" className="text-muted-foreground hover:text-primary transition-colors">
+                  تور ها
+                </Link>
+              </li>
+
+              <li>
+                <Link href="/tours" className="text-muted-foreground hover:text-primary transition-colors">
+                  CIP فرودگاهی
+                </Link>
+              </li>
+
+              <li>
+                <Link href="/posts" className="text-muted-foreground hover:text-primary transition-colors">
                   وبلاگ
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Support */}
-          <div>
-            <h3 className="mb-4 text-lg font-bold">پشتیبانی</h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link href="/faq" className="text-muted-foreground hover:text-primary transition-colors">
-                  سوالات متداول
-                </Link>
-              </li>
-              <li>
-                <Link href="/terms" className="text-muted-foreground hover:text-primary transition-colors">
-                  قوانین و مقررات
-                </Link>
-              </li>
-              <li>
-                <Link href="/privacy" className="text-muted-foreground hover:text-primary transition-colors">
-                  حریم خصوصی
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="text-muted-foreground hover:text-primary transition-colors">
-                  تماس با ما
-                </Link>
-              </li>
-            </ul>
+          <div className="flex flex-wrap gap-2">
+            <div className="w-14 h-14 p-2 bg-gray-300">
+              <Link href={''}>
+                <Image
+                  src={'/assets/images/aira.webp'}
+                  width={100}
+                  height={100}
+                  className="w-full h-full"
+                  alt="aira"
+                />
+              </Link>
+            </div>
+            <div className="w-14 h-14 p-2 bg-gray-300">
+              <Link href={''}>
+                <Image
+                  src={'/assets/images/cao.svg'}
+                  width={100}
+                  height={100}
+                  className="w-full h-full"
+                  alt="aira"
+                />
+              </Link>
+            </div>
+            <div className="w-14 h-14 p-2 bg-gray-300">
+              <Link href={''}>
+                <Image
+                  src={'/assets/images/cao-paxright.svg'}
+                  width={100}
+                  height={100}
+                  className="w-full h-full"
+                  alt="aira"
+                />
+              </Link>
+            </div>
           </div>
 
           {/* Contact */}
@@ -104,7 +127,7 @@ export function Footer() {
         </div>
 
         <div className="mt-8 border-t pt-8 text-center text-sm text-muted-foreground">
-          <p>© ۱۴۰۳ سفرتودی. تمامی حقوق محفوظ است.</p>
+          <p>© ۱۴۰۳ اُمسافر. تمامی حقوق محفوظ است.</p>
         </div>
       </div>
     </footer>

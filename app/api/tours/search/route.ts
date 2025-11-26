@@ -31,9 +31,21 @@ export const GET = async (request: NextRequest) => {
             // console.log(tours)
             return NextResponse.json(tours, { status: 200 })
         } else {
-            return NextResponse.json({
-                message: "لطفا تاریخ ورود و خروج خود را معین نمایید"
-            }, { status: 400})
+            const tours = await prisma.tour.findMany({
+                orderBy: {
+                    createdAt: 'desc'
+                },
+                take: 5,
+                include: {
+                    images: true
+                }
+            })
+            if (tours.length == 0) {
+                return NextResponse.json({
+                    message: "هیچ توری تعریف نشده است"
+                }, { status: 404 })
+            }
+            return NextResponse.json(tours, { status: 200 })
         }
 
     } catch (error) {

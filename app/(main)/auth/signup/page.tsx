@@ -11,7 +11,7 @@ export default function SignUpPage() {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-black mb-4 bg-gradient-to-br from-blue-600 to-blue-900 bg-clip-text text-transparent">
-              به خانواده سفرتودی بپیوندید
+              به خانواده اُمسافر بپیوندید
             </h1>
             <p className="text-gray-600 text-lg">حساب کاربری جدید ایجاد کنید و از خدمات ما بهره‌مند شوید</p>
           </div>

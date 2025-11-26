@@ -10,7 +10,7 @@ export default function BlogPage() {
       <main className="py-12">
         <div className="container mx-auto px-4">
           <div className="mb-12 text-center">
-            <h1 className="text-4xl font-bold mb-4">وبلاگ سفرتودی</h1>
+            <h1 className="text-4xl font-bold mb-4">وبلاگ اُمسافر</h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               راهنماهای سفر، نکات مفید و آخرین اخبار گردشگری
             </p>

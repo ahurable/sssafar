@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { User, Plane, LayoutDashboardIcon, LogOut, Settings, CreditCard, Menu, X, Globe, Shield, Hotel, ChevronDown } from "lucide-react"
 import { UserType } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import Image from "next/image"
 
 export function Header() {
   const router = useRouter()
@@ -200,7 +201,7 @@ export function Header() {
           // Guest user menu
           <div className="space-y-3">
             <div className="text-center py-2">
-              <p className="text-black font-medium">به سفرتودی خوش آمدید</p>
+              <p className="text-black font-medium">به اُمسافر خوش آمدید</p>
             </div>
             <Link
               href="/auth/signin"
@@ -260,12 +261,12 @@ export function Header() {
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-300 bg-[#fffefe]">
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center bg-blue-500">
-                <Plane className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-2xl font-black text-black">
-                سفرتودی
-              </span>
+              <Image
+              src={'/assets/logo.png'}
+              width={200}
+              height={100}
+              alt="O'MOSAFER Logo"
+              />
             </div>
             <button
               onClick={() => setMobileMenuOpen(false)}
@@ -515,12 +516,12 @@ export function Header() {
               href="/" 
               className="flex items-center gap-2"
             >
-              <div className="flex h-9 w-9 items-center justify-center bg-blue-500">
-                <Plane className="h-4 w-4 text-white" />
-              </div>
-              <span className="text-lg font-black text-black">
-                سفرتودی
-              </span>
+              <Image
+              src={'/assets/images/logo.png'}
+              width={150}
+              height={75}
+              alt="O'MOSAFER Logo"
+              />
             </Link>
 
             {/* Desktop Navigation - Moved closer to logo */}
