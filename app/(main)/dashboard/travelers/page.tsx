@@ -13,7 +13,7 @@ export default function DashboardPage() {
             '/api/travelers'
             )
             const data = await res.json()
-            console.log(data)
+            // console.log(data)
         }
         handleAsync()
     }, [])

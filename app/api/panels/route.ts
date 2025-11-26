@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
   
   try {
     const session = await getSession()
-    console.log("Session received:", session)
+    // console.log("Session received:", session)
 
     if (!session || session.role !== 'ADMIN') {
       return NextResponse.json({ error: "لطفا وارد شوید" }, { status: 401 })
@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
     
 
     const body = await request.json()
-    console.log("Request body:", body)
+    // console.log("Request body:", body)
     
     const { name, description, slug, isActive = true } = body
 
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log("Checking slug uniqueness...")
+    // console.log("Checking slug uniqueness...")
     // Check if slug is unique
     const existingPanel = await prisma.panel.findUnique({
       where: { slug },
@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log("Creating panel...")
+    // console.log("Creating panel...")
     // Create panel
     const panel = await prisma.panel.create({
       data: {
@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    console.log("Panel created successfully:", panel.id)
+    // console.log("Panel created successfully:", panel.id)
     return NextResponse.json({ panel }, { status: 201 })
     
   } catch (error) {

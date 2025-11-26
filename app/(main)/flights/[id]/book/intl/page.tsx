@@ -65,7 +65,7 @@ export default function OneWayReservation() {
 
         const revalidateResult = await revalidateResponse.json()
         setRevalidateData(revalidateResult)
-        console.log(revalidateResult)
+        // console.log(revalidateResult)
         // Extract flight details from revalidate response
         if (revalidateResult.Success && revalidateResult.PricedItinerary) {
           const itinerary = revalidateResult.PricedItinerary
@@ -226,7 +226,7 @@ export default function OneWayReservation() {
     })
   }
 
-  useEffect(() => { console.log(selectedTravelers)} , [selectedTravelers])
+  // useEffect(() => { console.log(selectedTravelers)} , [selectedTravelers])
 
   const calculateTotalPrice = () => {
     if (!flightDetails) return 0
@@ -277,7 +277,7 @@ export default function OneWayReservation() {
       if (response.ok) {
         const result = await response.json()
         // Navigate to payment page or show success
-        console.log("Booking successful:", result)
+        // console.log("Booking successful:", result)
         
         // Redirect to payment page
         router.push(`/invoice/${result.invoiceId}`)

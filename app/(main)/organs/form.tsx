@@ -20,7 +20,7 @@ const RequestCorporateForm = () => {
         for (let [key, value] of formData.entries()) {
             formDataObject[key] = value
         }
-        console.log('FormData collected:', formDataObject)
+        // console.log('FormData collected:', formDataObject)
 
         const data = {
             companyName: formData.get('companyName') as string,
@@ -33,7 +33,7 @@ const RequestCorporateForm = () => {
             needs: formData.get('needs') as string
         }
 
-        console.log('Data to send:', data)
+        // console.log('Data to send:', data)
 
         try {
             const response = await fetch('/api/companies/request', {
@@ -54,7 +54,7 @@ const RequestCorporateForm = () => {
                 error(result.error || 'خطایی در ارسال فرم رخ داده است.')
             }
         } catch (err) {
-            console.log(err)
+            // console.log(err)
             error('خطای شبکه. لطفا مجددا تلاش کنید.')
         } finally {
             setIsSubmitting(false)

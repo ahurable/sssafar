@@ -17,7 +17,7 @@ export function ForgotPasswordForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     // Handle forgot password logic here
-    console.log("[v0] Forgot password form submitted")
+    // console.log("[v0] Forgot password form submitted")
     setSubmitted(true)
   }
 

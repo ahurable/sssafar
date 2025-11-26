@@ -101,7 +101,7 @@ export function Header() {
         params.set('search', menuType)
         router.push(`/?${params.toString()}`, { scroll: false })
       } else {
-        console.log(menuType)
+        // console.log(menuType)
         router.push(`/${menuType}`)
       }
     }
@@ -226,7 +226,7 @@ export function Header() {
   // Desktop Dropdown Menu Component
   const DesktopDropdownMenu = ({ menuRef, isOpen, items, onSubmenuHover, onSubmenuLeave }: any) => {
     if (!isOpen) return null
-    console.log(items)
+    // console.log(items)
     return (
       <div 
         ref={menuRef}

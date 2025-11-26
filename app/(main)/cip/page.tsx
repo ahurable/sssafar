@@ -627,7 +627,7 @@ function CipServicesContent() {
   }, [searchData])
 
   useEffect(() => {
-    console.log(`[CIP] You search data is : ${searchData}`)
+    // console.log(`[CIP] You search data is : ${searchData}`)
 
     const getUser = async () => {
       const res = await fetch("/api/auth/me")
@@ -668,7 +668,7 @@ function CipServicesContent() {
       return
     }
 
-    console.log(searchData)
+    // console.log(searchData)
     try {
       // Create invoice data
       const invoiceData = {

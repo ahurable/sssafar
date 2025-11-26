@@ -50,7 +50,7 @@ export const POST = async (request: NextRequest) => {
             }
         }
 
-        console.log("Sending request to AirBook API:", JSON.stringify(requestBody, null, 2))
+        // console.log("Sending request to AirBook API:", JSON.stringify(requestBody, null, 2))
 
         const res = await fetch(
             'https://apidemo.partocrs.com/api/Air/AirBook', 
@@ -65,7 +65,7 @@ export const POST = async (request: NextRequest) => {
         
         const data = await res.json()
         
-        console.log("AirBook API response:", {
+        // console.log("AirBook API response:", {
             status: res.status,
             statusText: res.statusText,
             data: data

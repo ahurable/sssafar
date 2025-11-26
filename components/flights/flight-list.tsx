@@ -126,7 +126,7 @@ export function FlightList({ flights, area, itemsPerPage = 10 }: FlightListProps
   const getUser = async () => {
     const response = await fetch('/api/auth/me')
     const data = await response.json()
-    // console.log(data)
+    // // console.log(data)
     if (response.ok) {
       setUser(data.user)
       setUserLoading(false)

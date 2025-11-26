@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
     const callbackUrl = `${baseUrl}/api/zibal/payment/verify`;
     
     if (!paymentData.invoiceId) {
-      console.log("invoice id is ", paymentData.invoiceId)
+      // console.log("invoice id is ", paymentData.invoiceId)
         const createInvoice = await prisma.invoice.create({
             data: {
                 amount: paymentData.amount.toString(),
@@ -188,7 +188,7 @@ export async function POST(request: NextRequest) {
         };
 
 
-        console.log('Starting Zibal payment:', {
+        // console.log('Starting Zibal payment:', {
         amount: paymentData.amount,
         amountInRials,
         userId: session.userId,
@@ -218,7 +218,7 @@ export async function POST(request: NextRequest) {
 
         const zibalResult: ZibalStartPaymentResponse = await startPaymentResponse.json();
         
-        console.log('Zibal start payment response:', zibalResult);
+        // console.log('Zibal start payment response:', zibalResult);
 
         // Handle Zibal response
         if (zibalResult.result === ZIBAL_RESULT_CODES.SUCCESS) {
@@ -273,7 +273,7 @@ export async function POST(request: NextRequest) {
     };
 
 
-    console.log('Starting Zibal payment:', {
+    // console.log('Starting Zibal payment:', {
       amount: paymentData.amount,
       amountInRials,
       userId: session.userId,
@@ -304,7 +304,7 @@ export async function POST(request: NextRequest) {
 
     const zibalResult: ZibalStartPaymentResponse = await startPaymentResponse.json();
     
-    console.log('Zibal start payment response:', zibalResult);
+    // console.log('Zibal start payment response:', zibalResult);
 
     // Handle Zibal response
     if (zibalResult.result === ZIBAL_RESULT_CODES.SUCCESS) {
@@ -389,7 +389,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    console.log('Verifying Zibal payment:', {
+    // console.log('Verifying Zibal payment:', {
       trackId: verifyData.trackId,
       status: verifyData.status,
       success: verifyData.success
@@ -424,7 +424,7 @@ export async function PUT(request: NextRequest) {
 
     const zibalVerifyResult: ZibalVerifyResponse = await verifyResponse.json();
     
-    console.log('Zibal verify response:', zibalVerifyResult);
+    // console.log('Zibal verify response:', zibalVerifyResult);
 
     // Handle verification result
     if (zibalVerifyResult.result === ZIBAL_RESULT_CODES.SUCCESS || 
@@ -510,13 +510,13 @@ function getZibalErrorMessage(resultCode: number): string {
 async function  storePaymentRecord(paymentData: any) {
   // TODO: Implement database storage
   // Example: await db.payment.create({ data: paymentData });
-  console.log('Storing payment record:', paymentData);
+  // console.log('Storing payment record:', paymentData);
 }
 
 async function updatePaymentRecord(trackId: number, updateData: any) {
   // TODO: Implement database update
   // Example: await db.payment.update({ where: { trackId }, data: updateData });
-  console.log('Updating payment record:', { trackId, ...updateData });
+  // console.log('Updating payment record:', { trackId, ...updateData });
 }
 
 async function addUserCredit(trackId: number) {
@@ -524,7 +524,7 @@ async function addUserCredit(trackId: number) {
   // 1. Get payment record by trackId
   // 2. Get user ID from payment record
   // 3. Add credit amount to user's balance
-  console.log('Adding credit for payment trackId:', trackId);
+  // console.log('Adding credit for payment trackId:', trackId);
 }
 
 // GET endpoint for payment callback (redirect from Zibal)

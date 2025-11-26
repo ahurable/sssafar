@@ -21,7 +21,7 @@ export const GET = async (request: NextRequest, { params } : { params: { id : st
     })
     return NextResponse.json(tour)
   } catch (error) {
-    console.log(error)
+    // console.log(error)
     return NextResponse.json({
       message: "خطایی در دریافت اطلاعا رخ داد",
       error: error

@@ -12,7 +12,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
     try {
         const body = await request.json()
-        console.log(body)
+        // console.log(body)
 
         // ✅ Find existing ECO user for this panel
         const existingPanelUser = await prisma.panelUser.findFirst({

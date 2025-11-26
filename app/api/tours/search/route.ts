@@ -28,7 +28,7 @@ export const GET = async (request: NextRequest) => {
                     cityId: city
                 }
             })
-            console.log(tours)
+            // console.log(tours)
             return NextResponse.json(tours, { status: 200 })
         } else {
             return NextResponse.json({
@@ -37,7 +37,7 @@ export const GET = async (request: NextRequest) => {
         }
 
     } catch (error) {
-        console.log(error)
+        // console.log(error)
         return NextResponse.json({
             message: error
         }, { status: 500 })

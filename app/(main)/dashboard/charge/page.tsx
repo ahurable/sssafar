@@ -84,7 +84,7 @@ export default function ChargeCreditPage() {
         description: `شارژ اعتبار به مبلغ ${amountNumber.toLocaleString('fa-IR')} ریال`,
       }
 
-      console.log('Sending payment request:', paymentData)
+      // console.log('Sending payment request:', paymentData)
 
       // Call Zibal payment API
       const response = await fetch('/api/zibal/pay', {

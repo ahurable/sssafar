@@ -32,7 +32,7 @@ export function PanelManagement() {
       .then((res) => res.json())
       .then((data) => {
         setPanels(data.panels)
-        console.log(data.panels)
+        // console.log(data.panels)
         setLoading(false)
       })
       .catch((error) => {

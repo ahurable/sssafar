@@ -22,7 +22,7 @@ export default function PanelsPage() {
         if (!res.ok) {
             error("خطا در دریافت اطلاعات")
         }
-        console.log(data.user)
+        // console.log(data.user)
         setMe(data.user)
     }
     handleAsync()

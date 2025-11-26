@@ -97,7 +97,7 @@ const ShamsiDateModal = ({
             }
           })
           const data = await response.json()
-          console.log(data)
+          // console.log(data)
           setFlightLowerPricesPerDay(data)
         }
         getFlightsLowerPricesPerDay(origin, destination)

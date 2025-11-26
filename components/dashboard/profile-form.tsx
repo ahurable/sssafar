@@ -49,7 +49,7 @@ export function ProfileForm() {
       .then((res) => res.json())
       .then((data) => {
         if (data.user) {
-          console.log("user data is ", data.user)
+          // // console.log("user data is ", data.user)
           const userData = {
             firstName: data.user.firstName || "",
             lastName: data.user.lastName || "",

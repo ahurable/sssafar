@@ -90,10 +90,10 @@ export async function GET(request: NextRequest) {
         type: 'international' as const
       }));
       
-      console.log(internationalMatches)
+      // console.log(internationalMatches)
       results.push(...internationalMatches);
 
-      console.log(results)
+      // console.log(results)
       
     }
 

@@ -14,7 +14,7 @@ async function generateHotelNamesMapping() {
 
   const hotelNames: Record<number, string> = {};
 
-  console.log('Starting hotel names mapping generation...');
+  // console.log('Starting hotel names mapping generation...');
 
   // Process international properties
   try {
@@ -23,11 +23,11 @@ async function generateHotelNamesMapping() {
       /^Property_\d+-\d+\.json$/.test(file)
     );
 
-    console.log(`Found ${internationalPropertyFiles.length} international property files`);
+    // console.log(`Found ${internationalPropertyFiles.length} international property files`);
 
     for (const file of internationalPropertyFiles) {
       const filePath = path.join(internationalPath, file);
-      console.log(`Processing ${file}...`);
+      // console.log(`Processing ${file}...`);
       
       const data = await fs.readFile(filePath, 'utf-8');
       const properties: Property[] = JSON.parse(data);
@@ -36,7 +36,7 @@ async function generateHotelNamesMapping() {
         hotelNames[prop.Id] = prop.Name;
       });
       
-      console.log(`Processed ${file}, added ${properties.length} hotels`);
+      // console.log(`Processed ${file}, added ${properties.length} hotels`);
     }
   } catch (error) {
     console.error('Error processing international properties:', error);
@@ -49,11 +49,11 @@ async function generateHotelNamesMapping() {
       /^DomesticProperty_\d+-\d+\.json$/.test(file)
     );
 
-    console.log(`Found ${domesticPropertyFiles.length} domestic property files`);
+    // console.log(`Found ${domesticPropertyFiles.length} domestic property files`);
 
     for (const file of domesticPropertyFiles) {
       const filePath = path.join(domesticPath, file);
-      console.log(`Processing ${file}...`);
+      // console.log(`Processing ${file}...`);
       
       const data = await fs.readFile(filePath, 'utf-8');
       const properties: Property[] = JSON.parse(data);
@@ -62,7 +62,7 @@ async function generateHotelNamesMapping() {
         hotelNames[prop.Id] = prop.Name;
       });
       
-      console.log(`Processed ${file}, added ${properties.length} hotels`);
+      // console.log(`Processed ${file}, added ${properties.length} hotels`);
     }
   } catch (error) {
     console.error('Error processing domestic properties:', error);
@@ -80,8 +80,8 @@ async function generateHotelNamesMapping() {
   const outputPath = path.join(outputDir, 'hotel-names-mapping.json');
   await fs.writeFile(outputPath, JSON.stringify(hotelNames, null, 2));
   
-  console.log(`✅ Successfully generated mapping for ${Object.keys(hotelNames).length} hotels`);
-  console.log(`📁 File saved to: ${outputPath}`);
+  // console.log(`✅ Successfully generated mapping for ${Object.keys(hotelNames).length} hotels`);
+  // console.log(`📁 File saved to: ${outputPath}`);
 }
 
 generateHotelNamesMapping().catch(console.error);

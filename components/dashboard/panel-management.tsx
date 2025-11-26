@@ -33,8 +33,8 @@ export function PanelManagement({ panelId }: { panelId: string }) {
   }, [])
 
   // useEffect(() => {
-  //   console.log(userId)
-  //   // console.log(p)
+  //   // console.log(userId)
+  //   // // console.log(p)
   // }, [userId, panels])
 
   const fetchPanels = async () => {
@@ -47,7 +47,7 @@ export function PanelManagement({ panelId }: { panelId: string }) {
       const data = await response.json()
       setPanels(data.panels)
       setUserPanels(data.userPanels)
-      console.log(data)
+      // console.log(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : "خطای ناشناخته")
     } finally {
@@ -63,16 +63,16 @@ export function PanelManagement({ panelId }: { panelId: string }) {
   }
 
 
-  useEffect(() => console.log(userPanels) , [userPanels])
+  useEffect(() => // console.log(userPanels) , [userPanels])
 
   const handleCreatePanel = () => {
     // منطق ایجاد پنل جدید
-    console.log("ایجاد پنل جدید")
+    // console.log("ایجاد پنل جدید")
   }
 
   const handleEditPanel = (panelId: string) => {
     // منطق ویرایش پنل
-    console.log("ویرایش پنل:", panelId)
+    // console.log("ویرایش پنل:", panelId)
   }
 
   const handleViewPanel = (panelId: string) => {

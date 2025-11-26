@@ -110,7 +110,7 @@ export function AddPanelMembersForm( {panel} : {panel:Panel} ) {
   const fetchPanelUser = async () => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/panels/${panel.id}/user`)
     const data = await response.json()
-    console.log(data)
+    // console.log(data)
     if (!response.ok)
       error('خطا در صحت سنجی دسترسی کاربر')
     setPanelRole(data)
@@ -157,7 +157,7 @@ export function AddMemberForm({_panel, userRole}:{_panel:Panel, userRole: PanelU
         
         if (usersRes.ok) {
           setUsers(usersData.users || [])
-          console.log(usersData)
+          // console.log(usersData)
         }
 
       } catch (err) {
@@ -170,7 +170,7 @@ export function AddMemberForm({_panel, userRole}:{_panel:Panel, userRole: PanelU
 
   // Load existing members when panel changes
   useEffect(() => {
-    console.log(selectedPanel)
+    // console.log(selectedPanel)
     if (selectedPanel) {
       loadExistingMembers(selectedPanel)
       loadTransactions(selectedPanel)
@@ -181,7 +181,7 @@ export function AddMemberForm({_panel, userRole}:{_panel:Panel, userRole: PanelU
   }, [selectedPanel])
 
   useEffect(() => {
-    console.log(panel)
+    // console.log(panel)
     setLoading(false)
   } , [panel])
 
@@ -189,7 +189,7 @@ export function AddMemberForm({_panel, userRole}:{_panel:Panel, userRole: PanelU
     try {
       const res = await fetch(`/api/panels/${panelId}/members`)
       const data = await res.json()
-      console.log(data)
+      // console.log(data)
       if (res.ok) {
         setExistingMembers(data.members || [])
       }
@@ -202,10 +202,10 @@ export function AddMemberForm({_panel, userRole}:{_panel:Panel, userRole: PanelU
     try {
       const res = await fetch(`/api/panels/${panelId}/transactions`)
       const data: PanelCreditTransaction[] = await res.json()
-      console.log(data)
+      // console.log(data)
       if (res.ok) {
         setTransactions(data || [])
-        console.log(transactions)
+        // console.log(transactions)
       }
     } catch (err) {
       console.error("Error loading transactions:", err)

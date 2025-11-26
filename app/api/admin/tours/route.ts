@@ -139,7 +139,7 @@ export const POST = async (request: NextRequest) => {
       );
     }
 
-    console.log("Received data:", body);
+    // console.log("Received data:", body);
 
     // اعتبارسنجی داده‌ها
     const validatedData = createTourSchema.parse(body);

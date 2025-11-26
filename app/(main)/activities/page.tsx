@@ -296,7 +296,7 @@ function ActivitiesContent() {
         const response = await fetch(`/api/activities?${queryParams.toString()}`)
         if (response.ok) {
           const data = await response.json()
-          console.log('Fetched city tours:', data)
+          // console.log('Fetched city tours:', data)
           setCityTours(data.cityTours || [])
         } else {
           console.error('Failed to fetch city tours')

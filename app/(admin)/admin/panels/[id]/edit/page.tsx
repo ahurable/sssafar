@@ -79,7 +79,7 @@ export default function EditPanelPage() {
       const res = await fetch(`/api/panels/${params.id}`)
       if (res.ok) {
         const data = await res.json()
-        console.log(data)
+        // console.log(data)
         setPanel(data.panel)
         setFormData({
           name: data.panel.name || "",
@@ -113,7 +113,7 @@ export default function EditPanelPage() {
         if (!res.ok) {
             error("خطا در برقراری ارتباط با سرور")
         }
-        console.log(data)
+        // console.log(data)
         setContracts(data.contracts)
     } catch (err) {
         console.error("Error fetching contracts", err)
@@ -319,7 +319,7 @@ export default function EditPanelPage() {
       const eco = users?.find(user =>
         panel.panelUser?.find(panelUser => panelUser.userId == user.id && panelUser.role == "ECO")
       )
-      // console.log(_user)
+      // // console.log(_user)
       if (admin)
         setAdminCandidate(admin)
       if (accountant)

@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     const niraBaseURL = 'http://zv.zagrosairlines.com:882'
     const apiUrl = `${niraBaseURL}/AvailabilityJS.jsp?${params}&OfficeUser=${officeUser}&OfficePassword=${officePassword}`
 
-    console.log('🔍 Calling Nira Availability API:', apiUrl)
+    // console.log('🔍 Calling Nira Availability API:', apiUrl)
 
     // Call Nira API with timeout
     const controller = new AbortController()

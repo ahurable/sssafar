@@ -35,7 +35,7 @@ export const GET = async ( request: NextRequest,  { params }: { params: { id: st
             message: "درخواست شما با موفقیت ثبت شد ، پس از مشاهده ، کارشناسان با شما تماس میگیرند."
         }, { status: 201 })
     } catch (err) {
-        console.log('error raised : ', err)
+        // console.log('error raised : ', err)
         return NextResponse.json({
             message: "خطایی رخ داد"
         }, { status: 500 })

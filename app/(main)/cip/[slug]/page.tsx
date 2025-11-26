@@ -57,12 +57,12 @@ export default function CipDetailPage({ params }: { params: { slug: string } }) 
 
   useEffect(() => {
     const fetchService = async () => {
-      console.log(params.slug)
+      // console.log(params.slug)
       try {
         const response = await fetch(`/api/cip/service/${params.slug}`)
         if (response.ok) {
           const serviceData = await response.json()
-          // console.log(serviceData) 
+          // // console.log(serviceData) 
           setService(serviceData.service)
         } else {
           console.error("Service not found")

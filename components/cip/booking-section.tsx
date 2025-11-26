@@ -62,7 +62,7 @@ export function BookingSection({ service }: BookingSectionProps) {
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    console.log('button clicked')
+    // console.log('button clicked')
     // Basic validation
     if (!formData.firstName.trim() || !formData.lastName.trim() || !formData.phoneNumber.trim()) {
       toast.error("لطفا تمام فیلدهای ضروری را پر کنید")
@@ -100,7 +100,7 @@ export function BookingSection({ service }: BookingSectionProps) {
 
       if (response.ok) {
          // Here you would typically send the data to your API
-        console.log("Reservation data:", {
+        // console.log("Reservation data:", {
           data
         })
         toast.success("درخواست رزرو شما با موفقیت ثبت شد، پس از بررسی، همکاران ما با شما تماس خواهند گرفت.")
@@ -116,15 +116,15 @@ export function BookingSection({ service }: BookingSectionProps) {
       }
       else {
         toast.error("خطا در ثبت رزرو")
-        console.log(data)
+        // console.log(data)
       }
 
      
     } catch (error) {
-      console.log('its the catch ', error)
+      // console.log('its the catch ', error)
       toast.error("خطا در ثبت رزرو. لطفا مجددا تلاش کنید.")
     } finally {
-      console.log('its finally')
+      // console.log('its finally')
       setLoading(false)
     }
   }

@@ -22,7 +22,7 @@ interface Traveler {
 export async function POST(request: NextRequest) {
   try {
     const { invoiceId } = await request.json()
-    console.log(`
+    // console.log(`
       invoiceId: ${invoiceId}
       `)
     if (!invoiceId ) {
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({...reservation, ...book}, { status: 200 })
   } catch (error) {
-    console.log(`[Error debugger] Error is : ${error}`)
+    // console.log(`[Error debugger] Error is : ${error}`)
     return NextResponse.json({
       message: "خطایی از سمت سرور حین ثبت درخواست شما به وجود آمد"
     }, { status: 500 })

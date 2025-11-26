@@ -60,7 +60,7 @@ export default function Page( { params } : { params : { id: string } } ) {
             `/api/panels/${params.id}`
         )
         const data = await res.json()
-        console.log(data)
+        // console.log(data)
         if (res.ok) {
             setPanel(data.panel)
         }

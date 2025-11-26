@@ -12,7 +12,7 @@ export async function POST(request: NextRequest, { params } : { params : { id: s
     }
     try {
         const body = await request.json()
-        console.log(body)
+        // console.log(body)
         
         const existingPanelUser = await prisma.panelUser.findFirst(
             {

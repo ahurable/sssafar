@@ -7,7 +7,7 @@ import { signInSchema } from "@/lib/validations/auth"
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    console.log("Signin attempt for:", body.identifier)
+    // console.log("Signin attempt for:", body.identifier)
 
     // Validate input
     const validatedData = signInSchema.parse(body)
@@ -20,22 +20,22 @@ export async function POST(request: NextRequest) {
     })
 
     if (!user) {
-      console.log("User not found:", validatedData.identifier)
+      // console.log("User not found:", validatedData.identifier)
       return NextResponse.json({ error: "ایمیل/شماره موبایل یا رمز عبور اشتباه است" }, { status: 401 })
     }
 
     // Verify password
     const isValid = await verifyPassword(validatedData.password, user.password)
-    console.log("Password valid:", isValid)
+    // console.log("Password valid:", isValid)
 
     if (!isValid) {
-      console.log("Invalid password for user:", user.id)
+      // console.log("Invalid password for user:", user.id)
       return NextResponse.json({ error: "ایمیل/شماره موبایل یا رمز عبور اشتباه است" }, { status: 401 })
     }
 
     // Create token
     const token = await createToken({ userId: user.id, role: user.role })
-    console.log("Token created for user:", user.id)
+    // console.log("Token created for user:", user.id)
 
     // Create response
     const response = NextResponse.json({
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       path: "/",
     })
 
-    console.log("✅ Cookie set successfully")
+    // console.log("✅ Cookie set successfully")
     return response
 
   } catch (error: any) {

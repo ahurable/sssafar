@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
         hotelId: id
       }
     })
-    console.log(getHotelName)
+    // console.log(getHotelName)
     return NextResponse.json({ ...getHotelName });
 
   } catch (error) {
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    console.log(getHotelsNames)
+    // console.log(getHotelsNames)
 
     return NextResponse.json([ ...getHotelsNames ] , { status: 200 });
 

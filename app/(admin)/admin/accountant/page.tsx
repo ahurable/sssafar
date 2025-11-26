@@ -78,7 +78,7 @@ export default function FinancialManagement() {
     try {
       const res = await fetch(`/api/panels/${panelId}/transactions`)
       const data = await res.json()
-      console.log(data)
+      // console.log(data)
       setTransactions(data.transactions || [])
       setFilteredTransactions(data || [])
       setLoading(false)
@@ -186,7 +186,7 @@ export default function FinancialManagement() {
 
   const handleExport = () => {
     // Export functionality would go here
-    console.log("Exporting transactions...")
+    // console.log("Exporting transactions...")
   }
 
   const clearFilters = () => {

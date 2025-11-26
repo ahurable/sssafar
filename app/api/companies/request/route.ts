@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     ]
 
     const missingFields = requiredFields.filter(field => {
-        console.log(body[field],
+        // console.log(body[field],
         !body[field]
       )
     })
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    console.log('Corporate request created:', corporateRequest.id)
+    // console.log('Corporate request created:', corporateRequest.id)
 
     return NextResponse.json(
       { 

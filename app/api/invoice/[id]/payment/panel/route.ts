@@ -32,8 +32,8 @@ export const POST = async (request: NextRequest, { params } : { params: { id: st
                     credit: true
                 }
             })
-            console.log(body.panelId)
-            console.log(panelMember)
+            // console.log(body.panelId)
+            // console.log(panelMember)
             if (!panelMember || !invoice) {
                 return NextResponse.json({
                     message: "شما عضو این پنل نیستید"

@@ -87,7 +87,7 @@ export function TravelerForm({
         } else if (mode === "dashboard") {
           const response = await fetch("/api/travelers")
           const data = await response.json()
-          console.log(data)
+          // console.log(data)
           if (data.travelers && data.travelers.length > 0) {
             setAllExistingTravelers(data.travelers)
           }
@@ -183,11 +183,11 @@ export function TravelerForm({
 
     if (mode === "booking") {
       if (onTravelerAdded) {
-        console.log(travelerWithAge)
+        // console.log(travelerWithAge)
         onTravelerAdded(travelerWithAge)
       }
     } else {
-      console.log(travelerWithAge)
+      // console.log(travelerWithAge)
       setNewTravelers(prev => [...prev, travelerWithAge])
     }
 
@@ -948,7 +948,7 @@ export function TravelerForm({
                         name="gender"
                         defaultValue="یک مورد را انتخاب کنید"
                         onChange={e => {
-                            console.log(e.target.value)
+                            // console.log(e.target.value)
                            setNewTraveler(prev => ({...prev, gender: e.target.value}))}
                         }
                         className={cn(
@@ -976,7 +976,7 @@ export function TravelerForm({
                         name="passengerType"
                         defaultValue="یک مورد را انتخاب کنید"
                         onChange={e => {
-                          console.log(e.target.value)
+                          // console.log(e.target.value)
                           setNewTraveler(prev => ({...prev, passengerType: e.target.value}))}
                         }
                         className={cn(

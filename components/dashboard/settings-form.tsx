@@ -16,7 +16,7 @@ export function SettingsForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("[v0] Settings form submitted")
+    // console.log("[v0] Settings form submitted")
     // Handle form submission
   }
 

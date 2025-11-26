@@ -123,7 +123,7 @@ class FlightSessionService {
       UserName: process.env.FLIGHT_API_USERNAME,
       Password: hashedPassword,
     };
-    console.log(requestBody)
+    // console.log(requestBody)
     // this.logRequest('Authentication Request', {
     //   OfficeId: requestBody.OfficeId,
     //   UserName: requestBody.UserName,

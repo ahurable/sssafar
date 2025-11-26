@@ -16,7 +16,7 @@ interface PropertyImage {
 }
 
 async function importHotelNames() {
-  console.log('📊 Importing hotel names...')
+  // console.log('📊 Importing hotel names...')
   
   let totalImported = 0
 
@@ -53,7 +53,7 @@ async function importHotelNames() {
             }
           }
         }
-        console.log(`✅ Processed ${file} - ${properties.length} hotels`)
+        // console.log(`✅ Processed ${file} - ${properties.length} hotels`)
       } catch (error) {
         console.error(`❌ Error processing file ${file}:`, error)
       }
@@ -95,7 +95,7 @@ async function importHotelNames() {
             }
           }
         }
-        console.log(`✅ Processed ${file} - ${properties.length} domestic hotels`)
+        // console.log(`✅ Processed ${file} - ${properties.length} domestic hotels`)
       } catch (error) {
         console.error(`❌ Error processing domestic file ${file}:`, error)
       }
@@ -104,11 +104,11 @@ async function importHotelNames() {
     console.error('❌ Error importing domestic hotels:', error)
   }
 
-  console.log(`🎉 Imported ${totalImported} hotel names in total`)
+  // console.log(`🎉 Imported ${totalImported} hotel names in total`)
 }
 
 async function importHotelImages() {
-  console.log('📊 Importing hotel images...')
+  // console.log('📊 Importing hotel images...')
   
   let totalImported = 0
 
@@ -131,7 +131,7 @@ async function importHotelImages() {
           })
 
           if (!hotelExists) {
-            console.log(`⚠️  Hotel ${propImage.PropertyId} not found, skipping images`)
+            // console.log(`⚠️  Hotel ${propImage.PropertyId} not found, skipping images`)
             continue
           }
 
@@ -161,7 +161,7 @@ async function importHotelImages() {
             }
           }
         }
-        console.log(`✅ Processed ${file} - ${propertyImages.length} property images`)
+        // console.log(`✅ Processed ${file} - ${propertyImages.length} property images`)
       } catch (error) {
         console.error(`❌ Error processing image file ${file}:`, error)
       }
@@ -189,7 +189,7 @@ async function importHotelImages() {
           })
 
           if (!hotelExists) {
-            console.log(`⚠️  Domestic hotel ${propImage.PropertyId} not found, skipping images`)
+            // console.log(`⚠️  Domestic hotel ${propImage.PropertyId} not found, skipping images`)
             continue
           }
 
@@ -219,7 +219,7 @@ async function importHotelImages() {
             }
           }
         }
-        console.log(`✅ Processed ${file} - ${propertyImages.length} domestic property images`)
+        // console.log(`✅ Processed ${file} - ${propertyImages.length} domestic property images`)
       } catch (error) {
         console.error(`❌ Error processing domestic image file ${file}:`, error)
       }
@@ -228,22 +228,22 @@ async function importHotelImages() {
     console.error('❌ Error importing domestic hotel images:', error)
   }
 
-  console.log(`🎉 Imported ${totalImported} hotel images in total`)
+  // console.log(`🎉 Imported ${totalImported} hotel images in total`)
 }
 
 async function main() {
-  console.log('🚀 Starting hotel names and images import...')
+  // console.log('🚀 Starting hotel names and images import...')
   
   try {
     await importHotelNames()
     await importHotelImages()
     
-    console.log('🎉 Hotel names and images import completed successfully!')
+    // console.log('🎉 Hotel names and images import completed successfully!')
     
     // Print some stats
     const hotelCount = await prisma.hotel.count()
     const imageCount = await prisma.hotelImage.count()
-    console.log(`📊 Database stats: ${hotelCount} hotels, ${imageCount} images`)
+    // console.log(`📊 Database stats: ${hotelCount} hotels, ${imageCount} images`)
     
   } catch (error) {
     console.error('💥 Error during hotel data import:', error)

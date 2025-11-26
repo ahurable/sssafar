@@ -167,13 +167,13 @@ const suggestCity = async (query:string) => {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || ''
     const fileUrl = `${baseUrl}/api/hotels/search?q=${query}`
     
-    console.log('🔍 Attempting to fetch cities file from:', fileUrl)
+    // console.log('🔍 Attempting to fetch cities file from:', fileUrl)
     
     const response = await fetch(fileUrl, {
       cache: 'force-cache'
     })
     
-    console.log('📄 cities response status:', response.status)
+    // console.log('📄 cities response status:', response.status)
     
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: Failed to fetch Airlines XLSX file from ${fileUrl}`)
@@ -187,14 +187,14 @@ const suggestCity = async (query:string) => {
 
   
     const suggestions = data.results
-    // console.log(suggestions)
+    // // console.log(suggestions)
     return suggestions
 
   } catch (error) {
     console.error('❌ Error loading cities XLSX file:', error)
     // Return a fallback map with common cities
 
-    console.log('🔄 Using fallback cities data')
+    // console.log('🔄 Using fallback cities data')
     return null
   }
 }
@@ -203,7 +203,7 @@ const HotelContext = createContext<HotelContextType | undefined>(undefined)
 
 export function HotelProvider({ children }: { children: ReactNode }) {
   const [hotelData, setHotelData] = useState<HotelSearchResponse>()
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [filteredHotels, setFilteredHotels] = useState<any[]>([])
   const [request, setRequest] = useState()
   const getHotelNames = async (hotelIds: number[]): Promise<{[key: number]: string}> => {
@@ -219,7 +219,7 @@ export function HotelProvider({ children }: { children: ReactNode }) {
       }
       
       const data = await response.json();
-      console.log(data)
+      // console.log(data)
       return data;
     } catch (error) {
       console.error('Error getting hotel names:', error);
@@ -391,7 +391,7 @@ export function HotelProvider({ children }: { children: ReactNode }) {
   }
 
   const setHotelsData = (hotels:any) => {
-    // console.log(hotels)
+    // // console.log(hotels)
     setHotelData(hotels)
     setLoading(false)
   }

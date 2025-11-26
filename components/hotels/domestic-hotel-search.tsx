@@ -98,7 +98,7 @@ const DomesticHotelSearch = () => {
       throw new Error('Failed to fetch suggestions');
     }
     const data = await response.json();
-    console.log(data)
+    // console.log(data)
     return data.results || [];
   };
 
@@ -322,7 +322,7 @@ const DomesticHotelSearch = () => {
   }
 
   const handleTripTypeChange = (type: string) => {
-    console.log("Trip type changed:", type)
+    // console.log("Trip type changed:", type)
   }
 
   const renderError = (field: keyof FormErrors) => {

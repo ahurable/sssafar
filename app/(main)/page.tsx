@@ -32,7 +32,7 @@ async function getFeaturedPosts(): Promise<Post[]> {
     }
     
     const data = await res.json()
-    // console.log(data.posts)
+    // // console.log(data.posts)
     return data.posts || []
   } catch (error) {
     console.error('Error fetching posts:', error)

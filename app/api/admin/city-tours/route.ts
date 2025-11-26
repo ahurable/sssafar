@@ -64,7 +64,7 @@ export const GET = async (request: NextRequest) => {
     const skip = (page - 1) * limit;
 
     const cityTours = await prisma.cityTour.findMany();
-    // console.log(cityTours)
+    // // console.log(cityTours)
     const totalCityTours = await prisma.cityTour.count();
 
     return NextResponse.json({
@@ -106,7 +106,7 @@ export const POST = async (request: NextRequest) => {
       );
     }
 
-    console.log("Received data:", body);
+    // console.log("Received data:", body);
 
     // اعتبارسنجی داده‌ها
     const validatedData = createCityTourSchema.parse(body);

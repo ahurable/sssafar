@@ -29,7 +29,7 @@ export const GET = async (request: NextRequest) => {
 
         return NextResponse.json(foundedAirports);
     } catch (error) {
-        console.log("Error fetching airport suggestions:", error);
+        // console.log("Error fetching airport suggestions:", error);
         return NextResponse.json(
             { message: "مشکلی در دریافت لیست پیشنهادات پیش آمد" },
             { status: 500 }

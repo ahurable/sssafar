@@ -54,7 +54,7 @@ export const POST = async (request: NextRequest) => {
 
     const body = await request.json()
     const validatedData = createContractTitle.parse(body)
-    console.log(`the body is ${validatedData.organizationName}`)
+    // console.log(`the body is ${validatedData.organizationName}`)
     if (!body) {
         return NextResponse.json({
             error: "لطفا اطلاعات فرم را کامل ارسال کنید"

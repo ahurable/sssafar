@@ -287,10 +287,10 @@ function ToursContent() {
         const response = await fetch(`/api/tours/search?${queryParams.toString()}`)
         if (response.ok) {
           const data = await response.json()
-          console.log(data)
+          // console.log(data)
           setTours(data)
         }
-        console.log(tours)
+        // console.log(tours)
       } catch (error) {
         console.error('Error fetching tours:', error)
         setTours([])

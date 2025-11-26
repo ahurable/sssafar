@@ -81,7 +81,7 @@ export const POST = async (request: NextRequest) => {
       );
     }
 
-    console.log("Received data:", body);
+    // console.log("Received data:", body);
 
     // اعتبارسنجی داده‌ها برای ایجاد شهر
     const validatedData = createTourCitySchema.parse(body);

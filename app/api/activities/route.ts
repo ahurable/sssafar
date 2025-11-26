@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
         featured: 'desc'
       }
     });
-    // console.log(cityTours)
+    // // console.log(cityTours)
     // Get total count for pagination
     const total = await prisma.cityTour.count({ where });
 

@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma"
 export async function GET(request: NextRequest) {
   try {
     const session = await getSession()
-    console.log(session?.role)
+    // console.log(session?.role)
     if (!session) {
       return NextResponse.json({ error: "احراز هویت نشده" }, { status: 401 })
     }

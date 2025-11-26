@@ -19,7 +19,7 @@ interface HotelSearchRequest {
 export async function POST(request: NextRequest) {
   try {
     const requestData: HotelSearchRequest = await request.json();
-    console.log(requestData)
+    // console.log(requestData)
     // Validate required fields
     const { checkIn, checkOut, cityId } = requestData;
 
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // console.log(checkIn)
+    // // console.log(checkIn)
 
     const externalRequest = {
       SessionId: sessionId,
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
       IsAccommodation: false
     };
 
-    console.log('Sending hotel availability request:', externalRequest);
+    // console.log('Sending hotel availability request:', externalRequest);
 
     const response = await fetch('https://apidemo.partocrs.com/api/Hotel/HotelAvailability', {
       method: 'POST',
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
     // const hotelIds = externalResponse.PricedItineraries.map((hotel:any) => hotel.id)
 
    
-    // console.log(externalResponse)
+    // // console.log(externalResponse)
 
     return NextResponse.json({
       success: true,
@@ -148,14 +148,14 @@ export const PUT =  async ( request: NextRequest ) => {
       });
     }
 
-    console.log(`before : ${requestData.hotelIdList}`)
+    // console.log(`before : ${requestData.hotelIdList}`)
 
     if (requestData.hotelIdList && requestData.hotelIdList.length > 0) {
         const hotels = []
-        // console.log(`afterer: ${requestData.hotelIdList}`)
+        // // console.log(`afterer: ${requestData.hotelIdList}`)
         // Make individual requests for each hotel ID
         for (const _hotelId of requestData.hotelIdList) {
-          console.log(hotelId)
+          // console.log(hotelId)
             const _request = {
                 SessionId: sessionId,
                 CheckIn: `${checkIn}`,
@@ -170,7 +170,7 @@ export const PUT =  async ( request: NextRequest ) => {
                 IsAccommodation: false
             };
             
-            console.log(`Request for hotel ${hotelId}:`, _request)
+            // console.log(`Request for hotel ${hotelId}:`, _request)
             
             try {
                 const hotelsWithFareSourceCode = await fetch(
@@ -199,7 +199,7 @@ export const PUT =  async ( request: NextRequest ) => {
             }
         }
 
-        console.log("All hotels combined:", hotels)
+        // console.log("All hotels combined:", hotels)
         return NextResponse.json(hotels, { status: 200 })
     } 
 
@@ -217,7 +217,7 @@ export const PUT =  async ( request: NextRequest ) => {
               Occupancies: occupancies,
               IsAccommodation: false
           };
-          console.log(_request)
+          // console.log(_request)
        try {
             const hotels = []
             const hotelsWithFareSourceCode = await fetch(

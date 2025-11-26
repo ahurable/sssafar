@@ -29,7 +29,7 @@ export function SignInForm() {
     setLoading(true)
 
     try {
-      console.log("Starting signin request...")
+      // console.log("Starting signin request...")
       const res = await fetch("/api/auth/signin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -37,16 +37,16 @@ export function SignInForm() {
         credentials: 'include'
       })
 
-      console.log("Response status:", res.status)
+      // console.log("Response status:", res.status)
       const data = await res.json()
-      console.log("Response data:", data)
+      // console.log("Response data:", data)
       
       if (res.ok) {
         success('وارد حساب کاربری شدید', '', 1000)
         
         // Wait a bit for the cookie to be processed
         setTimeout(() => {
-          console.log("Redirecting to:", data.user.role === "ADMIN" ? "/admin" : "/dashboard")
+          // console.log("Redirecting to:", data.user.role === "ADMIN" ? "/admin" : "/dashboard")
           // Use window.location for full page reload to ensure middleware runs properly
           window.location.href = data.user.role === "ADMIN" ? "/admin" : "/dashboard"
         }, 1000)

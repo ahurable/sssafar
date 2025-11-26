@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const sessionId = await flightSessionService.getSession()
-    console.log(sessionId)
+    // console.log(sessionId)
 
     // Construct the request body for PartoCRS API
     const requestBody = {
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
       IsGenuine: body.IsGenuine || false
     }
 
-    console.log(requestBody)
+    // console.log(requestBody)
 
     // Call PartoCRS API
     const response = await fetch('https://apidemo.partocrs.com/api/Air/AirLowFareSearch', {
@@ -54,8 +54,8 @@ export async function POST(request: NextRequest) {
         destination: requestBody.OriginDestinationInformations[0].DestinationLocationCode,
         date: requestBody.OriginDestinationInformations[0].DepartureDateTime.split('T')[0]
       }
-    console.log(lowestObject)
     // console.log(lowestObject)
+    // // console.log(lowestObject)
     if (lowestPrice !== null)
       await prisma.flightLowPriceStorePerDay.create({
         data: {

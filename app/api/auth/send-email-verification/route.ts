@@ -102,7 +102,7 @@ async function sendVerificationEmail(email: string, code: string) {
 
   try {
     const info = await transporter.sendMail(mailOptions)
-    console.log(`Verification email sent to ${email}: ${info.messageId}`)
+    // console.log(`Verification email sent to ${email}: ${info.messageId}`)
     return info
   } catch (error) {
     console.error('Error sending email:', error)

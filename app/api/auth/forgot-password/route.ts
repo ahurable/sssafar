@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
 
     // TODO: Send email/SMS with reset link
     // For now, just return success
-    console.log("[v0] Reset token:", resetToken)
+    // console.log("[v0] Reset token:", resetToken)
 
     return NextResponse.json({
       success: true,

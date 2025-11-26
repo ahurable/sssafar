@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
     
-    console.log('Received booking request:', bookData);
+    // console.log('Received booking request:', bookData);
 
     const sessionId = await flightSessionService.getSession();
     
@@ -225,7 +225,7 @@ export async function POST(request: NextRequest) {
       Nationality: "IR" // Default to Iran, adjust as needed
     };
 
-    console.log('Sending booking request to external API:', {
+    // console.log('Sending booking request to external API:', {
       sessionId: externalRequest.SessionId,
       fareSourceCode: externalRequest.FareSourceCode,
       clientUniqueId: externalRequest.ClientUniqueId,
@@ -284,7 +284,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('Booking response received:', {
+    // console.log('Booking response received:', {
       success: externalResponse.Success,
       bookingId: externalResponse.BookingId,
       error: externalResponse.Error

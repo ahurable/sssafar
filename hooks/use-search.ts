@@ -7,14 +7,14 @@ export function useSearch() {
   // Get city and airport suggestions
   const getCitySuggestions = async (query: string, type: string): Promise<any[]> => {
     try {
-      // console.log(query) => teh
-      // console.log(type) => flight
+      // // console.log(query) => teh
+      // // console.log(type) => flight
       const response = await fetch(`/api/suggestions?query=${encodeURIComponent(query)}&type=${type}`)
       if (!response.ok) {
         throw new Error('Failed to fetch suggestions')
       }
       const data = await response.json()
-      console.log(data)
+      // console.log(data)
       return data
     } catch (error) {
       console.error('Error fetching suggestions:', error)

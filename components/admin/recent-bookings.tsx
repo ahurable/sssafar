@@ -49,7 +49,7 @@ export function RecentBookings() {
         console.error("[v0] Error fetching recent bookings:", error)
         setLoading(false)
       })
-      console.log(bookings)
+      // console.log(bookings)
   }, [])
 
   if (loading) {

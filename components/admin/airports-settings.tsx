@@ -42,7 +42,7 @@ export function AirportsSettings() {
       
       if (response.ok) {
         const data = await response.json()
-        console.log(data)
+        // console.log(data)
         setAirports(Array.isArray(data) ? data : [])
       } else {
         console.error('Failed to fetch airports')

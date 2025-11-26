@@ -5,8 +5,8 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const query = searchParams.get('query')?.toLowerCase() || ''
   const type = searchParams.get('type') || 'hotel'
-  // console.log(query) => tehr
-  // console.log(type) => flight
+  // // console.log(query) => tehr
+  // // console.log(type) => flight
   try {
     let suggestions: any[] = []
 
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
           code: airport.iata,
           type: 'airport' as const
         }))
-        // console.log(suggestions)
+        // // console.log(suggestions)
       } 
       
       
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
 
     // Limit results
     suggestions = suggestions.slice(0, 10)
-    console.log(suggestions)
+    // console.log(suggestions)
     return NextResponse.json(suggestions)
   } catch (error) {
     console.error('Suggestions API error:', error)

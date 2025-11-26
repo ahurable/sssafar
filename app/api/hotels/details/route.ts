@@ -157,7 +157,7 @@ export async function POST(request: NextRequest) {
       Nationality: requestData.Nationality || null
     };
 
-    console.log('Sending request to hotel check rate API:', {
+    // console.log('Sending request to hotel check rate API:', {
       url: 'https://apidemo.partocrs.com/api/Hotel/HotelCheckRate',
       data: externalRequest
     });
@@ -189,7 +189,7 @@ export async function POST(request: NextRequest) {
     }
 
     const externalResponse: HotelDetailsResponse = await response.json();
-    console.log(externalResponse)
+    // console.log(externalResponse)
     // Return the external API response
     return NextResponse.json({
       success: true,

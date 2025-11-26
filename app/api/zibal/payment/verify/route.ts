@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
   
   try {
     const verificationData: PaymentVerificationRequest = await request.json();
-    console.log(verificationData)
+    // console.log(verificationData)
     // Validate required fields
     if (!verificationData.trackId) {
       return NextResponse.json(
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('Payment verification request:',
+    // console.log('Payment verification request:',
       verificationData
     );
 
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
           );
       }
 
-      console.log(`[Zibal] Verification Results: ${verificationResult.verified}`)
+      // console.log(`[Zibal] Verification Results: ${verificationResult.verified}`)
 
 
       // If verification was successful, process the payment based on type
@@ -194,7 +194,7 @@ async function verifyZibalPayment(verificationData: PaymentVerificationRequest):
       where: { id: zibalResult.orderId},
       select: { state: true }
     })
-    console.log('Zibal verification response:', zibalResult);
+    // console.log('Zibal verification response:', zibalResult);
 
     if (zibalResult.result === RESULT_CODES.SUCCESS) {
       return {
@@ -251,7 +251,7 @@ async function processSuccessfulPayment(
   userId: string
 ) {
   try {
-    console.log('Processing successful payment: ', {
+    // console.log('Processing successful payment: ', {
       // paymentType: verificationData.paymentType,
       trackId: verificationData.trackId,
       amount: verificationResult.amount
@@ -286,7 +286,7 @@ async function processSuccessfulPayment(
       
       case 'HOTEL':
         await processInvoicePayment(verificationData, verificationResult, invoiceId);
-        console.log('[Hotel] it\'s a hotel payment , proceeded')
+        // console.log('[Hotel] it\'s a hotel payment , proceeded')
         break;
       
       case 'FLIGHT':
@@ -305,7 +305,7 @@ async function processSuccessfulPayment(
         console.warn('Unknown payment type: ', invoice.kind);
     }
 
-    console.log('Successfully processed payment for trackId:', verificationData.trackId);
+    // console.log('Successfully processed payment for trackId:', verificationData.trackId);
 
   } catch (error) {
     console.error('Error processing successful payment:', error);
@@ -352,7 +352,7 @@ async function bookFlight(invoiceId:string, userId:string) {
 
   const data = await response.json()
 
-  console.log("STRAIGHT PAYMENT FLIGHT BOOK RESPONSE: ", data)
+  // console.log("STRAIGHT PAYMENT FLIGHT BOOK RESPONSE: ", data)
 
   if (!response.ok) {
     return NextResponse.json({
@@ -374,7 +374,7 @@ async function processFailedPayment(
 ) {
   try {
     // Create failed transaction record
-    // console.log(verificationData)
+    // // console.log(verificationData)
     await prisma.userTransaction.create({
       data: {
         type: 'DEPOSIT', // Still DEPOSIT type but we'll mark it as failed in description
@@ -426,7 +426,7 @@ async function processCreditCharge(
 ) {
   if (invoiceId) {
     // Update user's credit balance in PanelUser model
-    // console.log(`the process charge data : ${verificationData} & ${verificationResult}`)
+    // // console.log(`the process charge data : ${verificationData} & ${verificationResult}`)
     const invoice = await prisma.invoice.findUnique({
       where: {
         id: invoiceId
@@ -466,7 +466,7 @@ async function processCreditCharge(
         }
       })
     }
-    console.log(`Added ${verificationResult.amount} credit to user ${verificationData.userId}`);
+    // console.log(`Added ${verificationResult.amount} credit to user ${verificationData.userId}`);
   }
 }
 
@@ -476,7 +476,7 @@ async function processInvoicePayment(
   invoiceId: string
 ) {
   try {
-    console.log(verificationData.invoiceId);
+    // console.log(verificationData.invoiceId);
     
     if (invoiceId) {
       const invoice = await prisma.invoice.update({
@@ -488,18 +488,18 @@ async function processInvoicePayment(
         }
       });
 
-      console.log(`[Hotel] the type of order is : ${typeof invoice.order}`);
-      console.log(`[Hotel] the type of travelers is : ${typeof invoice.travelers}`);
+      // console.log(`[Hotel] the type of order is : ${typeof invoice.order}`);
+      // console.log(`[Hotel] the type of travelers is : ${typeof invoice.travelers}`);
       
       if (!invoice.order) {
-        console.log('the order doesnt exists');
+        // console.log('the order doesnt exists');
         return NextResponse.json({
           message: "اطلاعات سفارش یافت نشد"
         }, { status: 400 });
       }
 
       if (!invoice.travelers) {
-        console.log('the travelers doesnt exists');
+        // console.log('the travelers doesnt exists');
         return NextResponse.json({
           message: "اطلاعات مسافران یافت نشد"
         }, { status: 400 });
@@ -509,8 +509,8 @@ async function processInvoicePayment(
       const orderData = invoice.order as any;
       const travelersData = invoice.travelers as any;
 
-      console.log('Order data:', orderData);
-      console.log('Travelers data:', travelersData);
+      // console.log('Order data:', orderData);
+      // console.log('Travelers data:', travelersData);
 
       // Prepare booking request
       const requestForBook = {
@@ -523,7 +523,7 @@ async function processInvoicePayment(
         rooms: orderData.Rooms || orderData.rooms
       };
 
-      console.log('Sending booking request:', requestForBook);
+      // console.log('Sending booking request:', requestForBook);
 
       // Make booking request
       const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/hotels/book`, {
@@ -535,7 +535,7 @@ async function processInvoicePayment(
       });
 
       const data = await response.json();
-      console.log(`[Hotel Payment Process] Booking response:`, data);
+      // console.log(`[Hotel Payment Process] Booking response:`, data);
       
       if (response.ok) {
         return NextResponse.json({
@@ -569,7 +569,7 @@ async function processCipPayment(
   verificationResult: PaymentVerificationResponse
 ) {
   // Handle service-specific payment processing
-  console.log('Processing service payment:', verificationData);
+  // console.log('Processing service payment:', verificationData);
 
   const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/cip/reservations`, {
     method: 'POST',
@@ -583,7 +583,7 @@ async function processCipPayment(
 
   const data = await res.json()
 
-  console.log(data)
+  // console.log(data)
 
   if (res.ok) {
      return NextResponse.json({
@@ -603,7 +603,7 @@ async function processActivityPayment(
   verificationResult: PaymentVerificationResponse
 ) {
   // Handle service-specific payment processing
-  console.log('Processing service payment:', verificationData);
+  // console.log('Processing service payment:', verificationData);
 
   const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/activities/booking`, {
     method: 'POST',
@@ -617,7 +617,7 @@ async function processActivityPayment(
 
   const data = await res.json()
 
-  console.log(data)
+  // console.log(data)
 
   if (res.ok) {
      return NextResponse.json({
@@ -656,7 +656,7 @@ export async function GET(request: NextRequest) {
   const status = searchParams.get('status');
   const orderId = searchParams.get('orderId');
 
-  console.log('Zibal callback received:', {
+  // console.log('Zibal callback received:', {
     success,
     trackId,
     status,
@@ -691,7 +691,7 @@ export async function GET(request: NextRequest) {
     }
 
     const verifyResult = await verifyResponse.json();
-    console.log('Verification result:', verifyResult);
+    // console.log('Verification result:', verifyResult);
 
     // Redirect based on verification result
     if (verifyResult.verified) {

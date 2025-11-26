@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation"
 import ShamsiDateModal from "../flights/ShamsiCalendar"
 import { formatShamsiDate } from "../flights/utils"
 import { shamsiToGregorianString } from "@/lib/jalaalil"
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface CitySuggestion {
   id: number;
@@ -95,7 +96,7 @@ const HotelSearch = () => {
       throw new Error('Failed to fetch suggestions');
     }
     const data = await response.json();
-    console.log(data)
+    // console.log(data)
     return data.results || [];
   };
 
@@ -319,7 +320,7 @@ const HotelSearch = () => {
   }
 
   const handleTripTypeChange = (type: string) => {
-    console.log("Trip type changed:", type)
+    // console.log("Trip type changed:", type)
   }
 
   const renderError = (field: keyof FormErrors) => {
@@ -455,6 +456,85 @@ const HotelSearch = () => {
 
   return (
     <div style={{direction:'rtl'}} className="container mx-auto">
+      { searchLoading && 
+        <AnimatePresence>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="w-full h-full fixed top-0 z-[9999999] right-0"
+          >
+            <div className="w-full h-full bg-black opacity-40 absolute z-[9999999]"></div>
+            <div className="w-full flex items-center justify-center h-screen z-[9999999] py-8 px-4 text-center my-auto top-0 bottom-0 absolute">
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", duration: 0.5 }}
+                className="p-8 bg-white rounded-2xl shadow-2xl max-w-md mx-auto"
+              >
+                {/* Hotel Building Animation */}
+                <motion.div
+                  animate={{
+                    y: [0, -5, 0],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                  className="text-4xl mb-6"
+                >
+                  🏨
+                </motion.div>
+                
+                {/* Pulsing dots */}
+                <div className="flex justify-center space-x-1 mb-6">
+                  {[0, 1, 2].map((index) => (
+                    <motion.div
+                      key={index}
+                      className="w-2 h-2 bg-green-500 rounded-full"
+                      animate={{
+                        scale: [1, 1.5, 1],
+                        opacity: [0.5, 1, 0.5],
+                      }}
+                      transition={{
+                        duration: 1,
+                        repeat: Infinity,
+                        delay: index * 0.2,
+                      }}
+                    />
+                  ))}
+                </div>
+                
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                  className="font-black text-2xl block text-gray-800 mb-2"
+                >
+                  در حال جستجو
+                </motion.span>
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                  className="font-medium text-sm block text-gray-600"
+                >
+                  هتل در {hotelSearch.city}
+                </motion.span>
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                  className="font-medium text-sm block text-gray-600"
+                >
+                  از تاریخ {hotelSearch.checkIn} تا تاریخ {hotelSearch.checkOut}
+                </motion.span>
+              </motion.div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      }
       {/* General Error Display */}
       {errors.general && (
         <div className="mb-4 p-3 bg-red-500 border border-red-700 flex items-center gap-3">

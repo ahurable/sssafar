@@ -14,7 +14,7 @@ let airportsCache: Airport[] | null = null
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const query = searchParams.get('query')?.toLowerCase() || ''
-  console.log('fired')
+  // console.log('fired')
   try {
     if (!airportsCache) {
       airportsCache = await loadAirportsFromXLSX()
@@ -57,7 +57,7 @@ async function loadAirportsFromXLSX(): Promise<Airport[]> {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     const fileUrl = `${baseUrl}/data/Airport.xls` // Using City.xlsx
     
-    console.log('🔍 Attempting to fetch file from:', fileUrl)
+    // console.log('🔍 Attempting to fetch file from:', fileUrl)
     
     const response = await fetch(fileUrl, {
       cache: 'force-cache',
@@ -66,7 +66,7 @@ async function loadAirportsFromXLSX(): Promise<Airport[]> {
       }
     })
     
-    console.log('📄 Response status:', response.status, response.statusText)
+    // console.log('📄 Response status:', response.status, response.statusText)
     
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: Failed to fetch XLSX file from ${fileUrl}`)
@@ -75,14 +75,14 @@ async function loadAirportsFromXLSX(): Promise<Airport[]> {
     const contentType = response.headers.get('content-type')
     const contentLength = response.headers.get('content-length')
     
-    console.log('📊 File info:', { contentType, contentLength })
+    // console.log('📊 File info:', { contentType, contentLength })
     
     if (!contentType?.includes('spreadsheet') && !contentType?.includes('excel')) {
       console.warn('⚠️ Unexpected content type:', contentType)
     }
 
     const arrayBuffer = await response.arrayBuffer()
-    console.log('📦 File size (bytes):', arrayBuffer.byteLength)
+    // console.log('📦 File size (bytes):', arrayBuffer.byteLength)
     
     if (arrayBuffer.byteLength === 0) {
       throw new Error('File is empty (0 bytes)')
@@ -90,7 +90,7 @@ async function loadAirportsFromXLSX(): Promise<Airport[]> {
 
     // Parse the XLSX file
     const workbook = read(arrayBuffer, { type: 'array' })
-    console.log('📋 Sheet names:', workbook.SheetNames)
+    // console.log('📋 Sheet names:', workbook.SheetNames)
     
     if (workbook.SheetNames.length === 0) {
       throw new Error('No sheets found in XLSX file')
@@ -99,19 +99,19 @@ async function loadAirportsFromXLSX(): Promise<Airport[]> {
     const worksheet = workbook.Sheets[workbook.SheetNames[0]]
     const data = utils.sheet_to_json(worksheet)
     
-    console.log('📊 Total rows in sheet:', data.length)
+    // console.log('📊 Total rows in sheet:', data.length)
     
     if (data.length === 0) {
       throw new Error('No data found in the first sheet')
     }
 
     // Log the first row to see column names
-    console.log('🔍 First row sample:', data[0])
-    console.log('🔍 All column names:', Object.keys(data[0] || {}))
+    // console.log('🔍 First row sample:', data[0])
+    // console.log('🔍 All column names:', Object.keys(data[0] || {}))
 
     // Map to Airport interface - we'll figure out the column names from the debug
     const columnNames = Object.keys(data[0] || {})
-    console.log('🏷️ Available columns:', columnNames)
+    // console.log('🏷️ Available columns:', columnNames)
     
     // Find the correct column names
     const iataColumn = columnNames.find(col => 
@@ -127,7 +127,7 @@ async function loadAirportsFromXLSX(): Promise<Airport[]> {
       col.toLowerCase().includes('country') || col.toLowerCase().includes('country code')
     )
 
-    console.log('🔍 Detected columns:', {
+    // console.log('🔍 Detected columns:', {
       iata: iataColumn,
       name: nameColumn,
       city: cityColumn,
@@ -149,9 +149,9 @@ async function loadAirportsFromXLSX(): Promise<Airport[]> {
       }
     }).filter(airport => airport.iata && airport.name && airport.city)
 
-    console.log(`✅ Successfully loaded ${airports.length} airports from XLSX`)
-    console.log('📝 First 3 airports:', airports.slice(0, 3))
-    // console.log(airports)
+    // console.log(`✅ Successfully loaded ${airports.length} airports from XLSX`)
+    // console.log('📝 First 3 airports:', airports.slice(0, 3))
+    // // console.log(airports)
     return airports
 
   } catch (error) {

@@ -252,7 +252,7 @@ export function InvoiceComponent({
 
     try {
       setRevalidatingHotel(true)
-      console.log("Manual revalidation triggered...")
+      // console.log("Manual revalidation triggered...")
 
       const revalidateResponse = await fetch('/api/hotels/details', {
         method: 'POST',
@@ -271,7 +271,7 @@ export function InvoiceComponent({
       }
 
       const revalidateResult = await revalidateResponse.json()
-      console.log("Manual revalidation result:", revalidateResult)
+      // console.log("Manual revalidation result:", revalidateResult)
 
       if (revalidateResult.Success) {
         const updatedHotelOrder: HotelOrder = {
@@ -295,13 +295,13 @@ export function InvoiceComponent({
   const currentHotelOrder = hotelOrderWithRevalidation || hotelOrder
 
   useEffect(() => {
-    console.log("Invoice order:", invoice.order)
-    console.log("Invoice kind:", invoice.kind)
-    console.log("Hotel order:", currentHotelOrder)
-    console.log("Flight order:", flightOrder)
-    console.log("CIP order:", cipOrder)
-    console.log("Activity order:", activityOrder)
-    console.log("Travelers:", invoice.travelers)
+    // console.log("Invoice order:", invoice.order)
+    // console.log("Invoice kind:", invoice.kind)
+    // console.log("Hotel order:", currentHotelOrder)
+    // console.log("Flight order:", flightOrder)
+    // console.log("CIP order:", cipOrder)
+    // console.log("Activity order:", activityOrder)
+    // console.log("Travelers:", invoice.travelers)
   }, [invoice.order, invoice.kind, currentHotelOrder, flightOrder, cipOrder, activityOrder, invoice.travelers])
 
   useEffect(() => {
@@ -358,7 +358,7 @@ export function InvoiceComponent({
       })
 
       const data = await res.json()
-      console.log(data)
+      // console.log(data)
       if (!res.ok) {
         error("خطایی در رفتن به صفحه پرداخت رخ داد")
         error(data.message)
@@ -400,7 +400,7 @@ export function InvoiceComponent({
         }
       )
       const data = await response.json()
-      console.log(data)
+      // console.log(data)
       if (response.ok) {
         success("پرداخت با موفقیت انجام شد")
         setPaid(true)
@@ -480,7 +480,7 @@ export function InvoiceComponent({
       if (res.ok) {
         success(data.message)
       } else {
-        console.log(data)
+        // console.log(data)
         error(data.message)
         handleCancelInvoice()
       }

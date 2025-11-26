@@ -37,10 +37,10 @@ export const POST = async (request: NextRequest) => {
 
         const now = new Date()
         
-        console.log("Current time:", now)
-        console.log("OTP code from DB:", otpCode.code)
-        console.log("OTP code from request:", body.otpCode)
-        console.log("OTP expires at:", otpCode.expireDate)
+        // console.log("Current time:", now)
+        // console.log("OTP code from DB:", otpCode.code)
+        // console.log("OTP code from request:", body.otpCode)
+        // console.log("OTP expires at:", otpCode.expireDate)
 
         // Check if OTP is expired
         if (otpCode.expireDate < now) {

@@ -24,7 +24,7 @@ const InvoicePage = ({ params } : { params : { id : string }}) => {
             setInvoiceData(data)
         }
         else {
-            console.log(data)
+            // console.log(data)
         }
     }
 
@@ -33,7 +33,7 @@ const InvoicePage = ({ params } : { params : { id : string }}) => {
         const data = await res.json()
         if (res.ok) {
             setUserCredit(data.user.userCredit)
-            // console.log(data)
+            // // console.log(data)
             setUserPanels(data.user.panelMember)
         }
     }

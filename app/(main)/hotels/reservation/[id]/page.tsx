@@ -86,7 +86,7 @@ export default function HotelReservation() {
 
   // Load hotel details and revalidate
   useEffect(() => {
-    console.log(fareSourceCode)
+    // console.log(fareSourceCode)
     const loadHotelDetails = async () => {
       try {
         setLoading(true)
@@ -245,7 +245,7 @@ export default function HotelReservation() {
 
       if (response.ok) {
         const result = await response.json()
-        console.log("Hotel booking successful:", result)
+        // console.log("Hotel booking successful:", result)
         
         // Redirect to payment page
         router.push(`/invoice/${result.invoiceId}`)

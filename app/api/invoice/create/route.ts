@@ -13,9 +13,9 @@ export const POST = async (request: NextRequest) => {
 
     try {
         const body = await request.json()
-        console.log("✅ RAW travelers data received:", JSON.stringify(body.travelers, null, 2))
-        console.log("✅ Order data:", body.order)
-        console.log("✅ Full request body:", JSON.stringify(body, null, 2)) // Add this for debugging
+        // console.log("✅ RAW travelers data received:", JSON.stringify(body.travelers, null, 2))
+        // console.log("✅ Order data:", body.order)
+        // console.log("✅ Full request body:", JSON.stringify(body, null, 2)) // Add this for debugging
 
         // Validate required fields
         if (!body.kind) {
@@ -109,7 +109,7 @@ export const POST = async (request: NextRequest) => {
         }
 
         // Log the exact order data before saving
-        console.log("📝 Order data to be saved:", {
+        // console.log("📝 Order data to be saved:", {
             serviceId: body.order?.serviceId,
             title: body.order?.title,
             airport: body.order?.airport,
@@ -138,8 +138,8 @@ export const POST = async (request: NextRequest) => {
             }
         })
 
-        console.log("✅ Invoice created with ID:", createdInvoice.id)
-        console.log("✅ Invoice type:", body.kind)
+        // console.log("✅ Invoice created with ID:", createdInvoice.id)
+        // console.log("✅ Invoice type:", body.kind)
 
         // Fetch the exact data that was saved to verify
         const verifiedInvoice = await prisma.invoice.findUnique({
@@ -147,8 +147,8 @@ export const POST = async (request: NextRequest) => {
             select: { travelers: true, order: true }
         })
 
-        console.log("✅ VERIFIED travelers data from database:", JSON.stringify(verifiedInvoice?.travelers, null, 2))
-        console.log("✅ VERIFIED order data from database:", JSON.stringify(verifiedInvoice?.order, null, 2))
+        // console.log("✅ VERIFIED travelers data from database:", JSON.stringify(verifiedInvoice?.travelers, null, 2))
+        // console.log("✅ VERIFIED order data from database:", JSON.stringify(verifiedInvoice?.order, null, 2))
 
         return NextResponse.json({
             success: "صورت حساب با موفقیت ایجاد شد نسبت به پرداخت آن اقدام نمایید",

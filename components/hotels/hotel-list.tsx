@@ -103,8 +103,8 @@ export function HotelList() {
   }
 
   useEffect(() => {
-    console.log("HotelData updated, initializing...")
-    console.log(hotelData)
+    // console.log("HotelData updated, initializing...")
+    // console.log(hotelData)
     
     setLoading(true)
     
@@ -124,8 +124,8 @@ export function HotelList() {
   }, [hotelData])
 
   useEffect(() => {
-    console.log("Hotel Names:", hotelNames)
-    console.log("Hotel Images:", hotelImages)
+    // console.log("Hotel Names:", hotelNames)
+    // console.log("Hotel Images:", hotelImages)
   }, [hotelNames, hotelImages])
 
   const loadMoreHotels = async () => {

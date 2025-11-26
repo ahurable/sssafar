@@ -54,7 +54,7 @@ export function EditPanelDialog({ panel, open, onOpenChange, onSuccess }: EditPa
             `/api/panels/${panel.id}`
         )
         const data = await res.json()
-        console.log(data)
+        // console.log(data)
     }
     getPanelUsers()
     getUsers()
@@ -116,11 +116,11 @@ export function EditPanelDialog({ panel, open, onOpenChange, onSuccess }: EditPa
   const handleUserSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setFoundedUsers(users?.filter( user => user.email?.toLowerCase().includes(value)))
-    console.log(foundedUsers)
+    // console.log(foundedUsers)
   }
 
   const handleSelectAdmin = async () => {
-    console.log(candidate)
+    // console.log(candidate)
     if(candidate) {
         const res = await fetch( 
             `/api/panels/${panel.id}`,

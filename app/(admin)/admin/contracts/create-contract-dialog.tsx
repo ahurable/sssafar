@@ -28,7 +28,7 @@ export function CreateContractDialog({ open, onOpenChange, onSuccess }: CreateCo
     setLoading(true)
 
     try {
-      console.log(formData)
+      // console.log(formData)
       const res = await fetch("/api/admin/contracts", {
         method: "POST",
         headers: {
