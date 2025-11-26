@@ -63,7 +63,7 @@ export function PanelManagement({ panelId }: { panelId: string }) {
   }
 
 
-  useEffect(() => // console.log(userPanels) , [userPanels])
+  // useEffect(() => // console.log(userPanels) , [userPanels])
 
   const handleCreatePanel = () => {
     // منطق ایجاد پنل جدید

@@ -158,9 +158,9 @@ export async function POST(request: NextRequest) {
     };
 
     // console.log('Sending request to hotel check rate API:', {
-      url: 'https://apidemo.partocrs.com/api/Hotel/HotelCheckRate',
-      data: externalRequest
-    });
+    //   url: 'https://apidemo.partocrs.com/api/Hotel/HotelCheckRate',
+    //   data: externalRequest
+    // });
 
     // Call the external API
     const response = await fetch('https://apidemo.partocrs.com/api/Hotel/HotelCheckRate', {

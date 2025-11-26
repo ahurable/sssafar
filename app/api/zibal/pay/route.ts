@@ -189,11 +189,11 @@ export async function POST(request: NextRequest) {
 
 
         // console.log('Starting Zibal payment:', {
-        amount: paymentData.amount,
-        amountInRials,
-        userId: session.userId,
-        orderId: zibalRequest.orderId
-        });
+        // amount: paymentData.amount,
+        // amountInRials,
+        // userId: session.userId,
+        // orderId: zibalRequest.orderId
+        // });
 
         // Call Zibal start payment API
         const startPaymentResponse = await fetch(`${ZIBAL_BASE_URL}${ZIBAL_START_PAYMENT_ENDPOINT}`, {
@@ -274,12 +274,12 @@ export async function POST(request: NextRequest) {
 
 
     // console.log('Starting Zibal payment:', {
-      amount: paymentData.amount,
-      amountInRials,
-      userId: session.userId,
-      orderId: zibalRequest.orderId,
-      paymentType: zibalRequest.paymentType
-    });
+    //   amount: paymentData.amount,
+    //   amountInRials,
+    //   userId: session.userId,
+    //   orderId: zibalRequest.orderId,
+    //   paymentType: zibalRequest.paymentType
+    // });
 
     // Call Zibal start payment API
     const startPaymentResponse = await fetch(`${ZIBAL_BASE_URL}${ZIBAL_START_PAYMENT_ENDPOINT}`, {
@@ -390,10 +390,10 @@ export async function PUT(request: NextRequest) {
     }
 
     // console.log('Verifying Zibal payment:', {
-      trackId: verifyData.trackId,
-      status: verifyData.status,
-      success: verifyData.success
-    });
+    //   trackId: verifyData.trackId,
+    //   status: verifyData.status,
+    //   success: verifyData.success
+    // });
 
     // Prepare verification request
     const verifyRequest: ZibalVerifyRequest = {

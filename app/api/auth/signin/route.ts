@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       path: "/",
     })
 
-    // console.log("✅ Cookie set successfully")
+    ("✅ Cookie set successfully")
     return response
 
   } catch (error: any) {

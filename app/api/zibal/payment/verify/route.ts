@@ -86,8 +86,8 @@ export async function POST(request: NextRequest) {
     }
 
     // console.log('Payment verification request:',
-      verificationData
-    );
+    //   verificationData
+    // );
 
     // Check if transaction was already processed to avoid duplicates
     const invoice = await prisma.invoice.findFirst({
@@ -253,9 +253,9 @@ async function processSuccessfulPayment(
   try {
     // console.log('Processing successful payment: ', {
       // paymentType: verificationData.paymentType,
-      trackId: verificationData.trackId,
-      amount: verificationResult.amount
-    });
+    //   trackId: verificationData.trackId,
+    //   amount: verificationResult.amount
+    // });
 
     const invoice = await prisma.invoice.update({
       where: {
@@ -657,11 +657,11 @@ export async function GET(request: NextRequest) {
   const orderId = searchParams.get('orderId');
 
   // console.log('Zibal callback received:', {
-    success,
-    trackId,
-    status,
-    orderId
-  });
+  //   success,
+  //   trackId,
+  //   status,
+  //   orderId
+  // });
 
   if (!trackId) {
     console.error('No trackId in callback');

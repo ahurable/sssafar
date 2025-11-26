@@ -20,11 +20,10 @@ export async function POST(request: NextRequest) {
       'employeeCount'
     ]
 
-    const missingFields = requiredFields.filter(field => {
-        // console.log(body[field],
+    const missingFields = requiredFields.filter(field => (
         !body[field]
       )
-    })
+    )
     
     if (missingFields.length > 0) {
       return NextResponse.json(

@@ -110,16 +110,16 @@ export const POST = async (request: NextRequest) => {
 
         // Log the exact order data before saving
         // console.log("📝 Order data to be saved:", {
-            serviceId: body.order?.serviceId,
-            title: body.order?.title,
-            airport: body.order?.airport,
-            date: body.order?.date,
-            passengers: body.order?.passengers,
-            serviceType: body.order?.serviceType,
-            duration: body.order?.duration,
-            price: body.order?.price,
-            currency: body.order?.currency
-        })
+        //     serviceId: body.order?.serviceId,
+        //     title: body.order?.title,
+        //     airport: body.order?.airport,
+        //     date: body.order?.date,
+        //     passengers: body.order?.passengers,
+        //     serviceType: body.order?.serviceType,
+        //     duration: body.order?.duration,
+        //     price: body.order?.price,
+        //     currency: body.order?.currency
+        // })
 
         // Create invoice
         const createdInvoice = await prisma.invoice.create({

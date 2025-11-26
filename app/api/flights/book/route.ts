@@ -66,10 +66,10 @@ export const POST = async (request: NextRequest) => {
         const data = await res.json()
         
         // console.log("AirBook API response:", {
-            status: res.status,
-            statusText: res.statusText,
-            data: data
-        })
+        //     status: res.status,
+        //     statusText: res.statusText,
+        //     data: data
+        // })
 
         if (res.ok) {
             const invoice = await prisma.invoice.findUnique({

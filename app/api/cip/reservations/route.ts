@@ -23,8 +23,8 @@ export async function POST(request: NextRequest) {
   try {
     const { invoiceId } = await request.json()
     // console.log(`
-      invoiceId: ${invoiceId}
-      `)
+      // invoiceId: ${invoiceId}
+      // `)
     if (!invoiceId ) {
       return NextResponse.json({
         message: "خطا! اطلاعات وارد شده ناقص میباشد"

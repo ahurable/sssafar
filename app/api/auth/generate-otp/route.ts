@@ -66,10 +66,10 @@ export const POST = async (request: NextRequest) => {
             const from = process.env.MELI_PAYAMAK_FROM_NUMBER
             const text = `کد تایید شماره همراه شما : ${otp}`
             sms.send(to, from, text)
-            .then((res:any) => // console.log(res))
-            .then((err:any) => // console.log(err))
+            .then((res:any) => console.log(res))
+            .then((err:any) => console.log(err))
         } catch (error) {
-            // console.log(error)
+            console.log(error)
         }
     }
 

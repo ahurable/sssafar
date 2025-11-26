@@ -101,8 +101,8 @@ export function BookingSection({ service }: BookingSectionProps) {
       if (response.ok) {
          // Here you would typically send the data to your API
         // console.log("Reservation data:", {
-          data
-        })
+        //   data
+        // })
         toast.success("درخواست رزرو شما با موفقیت ثبت شد، پس از بررسی، همکاران ما با شما تماس خواهند گرفت.")
         // Reset form
         setFormData({

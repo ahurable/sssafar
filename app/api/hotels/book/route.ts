@@ -226,13 +226,13 @@ export async function POST(request: NextRequest) {
     };
 
     // console.log('Sending booking request to external API:', {
-      sessionId: externalRequest.SessionId,
-      fareSourceCode: externalRequest.FareSourceCode,
-      clientUniqueId: externalRequest.ClientUniqueId,
-      roomCount: externalRequest.Rooms.length,
-      passengerCount: passengers.length,
-      hotelId: bookData.hotelId
-    });
+    //   sessionId: externalRequest.SessionId,
+    //   fareSourceCode: externalRequest.FareSourceCode,
+    //   clientUniqueId: externalRequest.ClientUniqueId,
+    //   roomCount: externalRequest.Rooms.length,
+    //   passengerCount: passengers.length,
+    //   hotelId: bookData.hotelId
+    // });
 
     // Make request to external API
     const response = await fetch('https://apidemo.partocrs.com/api/Hotel/HotelBook', {
@@ -285,10 +285,10 @@ export async function POST(request: NextRequest) {
     }
 
     // console.log('Booking response received:', {
-      success: externalResponse.Success,
-      bookingId: externalResponse.BookingId,
-      error: externalResponse.Error
-    });
+    //   success: externalResponse.Success,
+    //   bookingId: externalResponse.BookingId,
+    //   error: externalResponse.Error
+    // });
 
     // Return the external API response
     return NextResponse.json(externalResponse);
