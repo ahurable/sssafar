@@ -262,7 +262,7 @@ export function Header() {
           <div className="flex items-center justify-between p-4 border-b border-gray-300 bg-[#fffefe]">
             <div className="flex items-center gap-3">
               <Image
-              src={'/assets/logo.png'}
+              src={'/assets/images/logo.png'}
               width={200}
               height={100}
               alt="O'MOSAFER Logo"
