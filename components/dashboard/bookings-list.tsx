@@ -348,7 +348,7 @@ export function BookingsList() {
           </div>
 
           {/* Bookings List */}
-          <div className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
+          <div className="divide-y divide-gray-100">
             {filteredBookings.map((booking) => {
               const Icon = getTypeIcon(booking.type)
               const StatusIcon = getStatusIcon(booking.status, booking.data)

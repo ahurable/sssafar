@@ -963,6 +963,7 @@ model CorporateRequest {
   phone         String
   address       String
   contactPerson String
+  website       String        @default("")
   employeeCount Int
   needs         String?
   status        RequestStatus @default(PENDING)

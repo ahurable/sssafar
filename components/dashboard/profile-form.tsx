@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { User, MapPin, CreditCard, Save, Mail, Calendar, AlertCircle } from "lucide-react"
+import { User, MapPin, CreditCard, Save, Mail, Calendar, AlertCircle, Building } from "lucide-react"
 import DatePicker from "react-multi-date-picker"
 import { DateObject } from "react-multi-date-picker"
 import persian from "react-date-object/calendars/persian"
@@ -50,6 +50,21 @@ export function ProfileForm() {
     shabaCode: "",
     cardName: ""
   })
+
+  // Corporate Request State
+  const [corporateData, setCorporateData] = useState({
+    companyName: "",
+    companyType: "",
+    email: "",
+    phone: "",
+    address: "",
+    contactPerson: "",
+    website: "",
+    employeeCount: 0,
+    needs: ""
+  })
+  const [corporateSubmitting, setCorporateSubmitting] = useState(false)
+  const [corporateErrors, setCorporateErrors] = useState<Record<string, string>>({})
 
   const { success, error } = useSnack()
 
@@ -159,6 +174,44 @@ export function ProfileForm() {
     return Object.keys(errors).length === 0
   }
 
+  // Validate corporate form
+  const validateCorporateForm = (): boolean => {
+    const errors: Record<string, string> = {}
+
+    if (!corporateData.companyName.trim()) {
+      errors.companyName = "نام شرکت الزامی است"
+    }
+
+    if (!corporateData.companyType.trim()) {
+      errors.companyType = "نوع شرکت الزامی است"
+    }
+
+    if (!corporateData.email.trim()) {
+      errors.email = "ایمیل شرکت الزامی است"
+    } else if (!/^\S+@\S+\.\S+$/.test(corporateData.email)) {
+      errors.email = "فرمت ایمیل نامعتبر است"
+    }
+
+    if (!corporateData.phone.trim()) {
+      errors.phone = "تلفن شرکت الزامی است"
+    }
+
+    if (!corporateData.address.trim()) {
+      errors.address = "آدرس شرکت الزامی است"
+    }
+
+    if (!corporateData.contactPerson.trim()) {
+      errors.contactPerson = "نام شخص رابط الزامی است"
+    }
+
+    if (corporateData.employeeCount <= 0) {
+      errors.employeeCount = "تعداد پرسنل باید بیشتر از صفر باشد"
+    }
+
+    setCorporateErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -223,6 +276,52 @@ export function ProfileForm() {
     success("اطلاعات کارت بانکی با موفقیت ذخیره شد", "", 3000)
   }
 
+  // Corporate Request Submit Handler
+  const handleCorporateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!validateCorporateForm()) {
+      error("لطفا اطلاعات فرم حقوقی را به درستی تکمیل کنید", "", 3000)
+      return
+    }
+
+    setCorporateSubmitting(true)
+    setCorporateErrors({})
+
+    try {
+      const res = await fetch("/api/companies/request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(corporateData),
+      })
+
+      const data = await res.json()
+
+      if (res.ok) {
+        success("درخواست حقوقی با موفقیت ثبت شد", "درخواست شما با موفقیت ثبت شد و در حال بررسی است", 5000)
+        // Reset form
+        setCorporateData({
+          companyName: "",
+          companyType: "",
+          email: "",
+          phone: "",
+          address: "",
+          contactPerson: "",
+          website: "",
+          employeeCount: 0,
+          needs: ""
+        })
+      } else {
+        error(data.error || "خطا در ثبت درخواست حقوقی", "", 3000)
+      }
+    } catch (err) {
+      console.error("[v0] Error submitting corporate request:", err)
+      error("خطا در برقراری ارتباط با سرور", "", 3000)
+    } finally {
+      setCorporateSubmitting(false)
+    }
+  }
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (hasExistingData) return
     
@@ -249,6 +348,23 @@ export function ProfileForm() {
       ...prev,
       [name]: value,
     }))
+  }
+
+  const handleCorporateChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    
+    setCorporateData((prev) => ({
+      ...prev,
+      [name]: name === 'employeeCount' ? parseInt(value) || 0 : value,
+    }))
+
+    // Clear error when user starts typing
+    if (corporateErrors[name]) {
+      setCorporateErrors(prev => ({
+        ...prev,
+        [name]: ""
+      }))
+    }
   }
 
   const handleDateChange = (date: DateObject | null) => {
@@ -772,7 +888,218 @@ export function ProfileForm() {
         </CardContent>
       </Card>
 
-      {/* Section 3: Credit Card Details */}
+      {/* Section 3: Corporate Information */}
+      <Card className="p-4 mb-4">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Building className="h-5 w-5" />
+            اطلاعات حقوقی (سازمانی)
+          </CardTitle>
+          <CardDescription>درخواست همکاری سازمانی و شرکتی خود را ثبت کنید</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleCorporateSubmit} className="space-y-6">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="companyName">
+                  نام شرکت
+                  <span className="text-red-500 mr-1">*</span>
+                </Label>
+                <Input
+                  id="companyName"
+                  name="companyName"
+                  placeholder="نام کامل شرکت"
+                  value={corporateData.companyName}
+                  onChange={handleCorporateChange}
+                  className={corporateErrors.companyName ? "border-red-500" : ""}
+                />
+                {corporateErrors.companyName && (
+                  <p className="text-red-500 text-xs flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {corporateErrors.companyName}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="companyType">
+                  نوع شرکت
+                  <span className="text-red-500 mr-1">*</span>
+                </Label>
+                <Input
+                  id="companyType"
+                  name="companyType"
+                  placeholder="مثال: سهامی خاص، مسئولیت محدود"
+                  value={corporateData.companyType}
+                  onChange={handleCorporateChange}
+                  className={corporateErrors.companyType ? "border-red-500" : ""}
+                />
+                {corporateErrors.companyType && (
+                  <p className="text-red-500 text-xs flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {corporateErrors.companyType}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="corporateEmail">
+                  ایمیل شرکت
+                  <span className="text-red-500 mr-1">*</span>
+                </Label>
+                <Input
+                  id="corporateEmail"
+                  name="email"
+                  type="email"
+                  placeholder="email@company.com"
+                  value={corporateData.email}
+                  onChange={handleCorporateChange}
+                  className={corporateErrors.email ? "border-red-500" : ""}
+                />
+                {corporateErrors.email && (
+                  <p className="text-red-500 text-xs flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {corporateErrors.email}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="corporatePhone">
+                  تلفن شرکت
+                  <span className="text-red-500 mr-1">*</span>
+                </Label>
+                <Input
+                  id="corporatePhone"
+                  name="phone"
+                  placeholder="شماره تلفن شرکت"
+                  value={corporateData.phone}
+                  onChange={handleCorporateChange}
+                  className={corporateErrors.phone ? "border-red-500" : ""}
+                />
+                {corporateErrors.phone && (
+                  <p className="text-red-500 text-xs flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {corporateErrors.phone}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="corporateAddress">
+                آدرس شرکت
+                <span className="text-red-500 mr-1">*</span>
+              </Label>
+              <Textarea
+                id="corporateAddress"
+                name="address"
+                placeholder="آدرس کامل شرکت"
+                value={corporateData.address}
+                onChange={handleCorporateChange}
+                className={corporateErrors.address ? "border-red-500" : ""}
+              />
+              {corporateErrors.address && (
+                <p className="text-red-500 text-xs flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {corporateErrors.address}
+                </p>
+              )}
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="contactPerson">
+                  شخص رابط
+                  <span className="text-red-500 mr-1">*</span>
+                </Label>
+                <Input
+                  id="contactPerson"
+                  name="contactPerson"
+                  placeholder="نام و نام خانوادگی شخص رابط"
+                  value={corporateData.contactPerson}
+                  onChange={handleCorporateChange}
+                  className={corporateErrors.contactPerson ? "border-red-500" : ""}
+                />
+                {corporateErrors.contactPerson && (
+                  <p className="text-red-500 text-xs flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {corporateErrors.contactPerson}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="website">
+                  وبسایت
+                </Label>
+                <Input
+                  id="website"
+                  name="website"
+                  placeholder="https://example.com"
+                  value={corporateData.website}
+                  onChange={handleCorporateChange}
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="employeeCount">
+                  تعداد پرسنل
+                  <span className="text-red-500 mr-1">*</span>
+                </Label>
+                <Input
+                  id="employeeCount"
+                  name="employeeCount"
+                  type="number"
+                  placeholder="0"
+                  value={corporateData.employeeCount}
+                  onChange={handleCorporateChange}
+                  className={corporateErrors.employeeCount ? "border-red-500" : ""}
+                />
+                {corporateErrors.employeeCount && (
+                  <p className="text-red-500 text-xs flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {corporateErrors.employeeCount}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="needs">
+                نیازها و توضیحات
+              </Label>
+              <Textarea
+                id="needs"
+                name="needs"
+                placeholder="نیازهای سازمانی و توضیحات adicional"
+                value={corporateData.needs}
+                onChange={handleCorporateChange}
+                rows={4}
+              />
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <Button type="button" variant="outline">
+                انصراف
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={corporateSubmitting}
+              >
+                <Save className="ml-2 h-4 w-4" />
+                {corporateSubmitting ? "در حال ارسال..." : "ثبت درخواست حقوقی"}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* Section 4: Credit Card Details */}
       <Card className="p-4">
         <CardHeader>
           <CardTitle>اطلاعات کارت بانکی</CardTitle>
