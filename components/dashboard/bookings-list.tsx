@@ -3,14 +3,14 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Hotel, Plane, Train, Calendar, MapPin, Download, Loader2, AlertCircle, CheckCircle2, Router } from "lucide-react"
+import { Hotel, Plane, Calendar, MapPin, Download, Loader2, AlertCircle, CheckCircle2, Building } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 
 interface Booking {
   id: string
   userId: string
-  type: "HOTEL" | "FLIGHT" | "TRAIN" | "CIP" | "ACTIVITY"
+  type: "HOTEL" | "FLIGHT" | "CIP" | "ACTIVITY"
   status: "CONFIRMED" | "PENDING" | "CANCELLED"
   bookingCode: string
   totalPrice: number
@@ -34,14 +34,19 @@ interface Booking {
   }
 }
 
+interface BookingDisplayInfo {
+  title: string
+  subtitle: string
+}
+
 const getTypeIcon = (type: string) => {
   switch (type) {
     case "HOTEL":
       return Hotel
     case "FLIGHT":
       return Plane
-    case "TRAIN":
-      return Train
+    case "CIP":
+      return Building
     default:
       return Hotel
   }
@@ -53,8 +58,10 @@ const getTypeLabel = (type: string) => {
       return "هتل"
     case "FLIGHT":
       return "پرواز"
-    case "TRAIN":
-      return "قطار"
+    case "CIP":
+      return "CIP"
+    case "ACTIVITY":
+      return "فعالیت"
     default:
       return type
   }
@@ -77,20 +84,20 @@ const getStatusLabel = (status: string, bookingData: any) => {
   }
 }
 
-const getStatusVariant = (status: string, bookingData: any): "default" | "secondary" | "destructive" | "outline" => {
+const getStatusBadgeColor = (status: string, bookingData: any): string => {
   if (!bookingData.Success) {
-    return "destructive"
+    return "bg-red-100 text-red-800 border-red-200"
   }
   
   switch (status) {
     case "CONFIRMED":
-      return "default"
+      return "bg-green-100 text-green-800 border-green-200"
     case "PENDING":
-      return "secondary"
+      return "bg-blue-100 text-blue-800 border-blue-200"
     case "CANCELLED":
-      return "destructive"
+      return "bg-red-100 text-red-800 border-red-200"
     default:
-      return "secondary"
+      return "bg-gray-100 text-gray-800 border-gray-200"
   }
 }
 
@@ -106,41 +113,9 @@ const getStatusIcon = (status: string, bookingData: any) => {
   return null
 }
 
-// Helper functions to extract display information from booking data
-const getBookingTitle = (booking: Booking): string => {
-  if (!booking.data.Success) {
-    return `رزرو ${getTypeLabel(booking.type)} - ناموفق`
-  }
-
-  switch (booking.type) {
-    case "FLIGHT":
-      const flightInfo = JSON.parse(booking.bookingInformation)
-      const segments = flightInfo.OriginDestinationOptions?.[0]?.FlightSegments
-      if (segments && segments.length > 0) {
-        const firstSegment = segments[0]
-        return `پرواز ${firstSegment.DepartureAirportLocationCode} - ${firstSegment.ArrivalAirportLocationCode}`
-      }
-      return booking.data.UniqueId ? `پرواز ${booking.data.UniqueId}` : `پرواز ${booking.bookingCode}`
-    
-    case "HOTEL":
-      return booking.data.SupplierName || `هتل ${booking.bookingCode}`
-    
-    case "TRAIN":
-      return `قطار ${booking.bookingCode}`
-    case "CIP":
-      return `CIP فرودگاهی  ${booking.bookingCode}`
-    case "ACTIVITY":
-      return `گشت شهری ${booking.bookingCode}`
-    default:
-      return `رزرو ${booking.bookingCode}`
-  }
-}
-
-const getBookingLocation = (booking: Booking): string => {
-  if (!booking.data.Success) {
-    return "خطا در رزرو"
-  }
-
+// Helper function to extract display information from booking data
+const getBookingDisplayInfo = (booking: Booking): BookingDisplayInfo => {
+  
   try {
     const bookingInfo = JSON.parse(booking.bookingInformation)
     
@@ -149,21 +124,47 @@ const getBookingLocation = (booking: Booking): string => {
         const segments = bookingInfo.OriginDestinationOptions?.[0]?.FlightSegments
         if (segments && segments.length > 0) {
           const firstSegment = segments[0]
-          return `${firstSegment.MarketingAirlineCode} - ${firstSegment.FlightNumber}`
+          const lastSegment = segments[segments.length - 1]
+          return {
+            title: `${firstSegment.DepartureAirportLocationCode} - ${lastSegment.ArrivalAirportLocationCode}`,
+            subtitle: `${firstSegment.MarketingAirlineCode} ${firstSegment.FlightNumber}`
+          }
         }
-        return bookingInfo.ValidatingAirlineCode || "ایران ایر"
+        return {
+          title: booking.data.UniqueId ? `پرواز ${booking.data.UniqueId}` : `پرواز ${booking.bookingCode}`,
+          subtitle: bookingInfo.ValidatingAirlineCode || "ایران ایر"
+        }
       
       case "HOTEL":
-        return booking.data.SupplierName || "هتل"
+        // Return temporary title, we'll update it later with the actual hotel name
+        return {
+          title: `${bookingInfo.HotelName}`,
+          subtitle: "اقامتگاه"
+        }
       
-      case "TRAIN":
-        return "قطار"
+      case "CIP":
+        return {
+          title: `${bookingInfo.order?.title || `CIP ${booking.bookingCode}`}`,
+          subtitle: ""
+        }
+      
+      case "ACTIVITY":
+        return {
+          title: `${bookingInfo.tourTitle || `فعالیت ${booking.bookingCode}`}`,
+          subtitle: "فعالیت تفریحی"
+        }
       
       default:
-        return bookingInfo.location || "نامشخص"
+        return {
+          title: `رزرو ${booking.bookingCode}`,
+          subtitle: "نامشخص"
+        }
     }
   } catch {
-    return "نامشخص"
+    return {
+      title: `رزرو ${booking.bookingCode}`,
+      subtitle: "نامشخص"
+    }
   }
 }
 
@@ -205,34 +206,24 @@ const getBookingDate = (booking: Booking): string => {
   return date.toLocaleDateString('fa-IR')
 }
 
-const getFlightDetails = (booking: Booking) => {
-  if (booking.type !== "FLIGHT" || !booking.data.Success) return null
-  
-  try {
-    const bookingInfo = JSON.parse(booking.bookingInformation)
-    const segments = bookingInfo.OriginDestinationOptions?.[0]?.FlightSegments
-    if (segments && segments.length > 0) {
-      const firstSegment = segments[0]
-      return {
-        departureTime: new Date(firstSegment.DepartureDateTime).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' }),
-        arrivalTime: new Date(firstSegment.ArrivalDateTime).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' }),
-        duration: firstSegment.JourneyDuration,
-        baggage: firstSegment.Baggage
-      }
-    }
-  } catch {
-    return null
-  }
-  
-  return null
-}
-
 export function BookingsList() {
   const [bookings, setBookings] = useState<Booking[]>([])
+  const [filteredBookings, setFilteredBookings] = useState<Booking[]>([])
+  const [displayInfoMap, setDisplayInfoMap] = useState<Record<string, BookingDisplayInfo>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [activeFilter, setActiveFilter] = useState<string>("ALL")
   const router = useRouter()
 
+  const filters = [
+    { key: "ALL", label: "همه" },
+    { key: "FLIGHT", label: "پرواز" },
+    { key: "HOTEL", label: "هتل" },
+    { key: "CIP", label: "CIP" },
+    { key: "ACTIVITY", label: "فعالیت" }
+  ]
+
+  
   useEffect(() => {
     const fetchBookings = async () => {
       try {
@@ -244,6 +235,7 @@ export function BookingsList() {
             throw new Error("لطفاً ابتدا وارد حساب کاربری خود شوید")
           } else if (response.status === 404) {
             setBookings([])
+            setFilteredBookings([])
             return
           } else {
             throw new Error("خطایی در دریافت اطلاعات رزروها رخ داد")
@@ -252,6 +244,7 @@ export function BookingsList() {
         
         const data = await response.json()
         setBookings(data)
+        setFilteredBookings(data)
       } catch (err) {
         setError(err instanceof Error ? err.message : "خطایی رخ داد")
         console.error("Error fetching bookings:", err)
@@ -263,12 +256,21 @@ export function BookingsList() {
     fetchBookings()
   }, [])
 
+  const handleFilter = (filterKey: string) => {
+    setActiveFilter(filterKey)
+    if (filterKey === "ALL") {
+      setFilteredBookings(bookings)
+    } else {
+      setFilteredBookings(bookings.filter(booking => booking.type === filterKey))
+    }
+  }
+
   if (loading) {
     return (
       <Card className="border-sky-100 bg-sky-50/50">
         <CardContent className="flex flex-col items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-sky-600 mb-4" />
-          <p className="text-sky-700">در حال دریافت اطلاعات رزروها...</p>
+          <p className="text-sky-700 text-sm">در حال دریافت اطلاعات رزروها...</p>
         </CardContent>
       </Card>
     )
@@ -278,14 +280,14 @@ export function BookingsList() {
     return (
       <Card className="border-red-100 bg-red-50/50">
         <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
-            <AlertCircle className="h-8 w-8 text-red-600" />
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+            <AlertCircle className="h-6 w-6 text-red-600" />
           </div>
-          <h3 className="mb-2 text-xl font-bold text-red-800">خطا در دریافت اطلاعات</h3>
-          <p className="text-red-600 mb-6">{error}</p>
+          <h3 className="mb-2 text-lg font-bold text-red-800">خطا در دریافت اطلاعات</h3>
+          <p className="text-red-600 mb-6 text-sm">{error}</p>
           <Button 
             onClick={() => window.location.reload()}
-            className="bg-sky-600 hover:bg-sky-700"
+            className="bg-sky-600 hover:bg-sky-700 text-sm"
           >
             تلاش مجدد
           </Button>
@@ -298,12 +300,12 @@ export function BookingsList() {
     return (
       <Card className="border-sky-100 bg-sky-50/50">
         <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-sky-100">
-            <Plane className="h-8 w-8 text-sky-600" />
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-sky-100">
+            <Plane className="h-6 w-6 text-sky-600" />
           </div>
-          <h3 className="mb-2 text-xl font-bold text-sky-800">هنوز رزروی ندارید</h3>
-          <p className="text-sky-600 mb-6">برای شروع سفر، اولین رزرو خود را انجام دهید</p>
-          <Button className="bg-sky-600 hover:bg-sky-700" onClick={() => router.push('/')}>شروع رزرو</Button>
+          <h3 className="mb-2 text-lg font-bold text-sky-800">هنوز رزروی ندارید</h3>
+          <p className="text-sky-600 mb-6 text-sm">برای شروع سفر، اولین رزرو خود را انجام دهید</p>
+          <Button className="bg-sky-600 hover:bg-sky-700 text-sm" onClick={() => router.push('/')}>شروع رزرو</Button>
         </CardContent>
       </Card>
     )
@@ -311,143 +313,200 @@ export function BookingsList() {
 
   return (
     <div className="space-y-4">
-      {bookings.map((booking) => {
-        const Icon = getTypeIcon(booking.type)
-        const StatusIcon = getStatusIcon(booking.status, booking.data)
-        const flightDetails = getFlightDetails(booking)
-        
-        return (
-          <Card 
-            key={booking.id} 
+      {/* Filter Buttons */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {filters.map((filter) => (
+          <Button
+            key={filter.key}
+            variant={activeFilter === filter.key ? "default" : "outline"}
+            size="sm"
+            onClick={() => handleFilter(filter.key)}
             className={`
-              hover:shadow-lg transition-shadow border-l-4
-              ${!booking.data.Success 
-                ? "border-red-300 bg-red-50/50 hover:bg-red-50" 
-                : booking.status === "CONFIRMED" 
-                  ? "border-sky-300 bg-sky-50/50 hover:bg-sky-50"
-                  : "border-gray-200 bg-[#fffefe] hover:bg-gray-50"
+              text-xs px-3 py-1 h-auto
+              ${activeFilter === filter.key 
+                ? "bg-sky-600 text-white hover:bg-sky-700" 
+                : "bg-white text-gray-700 hover:bg-gray-50 border-gray-300"
               }
             `}
           >
-            <CardContent className="p-6">
-              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div className="flex items-start gap-4">
-                  <div className={`
-                    flex h-12 w-12 items-center justify-center rounded-lg flex-shrink-0
-                    ${!booking.data.Success 
-                      ? "bg-red-100 text-red-600" 
-                      : "bg-sky-100 text-sky-600"
-                    }
-                  `}>
-                    <Icon className="h-6 w-6" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className={`
-                        font-bold
-                        ${!booking.data.Success ? "text-red-800" : "text-gray-900"}
-                      `}>
-                        {getBookingTitle(booking)}
-                      </h3>
-                      <div className="flex items-center gap-2">
-                        <Badge 
-                          variant="outline" 
-                          className={`
-                            text-xs
-                            ${!booking.data.Success 
-                              ? "border-red-200 text-red-700 bg-red-100" 
-                              : "border-sky-200 text-sky-700 bg-sky-100"
-                            }
-                          `}
-                        >
-                          {getTypeLabel(booking.type)}
-                        </Badge>
-                        <Badge variant={getStatusVariant(booking.status, booking.data)}>
-                          {StatusIcon && <StatusIcon className="h-3 w-3 ml-1" />}
-                          {getStatusLabel(booking.status, booking.data)}
-                        </Badge>
+            {filter.label}
+          </Button>
+        ))}
+      </div>
+
+      {/* Responsive Container */}
+      <div className="w-full">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          {/* Table Header - Hidden on mobile */}
+          <div className="hidden md:grid md:grid-cols-12 gap-4 px-4 lg:px-6 py-3 bg-gray-50 border-b border-gray-200 text-xs font-medium text-gray-600">
+            <div className="col-span-2">نوع رزرو</div>
+            <div className="col-span-3">مقصد / نام</div>
+            <div className="col-span-2">تاریخ</div>
+            <div className="col-span-2">وضعیت</div>
+            <div className="col-span-2 text-left">قیمت</div>
+            <div className="col-span-1">عملیات</div>
+          </div>
+
+          {/* Bookings List */}
+          <div className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
+            {filteredBookings.map((booking) => {
+              const Icon = getTypeIcon(booking.type)
+              const StatusIcon = getStatusIcon(booking.status, booking.data)
+              const displayInfo = displayInfoMap[booking.id] || getBookingDisplayInfo(booking)
+              const bookingDate = getBookingDate(booking)
+              
+              return (
+                <div key={booking.id}>
+                  {/* Desktop View */}
+                  <div className="hidden md:grid md:grid-cols-12 gap-4 px-4 lg:px-6 py-4 hover:bg-gray-50 transition-colors items-center text-sm">
+                    {/* Type */}
+                    <div className="col-span-2 flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-100 text-sky-600 flex-shrink-0">
+                        <Icon className="h-4 w-4" />
                       </div>
+                      <span className="text-xs text-gray-700">{getTypeLabel(booking.type)}</span>
                     </div>
-                    
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center gap-1 text-gray-600">
+
+                    {/* Destination/Name */}
+                    <div className="col-span-3">
+                      <div className="font-medium text-gray-900 text-sm">{displayInfo.title}</div>
+                      <div className="text-xs text-gray-500 flex items-center gap-1 mt-1">
                         <MapPin className="h-3 w-3" />
-                        <span>{getBookingLocation(booking)}</span>
+                        {displayInfo.subtitle}
                       </div>
-                      <div className="flex items-center gap-1 text-gray-600">
-                        <Calendar className="h-3 w-3" />
-                        <span>{getBookingDate(booking)}</span>
-                        <span className="text-xs text-gray-500">• کد رزرو: {booking.bookingCode}</span>
-                      </div>
-
-                      {/* Flight specific details */}
-                      {flightDetails && (
-                        <div className="flex items-center gap-4 pt-1 text-xs text-sky-700">
-                          <span>🛫 {flightDetails.departureTime}</span>
-                          <span>🛬 {flightDetails.arrivalTime}</span>
-                          <span>⏱️ {flightDetails.duration}</span>
-                          <span>🎒 {flightDetails.baggage}</span>
-                        </div>
-                      )}
-
-                      {/* Error message */}
-                      {!booking.data.Success && booking.data.Error && (
-                        <div className="flex items-start gap-1 pt-1 text-red-600 text-xs">
-                          <AlertCircle className="h-3 w-3 mt-0.5 flex-shrink-0" />
-                          <span>{booking.data.Error.Message}</span>
-                        </div>
-                      )}
-
-                      {/* Warning messages */}
-                      {booking.data.Success && booking.data.WarningMessage && booking.data.WarningMessage.length > 0 && (
-                        <div className="text-amber-600 text-xs flex items-start gap-1">
-                          <AlertCircle className="h-3 w-3 mt-0.5 flex-shrink-0" />
-                          <span>{booking.data.WarningMessage[0]}</span>
-                        </div>
-                      )}
                     </div>
-                  </div>
-                </div>
 
-                <div className="flex flex-col items-end gap-3 md:border-r md:pr-6 border-gray-200">
-                  <div className="text-left">
-                    <p className="text-sm text-gray-500">مبلغ پرداختی</p>
-                    <p className={`
-                      text-xl font-bold
-                      ${!booking.data.Success ? "text-red-600" : "text-sky-600"}
-                    `}>
-                      {booking.totalPrice.toLocaleString("fa-IR")} 
-                      <span className="text-sm font-normal text-gray-500"> تومان</span>
-                    </p>
-                  </div>
-                  
-                  {booking.data.Success && (
-                    <div className="flex gap-2">
-                      <Button 
+                    {/* Date */}
+                    <div className="col-span-2 text-xs text-gray-600 flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {bookingDate}
+                    </div>
+
+                    {/* Status */}
+                    <div className="col-span-2">
+                      <Badge 
                         variant="outline" 
-                        size="sm"
-                        className="border-sky-200 text-sky-700 hover:bg-sky-50 hover:text-sky-800"
+                        className={`text-xs px-2 py-1 ${getStatusBadgeColor(booking.status, booking.data)}`}
                       >
-                        <Download className="ml-2 h-4 w-4" />
-                        دانلود بلیط
-                      </Button>
-                      {/* {booking.type === "HOTEL" && booking.data.CanExtendPaymentDeadline && (
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          className="border-sky-200 text-sky-700 hover:bg-sky-50 hover:text-sky-800"
-                        >
-                          تمدید پرداخت
-                        </Button>
-                      )} */}
+                        {StatusIcon && <StatusIcon className="h-3 w-3 ml-1" />}
+                        {getStatusLabel(booking.status, booking.data)}
+                      </Badge>
                     </div>
-                  )}
+
+                    {/* Price */}
+                    <div className="col-span-2 text-left">
+                      <p className="text-sm font-bold text-sky-600">
+                        {booking.totalPrice.toLocaleString("fa-IR")} 
+                        <span className="text-xs font-normal text-gray-500 mr-1">تومان</span>
+                      </p>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="col-span-1">
+                      {booking.data.Success && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          className="h-8 w-8 p-0 text-gray-500 hover:text-sky-600 hover:bg-sky-50"
+                          title="دانلود بلیط"
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Mobile View */}
+                  <div className="md:hidden p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <Card className="border-gray-200 shadow-sm">
+                      <CardContent className="p-4 space-y-3">
+                        {/* Header */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-100 text-sky-600">
+                              <Icon className="h-5 w-5" />
+                            </div>
+                            <div>
+                              <div className="font-bold text-gray-900 text-sm">{getTypeLabel(booking.type)}</div>
+                              <div className="text-xs text-gray-500">{booking.bookingCode}</div>
+                            </div>
+                          </div>
+                          
+                          <Badge 
+                            variant="outline" 
+                            className={`text-xs px-2 py-1 ${getStatusBadgeColor(booking.status, booking.data)}`}
+                          >
+                            {StatusIcon && <StatusIcon className="h-3 w-3 ml-1" />}
+                            {getStatusLabel(booking.status, booking.data)}
+                          </Badge>
+                        </div>
+
+                        {/* Content */}
+                        <div className="space-y-2">
+                          <div>
+                            <div className="font-semibold text-gray-900 text-sm">{displayInfo.title}</div>
+                            <div className="text-xs text-gray-500 flex items-center gap-1 mt-1">
+                              <MapPin className="h-3 w-3" />
+                              {displayInfo.subtitle}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between text-xs text-gray-600">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              {bookingDate}
+                            </div>
+                            
+                            <div className="text-left">
+                              <div className="font-bold text-sky-600 text-sm">
+                                {booking.totalPrice.toLocaleString("fa-IR")} 
+                                <span className="text-xs font-normal text-gray-500 mr-1">تومان</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex justify-between items-center pt-3 border-t border-gray-100">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="text-xs h-8"
+                            onClick={() => {/* View details action */}}
+                          >
+                            مشاهده جزئیات
+                          </Button>
+                          
+                          {booking.data.Success && (
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              className="h-8 w-8 p-0 text-gray-500 hover:text-sky-600 hover:bg-sky-50"
+                              title="دانلود بلیط"
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
                 </div>
+              )
+            })}
+          </div>
+
+          {filteredBookings.length === 0 && (
+            <div className="py-12 text-center">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 mx-auto">
+                <AlertCircle className="h-6 w-6 text-gray-400" />
               </div>
-            </CardContent>
-          </Card>
-        )
-      })}
+              <h3 className="text-lg font-bold text-gray-600 mb-2">رزروی یافت نشد</h3>
+              <p className="text-gray-500 text-sm">هیچ رزروی با فیلتر انتخاب شده وجود ندارد</p>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

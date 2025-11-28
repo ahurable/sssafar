@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useFlight } from "@/contexts/search/FlightContext"
 import { useSearch } from "@/hooks/use-search"
-import { Search, Calendar, MapPin, ChevronDown, Loader2, Users, Baby, User, Plus, Minus, CalendarIcon, AlertCircle } from "lucide-react"
+import { Search, Calendar, MapPin, ChevronDown, Loader2, Users, Baby, User, Plus, Minus, CalendarIcon, AlertCircle, RotateCcw, Heart } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState, useRef } from "react"
 import ShamsiDateModal from "./ShamsiCalendar"
@@ -28,18 +28,9 @@ interface FormErrors {
   general?: string
 }
 
-interface Suggestion {
-  id: string
-  name: string
-  country: string
-  code?: string
-  city?: string
-  type: 'city' | 'airport'
-}
-
 interface FlightSearchState {
-  from: Suggestion | null
-  to: Suggestion | null
+  from: DomesticSuggestion | null
+  to: DomesticSuggestion | null
   displayFrom: string
   displayTo: string
   departureDate: string
@@ -51,6 +42,51 @@ interface FlightSearchState {
   cabinClass: string
 }
 
+// Favorite domestic destinations data
+const FAVORITE_DOMESTIC_DESTINATIONS: DomesticSuggestion[] = [
+  {
+    id: "IKA",
+    name: "فرودگاه بین‌المللی امام خمینی",
+    code: "IKA",
+    city: "تهران",
+    type: 'airport'
+  },
+  {
+    id: "THR",
+    name: "فرودگاه بین‌المللی مهرآباد",
+    code: "THR",
+    city: "تهران",
+    type: 'airport'
+  },
+  {
+    id: "MHD",
+    name: "فرودگاه بین‌المللی شهید هاشمی نژاد",
+    code: "MHD",
+    city: "مشهد",
+    type: 'airport'
+  },
+  {
+    id: "SYZ",
+    name: "فرودگاه بین‌المللی شهید دستغیب",
+    code: "SYZ",
+    city: "شیراز",
+    type: 'airport'
+  },
+  {
+    id: "TBZ",
+    name: "فرودگاه بین‌المللی شهید مدنی تبریز",
+    code: "TBZ",
+    city: "تبریز",
+    type: 'airport'
+  },
+  {
+    id: "AWZ",
+    name: "فرودگاه بین‌المللی آیت الله اهوازی",
+    code: "AWZ",
+    city: "اهواز",
+    type: 'airport'
+  }
+]
 
 const DomesticFlightSearch = () => {
     const [isLoading, setIsLoading] = useState(false)
@@ -73,19 +109,20 @@ const DomesticFlightSearch = () => {
     const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0)
     const [suggestionLoading, setSuggestionLoading] = useState(false)
     const [currentInput, setCurrentInput] = useState("")
-    const [currentField, setCurrentField] = useState("")
+    const [currentField, setCurrentField] = useState<"from" | "to" | "">("")
     const [isFieldFocused, setIsFieldFocused] = useState("")
     const [errors, setErrors] = useState<FormErrors>({})
     const [openCalendarId, setOpenCalendarId] = useState<string | null>(null)
-
-    // Passengers popover state
     const [showPassengers, setShowPassengers] = useState(false)
+    const [showFavorites, setShowFavorites] = useState(false)
+    const [favoriteField, setFavoriteField] = useState<"from" | "to" | null>(null)
 
     const { getCitySuggestions } = useSearch()
     const { searchDomesticFlights, setDomesticFlightRequest, setFlightRequest, searchFlights, setFlightsData, loading, origin, destination } = useFlight()
     
     const suggestionsRef = useRef<HTMLDivElement>(null)
     const passengersRef = useRef<HTMLDivElement>(null)
+    const favoritesRef = useRef<HTMLDivElement>(null)
     const fromInputRef = useRef<HTMLInputElement>(null)
     const toInputRef = useRef<HTMLInputElement>(null)
 
@@ -132,7 +169,7 @@ const DomesticFlightSearch = () => {
         return () => clearTimeout(timer)
     }, [currentInput, getCitySuggestions])
 
-    // Handle click outside for suggestions and passengers popover
+    // Handle click outside for suggestions, passengers popover, and favorites
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             // Close suggestions
@@ -155,6 +192,15 @@ const DomesticFlightSearch = () => {
             ) {
                 setShowPassengers(false)
             }
+
+            // Close favorites popover
+            if (
+                favoritesRef.current && 
+                !favoritesRef.current.contains(event.target as Node) &&
+                !(event.target as Element).closest('.favorites-trigger')
+            ) {
+                setShowFavorites(false)
+            }
         }
 
         document.addEventListener('mousedown', handleClickOutside)
@@ -162,12 +208,6 @@ const DomesticFlightSearch = () => {
             document.removeEventListener('mousedown', handleClickOutside)
         }
     }, [])
-
-    // Extract airport code from the selected value
-    const extractAirportCode = (value: string): string => {
-        const match = value.match(/\(([A-Z]{3})\)/)
-        return match ? match[1] : value
-    }
 
     const validateForm = (): boolean => {
         const newErrors: FormErrors = {}
@@ -207,6 +247,24 @@ const DomesticFlightSearch = () => {
         return Object.keys(newErrors).length === 0
     }
 
+    // Reverse from and to values
+    const handleReverseLocations = () => {
+        setDomesticFlightSearch(prev => ({
+            ...prev,
+            from: prev.to,
+            to: prev.from,
+            displayFrom: prev.displayTo,
+            displayTo: prev.displayFrom
+        }))
+        
+        // Clear any existing errors
+        setErrors(prev => ({ 
+            ...prev, 
+            from: undefined, 
+            to: undefined 
+        }))
+    }
+
     const handleSuggestionClick = (suggestion: DomesticSuggestion, field: "from" | "to") => {
         let displayValue = ""
         
@@ -216,21 +274,21 @@ const DomesticFlightSearch = () => {
             displayValue = suggestion.name
         }
         
-        
         setDomesticFlightSearch(prev => ({ 
             ...prev, 
             [field]: suggestion,
             [`display${field.charAt(0).toUpperCase() + field.slice(1)}`]: displayValue
         }))
         setShowSuggestions(false)
+        setShowFavorites(false)
         setCurrentInput("")
-        setIsFieldFocused("")
+        setCurrentField("")
         
         // Clear error for this field
         setErrors(prev => ({ ...prev, [field]: undefined }))
     }
 
-    const handleInputChange = (value: string, field: string) => {
+    const handleInputChange = (value: string, field: "from" | "to") => {
         setCurrentInput(value)
         setCurrentField(field)
         setDomesticFlightSearch(prev => ({ 
@@ -239,14 +297,19 @@ const DomesticFlightSearch = () => {
             [field]: null // Clear the selected suggestion when user types
         }))
         
+        // Hide favorites when user starts typing
+        if (showFavorites) {
+            setShowFavorites(false)
+        }
+        
         // Clear error when user starts typing
-        if (errors[field as keyof FormErrors]) {
+        if (errors[field]) {
             setErrors(prev => ({ ...prev, [field]: undefined }))
         }
     }
 
     const handleKeyDown = (e: React.KeyboardEvent, field: "from" | "to") => {
-        if (!showSuggestions) return
+        if (!showSuggestions || currentField !== field) return
 
         if (e.key === "ArrowDown") {
             e.preventDefault()
@@ -263,7 +326,38 @@ const DomesticFlightSearch = () => {
             }
         } else if (e.key === "Escape") {
             setShowSuggestions(false)
+            setCurrentField("")
         }
+    }
+
+    const handleFocus = (field: "from" | "to") => {
+        setCurrentField(field)
+        setIsFieldFocused(field)
+        
+        // Show favorites only if the field is empty and it's the first focus
+        if (!domesticFlightSearch[`display${field.charAt(0).toUpperCase() + field.slice(1)}` as keyof Pick<FlightSearchState, 'displayFrom' | 'displayTo'>]) {
+            setShowFavorites(true)
+            setFavoriteField(field)
+        }
+        
+        // Only show suggestions if there's text in the input
+        if (domesticFlightSearch[`display${field.charAt(0).toUpperCase() + field.slice(1)}` as keyof Pick<FlightSearchState, 'displayFrom' | 'displayTo'>]) {
+            setShowSuggestions(suggestions.length > 0)
+        }
+    }
+
+    const handleBlur = () => {
+        setIsFieldFocused("")
+        // Use timeout to allow click events to register
+        setTimeout(() => {
+            setShowSuggestions(false)
+            setShowFavorites(false)
+            setCurrentField("")
+        }, 200)
+    }
+
+    const handleFavoriteClick = (favorite: DomesticSuggestion, field: "from" | "to") => {
+        handleSuggestionClick(favorite, field)
     }
 
     const handlePassengerChange = (type: 'adults' | 'children' | 'infants', operation: 'increment' | 'decrement') => {
@@ -430,20 +524,21 @@ const DomesticFlightSearch = () => {
         return (
             <div 
                 ref={suggestionsRef}
-                className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 shadow-lg z-50 max-h-80 overflow-y-auto mt-1"
+                className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 shadow-lg z-50 max-h-80 overflow-y-auto mt-1 rounded-md"
             >
                 {suggestions.map((suggestion, index) => (
                     <div
                         key={`${suggestion.id}-${index}`}
-                        className={`p-3 cursor-pointer border-b border-gray-300 last:border-b-0 ${
+                        className={`p-3 cursor-pointer border-b border-gray-200 last:border-b-0 ${
                             index === activeSuggestionIndex 
-                                ? 'bg-gray-100' 
+                                ? 'bg-blue-50 border-blue-200' 
                                 : 'hover:bg-gray-50'
                         }`}
                         onMouseDown={(e) => {
-                            e.preventDefault()
+                            e.preventDefault() // Prevent input blur
                             handleSuggestionClick(suggestion, field)
                         }}
+                        onMouseEnter={() => setActiveSuggestionIndex(index)}
                     >
                         <div className="flex justify-between items-start">
                             <div className="flex-1 text-right">
@@ -453,15 +548,65 @@ const DomesticFlightSearch = () => {
                                     </span>
                                     <span className="text-blue-500 font-bold">({suggestion.code})</span>
                                 </div>
-                                <div className="text-sm text-black mt-1">
+                                <div className="text-sm text-gray-600 mt-1">
                                     {suggestion.name}
                                 </div>
                                 <div className="flex items-center gap-2 mt-1 justify-end">
-                                    <span className="text-xs text-black">
+                                    <span className="text-xs text-gray-500">
                                         ایران
                                     </span>
-                                    <span className="text-xs bg-gray-200 text-black px-2 py-1 font-medium border border-gray-300">
+                                    <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded border border-gray-300">
                                         {suggestion.type === 'airport' ? 'فرودگاه' : 'شهر'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        )
+    }
+
+    const renderFavorites = (field: "from" | "to") => {
+        if (!showFavorites || favoriteField !== field || currentInput.length > 0) return null
+
+        return (
+            <div 
+                ref={favoritesRef}
+                className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 shadow-lg z-50 max-h-80 overflow-y-auto mt-1 rounded-md"
+            >
+                <div className="p-3 border-b border-gray-200 bg-gray-50">
+                    <div className="flex items-center gap-2 justify-end">
+                        <Heart className="h-4 w-4 text-red-500" />
+                        <span className="font-bold text-black">مقاصد محبوب داخلی</span>
+                    </div>
+                </div>
+                {FAVORITE_DOMESTIC_DESTINATIONS.map((favorite, index) => (
+                    <div
+                        key={`${favorite.id}-${index}`}
+                        className="p-3 cursor-pointer border-b border-gray-200 last:border-b-0 hover:bg-gray-50"
+                        onMouseDown={(e) => {
+                            e.preventDefault() // Prevent input blur
+                            handleFavoriteClick(favorite, field)
+                        }}
+                    >
+                        <div className="flex justify-between items-start">
+                            <div className="flex-1 text-right">
+                                <div className="flex items-center gap-2 justify-end">
+                                    <span className="font-bold text-black">
+                                        {favorite.city}
+                                    </span>
+                                    <span className="text-blue-500 font-bold">({favorite.code})</span>
+                                </div>
+                                <div className="text-sm text-gray-600 mt-1">
+                                    {favorite.name}
+                                </div>
+                                <div className="flex items-center gap-2 mt-1 justify-end">
+                                    <span className="text-xs text-gray-500">
+                                        ایران
+                                    </span>
+                                    <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded border border-gray-300">
+                                        فرودگاه
                                     </span>
                                 </div>
                             </div>
@@ -478,20 +623,20 @@ const DomesticFlightSearch = () => {
         return (
             <div 
                 ref={passengersRef}
-                className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 shadow-lg z-50 p-4 mt-1"
+                className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 shadow-lg z-50 p-4 mt-1 rounded-md"
             >
                 <div className="space-y-4">
                     {/* Adults Selector */}
                     <div className="flex items-center justify-between">
                         <div className="text-right">
                             <div className="font-bold text-black">بزرگسالان</div>
-                            <div className="text-xs text-black mt-1">(12 سال به بالا)</div>
+                            <div className="text-xs text-gray-600 mt-1">(12 سال به بالا)</div>
                         </div>
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={() => handlePassengerChange('adults', 'decrement')}
                                 disabled={domesticFlightSearch.adults <= 1}
-                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
+                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
                             >
                                 <Minus className="h-4 w-4" />
                             </button>
@@ -501,7 +646,7 @@ const DomesticFlightSearch = () => {
                             <button
                                 onClick={() => handlePassengerChange('adults', 'increment')}
                                 disabled={domesticFlightSearch.adults >= 9}
-                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
+                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
                             >
                                 <Plus className="h-4 w-4" />
                             </button>
@@ -512,13 +657,13 @@ const DomesticFlightSearch = () => {
                     <div className="flex items-center justify-between">
                         <div className="text-right">
                             <div className="font-bold text-black">کودکان</div>
-                            <div className="text-xs text-black mt-1">(2 تا 12 سال)</div>
+                            <div className="text-xs text-gray-600 mt-1">(2 تا 12 سال)</div>
                         </div>
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={() => handlePassengerChange('children', 'decrement')}
                                 disabled={domesticFlightSearch.children <= 0}
-                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
+                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
                             >
                                 <Minus className="h-4 w-4" />
                             </button>
@@ -528,7 +673,7 @@ const DomesticFlightSearch = () => {
                             <button
                                 onClick={() => handlePassengerChange('children', 'increment')}
                                 disabled={domesticFlightSearch.children >= 8}
-                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
+                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
                             >
                                 <Plus className="h-4 w-4" />
                             </button>
@@ -539,13 +684,13 @@ const DomesticFlightSearch = () => {
                     <div className="flex items-center justify-between">
                         <div className="text-right">
                             <div className="font-bold text-black">نوزادان</div>
-                            <div className="text-xs text-black mt-1">(زیر 2 سال)</div>
+                            <div className="text-xs text-gray-600 mt-1">(زیر 2 سال)</div>
                         </div>
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={() => handlePassengerChange('infants', 'decrement')}
                                 disabled={domesticFlightSearch.infants <= 0}
-                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
+                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
                             >
                                 <Minus className="h-4 w-4" />
                             </button>
@@ -555,7 +700,7 @@ const DomesticFlightSearch = () => {
                             <button
                                 onClick={() => handlePassengerChange('infants', 'increment')}
                                 disabled={domesticFlightSearch.infants >= 4}
-                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
+                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
                             >
                                 <Plus className="h-4 w-4" />
                             </button>
@@ -644,7 +789,7 @@ const DomesticFlightSearch = () => {
             }
             {/* General Error Display */}
             {errors.general && (
-                <div className="mb-4 p-3 bg-red-500 border border-red-700 flex items-center gap-3">
+                <div className="mb-4 p-3 bg-red-500 border border-red-700 flex items-center gap-3 rounded">
                     <AlertCircle className="h-4 w-4 text-white flex-shrink-0" />
                     <p className="text-white text-sm font-medium">{errors.general}</p>
                 </div>
@@ -656,7 +801,7 @@ const DomesticFlightSearch = () => {
                     <div className="relative">
                         <select 
                             id="domestic-flight-trip-type"
-                            className="w-full h-12 border rounded-full border-gray-300 bg-[#fffefe] text-black px-3 pr-10 appearance-none"
+                            className="w-full h-12 border rounded-full border-gray-300 bg-[#fffefe] text-black px-3 pr-10 appearance-none focus:outline-none focus:border-blue-500"
                             value={domesticFlightSearch.tripType}
                             onChange={(e) => setDomesticFlightSearch(prev => ({ ...prev, tripType: e.target.value }))}
                         >
@@ -672,7 +817,7 @@ const DomesticFlightSearch = () => {
                     <div className="relative">
                         <select 
                             id="domestic-flight-cabin-class"
-                            className="w-full rounded-full h-12 border border-gray-300 bg-[#fffefe] text-black px-3 pr-10 appearance-none"
+                            className="w-full rounded-full h-12 border border-gray-300 bg-[#fffefe] text-black px-3 pr-10 appearance-none focus:outline-none focus:border-blue-500"
                             value={domesticFlightSearch.cabinClass}
                             onChange={(e) => setDomesticFlightSearch(prev => ({ ...prev, cabinClass: e.target.value }))}
                         >
@@ -687,6 +832,8 @@ const DomesticFlightSearch = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Responsive Grid Layout - KEEPING EXISTING GRID FUNCTIONALITY */}
             <div className={`grid gap-4 md:grid-cols-2 relative pt-10 ${ domesticFlightSearch.tripType == "oneway" ? "lg:grid-cols-4" : " lg:grid-cols-5"}`}>
                 {/* From Input */}
                 <div className="space-y-2 col-span-1 relative">
@@ -700,27 +847,36 @@ const DomesticFlightSearch = () => {
                             ref={fromInputRef}
                             id="domestic-flight-from" 
                             placeholder="نام فرودگاه، مثال: تهران (IKA)" 
-                            className={`pr-10 h-12 border border-gray-300 bg-[#fffefe] text-black placeholder-gray-500 ${
+                            className={`pr-10 h-12 border bg-[#fffefe] text-black placeholder-gray-500 focus:outline-none ${
                                 errors.from 
-                                    ? 'border-red-500 bg-red-500' 
-                                    : 'border-gray-300'
+                                    ? 'border-red-500 focus:border-red-500' 
+                                    : 'border-gray-300 focus:border-blue-500'
                             }`}
                             value={domesticFlightSearch.displayFrom}
                             onChange={(e) => handleInputChange(e.target.value, "from")}
                             onKeyDown={(e) => handleKeyDown(e, "from")}
-                            onFocus={() => {
-                                setCurrentField("from")
-                                setIsFieldFocused("from")
-                                setShowSuggestions(suggestions.length > 0)
-                            }}
-                            onBlur={() => {
-                                setIsFieldFocused("")
-                                setTimeout(() => setShowSuggestions(false), 200)
-                            }}
+                            onFocus={() => handleFocus("from")}
+                            onBlur={handleBlur}
                             autoComplete="off"
                         />
                         {renderSuggestions("from")}
+                        {renderFavorites("from")}
                         {renderError("from")}
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            className="h-12 w-12 rounded-full border-2 
+                            border-gray-300 bg-white hover:border-blue-500 
+                            hover:bg-blue-50 hover:text-blue-600 shadow-md transition-all 
+                            duration-200 transform md:top-0 md:left-[-31px] md:scale-75 top-[43px] left-0
+                            scale-100
+                            absolute z-10"
+                            onClick={handleReverseLocations}
+                            title="جابجایی مبدا و مقصد"
+                        >
+                            <RotateCcw className="h-5 w-5" />
+                        </Button>
                     </div>
                 </div>
                 
@@ -736,26 +892,20 @@ const DomesticFlightSearch = () => {
                             ref={toInputRef}
                             id="domestic-flight-destination" 
                             placeholder="نام فرودگاه مقصد مثال: مشهد (MHD)" 
-                            className={`pr-10 h-12 border border-gray-300 bg-[#fffefe] text-black placeholder-gray-500 ${
+                            className={`pr-10 h-12 border bg-[#fffefe] text-black placeholder-gray-500 focus:outline-none ${
                                 errors.to 
-                                    ? 'border-red-500 bg-red-500' 
-                                    : 'border-gray-300'
+                                    ? 'border-red-500 focus:border-red-500' 
+                                    : 'border-gray-300 focus:border-blue-500'
                             }`}
                             value={domesticFlightSearch.displayTo}
                             onChange={(e) => handleInputChange(e.target.value, "to")}
                             onKeyDown={(e) => handleKeyDown(e, "to")}
-                            onFocus={() => {
-                                setCurrentField("to")
-                                setIsFieldFocused("to")
-                                setShowSuggestions(suggestions.length > 0)
-                            }}
-                            onBlur={() => {
-                                setIsFieldFocused("")
-                                setTimeout(() => setShowSuggestions(false), 200)
-                            }}
+                            onFocus={() => handleFocus("to")}
+                            onBlur={handleBlur}
                             autoComplete="off"
                         />
                         {renderSuggestions("to")}
+                        {renderFavorites("to")}
                         {renderError("to")}
                     </div>
                 </div>
@@ -809,8 +959,6 @@ const DomesticFlightSearch = () => {
                     </div>
                 )}
 
-                
-
                 {/* Passengers Selector */}
                 <div className="space-y-2 col-span-1 relative">
                     <Label className="text-black text-right block">مسافران</Label>
@@ -818,7 +966,9 @@ const DomesticFlightSearch = () => {
                         className="passengers-trigger cursor-pointer"
                         onClick={() => setShowPassengers(!showPassengers)}
                     >
-                        <div className="relative h-12 border border-gray-300 bg-[#fffefe] hover:border-gray-400 flex items-center justify-between px-3">
+                        <div className={`relative h-12 border bg-[#fffefe] hover:border-gray-400 flex items-center justify-between px-3 ${
+                            showPassengers ? 'border-blue-500' : 'border-gray-300'
+                        }`}>
                             <div className="flex items-center gap-2">
                                 <Users className="h-4 w-4 text-gray-400" />
                                 <User className="h-4 w-4 text-gray-400" />

@@ -43,13 +43,21 @@ export function ProfileForm() {
   const [selectedDate, setSelectedDate] = useState<DateObject | null>(null)
   const [hasOtpSent, setHasOtpSent] = useState(false)
   const [hasEmailVerificationSent, setHasEmailVerificationSent] = useState(false)
+  
+  // Credit Card State
+  const [cardData, setCardData] = useState({
+    cardNumber: "",
+    shabaCode: "",
+    cardName: ""
+  })
+
   const { success, error } = useSnack()
+
   useEffect(() => {
     fetch("/api/profile")
       .then((res) => res.json())
       .then((data) => {
         if (data.user) {
-          // // console.log("user data is ", data.user)
           const userData = {
             firstName: data.user.firstName || "",
             lastName: data.user.lastName || "",
@@ -103,7 +111,6 @@ export function ProfileForm() {
         setLoading(false)
       })
   }, [])
-
 
   // Validate form fields
   const validateForm = (): boolean => {
@@ -208,6 +215,14 @@ export function ProfileForm() {
     }
   }
 
+  // Credit Card Submit Handler
+  const handleCardSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    // TODO: Add credit card API integration later
+    console.log("Card data to be submitted:", cardData)
+    success("اطلاعات کارت بانکی با موفقیت ذخیره شد", "", 3000)
+  }
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (hasExistingData) return
     
@@ -227,6 +242,15 @@ export function ProfileForm() {
     }
   }
 
+  const handleCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    
+    setCardData((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
+
   const handleDateChange = (date: DateObject | null) => {
     if (hasExistingData) return
     
@@ -244,13 +268,10 @@ export function ProfileForm() {
   const isFormValid = () => {
     return formData.firstName.trim().length >= 2 && 
            formData.lastName.trim().length >= 2 && 
-          //  /^\d{10}$/.test(formData.nationalId) && 
            formData.address.trim().length >= 10 && 
            formData.city.trim() && 
-          //  /^\d{10}$/.test(formData.postalCode) && 
            selectedDate !== null
   }
-
 
   const addPhoneNumber = async () => {
     const res = await fetch("/api/auth/add-phone", {
@@ -268,7 +289,6 @@ export function ProfileForm() {
     else 
       error(data.message, "", 3000)
   } 
-
 
   const generateOtp = async () => {
     const res = await fetch("/api/auth/generate-otp", {
@@ -366,393 +386,460 @@ export function ProfileForm() {
 
   return (
     <>
-    {hasPhone === false ?
-    <Card className="p-4 mb-4">
-      <CardTitle>افزودن شماره همراه</CardTitle>
-      <CardDescription>برای استفاده از خدمات سایت باید شماره همراه خود را اضافه کنید</CardDescription>
-      <CardContent>
-        <div className="grid grid-cols-4 items-center w-full">
-          <div className="md:col-span-3 col-span-4 pe-2">
-            <Input type="text" placeholder="شماره همراه خود را وارد کنید" onChange={ e => setPhoneNumber(e.currentTarget.value)} />
-          </div>
-          <div className="md:col-span-1 col-span-4 p-2">
-            <Button className="w-full"
-            onClick={addPhoneNumber}>
-              افزودن شماره همراه
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-    :
-    <Card className="p-4 mb-4">
-      <CardTitle>شماره همراه</CardTitle>
-      <CardContent>
-        <div className="grid grid-cols-4 w-full">
-          <div className="col-span-1 p-2">
-            <span>موبایل:</span>
-          </div>
-          <div className="col-span-3 pe-2">
-            <Input type="text" disabled value={phoneNumber} />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-    }
+      {/* Section 1: Contact Information */}
+      <Card className="p-4 mb-4">
+        <CardHeader>
+          <CardTitle>اطلاعات تماس</CardTitle>
+          <CardDescription>شماره همراه و ایمیل خود را مدیریت کنید</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Phone Section */}
+          {hasPhone === false ? (
+            <div>
+              <CardTitle className="text-lg">افزودن شماره همراه</CardTitle>
+              <CardDescription>برای استفاده از خدمات سایت باید شماره همراه خود را اضافه کنید</CardDescription>
+              <div className="grid grid-cols-4 items-center w-full mt-4">
+                <div className="md:col-span-3 col-span-4 pe-2">
+                  <Input type="text" placeholder="شماره همراه خود را وارد کنید" onChange={e => setPhoneNumber(e.currentTarget.value)} />
+                </div>
+                <div className="md:col-span-1 col-span-4 p-2">
+                  <Button className="w-full" onClick={addPhoneNumber}>
+                    افزودن شماره همراه
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <CardTitle className="text-lg">شماره همراه</CardTitle>
+              <div className="grid grid-cols-4 w-full mt-4">
+                <div className="col-span-1 p-2">
+                  <span>موبایل:</span>
+                </div>
+                <div className="col-span-3 pe-2">
+                  <Input type="text" disabled value={phoneNumber} />
+                </div>
+              </div>
+            </div>
+          )}
 
-    {isPhoneVerified == false && hasPhone &&
-    <Card className="p-4 my-4">
-      <CardTitle>تایید شماره تلفن همراه</CardTitle>
-      <CardContent>
-        <div className="grid grid-cols-4 w-full items-center">
-          <div className="md:col-span-3 col-span-4 pe-2">
-            <Input type="text" disabled={!hasOtpSent} onChange={e => setOtpCode(e.currentTarget.value)} placeholder="کد تایید را وارد کنید" />
-          </div>
-          <div className="md:col-span-1 col-span-4">
-            { hasOtpSent ?
-            <Button className="bg-blue-400 ps-2 w-full"
-            onClick={handleVerifyNumber}>تایید شماره</Button>
-            :
-            <Button className="bg-blue-400 ps-2 w-full"
-            onClick={generateOtp}>ارسال کد تایید</Button>
+          {isPhoneVerified == false && hasPhone && (
+            <div>
+              <CardTitle className="text-lg">تایید شماره تلفن همراه</CardTitle>
+              <div className="grid grid-cols-4 w-full items-center mt-4">
+                <div className="md:col-span-3 col-span-4 pe-2">
+                  <Input type="text" disabled={!hasOtpSent} onChange={e => setOtpCode(e.currentTarget.value)} placeholder="کد تایید را وارد کنید" />
+                </div>
+                <div className="md:col-span-1 col-span-4">
+                  {hasOtpSent ? (
+                    <Button className="bg-blue-400 ps-2 w-full" onClick={handleVerifyNumber}>
+                      تایید شماره
+                    </Button>
+                  ) : (
+                    <Button className="bg-blue-400 ps-2 w-full" onClick={generateOtp}>
+                      ارسال کد تایید
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Email Section */}
+          {hasEmail === false ? (
+            <div>
+              <CardTitle className="text-lg">افزودن ایمیل</CardTitle>
+              <CardDescription>برای دریافت اطلاعیه‌ها و بازیابی رمز عبور، ایمیل خود را اضافه کنید</CardDescription>
+              <div className="grid grid-cols-4 items-center w-full mt-4">
+                <div className="md:col-span-3 col-span-4 pe-2">
+                  <Input 
+                    type="email" 
+                    placeholder="آدرس ایمیل خود را وارد کنید" 
+                    onChange={e => setEmail(e.currentTarget.value)} 
+                  />
+                </div>
+                <div className="md:col-span-1 col-span-4 p-2">
+                  <Button className="w-full" onClick={addEmail}>
+                    افزودن ایمیل
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <CardTitle className="text-lg">ایمیل</CardTitle>
+              <div className="grid grid-cols-4 w-full items-center mt-4">
+                <div className="col-span-1 p-2">
+                  <span>ایمیل:</span>
+                </div>
+                <div className="col-span-3 pe-2">
+                  <Input type="email" disabled value={email} />
+                </div>
+              </div>
+              {isEmailVerified && (
+                <div className="mt-2 text-sm text-green-600 flex items-center gap-1">
+                  <Mail className="h-4 w-4" />
+                  تایید شده
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Email Verification Section */}
+          {isEmailVerified == false && hasEmail && (
+            <div>
+              <CardTitle className="text-lg">تایید آدرس ایمیل</CardTitle>
+              <div className="grid grid-cols-4 w-full items-center mt-4">
+                <div className="md:col-span-3 col-span-4 pe-2">
+                  <Input 
+                    type="text" 
+                    disabled={!hasEmailVerificationSent} 
+                    onChange={e => setEmailVerificationCode(e.currentTarget.value)} 
+                    placeholder="کد تایید ایمیل را وارد کنید" 
+                  />
+                </div>
+                <div className="md:col-span-1 col-span-4">
+                  {hasEmailVerificationSent ? (
+                    <Button className="bg-blue-400 ps-2 w-full" onClick={handleVerifyEmail}>
+                      تایید ایمیل
+                    </Button>
+                  ) : (
+                    <Button className="bg-blue-400 ps-2 w-full" onClick={sendEmailVerification}>
+                      ارسال کد تایید
+                    </Button>
+                  )}
+                </div>
+              </div>
+              <div className="mt-2 text-sm text-gray-600">
+                کد تایید به ایمیل <strong>{email}</strong> ارسال خواهد شد
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Section 2: Personal Information */}
+      <Card className="p-4 mb-4">
+        <CardHeader>
+          <CardTitle>اطلاعات شخصی</CardTitle>
+          <CardDescription>
+            {hasExistingData 
+              ? "اطلاعات شما قبلا ثبت شده است. برای ویرایش با پشتیبانی تماس بگیرید."
+              : "اطلاعات خود را وارد و به‌روزرسانی کنید"
             }
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-    }
-
-      {/* Email Section */}
-      {hasEmail === false ?
-      <Card className="p-4 my-4">
-        <CardTitle>افزودن ایمیل</CardTitle>
-        <CardDescription>برای دریافت اطلاعیه‌ها و بازیابی رمز عبور، ایمیل خود را اضافه کنید</CardDescription>
+          </CardDescription>
+        </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-4 items-center w-full">
-            <div className="md:col-span-3 col-span-4 pe-2">
-              <Input 
-                type="email" 
-                placeholder="آدرس ایمیل خود را وارد کنید" 
-                onChange={e => setEmail(e.currentTarget.value)} 
-              />
-            </div>
-            <div className="md:col-span-1 col-span-4 p-2">
-              <Button className="w-full" onClick={addEmail}>
-                افزودن ایمیل
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      :
-      <Card className="p-4 my-4">
-        <CardTitle>ایمیل</CardTitle>
-        <CardContent>
-          <div className="grid grid-cols-4 w-full items-center">
-            <div className="col-span-1 p-2">
-              <span>ایمیل:</span>
-            </div>
-            <div className="col-span-3 pe-2">
-              <Input type="email" disabled value={email} />
-            </div>
-          </div>
-          {isEmailVerified && (
-            <div className="mt-2 text-sm text-green-600 flex items-center gap-1">
-              <Mail className="h-4 w-4" />
-              تایید شده
-            </div>
-          )}
-        </CardContent>
-      </Card>
-      }
-
-      {/* Email Verification Section */}
-      {isEmailVerified == false && hasEmail &&
-      <Card className="p-4 my-4">
-        <CardTitle>تایید آدرس ایمیل</CardTitle>
-        <CardContent>
-          <div className="grid grid-cols-4 w-full items-center">
-            <div className="md:col-span-3 col-span-4 pe-2">
-              <Input 
-                type="text" 
-                disabled={!hasEmailVerificationSent} 
-                onChange={e => setEmailVerificationCode(e.currentTarget.value)} 
-                placeholder="کد تایید ایمیل را وارد کنید" 
-              />
-            </div>
-            <div className="md:col-span-1 col-span-4">
-              { hasEmailVerificationSent ?
-              <Button className="bg-blue-400 ps-2 w-full" onClick={handleVerifyEmail}>
-                تایید ایمیل
-              </Button>
-              :
-              <Button className="bg-blue-400 ps-2 w-full" onClick={sendEmailVerification}>
-                ارسال کد تایید
-              </Button>
-              }
-            </div>
-          </div>
-          <div className="mt-2 text-sm text-gray-600">
-            کد تایید به ایمیل <strong>{email}</strong> ارسال خواهد شد
-          </div>
-        </CardContent>
-      </Card>
-      }
-
-
-
-    <Card className="p-4">
-      <CardHeader>
-        <CardTitle>اطلاعات شخصی</CardTitle>
-        <CardDescription>
-          {hasExistingData 
-            ? "اطلاعات شما قبلا ثبت شده است. برای ویرایش با پشتیبانی تماس بگیرید."
-            : "اطلاعات خود را وارد و به‌روزرسانی کنید"
-          }
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {hasExistingData && (
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-center gap-3 text-blue-700">
-              <Mail className="h-5 w-5" />
-              <div>
-                <p className="font-medium">اطلاعات شما قبلا ثبت شده است</p>
-                <p className="text-sm mt-1">برای ویرایش اطلاعات لطفا با پشتیبانی تماس بگیرید</p>
+          {hasExistingData && (
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center gap-3 text-blue-700">
+                <Mail className="h-5 w-5" />
+                <div>
+                  <p className="font-medium">اطلاعات شما قبلا ثبت شده است</p>
+                  <p className="text-sm mt-1">برای ویرایش اطلاعات لطفا با پشتیبانی تماس بگیرید</p>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {_success && (
-            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
-              اطلاعات با موفقیت به‌روزرسانی شد
-            </div>
-          )}
-          {_error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
-              <AlertCircle className="h-4 w-4" />
-              {_error}
-            </div>
           )}
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {_success && (
+              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
+                اطلاعات با موفقیت به‌روزرسانی شد
+              </div>
+            )}
+            {_error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                {_error}
+              </div>
+            )}
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">
+                  نام
+                  <span className="text-red-500 mr-1">*</span>
+                </Label>
+                <div className="relative">
+                  <User className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="firstName"
+                    name="firstName"
+                    placeholder="نام خود را وارد کنید"
+                    className={`pr-10 ${formErrors.firstName ? "border-red-500" : ""}`}
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    required
+                    disabled={hasExistingData}
+                  />
+                </div>
+                {formErrors.firstName && (
+                  <p className="text-red-500 text-xs flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {formErrors.firstName}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="lastName">
+                  نام خانوادگی
+                  <span className="text-red-500 mr-1">*</span>
+                </Label>
+                <div className="relative">
+                  <User className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="lastName"
+                    name="lastName"
+                    placeholder="نام خانوادگی خود را وارد کنید"
+                    className={`pr-10 ${formErrors.lastName ? "border-red-500" : ""}`}
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    required
+                    disabled={hasExistingData}
+                  />
+                </div>
+                {formErrors.lastName && (
+                  <p className="text-red-500 text-xs flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {formErrors.lastName}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="nationalId">
+                  کد ملی
+                  <span className="text-red-500 mr-1">*</span>
+                </Label>
+                <div className="relative">
+                  <CreditCard className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="nationalId"
+                    name="nationalId"
+                    placeholder="کد ملی ۱۰ رقمی"
+                    className={`pr-10 ${formErrors.nationalId ? "border-red-500" : ""}`}
+                    value={formData.nationalId}
+                    onChange={handleChange}
+                    maxLength={10}
+                    disabled={hasExistingData}
+                  />
+                </div>
+                {formErrors.nationalId && (
+                  <p className="text-red-500 text-xs flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {formErrors.nationalId}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="dateOfBirth">
+                  تاریخ تولد
+                  <span className="text-red-500 mr-1">*</span>
+                </Label>
+                <div className="relative">
+                  <Calendar className="absolute right-3 top-3 h-4 w-4 text-muted-foreground z-10" />
+                  <DatePicker
+                    value={selectedDate}
+                    onChange={handleDateChange}
+                    calendar={persian}
+                    locale={persian_fa}
+                    calendarPosition="bottom-right"
+                    disabled={hasExistingData}
+                    render={(value, openCalendar) => (
+                      <div className="relative">
+                        <input
+                          className={`w-full h-10 px-3 pr-10 border rounded-md text-sm bg-background ${
+                            formErrors.dateOfBirth ? "border-red-500" : "border-input"
+                          } ${hasExistingData ? "bg-muted cursor-not-allowed" : ""}`}
+                          placeholder="تاریخ تولد را انتخاب کنید"
+                          value={value || ""}
+                          onClick={openCalendar}
+                          readOnly
+                          disabled={hasExistingData}
+                        />
+                      </div>
+                    )}
+                    className="rmdp-prime"
+                  />
+                </div>
+                {formErrors.dateOfBirth && (
+                  <p className="text-red-500 text-xs flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {formErrors.dateOfBirth}
+                  </p>
+                )}
+              </div>
+            </div>
+
             <div className="space-y-2">
-              <Label htmlFor="firstName">
-                نام
+              <Label htmlFor="address">
+                آدرس
                 <span className="text-red-500 mr-1">*</span>
               </Label>
               <div className="relative">
-                <User className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="firstName"
-                  name="firstName"
-                  placeholder="نام خود را وارد کنید"
-                  className={`pr-10 ${formErrors.firstName ? "border-red-500" : ""}`}
-                  value={formData.firstName}
+                <MapPin className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Textarea
+                  id="address"
+                  name="address"
+                  placeholder="آدرس کامل خود را وارد کنید"
+                  className={`pr-10 min-h-24 ${formErrors.address ? "border-red-500" : ""}`}
+                  value={formData.address}
                   onChange={handleChange}
-                  required
                   disabled={hasExistingData}
                 />
               </div>
-              {formErrors.firstName && (
+              {formErrors.address && (
                 <p className="text-red-500 text-xs flex items-center gap-1">
                   <AlertCircle className="h-3 w-3" />
-                  {formErrors.firstName}
+                  {formErrors.address}
                 </p>
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="lastName">
-                نام خانوادگی
-                <span className="text-red-500 mr-1">*</span>
-              </Label>
-              <div className="relative">
-                <User className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="lastName"
-                  name="lastName"
-                  placeholder="نام خانوادگی خود را وارد کنید"
-                  className={`pr-10 ${formErrors.lastName ? "border-red-500" : ""}`}
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  required
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="city">
+                  شهر
+                  <span className="text-red-500 mr-1">*</span>
+                </Label>
+                <Input 
+                  id="city" 
+                  name="city" 
+                  placeholder="نام شهر" 
+                  className={formErrors.city ? "border-red-500" : ""}
+                  value={formData.city} 
+                  onChange={handleChange} 
                   disabled={hasExistingData}
                 />
+                {formErrors.city && (
+                  <p className="text-red-500 text-xs flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {formErrors.city}
+                  </p>
+                )}
               </div>
-              {formErrors.lastName && (
-                <p className="text-red-500 text-xs flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3" />
-                  {formErrors.lastName}
-                </p>
-              )}
-            </div>
-          </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="nationalId">
-                کد ملی
-                <span className="text-red-500 mr-1">*</span>
-              </Label>
-              <div className="relative">
-                <CreditCard className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+              <div className="space-y-2">
+                <Label htmlFor="postalCode">
+                  کد پستی
+                  <span className="text-red-500 mr-1">*</span>
+                </Label>
                 <Input
-                  id="nationalId"
-                  name="nationalId"
-                  placeholder="کد ملی ۱۰ رقمی"
-                  className={`pr-10 ${formErrors.nationalId ? "border-red-500" : ""}`}
-                  value={formData.nationalId}
+                  id="postalCode"
+                  name="postalCode"
+                  placeholder="کد پستی ۱۰ رقمی"
+                  className={formErrors.postalCode ? "border-red-500" : ""}
+                  value={formData.postalCode}
                   onChange={handleChange}
                   maxLength={10}
                   disabled={hasExistingData}
                 />
+                {formErrors.postalCode && (
+                  <p className="text-red-500 text-xs flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {formErrors.postalCode}
+                  </p>
+                )}
               </div>
-              {formErrors.nationalId && (
-                <p className="text-red-500 text-xs flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3" />
-                  {formErrors.nationalId}
-                </p>
-              )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="dateOfBirth">
-                تاریخ تولد
-                <span className="text-red-500 mr-1">*</span>
-              </Label>
-              <div className="relative">
-                <Calendar className="absolute right-3 top-3 h-4 w-4 text-muted-foreground z-10" />
-                <DatePicker
-                  value={selectedDate}
-                  onChange={handleDateChange}
-                  calendar={persian}
-                  locale={persian_fa}
-                  calendarPosition="bottom-right"
-                  disabled={hasExistingData}
-                  render={(value, openCalendar) => (
-                    <div className="relative">
-                      <input
-                        className={`w-full h-10 px-3 pr-10 border rounded-md text-sm bg-background ${
-                          formErrors.dateOfBirth ? "border-red-500" : "border-input"
-                        } ${hasExistingData ? "bg-muted cursor-not-allowed" : ""}`}
-                        placeholder="تاریخ تولد را انتخاب کنید"
-                        value={value || ""}
-                        onClick={openCalendar}
-                        readOnly
-                        disabled={hasExistingData}
-                      />
-                    </div>
-                  )}
-                  className="rmdp-prime"
+            <div className="flex justify-end gap-3">
+              <Button type="button" variant="outline" disabled={hasExistingData}>
+                انصراف
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={saving || hasExistingData || !isFormValid()}
+                className={hasExistingData || !isFormValid() ? "bg-gray-400 cursor-not-allowed" : ""}
+              >
+                <Save className="ml-2 h-4 w-4" />
+                {hasExistingData ? "غیرقابل ویرایش" : saving ? "در حال ذخیره..." : "ذخیره اطلاعات"}
+              </Button>
+            </div>
+
+            {!isFormValid() && !hasExistingData && (
+              <div className="bg-amber-50 border border-amber-200 text-amber-700 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                لطفا تمام فیلدهای ضروری (علامت‌دار با *) را به درستی پر کنید
+              </div>
+            )}
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* Section 3: Credit Card Details */}
+      <Card className="p-4">
+        <CardHeader>
+          <CardTitle>اطلاعات کارت بانکی</CardTitle>
+          <CardDescription>اطلاعات کارت بانکی خود را برای تراکنش‌های آینده وارد کنید</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleCardSubmit} className="space-y-6">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="cardNumber">
+                  شماره کارت (۱۶ رقمی)
+                  <span className="text-red-500 mr-1">*</span>
+                </Label>
+                <div className="relative">
+                  <CreditCard className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="cardNumber"
+                    name="cardNumber"
+                    placeholder="XXXX-XXXX-XXXX-XXXX"
+                    value={cardData.cardNumber}
+                    onChange={handleCardChange}
+                    maxLength={16}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="cardName">
+                  نام صاحب کارت
+                  <span className="text-red-500 mr-1">*</span>
+                </Label>
+                <Input
+                  id="cardName"
+                  name="cardName"
+                  placeholder="نام کامل صاحب کارت"
+                  value={cardData.cardName}
+                  onChange={handleCardChange}
                 />
               </div>
-              {formErrors.dateOfBirth && (
-                <p className="text-red-500 text-xs flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3" />
-                  {formErrors.dateOfBirth}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="address">
-              آدرس
-              <span className="text-red-500 mr-1">*</span>
-            </Label>
-            <div className="relative">
-              <MapPin className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Textarea
-                id="address"
-                name="address"
-                placeholder="آدرس کامل خود را وارد کنید"
-                className={`pr-10 min-h-24 ${formErrors.address ? "border-red-500" : ""}`}
-                value={formData.address}
-                onChange={handleChange}
-                disabled={hasExistingData}
-              />
-            </div>
-            {formErrors.address && (
-              <p className="text-red-500 text-xs flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" />
-                {formErrors.address}
-              </p>
-            )}
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="city">
-                شهر
-                <span className="text-red-500 mr-1">*</span>
-              </Label>
-              <Input 
-                id="city" 
-                name="city" 
-                placeholder="نام شهر" 
-                className={formErrors.city ? "border-red-500" : ""}
-                value={formData.city} 
-                onChange={handleChange} 
-                disabled={hasExistingData}
-              />
-              {formErrors.city && (
-                <p className="text-red-500 text-xs flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3" />
-                  {formErrors.city}
-                </p>
-              )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="postalCode">
-                کد پستی
+              <Label htmlFor="shabaCode">
+                شماره شبا (با پیشوند IR)
                 <span className="text-red-500 mr-1">*</span>
               </Label>
               <Input
-                id="postalCode"
-                name="postalCode"
-                placeholder="کد پستی ۱۰ رقمی"
-                className={formErrors.postalCode ? "border-red-500" : ""}
-                value={formData.postalCode}
-                onChange={handleChange}
-                maxLength={10}
-                disabled={hasExistingData}
+                id="shabaCode"
+                name="shabaCode"
+                placeholder="IRXXXXXXXXXXXXXXXXXXXXXX"
+                value={cardData.shabaCode}
+                onChange={handleCardChange}
               />
-              {formErrors.postalCode && (
-                <p className="text-red-500 text-xs flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3" />
-                  {formErrors.postalCode}
-                </p>
-              )}
             </div>
-          </div>
 
-          <div className="flex justify-end gap-3">
-            <Button type="button" variant="outline" disabled={hasExistingData}>
-              انصراف
-            </Button>
-            <Button 
-              type="submit" 
-              disabled={saving || hasExistingData || !isFormValid()}
-              className={hasExistingData || !isFormValid() ? "bg-gray-400 cursor-not-allowed" : ""}
-            >
-              <Save className="ml-2 h-4 w-4" />
-              {hasExistingData ? "غیرقابل ویرایش" : saving ? "در حال ذخیره..." : "ذخیره اطلاعات"}
-            </Button>
-          </div>
-
-          {!isFormValid() && !hasExistingData && (
-            <div className="bg-amber-50 border border-amber-200 text-amber-700 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
-              <AlertCircle className="h-4 w-4" />
-              لطفا تمام فیلدهای ضروری (علامت‌دار با *) را به درستی پر کنید
+            <div className="flex justify-end gap-3">
+              <Button type="button" variant="outline">
+                انصراف
+              </Button>
+              <Button type="submit">
+                <Save className="ml-2 h-4 w-4" />
+                ذخیره اطلاعات بانکی
+              </Button>
             </div>
-          )}
-        </form>
-      </CardContent>
-    </Card>
+          </form>
+        </CardContent>
+      </Card>
     </>
   )
 }

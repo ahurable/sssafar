@@ -4,14 +4,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useFlight } from "@/contexts/search/FlightContext"
 import { useSearch } from "@/hooks/use-search"
-import { Search, Calendar, MapPin, ChevronDown, Loader2, Users, Baby, User, Plus, Minus, CalendarIcon, AlertCircle } from "lucide-react"
+import { Search, Calendar, MapPin, ChevronDown, Loader2, Users, Baby, User, Plus, Minus, CalendarIcon, AlertCircle, RotateCcw, Heart } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState, useRef } from "react"
 import ShamsiDateModal from "./ShamsiCalendar"
 import { formatShamsiDate } from "./utils"
 import { shamsiToGregorianString } from "@/lib/jalaalil"
 import { motion, AnimatePresence } from 'framer-motion';
-
 
 interface Suggestion {
   id: string
@@ -44,6 +43,58 @@ interface FlightSearchState {
   cabinClass: string
 }
 
+// Favorite destinations data
+const FAVORITE_DESTINATIONS: Suggestion[] = [
+  {
+    id: "IST",
+    name: "فرودگاه بین‌المللی استانبول",
+    country: "ترکیه",
+    code: "IST",
+    city: "استانبول",
+    type: 'airport'
+  },
+  {
+    id: "DXB",
+    name: "فرودگاه بین‌المللی دبی",
+    country: "امارات",
+    code: "DXB",
+    city: "دبی",
+    type: 'airport'
+  },
+  {
+    id: "IKA",
+    name: "فرودگاه بین‌المللی امام خمینی",
+    country: "ایران",
+    code: "IKA",
+    city: "تهران",
+    type: 'airport'
+  },
+  {
+    id: "THR",
+    name: "فرودگاه بین‌المللی مهرآباد",
+    country: "ایران",
+    code: "THR",
+    city: "تهران",
+    type: 'airport'
+  },
+  {
+    id: "MHD",
+    name: "فرودگاه بین‌المللی شهید هاشمی نژاد",
+    country: "ایران",
+    code: "MHD",
+    city: "مشهد",
+    type: 'airport'
+  },
+  {
+    id: "SYZ",
+    name: "فرودگاه بین‌المللی شهید دستغیب",
+    country: "ایران",
+    code: "SYZ",
+    city: "شیراز",
+    type: 'airport'
+  }
+]
+
 const FlightSearch = () => {
     const [isLoading, setIsLoading] = useState(false)
     const [flightSearch, setFlightSearch] = useState<FlightSearchState>({
@@ -69,15 +120,16 @@ const FlightSearch = () => {
     const [isFieldFocused, setIsFieldFocused] = useState("")
     const [errors, setErrors] = useState<FormErrors>({})
     const [openCalendarId, setOpenCalendarId] = useState<string | null>(null)
-
-    // Passengers popover state
     const [showPassengers, setShowPassengers] = useState(false)
+    const [showFavorites, setShowFavorites] = useState(false)
+    const [favoriteField, setFavoriteField] = useState<"from" | "to" | null>(null)
 
     const { getCitySuggestions } = useSearch()
     const { searchFlights, setFlightsData, setFlightRequest, loading, origin, destination } = useFlight()
     
     const suggestionsRef = useRef<HTMLDivElement>(null)
     const passengersRef = useRef<HTMLDivElement>(null)
+    const favoritesRef = useRef<HTMLDivElement>(null)
     const fromInputRef = useRef<HTMLInputElement>(null)
     const toInputRef = useRef<HTMLInputElement>(null)
 
@@ -108,7 +160,6 @@ const FlightSearch = () => {
             setSuggestionLoading(true)
             try {
                 const data = await getCitySuggestions(currentInput, 'flight')
-                // console.log("Suggestions for:", currentInput, data)
                 setSuggestions(data)
                 setShowSuggestions(true)
                 setActiveSuggestionIndex(0)
@@ -125,7 +176,7 @@ const FlightSearch = () => {
         return () => clearTimeout(timer)
     }, [currentInput, getCitySuggestions])
 
-    // Handle click outside for suggestions and passengers popover
+    // Handle click outside for suggestions, passengers popover, and favorites
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             // Close suggestions
@@ -147,6 +198,15 @@ const FlightSearch = () => {
                 !(event.target as Element).closest('.passengers-trigger')
             ) {
                 setShowPassengers(false)
+            }
+
+            // Close favorites popover
+            if (
+                favoritesRef.current && 
+                !favoritesRef.current.contains(event.target as Node) &&
+                !(event.target as Element).closest('.favorites-trigger')
+            ) {
+                setShowFavorites(false)
             }
         }
 
@@ -195,6 +255,24 @@ const FlightSearch = () => {
         return Object.keys(newErrors).length === 0
     }
 
+    // Reverse from and to values
+    const handleReverseLocations = () => {
+        setFlightSearch(prev => ({
+            ...prev,
+            from: prev.to,
+            to: prev.from,
+            displayFrom: prev.displayTo,
+            displayTo: prev.displayFrom
+        }))
+        
+        // Clear any existing errors
+        setErrors(prev => ({ 
+            ...prev, 
+            from: undefined, 
+            to: undefined 
+        }))
+    }
+
     const handleSuggestionClick = (suggestion: Suggestion, field: "from" | "to") => {
         let displayValue = ""
         
@@ -219,6 +297,7 @@ const FlightSearch = () => {
             [`display${field.charAt(0).toUpperCase() + field.slice(1)}`]: displayValue
         }))
         setShowSuggestions(false)
+        setShowFavorites(false)
         setCurrentInput("")
         setCurrentField("")
         
@@ -239,6 +318,11 @@ const FlightSearch = () => {
             [`display${field.charAt(0).toUpperCase() + field.slice(1)}`]: value,
             [field]: null // Clear the selected suggestion when user types
         }))
+        
+        // Hide favorites when user starts typing
+        if (showFavorites) {
+            setShowFavorites(false)
+        }
         
         // Clear error when user starts typing
         if (errors[field]) {
@@ -271,6 +355,13 @@ const FlightSearch = () => {
     const handleFocus = (field: "from" | "to") => {
         setCurrentField(field)
         setIsFieldFocused(field)
+        
+        // Show favorites only if the field is empty and it's the first focus
+        if (!flightSearch[`display${field.charAt(0).toUpperCase() + field.slice(1)}` as keyof Pick<FlightSearchState, 'displayFrom' | 'displayTo'>]) {
+            setShowFavorites(true)
+            setFavoriteField(field)
+        }
+        
         // Only show suggestions if there's text in the input
         if (flightSearch[`display${field.charAt(0).toUpperCase() + field.slice(1)}` as keyof Pick<FlightSearchState, 'displayFrom' | 'displayTo'>]) {
             setShowSuggestions(suggestions.length > 0)
@@ -282,8 +373,13 @@ const FlightSearch = () => {
         // Use timeout to allow click events to register
         setTimeout(() => {
             setShowSuggestions(false)
+            setShowFavorites(false)
             setCurrentField("")
         }, 200)
+    }
+
+    const handleFavoriteClick = (favorite: Suggestion, field: "from" | "to") => {
+        handleSuggestionClick(favorite, field)
     }
 
     const handlePassengerChange = (type: 'adults' | 'children' | 'infants', operation: 'increment' | 'decrement') => {
@@ -489,6 +585,74 @@ const FlightSearch = () => {
                                         <div className="flex items-center gap-2 mt-1 justify-end">
                                             <span className="text-xs text-gray-500">
                                                 {suggestion.country}
+                                            </span>
+                                            <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded border border-gray-300">
+                                                شهر
+                                            </span>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        )
+    }
+
+    const renderFavorites = (field: "from" | "to") => {
+        if (!showFavorites || favoriteField !== field || currentInput.length > 0) return null
+
+        return (
+            <div 
+                ref={favoritesRef}
+                className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 shadow-lg z-50 max-h-80 overflow-y-auto mt-1 rounded-md"
+            >
+                <div className="p-3 border-b border-gray-200 bg-gray-50">
+                    <div className="flex items-center gap-2 justify-end">
+                        <Heart className="h-4 w-4 text-red-500" />
+                        <span className="font-bold text-black">مقاصد محبوب</span>
+                    </div>
+                </div>
+                {FAVORITE_DESTINATIONS.map((favorite, index) => (
+                    <div
+                        key={`${favorite.id}-${index}`}
+                        className="p-3 cursor-pointer border-b border-gray-200 last:border-b-0 hover:bg-gray-50"
+                        onMouseDown={(e) => {
+                            e.preventDefault() // Prevent input blur
+                            handleFavoriteClick(favorite, field)
+                        }}
+                    >
+                        <div className="flex justify-between items-start">
+                            <div className="flex-1 text-right">
+                                {favorite.type === 'airport' ? (
+                                    <>
+                                        <div className="flex items-center gap-2 justify-end">
+                                            <span className="font-bold text-black">
+                                                {favorite.city}
+                                            </span>
+                                            <span className="text-blue-500 font-bold">({favorite.code})</span>
+                                        </div>
+                                        <div className="text-sm text-gray-600 mt-1">
+                                            {favorite.name}
+                                        </div>
+                                        <div className="flex items-center gap-2 mt-1 justify-end">
+                                            <span className="text-xs text-gray-500">
+                                                {favorite.country}
+                                            </span>
+                                            <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded border border-gray-300">
+                                                فرودگاه
+                                            </span>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="font-bold text-black">
+                                            {favorite.name}
+                                        </div>
+                                        <div className="flex items-center gap-2 mt-1 justify-end">
+                                            <span className="text-xs text-gray-500">
+                                                {favorite.country}
                                             </span>
                                             <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded border border-gray-300">
                                                 شهر
@@ -734,6 +898,7 @@ const FlightSearch = () => {
                 </div>
             </div>
 
+            {/* Responsive Grid Layout - UPDATED WITH DOMESTIC FLIGHT SEARCH GRID FUNCTIONALITY */}
             <div className={`grid gap-4 md:grid-cols-2 relative pt-10 ${flightSearch.tripType === "oneway" ? "lg:grid-cols-4" : "lg:grid-cols-5"}`}>
                 {/* From Input */}
                 <div className="space-y-2 col-span-1 relative">
@@ -760,7 +925,23 @@ const FlightSearch = () => {
                             autoComplete="off"
                         />
                         {renderSuggestions("from")}
+                        {renderFavorites("from")}
                         {renderError("from")}
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            className="h-12 w-12 rounded-full border-2 
+                            border-gray-300 bg-white hover:border-blue-500 
+                            hover:bg-blue-50 hover:text-blue-600 shadow-md transition-all 
+                            duration-200 transform md:top-0 md:left-[-31px] md:scale-75 top-[43px] left-0
+                            scale-100
+                            absolute z-10"
+                            onClick={handleReverseLocations}
+                            title="جابجایی مبدا و مقصد"
+                        >
+                            <RotateCcw className="h-5 w-5" />
+                        </Button>
                     </div>
                 </div>
                 
@@ -789,6 +970,7 @@ const FlightSearch = () => {
                             autoComplete="off"
                         />
                         {renderSuggestions("to")}
+                        {renderFavorites("to")}
                         {renderError("to")}
                     </div>
                 </div>
@@ -796,21 +978,24 @@ const FlightSearch = () => {
                 {/* Departure Date */}
                 <div className="space-y-2 col-span-1 relative">
                     <Label className="text-black text-right block">تاریخ رفت</Label>
-                    <ShamsiDateModal
-                        calendarId="calendar1"
-                        onOpenChange={setOpenCalendarId}
-                        isOpen={openCalendarId === "calendar1"}
-                        departureDate={flightSearch.departureDate}
-                        returnDate={flightSearch.returnDate || ""}
-                        tripType={flightSearch.tripType}
-                        origin={flightSearch.from?.code}
-                        destination={flightSearch.to?.code}
-                        onDepartureDateChange={(date) => setFlightSearch(prev => ({ ...prev, departureDate: date }))}
-                        onReturnDateChange={(date) => setFlightSearch(prev => ({ ...prev, returnDate: date }))}
-                        onTripTypeChange={(type) => setFlightSearch(prev => ({ ...prev, tripType: type }))}
-                        error={errors.departureDate}
-                        errorColor="black"
-                    />
+                    <div className="relative">
+                        <CalendarIcon className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
+                        <ShamsiDateModal
+                            calendarId="calendar1"
+                            onOpenChange={setOpenCalendarId}
+                            isOpen={openCalendarId === "calendar1"}
+                            departureDate={flightSearch.departureDate}
+                            returnDate={flightSearch.returnDate || ""}
+                            tripType={flightSearch.tripType}
+                            origin={flightSearch.from?.code}
+                            destination={flightSearch.to?.code}
+                            onDepartureDateChange={(date) => setFlightSearch(prev => ({ ...prev, departureDate: date }))}
+                            onReturnDateChange={(date) => setFlightSearch(prev => ({ ...prev, returnDate: date }))}
+                            onTripTypeChange={(type) => setFlightSearch(prev => ({ ...prev, tripType: type }))}
+                            error={errors.departureDate}
+                            errorColor="black"
+                        />
+                    </div>
                 </div>
 
                 {/* Return Date */}
@@ -845,7 +1030,7 @@ const FlightSearch = () => {
                         className="passengers-trigger cursor-pointer"
                         onClick={() => setShowPassengers(!showPassengers)}
                     >
-                        <div className={`relative h-12 border bg-[#fffefe] hover:border-gray-400 flex items-center justify-between px-3 rounded ${
+                        <div className={`relative h-12 border bg-[#fffefe] hover:border-gray-400 flex items-center justify-between px-3 ${
                             showPassengers ? 'border-blue-500' : 'border-gray-300'
                         }`}>
                             <div className="flex items-center gap-2">
