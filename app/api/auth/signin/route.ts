@@ -58,8 +58,7 @@ export async function POST(request: NextRequest) {
       maxAge: 60 * 60 * 24 * 7,
       path: "/",
     })
-
-    ("✅ Cookie set successfully")
+    
     return response
 
   } catch (error: any) {
