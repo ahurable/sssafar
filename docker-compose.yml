@@ -8,21 +8,8 @@ services:
     user: root
     ports:
       - "3000:3000"
-    environment:
-      DATABASE_URL: postgresql://postgres:12345@db:5432/postgres
-      JWT_SECRET: shabapatotouataksojfsdljfaoieioifhobaojfdoij02390ru2093f0c2n099uweu0f0pq239idj
-      NODE_ENV: production
-      OFFICE_ID: CRS001328
-      FLIGHT_API_USERNAME: api
-      FLIGHT_API_PASSWORD: LrW1Y0J)Kv6h
-      ZIBAL_MERCHANT_ID: zibal
-      NEXT_PUBLIC_APP_URL: http://185.192.113.199:3000
-      SMTP_HOST: smtp.mail.yahoo.com
-      SMTP_PORT: 587
-      SMTP_USER: ahura.alipur19@yahoo.com
-      SMTP_PASSWORD: xfjmcitbcvhwznwy
-      EMAIL_FROM: "safartoday <ahura.alipur19@yahoo.com>"
-      APP_NAME: "safartoday"
+    env_file:
+      - .env
     depends_on:
       - db
     volumes:

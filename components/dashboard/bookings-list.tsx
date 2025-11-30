@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Hotel, Plane, Calendar, MapPin, Download, Loader2, AlertCircle, CheckCircle2, Building } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { TicketGenerator } from "./booking-ticket-generator"
 
 interface Booking {
   id: string
@@ -112,6 +113,8 @@ const getStatusIcon = (status: string, bookingData: any) => {
   
   return null
 }
+
+
 
 // Helper function to extract display information from booking data
 const getBookingDisplayInfo = (booking: Booking): BookingDisplayInfo => {
@@ -243,6 +246,7 @@ export function BookingsList() {
         }
         
         const data = await response.json()
+        console.log(data)
         setBookings(data)
         setFilteredBookings(data)
       } catch (err) {
@@ -264,6 +268,46 @@ export function BookingsList() {
       setFilteredBookings(bookings.filter(booking => booking.type === filterKey))
     }
   }
+
+  const handleDownloadTicket = async (bookingId: string, bookingType: string, bookingData: any, bookingInformation:string) => {
+    console.log('clicked')
+    try {
+      console.log('clicked on download ticket', bookingId);
+      
+      const response = await fetch('/api/generate-tickets', {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          bookingId,
+          bookingType,
+          bookingData: typeof bookingData === 'string' ? bookingData : JSON.stringify(bookingData)
+        })
+      });
+
+      if (response.ok) {
+        // Response is OK, get the PDF blob
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `ticket-${bookingId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        // Response is not OK, get the error message
+        const errorData = await response.json();
+        console.error('Failed to generate ticket:', errorData.error);
+        // You might want to show a toast notification here
+      }
+    } catch (error) {
+      console.error('Error downloading ticket:', error);
+    }
+  };
 
   if (loading) {
     return (
@@ -404,14 +448,16 @@ export function BookingsList() {
                     {/* Actions */}
                     <div className="col-span-1">
                       {booking.data.Success && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          className="h-8 w-8 p-0 text-gray-500 hover:text-sky-600 hover:bg-sky-50"
-                          title="دانلود بلیط"
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
+                        <TicketGenerator booking={booking} bookingType={booking.type}>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            className="h-8 w-8 p-0 text-gray-500 hover:text-sky-600 hover:bg-sky-50"
+                            title="دانلود بلیط"
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        </TicketGenerator>
                       )}
                     </div>
                   </div>
@@ -478,14 +524,16 @@ export function BookingsList() {
                           </Button>
                           
                           {booking.data.Success && (
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              className="h-8 w-8 p-0 text-gray-500 hover:text-sky-600 hover:bg-sky-50"
-                              title="دانلود بلیط"
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
+                            <TicketGenerator booking={booking} bookingType={booking.type}>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                className="h-8 w-8 p-0 text-gray-500 hover:text-sky-600 hover:bg-sky-50"
+                                title="دانلود بلیط"
+                              >
+                                <Download className="h-4 w-4" />
+                              </Button>
+                            </TicketGenerator>
                           )}
                         </div>
                       </CardContent>
