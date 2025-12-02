@@ -18,7 +18,7 @@ const navItems = [
     icon: User,
   },
   {
-    title: "رزروهای من",
+    title: "سفارشات من",
     description: "مشاهده وضعیت رزرو های شما",
     href: "/dashboard/bookings",
     icon: Ticket,
@@ -30,7 +30,7 @@ const navItems = [
     icon: Settings,
   },
   {
-    title: "صورت حساب ها",
+    title: "خرید ها",
     description: "وضعیت خرید های  شما",
     href: "/dashboard/invoices",
     icon: File
