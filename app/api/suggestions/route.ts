@@ -14,30 +14,32 @@ export async function GET(request: NextRequest) {
       // Fetch from airports API for flight searches
       const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
       const airportsResponse = await fetch(`${baseUrl}/api/flights/getAirportCity?query=${encodeURIComponent(query)}`)
-      
+
       if (airportsResponse.ok) {
         const airports = await airportsResponse.json()
+        // console.log(airports)
         suggestions = airports.map((airport: any) => ({
           id: airport.iata,
           name: airport.name,
           city: airport.city,
           country: airport.country,
+          showName: airport.showName,
           code: airport.iata,
           type: 'airport' as const
         }))
-        // // console.log(suggestions)
-      } 
-      
-      
+        // console.log(suggestions)
+      }
+
+
       else {
         console.warn('Failed to fetch airports, using fallback')
         suggestions = getFallbackAirportSuggestions(query)
       }
-    } 
+    }
     else if (type == "domesticFlights") {
       const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
       const airportsResponse = await fetch(`${baseUrl}/api/flights/getDomesticAirportCity?query=${encodeURIComponent(query)}`)
-      
+
       if (airportsResponse.ok) {
         const airports = await airportsResponse.json()
         suggestions = airports.map((airport: any) => ({
@@ -48,7 +50,8 @@ export async function GET(request: NextRequest) {
           code: airport.iata,
           type: 'airport' as const
         }))
-      } 
+        // console.log(airports)
+      }
     }
     else {
       // For hotels and trains, use city-based suggestions
@@ -81,6 +84,7 @@ function getFallbackAirportSuggestions(query: string): any[] {
       name: airport.name,
       city: airport.city,
       country: airport.country,
+      // showName: airport.showName,
       code: airport.iata,
       type: 'airport' as const
     }))

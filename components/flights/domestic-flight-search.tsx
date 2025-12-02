@@ -273,7 +273,13 @@ const DomesticFlightSearch = () => {
         } else {
             displayValue = suggestion.name
         }
-
+        if (field === "to" && domesticFlightSearch.from?.city === suggestion.city) {
+            setErrors(prev => ({
+                ...prev,
+                to: "شهر مبدا و مقصد نمی‌توانند یکسان باشند"
+            }))
+            return
+        }
         setDomesticFlightSearch(prev => ({
             ...prev,
             [field]: suggestion,
@@ -347,11 +353,9 @@ const DomesticFlightSearch = () => {
     }
 
     const handleBlur = () => {
-        setIsFieldFocused("")
         // Use timeout to allow click events to register
         setTimeout(() => {
-            setShowSuggestions(false)
-            setShowFavorites(false)
+            setIsFieldFocused("")
             setCurrentField("")
         }, 200)
     }

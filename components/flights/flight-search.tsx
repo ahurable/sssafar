@@ -18,6 +18,7 @@ interface Suggestion {
     country: string
     code?: string
     city?: string
+    showName?: string
     type: 'city' | 'airport'
 }
 
@@ -369,13 +370,13 @@ const FlightSearch = () => {
     }
 
     const handleBlur = () => {
-        setIsFieldFocused("")
-        // Use timeout to allow click events to register
+        // Only blur if we're not clicking on suggestions
         setTimeout(() => {
-            setShowSuggestions(false)
-            setShowFavorites(false)
-            setCurrentField("")
-        }, 200)
+            if (!showSuggestions && !showFavorites) {
+                setIsFieldFocused("")
+                setCurrentField("")
+            }
+        }, 100)
     }
 
     const handleFavoriteClick = (favorite: Suggestion, field: "from" | "to") => {
@@ -560,7 +561,7 @@ const FlightSearch = () => {
                                     <>
                                         <div className="flex items-center gap-2 justify-end">
                                             <span className="font-bold text-black">
-                                                {suggestion.city}
+                                                {suggestion.showName || suggestion.city}
                                             </span>
                                             <span className="text-blue-500 font-bold">({suggestion.code})</span>
                                         </div>
