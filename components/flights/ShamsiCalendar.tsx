@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef, RefObject } from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
@@ -396,6 +396,30 @@ const ShamsiDateModal = ({
     })
   }
 
+  function useOutsideClick<T extends HTMLElement>(
+    callback: () => void
+  ): RefObject<T> {
+    const ref = useRef<T>(null);
+
+    useEffect(() => {
+      function handleClickOutside(event: MouseEvent) {
+        if (ref.current && !ref.current.contains(event.target as Node)) {
+          callback();
+        }
+      }
+
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }, [callback]);
+
+    return ref;
+  }
+
+  const calRef = useOutsideClick<HTMLDivElement>(() => handleOpenChange(false));
+
+
   const handleDateHoverLeave = () => {
     setHoverTooltip({ show: false, text: "", x: 0, y: 0 })
   }
@@ -441,7 +465,7 @@ const ShamsiDateModal = ({
 
         {/* Desktop Absolute Calendar Box */}
         {isOpen && (
-          <div className="absolute top-full left-0 mt-1 w-[720px] z-30 bg-[#fffefe] border-gray-300 shadow-lg">
+          <div ref={calRef} className="absolute top-full left-0 mt-1 w-[720px] z-30 bg-[#fffefe] border-gray-300 shadow-lg">
             <div className="p-4">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-bold text-blue-900">انتخاب تاریخ</h2>
@@ -483,8 +507,8 @@ const ShamsiDateModal = ({
                 <div className="flex bg-gray-100 p-1 mb-4 rounded">
                   <button
                     className={`flex-1 py-1 px-3 text-xs font-medium rounded ${selectionMode === "departure"
-                        ? "bg-[#fffefe] text-blue-800 shadow-sm"
-                        : "text-blue-900 hover:text-blue-950"
+                      ? "bg-[#fffefe] text-blue-800 shadow-sm"
+                      : "text-blue-900 hover:text-blue-950"
                       }`}
                     onClick={() => setSelectionMode("departure")}
                   >
@@ -492,8 +516,8 @@ const ShamsiDateModal = ({
                   </button>
                   <button
                     className={`flex-1 py-1 px-3 text-xs font-medium rounded ${selectionMode === "return"
-                        ? "bg-[#fffefe] text-blue-800 shadow-sm"
-                        : "text-blue-900 hover:text-blue-950"
+                      ? "bg-[#fffefe] text-blue-800 shadow-sm"
+                      : "text-blue-900 hover:text-blue-950"
                       } ${!selectedDepartureDate ? "opacity-50 cursor-not-allowed" : ""}`}
                     onClick={() => selectedDepartureDate && setSelectionMode("return")}
                     disabled={!selectedDepartureDate}
@@ -630,8 +654,8 @@ const ShamsiDateModal = ({
               <div className="flex bg-gray-100 p-1 mx-3 mt-3">
                 <button
                   className={`flex-1 py-2 px-4 text-sm font-medium ${selectionMode === "departure"
-                      ? "bg-[#fffefe] text-blue-800"
-                      : "text-blue-900 hover:text-blue-950"
+                    ? "bg-[#fffefe] text-blue-800"
+                    : "text-blue-900 hover:text-blue-950"
                     }`}
                   onClick={() => setSelectionMode("departure")}
                 >
@@ -639,8 +663,8 @@ const ShamsiDateModal = ({
                 </button>
                 <button
                   className={`flex-1 py-2 px-4 text-sm font-medium ${selectionMode === "return"
-                      ? "bg-[#fffefe] text-blue-800"
-                      : "text-blue-900 hover:text-blue-950"
+                    ? "bg-[#fffefe] text-blue-800"
+                    : "text-blue-900 hover:text-blue-950"
                     } ${!selectedDepartureDate ? "opacity-50 cursor-not-allowed" : ""}`}
                   onClick={() => selectedDepartureDate && setSelectionMode("return")}
                   disabled={!selectedDepartureDate}
