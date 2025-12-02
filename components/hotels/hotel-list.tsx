@@ -653,12 +653,6 @@ export function HotelList() {
   }, [hotelImages])
 
 
-  // Restore the original getMainImage function with useCallback:
-  const getMainImage = useCallback((hotelId: number): string => {
-    const hotelImage = hotelImages.find(h => h.hotelId === hotelId)
-    return hotelImage?.imageUrl || getRandomPlaceholderImage(hotelId)
-  }, [hotelImages])
-
   // Calculate discount
   const calculateDiscount = useCallback((original: number, discounted: number) => {
     if (original <= 0 || discounted <= 0) return 0
