@@ -13,79 +13,79 @@ import { shamsiToGregorianString } from "@/lib/jalaalil"
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface DomesticSuggestion {
-  id: string
-  name: string
-  code: string
-  city: string
-  type: 'city' | 'airport'
+    id: string
+    name: string
+    code: string
+    city: string
+    type: 'city' | 'airport'
 }
 
 interface FormErrors {
-  from?: string
-  to?: string
-  departureDate?: string
-  returnDate?: string
-  general?: string
+    from?: string
+    to?: string
+    departureDate?: string
+    returnDate?: string
+    general?: string
 }
 
 interface FlightSearchState {
-  from: DomesticSuggestion | null
-  to: DomesticSuggestion | null
-  displayFrom: string
-  displayTo: string
-  departureDate: string
-  returnDate: string
-  adults: number
-  children: number
-  infants: number
-  tripType: string
-  cabinClass: string
+    from: DomesticSuggestion | null
+    to: DomesticSuggestion | null
+    displayFrom: string
+    displayTo: string
+    departureDate: string
+    returnDate: string
+    adults: number
+    children: number
+    infants: number
+    tripType: string
+    cabinClass: string
 }
 
 // Favorite domestic destinations data
 const FAVORITE_DOMESTIC_DESTINATIONS: DomesticSuggestion[] = [
-  {
-    id: "IKA",
-    name: "فرودگاه بین‌المللی امام خمینی",
-    code: "IKA",
-    city: "تهران",
-    type: 'airport'
-  },
-  {
-    id: "THR",
-    name: "فرودگاه بین‌المللی مهرآباد",
-    code: "THR",
-    city: "تهران",
-    type: 'airport'
-  },
-  {
-    id: "MHD",
-    name: "فرودگاه بین‌المللی شهید هاشمی نژاد",
-    code: "MHD",
-    city: "مشهد",
-    type: 'airport'
-  },
-  {
-    id: "SYZ",
-    name: "فرودگاه بین‌المللی شهید دستغیب",
-    code: "SYZ",
-    city: "شیراز",
-    type: 'airport'
-  },
-  {
-    id: "TBZ",
-    name: "فرودگاه بین‌المللی شهید مدنی تبریز",
-    code: "TBZ",
-    city: "تبریز",
-    type: 'airport'
-  },
-  {
-    id: "AWZ",
-    name: "فرودگاه بین‌المللی آیت الله اهوازی",
-    code: "AWZ",
-    city: "اهواز",
-    type: 'airport'
-  }
+    {
+        id: "IKA",
+        name: "فرودگاه بین‌المللی امام خمینی",
+        code: "IKA",
+        city: "تهران",
+        type: 'airport'
+    },
+    {
+        id: "THR",
+        name: "فرودگاه بین‌المللی مهرآباد",
+        code: "THR",
+        city: "تهران",
+        type: 'airport'
+    },
+    {
+        id: "MHD",
+        name: "فرودگاه بین‌المللی شهید هاشمی نژاد",
+        code: "MHD",
+        city: "مشهد",
+        type: 'airport'
+    },
+    {
+        id: "SYZ",
+        name: "فرودگاه بین‌المللی شهید دستغیب",
+        code: "SYZ",
+        city: "شیراز",
+        type: 'airport'
+    },
+    {
+        id: "TBZ",
+        name: "فرودگاه بین‌المللی شهید مدنی تبریز",
+        code: "TBZ",
+        city: "تبریز",
+        type: 'airport'
+    },
+    {
+        id: "AWZ",
+        name: "فرودگاه بین‌المللی آیت الله اهوازی",
+        code: "AWZ",
+        city: "اهواز",
+        type: 'airport'
+    }
 ]
 
 const DomesticFlightSearch = () => {
@@ -103,7 +103,7 @@ const DomesticFlightSearch = () => {
         tripType: "oneway",
         cabinClass: "economy"
     })
-    
+
     const [suggestions, setSuggestions] = useState<DomesticSuggestion[]>([])
     const [showSuggestions, setShowSuggestions] = useState(false)
     const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0)
@@ -119,7 +119,7 @@ const DomesticFlightSearch = () => {
 
     const { getCitySuggestions } = useSearch()
     const { searchDomesticFlights, setDomesticFlightRequest, setFlightRequest, searchFlights, setFlightsData, loading, origin, destination } = useFlight()
-    
+
     const suggestionsRef = useRef<HTMLDivElement>(null)
     const passengersRef = useRef<HTMLDivElement>(null)
     const favoritesRef = useRef<HTMLDivElement>(null)
@@ -174,7 +174,7 @@ const DomesticFlightSearch = () => {
         const handleClickOutside = (event: MouseEvent) => {
             // Close suggestions
             if (
-                suggestionsRef.current && 
+                suggestionsRef.current &&
                 !suggestionsRef.current.contains(event.target as Node) &&
                 fromInputRef.current &&
                 !fromInputRef.current.contains(event.target as Node) &&
@@ -186,7 +186,7 @@ const DomesticFlightSearch = () => {
 
             // Close passengers popover
             if (
-                passengersRef.current && 
+                passengersRef.current &&
                 !passengersRef.current.contains(event.target as Node) &&
                 !(event.target as Element).closest('.passengers-trigger')
             ) {
@@ -195,7 +195,7 @@ const DomesticFlightSearch = () => {
 
             // Close favorites popover
             if (
-                favoritesRef.current && 
+                favoritesRef.current &&
                 !favoritesRef.current.contains(event.target as Node) &&
                 !(event.target as Element).closest('.favorites-trigger')
             ) {
@@ -256,26 +256,26 @@ const DomesticFlightSearch = () => {
             displayFrom: prev.displayTo,
             displayTo: prev.displayFrom
         }))
-        
+
         // Clear any existing errors
-        setErrors(prev => ({ 
-            ...prev, 
-            from: undefined, 
-            to: undefined 
+        setErrors(prev => ({
+            ...prev,
+            from: undefined,
+            to: undefined
         }))
     }
 
     const handleSuggestionClick = (suggestion: DomesticSuggestion, field: "from" | "to") => {
         let displayValue = ""
-        
+
         if (suggestion.type === 'airport') {
             displayValue = `${suggestion.city} (${suggestion.code}) - ${suggestion.name}`
         } else {
             displayValue = suggestion.name
         }
-        
-        setDomesticFlightSearch(prev => ({ 
-            ...prev, 
+
+        setDomesticFlightSearch(prev => ({
+            ...prev,
             [field]: suggestion,
             [`display${field.charAt(0).toUpperCase() + field.slice(1)}`]: displayValue
         }))
@@ -283,7 +283,7 @@ const DomesticFlightSearch = () => {
         setShowFavorites(false)
         setCurrentInput("")
         setCurrentField("")
-        
+
         // Clear error for this field
         setErrors(prev => ({ ...prev, [field]: undefined }))
     }
@@ -291,17 +291,17 @@ const DomesticFlightSearch = () => {
     const handleInputChange = (value: string, field: "from" | "to") => {
         setCurrentInput(value)
         setCurrentField(field)
-        setDomesticFlightSearch(prev => ({ 
-            ...prev, 
+        setDomesticFlightSearch(prev => ({
+            ...prev,
             [`display${field.charAt(0).toUpperCase() + field.slice(1)}`]: value,
             [field]: null // Clear the selected suggestion when user types
         }))
-        
+
         // Hide favorites when user starts typing
         if (showFavorites) {
             setShowFavorites(false)
         }
-        
+
         // Clear error when user starts typing
         if (errors[field]) {
             setErrors(prev => ({ ...prev, [field]: undefined }))
@@ -313,7 +313,7 @@ const DomesticFlightSearch = () => {
 
         if (e.key === "ArrowDown") {
             e.preventDefault()
-            setActiveSuggestionIndex(prev => 
+            setActiveSuggestionIndex(prev =>
                 prev < suggestions.length - 1 ? prev + 1 : prev
             )
         } else if (e.key === "ArrowUp") {
@@ -333,13 +333,13 @@ const DomesticFlightSearch = () => {
     const handleFocus = (field: "from" | "to") => {
         setCurrentField(field)
         setIsFieldFocused(field)
-        
+
         // Show favorites only if the field is empty and it's the first focus
         if (!domesticFlightSearch[`display${field.charAt(0).toUpperCase() + field.slice(1)}` as keyof Pick<FlightSearchState, 'displayFrom' | 'displayTo'>]) {
             setShowFavorites(true)
             setFavoriteField(field)
         }
-        
+
         // Only show suggestions if there's text in the input
         if (domesticFlightSearch[`display${field.charAt(0).toUpperCase() + field.slice(1)}` as keyof Pick<FlightSearchState, 'displayFrom' | 'displayTo'>]) {
             setShowSuggestions(suggestions.length > 0)
@@ -367,15 +367,15 @@ const DomesticFlightSearch = () => {
 
             if (operation === 'increment') {
                 const maxValues = { adults: 9, children: 8, infants: 4 };
-                
+
                 // Calculate current total using all passenger types from prev state
                 const currentTotal = prev.adults + prev.children + prev.infants;
-                
+
                 // Check if adding one would exceed maximum total of 9
                 if (currentTotal >= 9) {
                     return prev; // Don't allow increment - return previous state unchanged
                 }
-                
+
                 // Special validation for children - they must be less than adults
                 if (type === 'children') {
                     // Children cannot be equal to or greater than adults
@@ -407,7 +407,7 @@ const DomesticFlightSearch = () => {
             first: "F",
             premiumEconomy: "S",             // Premium Economy            
             premiumBussiness: "J",           // Premium Business              
-            premiumFirst: "P"  
+            premiumFirst: "P"
         }
         return cabinMap[cabinClass] || "Y"
     }
@@ -426,7 +426,7 @@ const DomesticFlightSearch = () => {
     const handleDomesticFlightSearch = async () => {
         // Clear previous errors
         setErrors({})
-        
+
         // Validate form
         if (!validateForm()) {
             // Focus on first error field
@@ -444,7 +444,7 @@ const DomesticFlightSearch = () => {
             const originCode = domesticFlightSearch.from?.code || ""
             const destinationCode = domesticFlightSearch.to?.code || ""
             const gregorianDepartureDate = shamsiToGregorianString(domesticFlightSearch.departureDate)
-            
+
             // Prepare request body for Domestic API
             const requestBody = {
                 airline: 'ZV',
@@ -498,9 +498,9 @@ const DomesticFlightSearch = () => {
 
         } catch (error) {
             console.error("Domestic flight search error:", error)
-            setErrors(prev => ({ 
-                ...prev, 
-                general: "خطا در جستجوی پرواز داخلی. لطفا دوباره تلاش کنید." 
+            setErrors(prev => ({
+                ...prev,
+                general: "خطا در جستجوی پرواز داخلی. لطفا دوباره تلاش کنید."
             }))
         } finally {
             setIsLoading(false)
@@ -509,7 +509,7 @@ const DomesticFlightSearch = () => {
 
     const renderError = (field: keyof FormErrors) => {
         if (!errors[field]) return null
-        
+
         return (
             <div className="flex items-center gap-2 mt-2 text-black text-sm">
                 <AlertCircle className="h-4 w-4" />
@@ -522,18 +522,17 @@ const DomesticFlightSearch = () => {
         if (!showSuggestions || suggestions.length === 0 || currentField !== field) return null
 
         return (
-            <div 
+            <div
                 ref={suggestionsRef}
                 className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 shadow-lg z-50 max-h-80 overflow-y-auto mt-1 rounded-md"
             >
                 {suggestions.map((suggestion, index) => (
                     <div
                         key={`${suggestion.id}-${index}`}
-                        className={`p-3 cursor-pointer border-b border-gray-200 last:border-b-0 ${
-                            index === activeSuggestionIndex 
-                                ? 'bg-blue-50 border-blue-200' 
-                                : 'hover:bg-gray-50'
-                        }`}
+                        className={`p-3 cursor-pointer border-b border-gray-200 last:border-b-0 ${index === activeSuggestionIndex
+                            ? 'bg-blue-50 border-blue-200'
+                            : 'hover:bg-gray-50'
+                            }`}
                         onMouseDown={(e) => {
                             e.preventDefault() // Prevent input blur
                             handleSuggestionClick(suggestion, field)
@@ -571,7 +570,7 @@ const DomesticFlightSearch = () => {
         if (!showFavorites || favoriteField !== field || currentInput.length > 0) return null
 
         return (
-            <div 
+            <div
                 ref={favoritesRef}
                 className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 shadow-lg z-50 max-h-80 overflow-y-auto mt-1 rounded-md"
             >
@@ -621,7 +620,7 @@ const DomesticFlightSearch = () => {
         if (!showPassengers) return null
 
         return (
-            <div 
+            <div
                 ref={passengersRef}
                 className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 shadow-lg z-50 p-4 mt-1 rounded-md"
             >
@@ -714,76 +713,76 @@ const DomesticFlightSearch = () => {
     const totalPassengers = domesticFlightSearch.adults + domesticFlightSearch.children + domesticFlightSearch.infants
 
     return (
-        <div style={{direction:'rtl'}}>
-            { loading && 
+        <div style={{ direction: 'rtl' }}>
+            {loading &&
                 <AnimatePresence>
                     <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="w-full h-full fixed top-0 z-[9999999] right-0"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="w-full h-full fixed top-0 z-[9999999] right-0"
                     >
-                    <div className="w-full h-full bg-black opacity-40 absolute z-[9999999]"></div>
-                    <div className="w-full flex items-center justify-center h-screen z-[9999999] py-8 px-4 text-center my-auto top-0 bottom-0 absolute">
-                        <motion.div
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ type: "spring", duration: 0.5 }}
-                        className="p-8 bg-white rounded-2xl shadow-2xl max-w-md mx-auto"
-                        >
-                        {/* Airplane Animation */}
-                        <motion.div
-                            animate={{
-                            x: [-20, 20, -20],
-                            y: [0, -10, 0],
-                            }}
-                            transition={{
-                            duration: 2,
-                            repeat: Infinity,
-                            ease: "easeInOut"
-                            }}
-                            className="text-4xl mb-6"
-                        >
-                            ✈️
-                        </motion.div>
-                        
-                        {/* Pulsing dots */}
-                        <div className="flex justify-center space-x-1 mb-6">
-                            {[0, 1, 2].map((index) => (
+                        <div className="w-full h-full bg-black opacity-40 absolute z-[9999999]"></div>
+                        <div className="w-full flex items-center justify-center h-screen z-[9999999] py-8 px-4 text-center my-auto top-0 bottom-0 absolute">
                             <motion.div
-                                key={index}
-                                className="w-2 h-2 bg-blue-500 rounded-full"
-                                animate={{
-                                scale: [1, 1.5, 1],
-                                opacity: [0.5, 1, 0.5],
-                                }}
-                                transition={{
-                                duration: 1,
-                                repeat: Infinity,
-                                delay: index * 0.2,
-                                }}
-                            />
-                            ))}
+                                initial={{ scale: 0.8, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                transition={{ type: "spring", duration: 0.5 }}
+                                className="p-8 bg-white rounded-2xl shadow-2xl max-w-md mx-auto"
+                            >
+                                {/* Airplane Animation */}
+                                <motion.div
+                                    animate={{
+                                        x: [-20, 20, -20],
+                                        y: [0, -10, 0],
+                                    }}
+                                    transition={{
+                                        duration: 2,
+                                        repeat: Infinity,
+                                        ease: "easeInOut"
+                                    }}
+                                    className="text-4xl mb-6"
+                                >
+                                    ✈️
+                                </motion.div>
+
+                                {/* Pulsing dots */}
+                                <div className="flex justify-center space-x-1 mb-6">
+                                    {[0, 1, 2].map((index) => (
+                                        <motion.div
+                                            key={index}
+                                            className="w-2 h-2 bg-blue-500 rounded-full"
+                                            animate={{
+                                                scale: [1, 1.5, 1],
+                                                opacity: [0.5, 1, 0.5],
+                                            }}
+                                            transition={{
+                                                duration: 1,
+                                                repeat: Infinity,
+                                                delay: index * 0.2,
+                                            }}
+                                        />
+                                    ))}
+                                </div>
+
+                                <motion.span
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.3 }}
+                                    className="font-black text-2xl block text-gray-800 mb-2"
+                                >
+                                    در حال جستجو
+                                </motion.span>
+                                <motion.span
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.5 }}
+                                    className="font-medium text-sm block text-gray-600"
+                                >
+                                    پرواز {domesticFlightSearch.from?.city} به مقصد {domesticFlightSearch.to?.city}
+                                </motion.span>
+                            </motion.div>
                         </div>
-                        
-                        <motion.span
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.3 }}
-                            className="font-black text-2xl block text-gray-800 mb-2"
-                        >
-                            در حال جستجو
-                        </motion.span>
-                        <motion.span
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.5 }}
-                            className="font-medium text-sm block text-gray-600"
-                        >
-                            پرواز {domesticFlightSearch.from?.city} به مقصد {domesticFlightSearch.to?.city}
-                        </motion.span>
-                        </motion.div>
-                    </div>
                     </motion.div>
                 </AnimatePresence>
             }
@@ -799,7 +798,7 @@ const DomesticFlightSearch = () => {
                 <div className="w-[150px]">
                     <Label htmlFor="domestic-flight-trip-type" className="text-black text-right block mb-2">نوع سفر</Label>
                     <div className="relative">
-                        <select 
+                        <select
                             id="domestic-flight-trip-type"
                             className="w-full h-12 border rounded-full border-gray-300 bg-[#fffefe] text-black px-3 pr-10 appearance-none focus:outline-none focus:border-blue-500"
                             value={domesticFlightSearch.tripType}
@@ -815,7 +814,7 @@ const DomesticFlightSearch = () => {
                 <div className="w-[150px]">
                     <Label htmlFor="domestic-flight-cabin-class" className="text-black text-right block mb-2">کلاس پرواز</Label>
                     <div className="relative">
-                        <select 
+                        <select
                             id="domestic-flight-cabin-class"
                             className="w-full rounded-full h-12 border border-gray-300 bg-[#fffefe] text-black px-3 pr-10 appearance-none focus:outline-none focus:border-blue-500"
                             value={domesticFlightSearch.cabinClass}
@@ -834,7 +833,7 @@ const DomesticFlightSearch = () => {
             </div>
 
             {/* Responsive Grid Layout - KEEPING EXISTING GRID FUNCTIONALITY */}
-            <div className={`grid gap-4 md:grid-cols-2 relative pt-10 ${ domesticFlightSearch.tripType == "oneway" ? "lg:grid-cols-4" : " lg:grid-cols-5"}`}>
+            <div className={`grid gap-4 md:grid-cols-2 relative pt-10 ${domesticFlightSearch.tripType == "oneway" ? "lg:grid-cols-4" : " lg:grid-cols-5"}`}>
                 {/* From Input */}
                 <div className="space-y-2 col-span-1 relative">
                     <Label htmlFor="domestic-flight-origin" className="text-black text-right block">مبدا (فرودگاه)</Label>
@@ -843,15 +842,14 @@ const DomesticFlightSearch = () => {
                         {suggestionLoading && currentField === "from" && (
                             <Loader2 className="absolute left-3 top-3 h-4 w-4 animate-spin text-blue-500" />
                         )}
-                        <Input 
+                        <Input
                             ref={fromInputRef}
-                            id="domestic-flight-from" 
-                            placeholder="نام فرودگاه، مثال: تهران (IKA)" 
-                            className={`pr-10 h-12 border bg-[#fffefe] text-black placeholder-gray-500 focus:outline-none ${
-                                errors.from 
-                                    ? 'border-red-500 focus:border-red-500' 
-                                    : 'border-gray-300 focus:border-blue-500'
-                            }`}
+                            id="domestic-flight-from"
+                            placeholder="نام فرودگاه، مثال: تهران (IKA)"
+                            className={`pr-10 h-12 border bg-[#fffefe] text-black placeholder-gray-500 focus:outline-none ${errors.from
+                                ? 'border-red-500 focus:border-red-500'
+                                : 'border-gray-300 focus:border-blue-500'
+                                }`}
                             value={domesticFlightSearch.displayFrom}
                             onChange={(e) => handleInputChange(e.target.value, "from")}
                             onKeyDown={(e) => handleKeyDown(e, "from")}
@@ -868,7 +866,7 @@ const DomesticFlightSearch = () => {
                             size="icon"
                             className="h-12 w-12 rounded-full border-2 
                             border-gray-300 bg-white hover:border-blue-500 
-                            hover:bg-blue-50 hover:text-blue-600 shadow-md transition-all 
+                            hover:bg-blue-50 hover:text-blue-600 transition-all 
                             duration-200 transform md:top-0 md:left-[-31px] md:scale-75 top-[43px] left-0
                             scale-100
                             absolute z-10"
@@ -879,7 +877,7 @@ const DomesticFlightSearch = () => {
                         </Button>
                     </div>
                 </div>
-                
+
                 {/* To Input */}
                 <div className="space-y-2 col-span-1 relative">
                     <Label htmlFor="domestic-flight-destination" className="text-black text-right block">مقصد (فرودگاه)</Label>
@@ -888,15 +886,14 @@ const DomesticFlightSearch = () => {
                         {suggestionLoading && currentField === "to" && (
                             <Loader2 className="absolute left-3 top-3 h-4 w-4 animate-spin text-blue-500" />
                         )}
-                        <Input 
+                        <Input
                             ref={toInputRef}
-                            id="domestic-flight-destination" 
-                            placeholder="نام فرودگاه مقصد مثال: مشهد (MHD)" 
-                            className={`pr-10 h-12 border bg-[#fffefe] text-black placeholder-gray-500 focus:outline-none ${
-                                errors.to 
-                                    ? 'border-red-500 focus:border-red-500' 
-                                    : 'border-gray-300 focus:border-blue-500'
-                            }`}
+                            id="domestic-flight-destination"
+                            placeholder="نام فرودگاه مقصد مثال: مشهد (MHD)"
+                            className={`pr-10 h-12 border bg-[#fffefe] text-black placeholder-gray-500 focus:outline-none ${errors.to
+                                ? 'border-red-500 focus:border-red-500'
+                                : 'border-gray-300 focus:border-blue-500'
+                                }`}
                             value={domesticFlightSearch.displayTo}
                             onChange={(e) => handleInputChange(e.target.value, "to")}
                             onKeyDown={(e) => handleKeyDown(e, "to")}
@@ -962,13 +959,12 @@ const DomesticFlightSearch = () => {
                 {/* Passengers Selector */}
                 <div className="space-y-2 col-span-1 relative">
                     <Label className="text-black text-right block">مسافران</Label>
-                    <div 
+                    <div
                         className="passengers-trigger cursor-pointer"
                         onClick={() => setShowPassengers(!showPassengers)}
                     >
-                        <div className={`relative h-12 border bg-[#fffefe] hover:border-gray-400 flex items-center justify-between px-3 ${
-                            showPassengers ? 'border-blue-500' : 'border-gray-300'
-                        }`}>
+                        <div className={`relative h-12 border bg-[#fffefe] hover:border-gray-400 flex items-center justify-between px-3 rounded-lg ${showPassengers ? 'border-blue-500' : 'border-gray-300'
+                            }`}>
                             <div className="flex items-center gap-2">
                                 <Users className="h-4 w-4 text-gray-400" />
                                 <User className="h-4 w-4 text-gray-400" />
@@ -987,9 +983,9 @@ const DomesticFlightSearch = () => {
                     {renderPassengersSelector()}
                 </div>
             </div>
-            
+
             {/* Search Button */}
-            <Button 
+            <Button
                 className="w-full h-12 bg-blue-500 text-white hover:bg-blue-900 mt-6"
                 onClick={handleDomesticFlightSearch}
                 disabled={isLoading}

@@ -28,7 +28,7 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
     const searchParam = searchParams.get('search')
     if (searchParam && ['hotel', 'flight', 'domesticFlights', 'cip', 'tour', 'domesticHotel'].includes(searchParam)) {
       setActiveTab(searchParam as any)
-      
+
       // Auto-open modal on mobile if coming from header navigation
       if (window.innerWidth < 1024) { // lg breakpoint
         setMobileSearchModalOpen(true)
@@ -47,7 +47,7 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
     }
 
     window.addEventListener('openSearchModal', handleOpenSearchModal as EventListener)
-    
+
     return () => {
       window.removeEventListener('openSearchModal', handleOpenSearchModal as EventListener)
     }
@@ -157,23 +157,24 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
       localStorage.setItem('activeSearchTab', value)
     }} className="w-full">
       <TabsList className="flex w-full h-max bg-[#fffefe] border-b border-gray-300 p-0"
-              style={{
-                direction: "rtl"
-              }}>
+        style={{
+          direction: "rtl"
+        }}>
         {Object.entries(tabConfig).map(([key, config]) => {
           const Icon = config.icon
           const isSelected = activeTab === key
           return (
-            <TabsTrigger 
+            <TabsTrigger
               key={key}
-              value={key} 
-              className={`flex-1 flex items-center justify-center gap-3 py-4 border-b-2 transition-colors ${
-                isSelected 
-                  ? 'border-b-2 border-blue-900 text-blue-900' 
-                  : 'border-b-2 border-transparent text-black hover:text-gray-600'
-              }`}
+              value={key}
+              className={`flex-1 flex items-center justify-center gap-3 py-4 border-b-2 transition-colors ${isSelected
+                ? 'border-b-2 border-blue-900 text-blue-900'
+                : 'border-b-2 border-transparent text-black hover:text-gray-600'
+                }`}
             >
-              <Icon className={`h-5 w-5 ${isSelected ? 'text-blue-900' : 'text-black'}`} />
+              <span className={isSelected ? 'bg-[#d0181f] rounded-full p-1' : 'text-black'}>
+                <Icon className={`h-5 w-5 ${isSelected ? 'text-white rounded-full' : 'text-black'}`} />
+              </span>
               <span className=" font-black">{config.label}</span>
             </TabsTrigger>
           )
@@ -252,7 +253,7 @@ export function FlightSearchSection({ onSearchResults }: SearchSectionProps) {
     const searchParam = searchParams.get('search')
     if (searchParam && ['hotel', 'flight', 'domesticFlights', 'cip', 'tour', 'domesticHotel'].includes(searchParam)) {
       setActiveTab(searchParam as any)
-      
+
       // Auto-open modal on mobile if coming from header navigation
       if (window.innerWidth < 1024) { // lg breakpoint
         setMobileSearchModalOpen(true)
@@ -278,14 +279,13 @@ export function FlightSearchSection({ onSearchResults }: SearchSectionProps) {
           const Icon = config.icon
           const isSelected = activeTab === key
           return (
-            <TabsTrigger 
+            <TabsTrigger
               key={key}
-              value={key} 
-              className={`flex-1 flex items-center justify-center gap-3 py-4 border-b-2 transition-colors ${
-                isSelected 
-                  ? 'border-b-2 border-blue-900 text-blue-900' 
-                  : 'border-b-2 border-transparent text-black hover:text-gray-600'
-              }`}
+              value={key}
+              className={`flex-1 flex items-center justify-center gap-3 py-4 border-b-2 transition-colors ${isSelected
+                ? 'border-b-2 border-blue-900 text-blue-900'
+                : 'border-b-2 border-transparent text-black hover:text-gray-600'
+                }`}
             >
               <Icon className={`h-5 w-5 ${isSelected ? 'text-blue-900' : 'text-black'}`} />
               <span className=" font-black">{config.label}</span>
@@ -308,7 +308,7 @@ export function FlightSearchSection({ onSearchResults }: SearchSectionProps) {
 
   return (
     <section ref={cardRef} className=" bg-[#fffefe]">
-      
+
       <div className="mx-auto">
         <div className="text-center bg-blue-900 md:pt-8 md:pb-20 py-8">
           <h2 className="text-3xl font-bold text-white mb-4">
@@ -363,14 +363,13 @@ export function HotelSearchSection({ onSearchResults }: SearchSectionProps) {
           const Icon = config.icon
           const isSelected = activeTab === key
           return (
-            <TabsTrigger 
+            <TabsTrigger
               key={key}
-              value={key} 
-              className={`flex-1 flex items-center justify-center gap-3 py-4 border-b-2 transition-colors ${
-                isSelected 
-                  ? 'border-b-2 border-blue-900 text-blue-900' 
-                  : 'border-b-2 border-transparent text-black hover:text-gray-600'
-              }`}
+              value={key}
+              className={`flex-1 flex items-center justify-center gap-3 py-4 border-b-2 transition-colors ${isSelected
+                ? 'border-b-2 border-blue-900 text-blue-900'
+                : 'border-b-2 border-transparent text-black hover:text-gray-600'
+                }`}
             >
               <Icon className={`h-5 w-5 ${isSelected ? 'text-blue-900' : 'text-black'}`} />
               <span className=" font-black">{config.label}</span>

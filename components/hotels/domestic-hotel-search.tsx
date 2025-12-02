@@ -45,7 +45,7 @@ const DomesticHotelSearch = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [searchLoading, setSearchLoading] = useState(false)
   const router = useRouter()
-  
+
   const [hotelSearch, setHotelSearch] = useState<HotelSearchFormData>({
     city: "",
     cityId: undefined,
@@ -66,7 +66,7 @@ const DomesticHotelSearch = () => {
   const [suggestionLoading, setSuggestionLoading] = useState(false)
   const [currentInput, setCurrentInput] = useState("")
   const [isCityFocused, setIsCityFocused] = useState(false)
-  
+
   const [openCalendarId, setOpenCalendarId] = useState<string | null>(null)
 
   const { setHotelsData, setRequest } = useHotel()
@@ -133,7 +133,7 @@ const DomesticHotelSearch = () => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        suggestionsRef.current && 
+        suggestionsRef.current &&
         !suggestionsRef.current.contains(event.target as Node) &&
         inputRef.current &&
         !inputRef.current.contains(event.target as Node)
@@ -142,7 +142,7 @@ const DomesticHotelSearch = () => {
       }
 
       if (
-        guestsRoomsRef.current && 
+        guestsRoomsRef.current &&
         !guestsRoomsRef.current.contains(event.target as Node) &&
         !(event.target as Element).closest('.guests-rooms-trigger')
       ) {
@@ -176,7 +176,7 @@ const DomesticHotelSearch = () => {
     if (hotelSearch.checkIn && hotelSearch.checkOut) {
       const checkInDate = new Date(hotelSearch.checkIn)
       const checkOutDate = new Date(hotelSearch.checkOut)
-      
+
       if (checkOutDate <= checkInDate) {
         newErrors.checkOut = "تاریخ خروج باید بعد از تاریخ ورود باشد"
       }
@@ -187,10 +187,10 @@ const DomesticHotelSearch = () => {
   }
 
   const handleSuggestionClick = (suggestion: CitySuggestion) => {
-    const displayValue = suggestion.nameFa 
+    const displayValue = suggestion.nameFa
       ? `${suggestion.nameFa} (${suggestion.name})`
       : suggestion.name;
-    
+
     setHotelSearch(prev => ({
       ...prev,
       city: displayValue,
@@ -198,24 +198,24 @@ const DomesticHotelSearch = () => {
       cityType: suggestion.type,
       propertyDestinationId: suggestion.propertyDestinationId
     }))
-    
+
     setShowSuggestions(false)
     setCurrentInput("")
     setIsCityFocused(false)
-    
+
     setErrors(prev => ({ ...prev, city: undefined }))
   }
 
   const handleInputChange = (value: string) => {
     setCurrentInput(value)
-    setHotelSearch(prev => ({ 
-      ...prev, 
+    setHotelSearch(prev => ({
+      ...prev,
       city: value,
       cityId: undefined,
       cityType: undefined,
       propertyDestinationId: undefined
     }))
-    
+
     if (errors.city) {
       setErrors(prev => ({ ...prev, city: undefined }))
     }
@@ -226,7 +226,7 @@ const DomesticHotelSearch = () => {
 
     if (e.key === "ArrowDown") {
       e.preventDefault()
-      setActiveSuggestionIndex(prev => 
+      setActiveSuggestionIndex(prev =>
         prev < suggestions.length - 1 ? prev + 1 : prev
       )
     } else if (e.key === "ArrowUp") {
@@ -259,7 +259,7 @@ const DomesticHotelSearch = () => {
 
   const handleHotelSearch = async () => {
     setErrors({})
-    
+
     if (!validateForm()) {
       if (errors.city) {
         inputRef.current?.focus()
@@ -270,10 +270,10 @@ const DomesticHotelSearch = () => {
     setIsLoading(true)
     try {
       setSearchLoading(true)
-      
+
       const gregorianCheckIn = shamsiToGregorianString(hotelSearch.checkIn)
       const gregorianCheckOut = shamsiToGregorianString(hotelSearch.checkOut)
-      
+
       const searchPayload = {
         ...hotelSearch,
         checkIn: gregorianCheckIn,
@@ -295,12 +295,12 @@ const DomesticHotelSearch = () => {
       setRequest(data.request)
       router.push('/hotels/')
       setSearchLoading(false)
-      
+
     } catch (error) {
       console.error("Error searching hotels:", error)
-      setErrors(prev => ({ 
-        ...prev, 
-        general: "خطا در جستجوی هتل. لطفا دوباره تلاش کنید." 
+      setErrors(prev => ({
+        ...prev,
+        general: "خطا در جستجوی هتل. لطفا دوباره تلاش کنید."
       }))
     } finally {
       setIsLoading(false)
@@ -327,7 +327,7 @@ const DomesticHotelSearch = () => {
 
   const renderError = (field: keyof FormErrors) => {
     if (!errors[field]) return null
-    
+
     return (
       <div className="flex items-center gap-2 mt-2 text-black text-sm">
         <AlertCircle className="h-4 w-4" />
@@ -340,18 +340,17 @@ const DomesticHotelSearch = () => {
     if (!showSuggestions || suggestions.length === 0) return null
 
     return (
-      <div 
+      <div
         ref={suggestionsRef}
         className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 z-50 max-h-80 overflow-y-auto mt-1"
       >
         {suggestions.map((suggestion, index) => (
           <div
             key={`${suggestion.id}-${suggestion.type}`}
-            className={`p-3 cursor-pointer border-b border-gray-300 last:border-b-0 ${
-              index === activeSuggestionIndex 
-                ? 'bg-gray-100' 
+            className={`p-3 cursor-pointer border-b border-gray-300 last:border-b-0 ${index === activeSuggestionIndex
+                ? 'bg-gray-100'
                 : 'hover:bg-gray-50'
-            }`}
+              }`}
             onMouseDown={(e) => {
               e.preventDefault()
               handleSuggestionClick(suggestion)
@@ -368,11 +367,10 @@ const DomesticHotelSearch = () => {
                   )}
                 </div>
                 <div className="flex items-center gap-2 mt-1 justify-end">
-                  <span className={`text-xs px-2 py-1 font-medium ${
-                    suggestion.type === 'domestic' 
-                      ? 'bg-gray-200 text-black border border-gray-300' 
+                  <span className={`text-xs px-2 py-1 font-medium ${suggestion.type === 'domestic'
+                      ? 'bg-gray-200 text-black border border-gray-300'
                       : 'bg-gray-200 text-black border border-gray-300'
-                  }`}>
+                    }`}>
                     {suggestion.type === 'domestic' ? 'داخلی' : 'بین‌المللی'}
                   </span>
                   {suggestion.isPopular && (
@@ -393,7 +391,7 @@ const DomesticHotelSearch = () => {
     if (!showGuestsRooms) return null
 
     return (
-      <div 
+      <div
         ref={guestsRoomsRef}
         className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 z-50 p-4 mt-1"
       >
@@ -457,7 +455,7 @@ const DomesticHotelSearch = () => {
   }
 
   return (
-    <div style={{direction:'rtl'}} className="container mx-auto">
+    <div style={{ direction: 'rtl' }} className="container mx-auto">
       {/* General Error Display */}
       {errors.general && (
         <div className="mb-4 p-3 bg-red-500 border border-red-700 flex items-center gap-3">
@@ -475,15 +473,14 @@ const DomesticHotelSearch = () => {
             {suggestionLoading && (
               <Loader2 className="absolute left-3 top-3 h-4 w-4 animate-spin text-blue-500" />
             )}
-            <Input 
+            <Input
               ref={inputRef}
-              id="hotel-city" 
-              placeholder="تهران، استانبول، دبی..." 
-              className={`pr-10 h-12 border border-gray-300 bg-[#fffefe] text-black placeholder-gray-500 ${
-                errors.city 
-                  ? 'border-red-500 bg-red-500' 
+              id="hotel-city"
+              placeholder="تهران، استانبول، دبی..."
+              className={`pr-10 h-12 border border-gray-300 bg-[#fffefe] text-black placeholder-gray-500 ${errors.city
+                  ? 'border-red-500 bg-red-500'
                   : 'border-gray-300'
-              }`}
+                }`}
               value={hotelSearch.city}
               onChange={(e) => handleInputChange(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -500,7 +497,7 @@ const DomesticHotelSearch = () => {
             {renderError("city")}
           </div>
         </div>
-        
+
         {/* Check-in Date */}
         <div className="space-y-2 relative">
           <Label className="text-black text-right block">تاریخ ورود</Label>
@@ -518,7 +515,7 @@ const DomesticHotelSearch = () => {
             errorColor="black"
           />
         </div>
-        
+
         {/* Check-out Date Display */}
         <div className="space-y-2 relative">
           <Label className="text-black text-right block">تاریخ خروج</Label>
@@ -538,15 +535,15 @@ const DomesticHotelSearch = () => {
           />
           {renderError("checkOut")}
         </div>
-        
+
         {/* Guests & Rooms Selector */}
         <div className="space-y-2 relative">
           <Label className="text-black text-right block">مهمان و اتاق</Label>
-          <div 
+          <div
             className="guests-rooms-trigger cursor-pointer"
             onClick={() => setShowGuestsRooms(!showGuestsRooms)}
           >
-            <div className="relative h-12 border border-gray-300 bg-[#fffefe] hover:border-gray-400 flex items-center justify-between px-3">
+            <div className="relative h-12 rounded-lg border border-gray-300 bg-[#fffefe] hover:border-gray-400 flex items-center justify-between px-3">
               <div className="flex items-center gap-3">
                 <Users className="h-4 w-4 text-gray-400" />
                 <Bed className="h-4 w-4 text-gray-400" />
@@ -564,9 +561,9 @@ const DomesticHotelSearch = () => {
           {renderGuestsRoomsSelector()}
         </div>
       </div>
-      
+
       {/* Search Button */}
-      <Button 
+      <Button
         className="w-full h-12 bg-blue-500 text-white hover:bg-blue-900 mt-6"
         onClick={handleHotelSearch}
         disabled={isLoading}

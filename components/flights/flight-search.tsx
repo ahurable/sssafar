@@ -13,86 +13,86 @@ import { shamsiToGregorianString } from "@/lib/jalaalil"
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Suggestion {
-  id: string
-  name: string
-  country: string
-  code?: string
-  city?: string
-  type: 'city' | 'airport'
+    id: string
+    name: string
+    country: string
+    code?: string
+    city?: string
+    type: 'city' | 'airport'
 }
 
 interface FormErrors {
-  from?: string
-  to?: string
-  departureDate?: string
-  returnDate?: string
-  general?: string
+    from?: string
+    to?: string
+    departureDate?: string
+    returnDate?: string
+    general?: string
 }
 
 interface FlightSearchState {
-  from: Suggestion | null
-  to: Suggestion | null
-  displayFrom: string
-  displayTo: string
-  departureDate: string
-  returnDate: string
-  adults: number
-  children: number
-  infants: number
-  tripType: string
-  cabinClass: string
+    from: Suggestion | null
+    to: Suggestion | null
+    displayFrom: string
+    displayTo: string
+    departureDate: string
+    returnDate: string
+    adults: number
+    children: number
+    infants: number
+    tripType: string
+    cabinClass: string
 }
 
 // Favorite destinations data
 const FAVORITE_DESTINATIONS: Suggestion[] = [
-  {
-    id: "IST",
-    name: "فرودگاه بین‌المللی استانبول",
-    country: "ترکیه",
-    code: "IST",
-    city: "استانبول",
-    type: 'airport'
-  },
-  {
-    id: "DXB",
-    name: "فرودگاه بین‌المللی دبی",
-    country: "امارات",
-    code: "DXB",
-    city: "دبی",
-    type: 'airport'
-  },
-  {
-    id: "IKA",
-    name: "فرودگاه بین‌المللی امام خمینی",
-    country: "ایران",
-    code: "IKA",
-    city: "تهران",
-    type: 'airport'
-  },
-  {
-    id: "THR",
-    name: "فرودگاه بین‌المللی مهرآباد",
-    country: "ایران",
-    code: "THR",
-    city: "تهران",
-    type: 'airport'
-  },
-  {
-    id: "MHD",
-    name: "فرودگاه بین‌المللی شهید هاشمی نژاد",
-    country: "ایران",
-    code: "MHD",
-    city: "مشهد",
-    type: 'airport'
-  },
-  {
-    id: "SYZ",
-    name: "فرودگاه بین‌المللی شهید دستغیب",
-    country: "ایران",
-    code: "SYZ",
-    city: "شیراز",
-    type: 'airport'
-  }
+    {
+        id: "IST",
+        name: "فرودگاه بین‌المللی استانبول",
+        country: "ترکیه",
+        code: "IST",
+        city: "استانبول",
+        type: 'airport'
+    },
+    {
+        id: "DXB",
+        name: "فرودگاه بین‌المللی دبی",
+        country: "امارات",
+        code: "DXB",
+        city: "دبی",
+        type: 'airport'
+    },
+    {
+        id: "IKA",
+        name: "فرودگاه بین‌المللی امام خمینی",
+        country: "ایران",
+        code: "IKA",
+        city: "تهران",
+        type: 'airport'
+    },
+    {
+        id: "THR",
+        name: "فرودگاه بین‌المللی مهرآباد",
+        country: "ایران",
+        code: "THR",
+        city: "تهران",
+        type: 'airport'
+    },
+    {
+        id: "MHD",
+        name: "فرودگاه بین‌المللی شهید هاشمی نژاد",
+        country: "ایران",
+        code: "MHD",
+        city: "مشهد",
+        type: 'airport'
+    },
+    {
+        id: "SYZ",
+        name: "فرودگاه بین‌المللی شهید دستغیب",
+        country: "ایران",
+        code: "SYZ",
+        city: "شیراز",
+        type: 'airport'
+    }
 ]
 
 const FlightSearch = () => {
@@ -110,7 +110,7 @@ const FlightSearch = () => {
         tripType: "oneway",
         cabinClass: "economy"
     })
-    
+
     const [suggestions, setSuggestions] = useState<Suggestion[]>([])
     const [showSuggestions, setShowSuggestions] = useState(false)
     const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0)
@@ -126,7 +126,7 @@ const FlightSearch = () => {
 
     const { getCitySuggestions } = useSearch()
     const { searchFlights, setFlightsData, setFlightRequest, loading, origin, destination } = useFlight()
-    
+
     const suggestionsRef = useRef<HTMLDivElement>(null)
     const passengersRef = useRef<HTMLDivElement>(null)
     const favoritesRef = useRef<HTMLDivElement>(null)
@@ -181,7 +181,7 @@ const FlightSearch = () => {
         const handleClickOutside = (event: MouseEvent) => {
             // Close suggestions
             if (
-                suggestionsRef.current && 
+                suggestionsRef.current &&
                 !suggestionsRef.current.contains(event.target as Node) &&
                 fromInputRef.current &&
                 !fromInputRef.current.contains(event.target as Node) &&
@@ -193,7 +193,7 @@ const FlightSearch = () => {
 
             // Close passengers popover
             if (
-                passengersRef.current && 
+                passengersRef.current &&
                 !passengersRef.current.contains(event.target as Node) &&
                 !(event.target as Element).closest('.passengers-trigger')
             ) {
@@ -202,7 +202,7 @@ const FlightSearch = () => {
 
             // Close favorites popover
             if (
-                favoritesRef.current && 
+                favoritesRef.current &&
                 !favoritesRef.current.contains(event.target as Node) &&
                 !(event.target as Element).closest('.favorites-trigger')
             ) {
@@ -264,35 +264,35 @@ const FlightSearch = () => {
             displayFrom: prev.displayTo,
             displayTo: prev.displayFrom
         }))
-        
+
         // Clear any existing errors
-        setErrors(prev => ({ 
-            ...prev, 
-            from: undefined, 
-            to: undefined 
+        setErrors(prev => ({
+            ...prev,
+            from: undefined,
+            to: undefined
         }))
     }
 
     const handleSuggestionClick = (suggestion: Suggestion, field: "from" | "to") => {
         let displayValue = ""
-        
+
         if (suggestion.type === 'airport') {
             displayValue = `${suggestion.city} (${suggestion.code}) - ${suggestion.name}`
         } else {
             displayValue = suggestion.name
         }
-        
+
         // Validate country match for "to" field
         if (field === "to" && flightSearch.from?.country === suggestion.country) {
-            setErrors(prev => ({ 
-                ...prev, 
-                to: "شهر مبدا و مقصد نمی‌توانند از یک کشور باشند" 
+            setErrors(prev => ({
+                ...prev,
+                to: "شهر مبدا و مقصد نمی‌توانند از یک کشور باشند"
             }))
             return
         }
 
-        setFlightSearch(prev => ({ 
-            ...prev, 
+        setFlightSearch(prev => ({
+            ...prev,
             [field]: suggestion,
             [`display${field.charAt(0).toUpperCase() + field.slice(1)}`]: displayValue
         }))
@@ -300,10 +300,10 @@ const FlightSearch = () => {
         setShowFavorites(false)
         setCurrentInput("")
         setCurrentField("")
-        
+
         // Clear error for this field
         setErrors(prev => ({ ...prev, [field]: undefined }))
-        
+
         // If there was a country match error, clear it
         if (errors.to && field === "to") {
             setErrors(prev => ({ ...prev, to: undefined }))
@@ -313,17 +313,17 @@ const FlightSearch = () => {
     const handleInputChange = (value: string, field: "from" | "to") => {
         setCurrentInput(value)
         setCurrentField(field)
-        setFlightSearch(prev => ({ 
-            ...prev, 
+        setFlightSearch(prev => ({
+            ...prev,
             [`display${field.charAt(0).toUpperCase() + field.slice(1)}`]: value,
             [field]: null // Clear the selected suggestion when user types
         }))
-        
+
         // Hide favorites when user starts typing
         if (showFavorites) {
             setShowFavorites(false)
         }
-        
+
         // Clear error when user starts typing
         if (errors[field]) {
             setErrors(prev => ({ ...prev, [field]: undefined }))
@@ -335,7 +335,7 @@ const FlightSearch = () => {
 
         if (e.key === "ArrowDown") {
             e.preventDefault()
-            setActiveSuggestionIndex(prev => 
+            setActiveSuggestionIndex(prev =>
                 prev < suggestions.length - 1 ? prev + 1 : prev
             )
         } else if (e.key === "ArrowUp") {
@@ -355,13 +355,13 @@ const FlightSearch = () => {
     const handleFocus = (field: "from" | "to") => {
         setCurrentField(field)
         setIsFieldFocused(field)
-        
+
         // Show favorites only if the field is empty and it's the first focus
         if (!flightSearch[`display${field.charAt(0).toUpperCase() + field.slice(1)}` as keyof Pick<FlightSearchState, 'displayFrom' | 'displayTo'>]) {
             setShowFavorites(true)
             setFavoriteField(field)
         }
-        
+
         // Only show suggestions if there's text in the input
         if (flightSearch[`display${field.charAt(0).toUpperCase() + field.slice(1)}` as keyof Pick<FlightSearchState, 'displayFrom' | 'displayTo'>]) {
             setShowSuggestions(suggestions.length > 0)
@@ -389,15 +389,15 @@ const FlightSearch = () => {
 
             if (operation === 'increment') {
                 const maxValues = { adults: 9, children: 8, infants: 4 };
-                
+
                 // Calculate current total using all passenger types from prev state
                 const currentTotal = prev.adults + prev.children + prev.infants;
-                
+
                 // Check if adding one would exceed maximum total of 9
                 if (currentTotal >= 9) {
                     return prev; // Don't allow increment - return previous state unchanged
                 }
-                
+
                 // Special validation for children and infants
                 if (type === 'children') {
                     // Children cannot be equal to or greater than adults
@@ -426,7 +426,7 @@ const FlightSearch = () => {
         const cabinMap: { [key: string]: string } = {
             economy: "Y",
             business: "C",
-            first: "F",        
+            first: "F",
             premiumEconomy: "S",             // Premium Economy            
             premiumBussiness: "J",           // Premium Business              
             premiumFirst: "P"             // Premium First    
@@ -448,7 +448,7 @@ const FlightSearch = () => {
     const handleFlightSearch = async () => {
         // Clear previous errors
         setErrors({})
-        
+
         // Validate form
         if (!validateForm()) {
             // Focus on first error field
@@ -466,7 +466,7 @@ const FlightSearch = () => {
             const originCode = flightSearch.from?.code || ""
             const destinationCode = flightSearch.to?.code || ""
             const gregorianDepartureDate = shamsiToGregorianString(flightSearch.departureDate)
-            
+
             // Prepare request body for PartoCRS API
             const requestBody = {
                 PricingSourceType: "All",
@@ -504,18 +504,18 @@ const FlightSearch = () => {
                     OriginType: 0
                 })
             }
-            
+
             setFlightRequest(requestBody)
             const response = await searchFlights(requestBody)
-            
+
             setFlightsData(response.PricedItineraries, "intl", flightSearch.from?.city, flightSearch.to?.city)
             router.push('/flights')
 
         } catch (error) {
             console.error("Flight search error:", error)
-            setErrors(prev => ({ 
-                ...prev, 
-                general: "خطا در جستجوی پرواز. لطفا دوباره تلاش کنید." 
+            setErrors(prev => ({
+                ...prev,
+                general: "خطا در جستجوی پرواز. لطفا دوباره تلاش کنید."
             }))
         } finally {
             setIsLoading(false)
@@ -524,7 +524,7 @@ const FlightSearch = () => {
 
     const renderError = (field: keyof FormErrors) => {
         if (!errors[field]) return null
-        
+
         return (
             <div className="flex items-center gap-2 mt-2 text-black text-sm">
                 <AlertCircle className="h-4 w-4" />
@@ -537,18 +537,17 @@ const FlightSearch = () => {
         if (!showSuggestions || suggestions.length === 0 || currentField !== field) return null
 
         return (
-            <div 
+            <div
                 ref={suggestionsRef}
                 className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 shadow-lg z-50 max-h-80 overflow-y-auto mt-1 rounded-md"
             >
                 {suggestions.map((suggestion, index) => (
                     <div
                         key={`${suggestion.id}-${index}`}
-                        className={`p-3 cursor-pointer border-b border-gray-200 last:border-b-0 ${
-                            index === activeSuggestionIndex 
-                                ? 'bg-blue-50 border-blue-200' 
-                                : 'hover:bg-gray-50'
-                        }`}
+                        className={`p-3 cursor-pointer border-b border-gray-200 last:border-b-0 ${index === activeSuggestionIndex
+                            ? 'bg-blue-50 border-blue-200'
+                            : 'hover:bg-gray-50'
+                            }`}
                         onMouseDown={(e) => {
                             e.preventDefault() // Prevent input blur
                             handleSuggestionClick(suggestion, field)
@@ -604,7 +603,7 @@ const FlightSearch = () => {
         if (!showFavorites || favoriteField !== field || currentInput.length > 0) return null
 
         return (
-            <div 
+            <div
                 ref={favoritesRef}
                 className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 shadow-lg z-50 max-h-80 overflow-y-auto mt-1 rounded-md"
             >
@@ -672,11 +671,11 @@ const FlightSearch = () => {
         if (!showPassengers) return null
 
         return (
-            <div 
+            <div
                 ref={passengersRef}
                 className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 shadow-lg z-50 p-4 mt-1 rounded-md"
             >
-                { loading && 
+                {loading &&
                     <div className="w-full h-full absolute top-0 right-0">
                         <div className="w-full h-full bg-black opacity-40 absolute z-[100000]"></div>
                         <div className="w-full flex items-center justify-center h-screen z-[100000] py-8 px-4 text-center my-auto top-0 bottom-0 absolute">
@@ -778,79 +777,79 @@ const FlightSearch = () => {
     const totalPassengers = flightSearch.adults + flightSearch.children + flightSearch.infants
 
     return (
-        <div style={{direction:'rtl'}}>
-            { loading && 
+        <div style={{ direction: 'rtl' }}>
+            {loading &&
                 <AnimatePresence>
                     <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="w-full h-full fixed top-0 z-[9999999] right-0"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="w-full h-full fixed top-0 z-[9999999] right-0"
                     >
-                    <div className="w-full h-full bg-black opacity-40 absolute z-[9999999]"></div>
-                    <div className="w-full flex items-center justify-center h-screen z-[9999999] py-8 px-4 text-center my-auto top-0 bottom-0 absolute">
-                        <motion.div
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ type: "spring", duration: 0.5 }}
-                        className="p-8 bg-white rounded-2xl shadow-2xl max-w-md mx-auto"
-                        >
-                        {/* Airplane Animation */}
-                        <motion.div
-                            animate={{
-                            x: [-20, 20, -20],
-                            y: [0, -10, 0],
-                            }}
-                            transition={{
-                            duration: 2,
-                            repeat: Infinity,
-                            ease: "easeInOut"
-                            }}
-                            className="text-4xl mb-6"
-                        >
-                            ✈️
-                        </motion.div>
-                        
-                        {/* Pulsing dots */}
-                        <div className="flex justify-center space-x-1 mb-6">
-                            {[0, 1, 2].map((index) => (
+                        <div className="w-full h-full bg-black opacity-40 absolute z-[9999999]"></div>
+                        <div className="w-full flex items-center justify-center h-screen z-[9999999] py-8 px-4 text-center my-auto top-0 bottom-0 absolute">
                             <motion.div
-                                key={index}
-                                className="w-2 h-2 bg-blue-500 rounded-full"
-                                animate={{
-                                scale: [1, 1.5, 1],
-                                opacity: [0.5, 1, 0.5],
-                                }}
-                                transition={{
-                                duration: 1,
-                                repeat: Infinity,
-                                delay: index * 0.2,
-                                }}
-                            />
-                            ))}
+                                initial={{ scale: 0.8, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                transition={{ type: "spring", duration: 0.5 }}
+                                className="p-8 bg-white rounded-2xl shadow-2xl max-w-md mx-auto"
+                            >
+                                {/* Airplane Animation */}
+                                <motion.div
+                                    animate={{
+                                        x: [-20, 20, -20],
+                                        y: [0, -10, 0],
+                                    }}
+                                    transition={{
+                                        duration: 2,
+                                        repeat: Infinity,
+                                        ease: "easeInOut"
+                                    }}
+                                    className="text-4xl mb-6"
+                                >
+                                    ✈️
+                                </motion.div>
+
+                                {/* Pulsing dots */}
+                                <div className="flex justify-center space-x-1 mb-6">
+                                    {[0, 1, 2].map((index) => (
+                                        <motion.div
+                                            key={index}
+                                            className="w-2 h-2 bg-blue-500 rounded-full"
+                                            animate={{
+                                                scale: [1, 1.5, 1],
+                                                opacity: [0.5, 1, 0.5],
+                                            }}
+                                            transition={{
+                                                duration: 1,
+                                                repeat: Infinity,
+                                                delay: index * 0.2,
+                                            }}
+                                        />
+                                    ))}
+                                </div>
+
+                                <motion.span
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.3 }}
+                                    className="font-black text-2xl block text-gray-800 mb-2"
+                                >
+                                    در حال جستجو
+                                </motion.span>
+                                <motion.span
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.5 }}
+                                    className="font-medium text-sm block text-gray-600"
+                                >
+                                    پرواز {flightSearch.from?.city} به مقصد {flightSearch.to?.city}
+                                </motion.span>
+                            </motion.div>
                         </div>
-                        
-                        <motion.span
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.3 }}
-                            className="font-black text-2xl block text-gray-800 mb-2"
-                        >
-                            در حال جستجو
-                        </motion.span>
-                        <motion.span
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.5 }}
-                            className="font-medium text-sm block text-gray-600"
-                        >
-                            پرواز {flightSearch.from?.city} به مقصد {flightSearch.to?.city}
-                        </motion.span>
-                        </motion.div>
-                    </div>
                     </motion.div>
                 </AnimatePresence>
-                }
+            }
             {/* General Error Display */}
             {errors.general && (
                 <div className="mb-4 p-3 bg-red-500 border border-red-700 flex items-center gap-3 rounded">
@@ -858,13 +857,13 @@ const FlightSearch = () => {
                     <p className="text-white text-sm font-medium">{errors.general}</p>
                 </div>
             )}
-            
+
             <div className="w-full flex gap-2">
                 {/* Trip Type */}
                 <div className="w-[150px]">
                     <Label htmlFor="flight-trip-type" className="text-black text-right block mb-2">نوع سفر</Label>
                     <div className="relative">
-                        <select 
+                        <select
                             id="flight-trip-type"
                             className="w-full h-12 border rounded-full border-gray-300 bg-[#fffefe] text-black px-3 pr-10 appearance-none focus:outline-none focus:border-blue-500"
                             value={flightSearch.tripType}
@@ -880,7 +879,7 @@ const FlightSearch = () => {
                 <div className="w-[150px]">
                     <Label htmlFor="flight-cabin-class" className="text-black text-right block mb-2">کلاس پرواز</Label>
                     <div className="relative">
-                        <select 
+                        <select
                             id="flight-cabin-class"
                             className="w-full rounded-full h-12 border border-gray-300 bg-[#fffefe] text-black px-3 pr-10 appearance-none focus:outline-none focus:border-blue-500"
                             value={flightSearch.cabinClass}
@@ -908,15 +907,14 @@ const FlightSearch = () => {
                         {suggestionLoading && currentField === "from" && (
                             <Loader2 className="absolute left-3 top-3 h-4 w-4 animate-spin text-blue-500" />
                         )}
-                        <Input 
+                        <Input
                             ref={fromInputRef}
-                            id="flight-from" 
-                            placeholder="نام فرودگاه، مثال: تهران (IKA)" 
-                            className={`pr-10 h-12 border bg-[#fffefe] text-black placeholder-gray-500 focus:outline-none ${
-                                errors.from 
-                                    ? 'border-red-500 focus:border-red-500' 
-                                    : 'border-gray-300 focus:border-blue-500'
-                            }`}
+                            id="flight-from"
+                            placeholder="نام فرودگاه، مثال: تهران (IKA)"
+                            className={`pr-10 h-12 border bg-[#fffefe] text-black placeholder-gray-500 focus:outline-none ${errors.from
+                                ? 'border-red-500 focus:border-red-500'
+                                : 'border-gray-300 focus:border-blue-500'
+                                }`}
                             value={flightSearch.displayFrom}
                             onChange={(e) => handleInputChange(e.target.value, "from")}
                             onKeyDown={(e) => handleKeyDown(e, "from")}
@@ -933,7 +931,7 @@ const FlightSearch = () => {
                             size="icon"
                             className="h-12 w-12 rounded-full border-2 
                             border-gray-300 bg-white hover:border-blue-500 
-                            hover:bg-blue-50 hover:text-blue-600 shadow-md transition-all 
+                            hover:bg-blue-50 hover:text-blue-600 transition-all 
                             duration-200 transform md:top-0 md:left-[-31px] md:scale-75 top-[43px] left-0
                             scale-100
                             absolute z-10"
@@ -944,7 +942,7 @@ const FlightSearch = () => {
                         </Button>
                     </div>
                 </div>
-                
+
                 {/* To Input */}
                 <div className="space-y-2 col-span-1 relative">
                     <Label htmlFor="flight-to" className="text-black text-right block">مقصد (فرودگاه)</Label>
@@ -953,15 +951,14 @@ const FlightSearch = () => {
                         {suggestionLoading && currentField === "to" && (
                             <Loader2 className="absolute left-3 top-3 h-4 w-4 animate-spin text-blue-500" />
                         )}
-                        <Input 
+                        <Input
                             ref={toInputRef}
-                            id="flight-to" 
-                            placeholder="نام فرودگاه مقصد مثال: استانبول (IST)" 
-                            className={`pr-10 h-12 border bg-[#fffefe] text-black placeholder-gray-500 focus:outline-none ${
-                                errors.to 
-                                    ? 'border-red-500 focus:border-red-500' 
-                                    : 'border-gray-300 focus:border-blue-500'
-                            }`}
+                            id="flight-to"
+                            placeholder="نام فرودگاه مقصد مثال: استانبول (IST)"
+                            className={`pr-10 h-12 border bg-[#fffefe] text-black placeholder-gray-500 focus:outline-none ${errors.to
+                                ? 'border-red-500 focus:border-red-500'
+                                : 'border-gray-300 focus:border-blue-500'
+                                }`}
                             value={flightSearch.displayTo}
                             onChange={(e) => handleInputChange(e.target.value, "to")}
                             onKeyDown={(e) => handleKeyDown(e, "to")}
@@ -1026,13 +1023,12 @@ const FlightSearch = () => {
                 {/* Passengers Selector */}
                 <div className="space-y-2 col-span-1 relative">
                     <Label className="text-black text-right block">مسافران</Label>
-                    <div 
+                    <div
                         className="passengers-trigger cursor-pointer"
                         onClick={() => setShowPassengers(!showPassengers)}
                     >
-                        <div className={`relative h-12 border bg-[#fffefe] hover:border-gray-400 flex items-center justify-between px-3 ${
-                            showPassengers ? 'border-blue-500' : 'border-gray-300'
-                        }`}>
+                        <div className={`relative h-12 border rounded-lg bg-[#fffefe] hover:border-gray-400 flex items-center justify-between px-3 ${showPassengers ? 'border-blue-500' : 'border-gray-300'
+                            }`}>
                             <div className="flex items-center gap-2">
                                 <Users className="h-4 w-4 text-gray-400" />
                                 <User className="h-4 w-4 text-gray-400" />
@@ -1051,9 +1047,9 @@ const FlightSearch = () => {
                     {renderPassengersSelector()}
                 </div>
             </div>
-            
+
             {/* Search Button */}
-            <Button 
+            <Button
                 className="w-full h-12 bg-blue-500 text-white hover:bg-blue-900 mt-6"
                 onClick={handleFlightSearch}
                 disabled={isLoading}

@@ -7,16 +7,16 @@ import { Slider } from "@/components/ui/slider"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { useFlight } from "@/contexts/search/FlightContext"
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetHeader, 
-  SheetTitle, 
-  SheetTrigger 
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger
 } from "@/components/ui/sheet"
-import { 
-  Filter, 
-  X, 
+import {
+  Filter,
+  X,
   Plane,
   Clock,
   Layers,
@@ -44,7 +44,7 @@ export function FlightFilters() {
     flightTimes: [],
     stops: []
   })
-  
+
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     price: true,
     airlines: true,
@@ -52,7 +52,7 @@ export function FlightFilters() {
     time: true,
     stops: true
   })
-  
+
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const [activeFilterSection, setActiveFilterSection] = useState<string | null>(null)
 
@@ -60,7 +60,7 @@ export function FlightFilters() {
   const availableAirlines = Array.from(
     new Map(
       flightData.map(flight => [
-        flight.ValidatingAirlineCode, 
+        flight.ValidatingAirlineCode,
         [getAirlineName(flight.ValidatingAirlineCode), flight.ValidatingAirlineCode]
       ])
     ).values()
@@ -82,6 +82,28 @@ export function FlightFilters() {
     }
   }, [flightData.length])
 
+  // Function to apply filters immediately (for desktop)
+  const applyFiltersImmediately = () => {
+    applyFilters(filters)
+  }
+
+  // Apply filters when any filter changes (for desktop)
+  useEffect(() => {
+    // Don't apply on initial load
+    if (flightData.length === 0) return
+
+    // Only auto-apply for desktop (where there's no apply button)
+    const isDesktop = window.innerWidth >= 1024
+    if (isDesktop) {
+      // Small delay to ensure state is updated
+      const timeoutId = setTimeout(() => {
+        applyFilters(filters)
+      }, 10)
+
+      return () => clearTimeout(timeoutId)
+    }
+  }, [filters, flightData.length])
+
   const handlePriceChange = (value: number[]) => {
     setFilters(prev => ({
       ...prev,
@@ -92,7 +114,7 @@ export function FlightFilters() {
   const handleAirlineChange = (airline: string, checked: boolean) => {
     setFilters(prev => ({
       ...prev,
-      airlines: checked 
+      airlines: checked
         ? [...prev.airlines, airline]
         : prev.airlines.filter(a => a !== airline)
     }))
@@ -101,7 +123,7 @@ export function FlightFilters() {
   const handleFlightClassChange = (flightClass: string, checked: boolean) => {
     setFilters(prev => ({
       ...prev,
-      flightClasses: checked 
+      flightClasses: checked
         ? [...prev.flightClasses, flightClass]
         : prev.flightClasses.filter(fc => fc !== flightClass)
     }))
@@ -110,7 +132,7 @@ export function FlightFilters() {
   const handleFlightTimeChange = (timeRange: string, checked: boolean) => {
     setFilters(prev => ({
       ...prev,
-      flightTimes: checked 
+      flightTimes: checked
         ? [...prev.flightTimes, timeRange]
         : prev.flightTimes.filter(t => t !== timeRange)
     }))
@@ -119,20 +141,22 @@ export function FlightFilters() {
   const handleStopsChange = (stop: string, checked: boolean) => {
     setFilters(prev => ({
       ...prev,
-      stops: checked 
+      stops: checked
         ? [...prev.stops, stop]
         : prev.stops.filter(s => s !== stop)
     }))
   }
 
   const clearAllFilters = () => {
-    setFilters({
+    const newFilters = {
       priceRange: [availablePriceRange[0], availablePriceRange[1]],
       airlines: [],
       flightClasses: [],
       flightTimes: [],
       stops: []
-    })
+    }
+    setFilters(newFilters)
+    applyFilters(newFilters)
   }
 
   const toggleSection = (section: string) => {
@@ -143,7 +167,11 @@ export function FlightFilters() {
   }
 
   const handleApplyFilters = () => {
-    applyFilters(filters)
+    // For mobile, apply filters when button is clicked
+    const isMobile = window.innerWidth < 1024
+    if (isMobile) {
+      applyFilters(filters)
+    }
     setIsSheetOpen(false)
     setActiveFilterSection(null)
   }
@@ -181,30 +209,30 @@ export function FlightFilters() {
   }
 
   const FlightLogo = ({ airlineCode = "", width = 8, height = 8 }) => {
-      const [logoError, setLogoError] = useState(false);
-  
-      const handleImageError = () => {
-        setLogoError(true);
-      };
-  
-      return (
-        <Image 
-          src={logoError ? `/assets/airline/logos/default.png` : `/assets/airline/logos/${airlineCode}.png`}
-          alt={`${airlineCode} airline logo`}
-          width={100}
-          height={100}
-          className={`w-${width} h-${height}`}
-          onError={handleImageError}
-        />
-      );
+    const [logoError, setLogoError] = useState(false);
+
+    const handleImageError = () => {
+      setLogoError(true);
     };
 
-  const FilterSection = ({ 
-    title, 
-    sectionKey, 
-    icon: Icon, 
-    children 
-  }: { 
+    return (
+      <Image
+        src={logoError ? `/assets/airline/logos/default.png` : `/assets/airline/logos/${airlineCode}.png`}
+        alt={`${airlineCode} airline logo`}
+        width={100}
+        height={100}
+        className={`w-${width} h-${height}`}
+        onError={handleImageError}
+      />
+    );
+  };
+
+  const FilterSection = ({
+    title,
+    sectionKey,
+    icon: Icon,
+    children
+  }: {
     title: string
     sectionKey: string
     icon: any
@@ -233,177 +261,196 @@ export function FlightFilters() {
     </div>
   )
 
-  const FilterContent = ({ showAllSections = true }) => (
-    <div className="space-y-6">
-      {/* Active Filters Badge */}
-      {showAllSections && getActiveFiltersCount() > 0 && (
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-600">فیلترهای فعال:</span>
-          <Badge variant="secondary" className="bg-blue-50 text-blue-700">
-            {getActiveFiltersCount()} فیلتر
-          </Badge>
-        </div>
-      )}
+  const FilterContent = ({ showAllSections = true }) => {
+    const isMobile = typeof window !== 'undefined' ? window.innerWidth < 1024 : false;
 
-      {/* Price Range Filter */}
-      {(showAllSections || activeFilterSection === 'price') && (
-        <FilterSection title="محدوده قیمت" sectionKey="price" icon={DollarSign}>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <Label className="text-sm font-medium">قیمت (تومان)</Label>
-              <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full">
-                {filters.priceRange[1].toLocaleString('fa-IR')} - {filters.priceRange[0].toLocaleString('fa-IR')}
-              </span>
+    return (
+      <div className="space-y-6">
+        {/* Active Filters Badge */}
+        {showAllSections && getActiveFiltersCount() > 0 && (
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-600">فیلترهای فعال:</span>
+            <Badge variant="secondary" className="bg-blue-50 text-blue-700">
+              {getActiveFiltersCount()} فیلتر
+            </Badge>
+          </div>
+        )}
+
+        {/* Price Range Filter */}
+        {(showAllSections || activeFilterSection === 'price') && (
+          <FilterSection title="محدوده قیمت" sectionKey="price" icon={DollarSign}>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <Label className="text-sm font-medium">قیمت (تومان)</Label>
+                <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full">
+                  {filters.priceRange[1].toLocaleString('fa-IR')} - {filters.priceRange[0].toLocaleString('fa-IR')}
+                </span>
+              </div>
+              <Slider
+                value={filters.priceRange}
+                onValueChange={handlePriceChange}
+                min={availablePriceRange[0]}
+                max={availablePriceRange[1]}
+                step={100000}
+                className="mt-2"
+              />
+              <div className="flex justify-between text-xs text-gray-500">
+                <span>{availablePriceRange[1].toLocaleString('fa-IR')}</span>
+                <span>{availablePriceRange[0].toLocaleString('fa-IR')}</span>
+              </div>
             </div>
-            <Slider 
-              value={filters.priceRange}
-              onValueChange={handlePriceChange}
-              min={availablePriceRange[0]}
-              max={availablePriceRange[1]}
-              step={100000}
-              className="mt-2"
-            />
-            <div className="flex justify-between text-xs text-gray-500">
-              <span>{availablePriceRange[1].toLocaleString('fa-IR')}</span>
-              <span>{availablePriceRange[0].toLocaleString('fa-IR')}</span>
+          </FilterSection>
+        )}
+
+        {/* Airlines Filter */}
+        {(showAllSections || activeFilterSection === 'airlines') && (
+          <FilterSection title="ایرلاین‌ها" sectionKey="airlines" icon={Plane}>
+            <div className="space-y-3 max-h-48 overflow-y-auto">
+              {availableAirlines.map((airline) => (
+                <div key={airline[0]} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                  <div>
+                    <FlightLogo airlineCode={airline[1]} />
+                  </div>
+                  <Checkbox
+                    id={`airline-${airline}`}
+                    checked={filters.airlines.includes(airline[0])}
+                    onCheckedChange={(checked) => {
+                      handleAirlineChange(airline[0], checked as boolean)
+                      // For mobile, don't apply immediately
+                      if (!isMobile) {
+                        setTimeout(() => applyFiltersImmediately(), 10)
+                      }
+                    }}
+                  />
+                  <label
+                    htmlFor={`airline-${airline}`}
+                    className="text-sm cursor-pointer flex-1 text-right"
+                  >
+                    {airline[0]}
+                  </label>
+                </div>
+              ))}
             </div>
-          </div>
-        </FilterSection>
-      )}
+          </FilterSection>
+        )}
 
-      {/* Airlines Filter */}
-      {(showAllSections || activeFilterSection === 'airlines') && (
-        <FilterSection title="ایرلاین‌ها" sectionKey="airlines" icon={Plane}>
-          <div className="space-y-3 max-h-48 overflow-y-auto">
-            {availableAirlines.map((airline) => (
-              <div key={airline[0]} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                
-                <div>
-                  <FlightLogo airlineCode={airline[1]} />
+        {/* Flight Class Filter */}
+        {(showAllSections || activeFilterSection === 'class') && (
+          <FilterSection title="کلاس پرواز" sectionKey="class" icon={Plane}>
+            <div className="space-y-3">
+              {[
+                { value: "economy", label: "اکونومی", description: "کلاس اقتصادی" },
+                { value: "business", label: "بیزینس", description: "کلاس تجاری" },
+                { value: "first", label: "فرست کلاس", description: "کلاس اول" }
+              ].map((flightClass) => (
+                <div key={flightClass.value} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                  <Checkbox
+                    id={`class-${flightClass.value}`}
+                    checked={filters.flightClasses.includes(flightClass.value)}
+                    onCheckedChange={(checked) => {
+                      handleFlightClassChange(flightClass.value, checked as boolean)
+                      // For mobile, don't apply immediately
+                      if (!isMobile) {
+                        setTimeout(() => applyFiltersImmediately(), 10)
+                      }
+                    }}
+                  />
+                  <div className="flex-1 text-right">
+                    <label
+                      htmlFor={`class-${flightClass.value}`}
+                      className="text-sm font-medium cursor-pointer block"
+                    >
+                      {flightClass.label}
+                    </label>
+                    <span className="text-xs text-gray-500">{flightClass.description}</span>
+                  </div>
                 </div>
-                <Checkbox 
-                  id={`airline-${airline}`}
-                  checked={filters.airlines.includes(airline[0])}
-                  onCheckedChange={(checked) => 
-                    handleAirlineChange(airline[0], checked as boolean)
-                  }
-                />
-                <label 
-                  htmlFor={`airline-${airline}`} 
-                  className="text-sm cursor-pointer flex-1 text-right"
-                >
-                  {airline}
-                </label>
-              </div>
-            ))}
-          </div>
-        </FilterSection>
-      )}
+              ))}
+            </div>
+          </FilterSection>
+        )}
 
-      {/* Flight Class Filter */}
-      {(showAllSections || activeFilterSection === 'class') && (
-        <FilterSection title="کلاس پرواز" sectionKey="class" icon={Plane}>
-          <div className="space-y-3">
-            {[
-              { value: "economy", label: "اکونومی", description: "کلاس اقتصادی" },
-              { value: "business", label: "بیزینس", description: "کلاس تجاری" },
-              { value: "first", label: "فرست کلاس", description: "کلاس اول" }
-            ].map((flightClass) => (
-              <div key={flightClass.value} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                <Checkbox 
-                  id={`class-${flightClass.value}`}
-                  checked={filters.flightClasses.includes(flightClass.value)}
-                  onCheckedChange={(checked) => 
-                    handleFlightClassChange(flightClass.value, checked as boolean)
-                  }
-                />
-                <div className="flex-1 text-right">
-                  <label 
-                    htmlFor={`class-${flightClass.value}`} 
-                    className="text-sm font-medium cursor-pointer block"
-                  >
-                    {flightClass.label}
-                  </label>
-                  <span className="text-xs text-gray-500">{flightClass.description}</span>
+        {/* Flight Time Filter */}
+        {(showAllSections || activeFilterSection === 'time') && (
+          <FilterSection title="زمان پرواز" sectionKey="time" icon={Clock}>
+            <div className="space-y-3">
+              {[
+                { value: "صبح (۶-۱۲)", label: "صبح", time: "۶:۰۰ - ۱۲:۰۰" },
+                { value: "ظهر (۱۲-۱۸)", label: "ظهر", time: "۱۲:۰۰ - ۱۸:۰۰" },
+                { value: "عصر (۱۸-۲۴)", label: "عصر", time: "۱۸:۰۰ - ۲۴:۰۰" },
+                { value: "شب (۰-۶)", label: "شب", time: "۰۰:۰۰ - ۶:۰۰" }
+              ].map((time) => (
+                <div key={time.value} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                  <Checkbox
+                    id={`time-${time.value}`}
+                    checked={filters.flightTimes.includes(time.value)}
+                    onCheckedChange={(checked) => {
+                      handleFlightTimeChange(time.value, checked as boolean)
+                      // For mobile, don't apply immediately
+                      if (!isMobile) {
+                        setTimeout(() => applyFiltersImmediately(), 10)
+                      }
+                    }}
+                  />
+                  <div className="flex-1 text-right">
+                    <label
+                      htmlFor={`time-${time.value}`}
+                      className="text-sm font-medium cursor-pointer block"
+                    >
+                      {time.label}
+                    </label>
+                    <span className="text-xs text-gray-500">{time.time}</span>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </FilterSection>
-      )}
+              ))}
+            </div>
+          </FilterSection>
+        )}
 
-      {/* Flight Time Filter */}
-      {(showAllSections || activeFilterSection === 'time') && (
-        <FilterSection title="زمان پرواز" sectionKey="time" icon={Clock}>
-          <div className="space-y-3">
-            {[
-              { value: "صبح (۶-۱۲)", label: "صبح", time: "۶:۰۰ - ۱۲:۰۰" },
-              { value: "ظهر (۱۲-۱۸)", label: "ظهر", time: "۱۲:۰۰ - ۱۸:۰۰" },
-              { value: "عصر (۱۸-۲۴)", label: "عصر", time: "۱۸:۰۰ - ۲۴:۰۰" },
-              { value: "شب (۰-۶)", label: "شب", time: "۰۰:۰۰ - ۶:۰۰" }
-            ].map((time) => (
-              <div key={time.value} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                <Checkbox 
-                  id={`time-${time.value}`}
-                  checked={filters.flightTimes.includes(time.value)}
-                  onCheckedChange={(checked) => 
-                    handleFlightTimeChange(time.value, checked as boolean)
-                  }
-                />
-                <div className="flex-1 text-right">
-                  <label 
-                    htmlFor={`time-${time.value}`} 
-                    className="text-sm font-medium cursor-pointer block"
-                  >
-                    {time.label}
-                  </label>
-                  <span className="text-xs text-gray-500">{time.time}</span>
+        {/* Stops Filter */}
+        {(showAllSections || activeFilterSection === 'stops') && (
+          <FilterSection title="توقف‌ها" sectionKey="stops" icon={Layers}>
+            <div className="space-y-3">
+              {[
+                { value: "direct", label: "بدون توقف", description: "پرواز مستقیم" },
+                { value: "1-stop", label: "۱ توقف", description: "یک توقف" },
+                { value: "2-stops", label: "۲ توقف", description: "دو توقف" }
+              ].map((stop) => (
+                <div key={stop.value} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                  <Checkbox
+                    id={`stop-${stop.value}`}
+                    checked={filters.stops.includes(stop.value)}
+                    onCheckedChange={(checked) => {
+                      handleStopsChange(stop.value, checked as boolean)
+                      // For mobile, don't apply immediately
+                      if (!isMobile) {
+                        setTimeout(() => applyFiltersImmediately(), 10)
+                      }
+                    }}
+                  />
+                  <div className="flex-1 text-right">
+                    <label
+                      htmlFor={`stop-${stop.value}`}
+                      className="text-sm font-medium cursor-pointer block"
+                    >
+                      {stop.label}
+                    </label>
+                    <span className="text-xs text-gray-500">{stop.description}</span>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </FilterSection>
-      )}
+              ))}
+            </div>
+          </FilterSection>
+        )}
+      </div>
+    )
+  }
 
-      {/* Stops Filter */}
-      {(showAllSections || activeFilterSection === 'stops') && (
-        <FilterSection title="توقف‌ها" sectionKey="stops" icon={Layers}>
-          <div className="space-y-3">
-            {[
-              { value: "direct", label: "بدون توقف", description: "پرواز مستقیم" },
-              { value: "1-stop", label: "۱ توقف", description: "یک توقف" },
-              { value: "2-stops", label: "۲ توقف", description: "دو توقف" }
-            ].map((stop) => (
-              <div key={stop.value} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                <Checkbox 
-                  id={`stop-${stop.value}`}
-                  checked={filters.stops.includes(stop.value)}
-                  onCheckedChange={(checked) => 
-                    handleStopsChange(stop.value, checked as boolean)
-                  }
-                />
-                <div className="flex-1 text-right">
-                  <label 
-                    htmlFor={`stop-${stop.value}`} 
-                    className="text-sm font-medium cursor-pointer block"
-                  >
-                    {stop.label}
-                  </label>
-                  <span className="text-xs text-gray-500">{stop.description}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </FilterSection>
-      )}
-    </div>
-  )
-
-  const FilterTriggerButton = ({ 
-    section, 
-    title, 
-    icon: Icon 
-  }: { 
+  const FilterTriggerButton = ({
+    section,
+    title,
+    icon: Icon
+  }: {
     section: string
     title: string
     icon: any
@@ -428,16 +475,16 @@ export function FlightFilters() {
       {/* Desktop Sidebar */}
       <div className="hidden lg:block">
         <Card className="sticky top-20 border border-blue-900 lg:overflow-auto text-blue-900" style={{ scrollbarWidth: 'none' }}>
-          <CardHeader className="pb-3  lg:pt-6 border-b">
+          <CardHeader className="pb-3 lg:pt-6 border-b">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg flex items-center gap-2">
                 <Filter className="h-5 w-5" />
                 فیلترها
               </CardTitle>
               {getActiveFiltersCount() > 0 && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={clearAllFilters}
                   className="text-xs text-gray-500 hover:text-gray-700 h-8"
                 >
@@ -448,19 +495,13 @@ export function FlightFilters() {
           </CardHeader>
           <CardContent className="p-4">
             <FilterContent showAllSections={true} />
-            <Button 
-              onClick={handleApplyFilters}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium mt-6 h-12 text-base"
-            >
-              اعمال فیلترها
-            </Button>
           </CardContent>
         </Card>
       </div>
 
       {/* Mobile Filter Buttons */}
-      <div className="lg:hidden absolute top-14 right-0 w-full bg-[#fffefe] py-2 px-2 z-40" >
-        <div className="flex items-center gap-2 overflow-x-auto pb-2" style={{scrollbarWidth: 'none'}}>
+      <div className="lg:hidden absolute top-14 right-0 w-full bg-[#fffefe] py-2 px-2 z-40">
+        <div className="flex items-center gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
           {/* Main Filters Button */}
           <Sheet open={isSheetOpen && !activeFilterSection} onOpenChange={(open) => {
             setIsSheetOpen(open)
@@ -486,9 +527,9 @@ export function FlightFilters() {
                   </SheetTitle>
                   <div className="flex items-center gap-2">
                     {getActiveFiltersCount() > 0 && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={clearAllFilters}
                         className="text-xs text-gray-500 hover:text-gray-700"
                       >
@@ -502,7 +543,7 @@ export function FlightFilters() {
                 <FilterContent showAllSections={true} />
               </div>
               <div className="absolute bottom-0 left-0 right-0 p-4 bg-[#fffefe] border-t">
-                <Button 
+                <Button
                   onClick={handleApplyFilters}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium h-14 text-lg"
                   size="lg"
@@ -544,9 +585,9 @@ export function FlightFilters() {
                   {activeFilterSection === 'time' && 'زمان پرواز'}
                   {activeFilterSection === 'stops' && 'توقف‌ها'}
                 </SheetTitle>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => {
                     setIsSheetOpen(false)
                     setActiveFilterSection(null)
@@ -561,7 +602,7 @@ export function FlightFilters() {
               <FilterContent showAllSections={false} />
             </div>
             <div className="absolute bottom-0 left-0 right-0 p-4 bg-[#fffefe] border-t">
-              <Button 
+              <Button
                 onClick={handleApplyFilters}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium h-14 text-lg"
                 size="lg"

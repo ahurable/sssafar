@@ -45,7 +45,7 @@ const HotelSearch = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [searchLoading, setSearchLoading] = useState(false)
   const router = useRouter()
-  
+
   const [hotelSearch, setHotelSearch] = useState<HotelSearchFormData>({
     city: "",
     cityId: undefined,
@@ -131,7 +131,7 @@ const HotelSearch = () => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        suggestionsRef.current && 
+        suggestionsRef.current &&
         !suggestionsRef.current.contains(event.target as Node) &&
         inputRef.current &&
         !inputRef.current.contains(event.target as Node)
@@ -140,7 +140,7 @@ const HotelSearch = () => {
       }
 
       if (
-        guestsRoomsRef.current && 
+        guestsRoomsRef.current &&
         !guestsRoomsRef.current.contains(event.target as Node) &&
         !(event.target as Element).closest('.guests-rooms-trigger')
       ) {
@@ -174,7 +174,7 @@ const HotelSearch = () => {
     if (hotelSearch.checkIn && hotelSearch.checkOut) {
       const checkInDate = new Date(hotelSearch.checkIn)
       const checkOutDate = new Date(hotelSearch.checkOut)
-      
+
       if (checkOutDate <= checkInDate) {
         newErrors.checkOut = "تاریخ خروج باید بعد از تاریخ ورود باشد"
       }
@@ -185,10 +185,10 @@ const HotelSearch = () => {
   }
 
   const handleSuggestionClick = (suggestion: CitySuggestion) => {
-    const displayValue = suggestion.nameFa 
+    const displayValue = suggestion.nameFa
       ? `${suggestion.nameFa} (${suggestion.name})`
       : suggestion.name;
-    
+
     setHotelSearch(prev => ({
       ...prev,
       city: displayValue,
@@ -196,24 +196,24 @@ const HotelSearch = () => {
       cityType: suggestion.type,
       propertyDestinationId: suggestion.propertyDestinationId
     }))
-    
+
     setShowSuggestions(false)
     setCurrentInput("")
     setIsCityFocused(false)
-    
+
     setErrors(prev => ({ ...prev, city: undefined }))
   }
 
   const handleInputChange = (value: string) => {
     setCurrentInput(value)
-    setHotelSearch(prev => ({ 
-      ...prev, 
+    setHotelSearch(prev => ({
+      ...prev,
       city: value,
       cityId: undefined,
       cityType: undefined,
       propertyDestinationId: undefined
     }))
-    
+
     if (errors.city) {
       setErrors(prev => ({ ...prev, city: undefined }))
     }
@@ -224,7 +224,7 @@ const HotelSearch = () => {
 
     if (e.key === "ArrowDown") {
       e.preventDefault()
-      setActiveSuggestionIndex(prev => 
+      setActiveSuggestionIndex(prev =>
         prev < suggestions.length - 1 ? prev + 1 : prev
       )
     } else if (e.key === "ArrowUp") {
@@ -257,7 +257,7 @@ const HotelSearch = () => {
 
   const handleHotelSearch = async () => {
     setErrors({})
-    
+
     if (!validateForm()) {
       if (errors.city) {
         inputRef.current?.focus()
@@ -268,10 +268,10 @@ const HotelSearch = () => {
     setIsLoading(true)
     try {
       setSearchLoading(true)
-      
+
       const gregorianCheckIn = shamsiToGregorianString(hotelSearch.checkIn)
       const gregorianCheckOut = shamsiToGregorianString(hotelSearch.checkOut)
-      
+
       const searchPayload = {
         ...hotelSearch,
         checkIn: gregorianCheckIn,
@@ -293,12 +293,12 @@ const HotelSearch = () => {
       setRequest(data.request)
       router.push('/hotels/')
       setSearchLoading(false)
-      
+
     } catch (error) {
       console.error("Error searching hotels:", error)
-      setErrors(prev => ({ 
-        ...prev, 
-        general: "خطا در جستجوی هتل. لطفا دوباره تلاش کنید." 
+      setErrors(prev => ({
+        ...prev,
+        general: "خطا در جستجوی هتل. لطفا دوباره تلاش کنید."
       }))
     } finally {
       setIsLoading(false)
@@ -325,7 +325,7 @@ const HotelSearch = () => {
 
   const renderError = (field: keyof FormErrors) => {
     if (!errors[field]) return null
-    
+
     return (
       <div className="flex items-center gap-2 mt-2 text-black text-sm">
         <AlertCircle className="h-4 w-4" />
@@ -338,18 +338,17 @@ const HotelSearch = () => {
     if (!showSuggestions || suggestions.length === 0) return null
 
     return (
-      <div 
+      <div
         ref={suggestionsRef}
         className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 z-50 max-h-80 overflow-y-auto mt-1"
       >
         {suggestions.map((suggestion, index) => (
           <div
             key={`${suggestion.id}-${suggestion.type}`}
-            className={`p-3 cursor-pointer border-b border-gray-300 last:border-b-0 ${
-              index === activeSuggestionIndex 
-                ? 'bg-gray-100' 
+            className={`p-3 cursor-pointer border-b border-gray-300 last:border-b-0 ${index === activeSuggestionIndex
+                ? 'bg-gray-100'
                 : 'hover:bg-gray-50'
-            }`}
+              }`}
             onMouseDown={(e) => {
               e.preventDefault()
               handleSuggestionClick(suggestion)
@@ -366,11 +365,10 @@ const HotelSearch = () => {
                   )}
                 </div>
                 <div className="flex items-center gap-2 mt-1 justify-end">
-                  <span className={`text-xs px-2 py-1 font-medium ${
-                    suggestion.type === 'domestic' 
-                      ? 'bg-gray-200 text-black border border-gray-300' 
+                  <span className={`text-xs px-2 py-1 font-medium ${suggestion.type === 'domestic'
+                      ? 'bg-gray-200 text-black border border-gray-300'
                       : 'bg-gray-200 text-black border border-gray-300'
-                  }`}>
+                    }`}>
                     {suggestion.type === 'domestic' ? 'داخلی' : 'بین‌المللی'}
                   </span>
                   {suggestion.isPopular && (
@@ -391,7 +389,7 @@ const HotelSearch = () => {
     if (!showGuestsRooms) return null
 
     return (
-      <div 
+      <div
         ref={guestsRoomsRef}
         className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 z-50 p-4 mt-1"
       >
@@ -455,8 +453,8 @@ const HotelSearch = () => {
   }
 
   return (
-    <div style={{direction:'rtl'}} className="container mx-auto">
-      { searchLoading && 
+    <div style={{ direction: 'rtl' }} className="container mx-auto">
+      {searchLoading &&
         <AnimatePresence>
           <motion.div
             initial={{ opacity: 0 }}
@@ -486,7 +484,7 @@ const HotelSearch = () => {
                 >
                   🏨
                 </motion.div>
-                
+
                 {/* Pulsing dots */}
                 <div className="flex justify-center space-x-1 mb-6">
                   {[0, 1, 2].map((index) => (
@@ -505,7 +503,7 @@ const HotelSearch = () => {
                     />
                   ))}
                 </div>
-                
+
                 <motion.span
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -552,15 +550,14 @@ const HotelSearch = () => {
             {suggestionLoading && (
               <Loader2 className="absolute left-3 top-3 h-4 w-4 animate-spin text-blue-500" />
             )}
-            <Input 
+            <Input
               ref={inputRef}
-              id="hotel-city" 
-              placeholder="تهران، استانبول، دبی..." 
-              className={`pr-10 h-12 border border-gray-300 bg-[#fffefe] text-black placeholder-gray-500 ${
-                errors.city 
-                  ? 'border-red-500 bg-red-500' 
+              id="hotel-city"
+              placeholder="تهران، استانبول، دبی..."
+              className={`pr-10 h-12 border border-gray-300 bg-[#fffefe] text-black placeholder-gray-500 ${errors.city
+                  ? 'border-red-500 bg-red-500'
                   : 'border-gray-300'
-              }`}
+                }`}
               value={hotelSearch.city}
               onChange={(e) => handleInputChange(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -578,7 +575,7 @@ const HotelSearch = () => {
             {renderError("city")}
           </div>
         </div>
-        
+
         {/* Check-in Date */}
         <div className="space-y-2 relative">
           <Label className="text-black text-right block">تاریخ ورود</Label>
@@ -596,7 +593,7 @@ const HotelSearch = () => {
             errorColor="black"
           />
         </div>
-        
+
         {/* Check-out Date Display */}
         <div className="space-y-2 relative">
           <Label className="text-black text-right block">تاریخ خروج</Label>
@@ -616,15 +613,15 @@ const HotelSearch = () => {
           />
           {renderError("checkOut")}
         </div>
-        
+
         {/* Guests & Rooms Selector */}
         <div className="space-y-2 relative">
           <Label className="text-black text-right block">مهمان و اتاق</Label>
-          <div 
+          <div
             className="guests-rooms-trigger cursor-pointer"
             onClick={() => setShowGuestsRooms(!showGuestsRooms)}
           >
-            <div className="relative h-12 border border-gray-300 bg-[#fffefe] hover:border-gray-400 flex items-center justify-between px-3">
+            <div className="relative h-12 rounded-lg border border-gray-300 bg-[#fffefe] hover:border-gray-400 flex items-center justify-between px-3">
               <div className="flex items-center gap-3">
                 <Users className="h-4 w-4 text-gray-400" />
                 <Bed className="h-4 w-4 text-gray-400" />
@@ -642,9 +639,9 @@ const HotelSearch = () => {
           {renderGuestsRoomsSelector()}
         </div>
       </div>
-      
+
       {/* Search Button */}
-      <Button 
+      <Button
         className="w-full h-12 bg-blue-500 text-white hover:bg-blue-900 mt-6"
         onClick={handleHotelSearch}
         disabled={isLoading}

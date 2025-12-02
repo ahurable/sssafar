@@ -1,11 +1,11 @@
 "use client"
 import { useState } from 'react';
 import Link from 'next/link';
-import { 
-  Plane, 
-  Hotel, 
-  Shield, 
-  Users, 
+import {
+  Plane,
+  Hotel,
+  Shield,
+  Users,
   Globe,
   Building,
   CreditCard,
@@ -54,7 +54,7 @@ const ServiceCardsSection = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {services.map((service, index) => (
             <Link key={index} href={service.href} className="block">
-              <Card 
+              <Card
                 className={`
                   relative overflow-hidden border-2 border-blue-950/20 bg-white
                   transition-all duration-500 ease-out
@@ -72,13 +72,13 @@ const ServiceCardsSection = () => {
                   {/* Icon Container */}
                   <div className={`
                     inline-flex items-center justify-center w-16 h-16
-                    transition-all duration-500 ease-out
-                    ${hoveredCard === index ? 'scale-110' : 'scale-100'}
+                    transition-all duration-500 ease-out rounded-full
+                    ${hoveredCard === index ? 'scale-110 bg-[#d0181f]' : 'scale-100'}
                   `}>
                     <service.icon className={`
-                      w-8 h-8 text-[#f53c40]
+                      w-8 h-8 text-[#d0181f]
                       transition-transform duration-700 ease-out
-                      ${hoveredCard === index ? 'rotate-12 scale-110' : 'rotate-0 scale-100 '}
+                      ${hoveredCard === index ? 'rotate-12 scale-110 text-white' : 'rotate-0 scale-100 '}
                     `} />
                   </div>
 
@@ -89,7 +89,7 @@ const ServiceCardsSection = () => {
                         transition-all duration-500
                         ${hoveredCard === index ? 'text-blue-900' : ''}
                     `}>
-                        {service.title}
+                      {service.title}
                     </h3>
 
                     {/* Description */}
@@ -98,7 +98,7 @@ const ServiceCardsSection = () => {
                         transition-all duration-500
                         ${hoveredCard === index ? 'text-blue-900/80' : ''}
                     `}>
-                        {service.description}
+                      {service.description}
                     </p>
                   </div>
                   {/* Hover Border Effect */}

@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Calendar as CalendarIcon, X, Globe, AlertCircle } from "lucide-react"
-import { 
-  toJalaali, 
-  toGregorian, 
-  getJalaaliDaysInMonth, 
+import {
+  toJalaali,
+  toGregorian,
+  getJalaaliDaysInMonth,
   getJalaaliFirstDayOfMonth,
   getTodayJalaali,
   getTodayGregorian,
@@ -87,13 +87,13 @@ const ShamsiDateModal = ({
 
   useEffect(() => {
     if (calendarFor) {
-      if ( calendarFor === "HOTEL") {
+      if (calendarFor === "HOTEL") {
 
-      } else if ( calendarFor === "FLIGHT" && origin && destination) {
-        const getFlightsLowerPricesPerDay = async (origin:string, destination:string) => {
+      } else if (calendarFor === "FLIGHT" && origin && destination) {
+        const getFlightsLowerPricesPerDay = async (origin: string, destination: string) => {
           const response = await fetch(`/api/flights/lowerPricePerDay?origin=${origin}&destination=${destination}`, {
             headers: {
-              "Content-Type" : "application/json"
+              "Content-Type": "application/json"
             }
           })
           const data = await response.json()
@@ -120,25 +120,25 @@ const ShamsiDateModal = ({
 
   const formatDate = (date: string): string => {
     if (!date) return "انتخاب تاریخ"
-    
+
     try {
       if (calendarType === "shamsi") {
         const [year, month, day] = date.split('-')
         const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹']
-        
+
         const formatNumber = (num: string): string => {
           return num.split('').map(char => persianNumbers[parseInt(char)] || char).join('')
         }
-        
+
         return `${formatNumber(year)}/${formatNumber(month)}/${formatNumber(day)}`
       } else {
         const [year, month, day] = date.split('-')
         const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹']
-        
+
         const formatNumber = (num: string): string => {
           return num.split('').map(char => persianNumbers[parseInt(char)] || char).join('')
         }
-        
+
         return `${formatNumber(year)}/${formatNumber(month)}/${formatNumber(day)}`
       }
     } catch (error) {
@@ -201,7 +201,7 @@ const ShamsiDateModal = ({
   const handleTripTypeChange = (type: string) => {
     setLocalTripType(type)
     onTripTypeChange(type)
-    
+
     if (type === "oneway") {
       setSelectedReturnDate("")
       setSelectionMode("departure")
@@ -222,7 +222,7 @@ const ShamsiDateModal = ({
   const navigateMonths = (direction: 'prev' | 'next') => {
     setCurrentMonth(prev => {
       const newDate = new Date(prev)
-      
+
       if (calendarType === "shamsi") {
         const jalaali = toJalaali(prev.getFullYear(), prev.getMonth() + 1, prev.getDate())
         let newYear = jalaali.jy
@@ -258,7 +258,7 @@ const ShamsiDateModal = ({
   const navigateMobileMonths = (direction: 'prev' | 'next') => {
     setMobileCurrentMonth(prev => {
       const newDate = new Date(prev)
-      
+
       if (calendarType === "shamsi") {
         const jalaali = toJalaali(prev.getFullYear(), prev.getMonth() + 1, prev.getDate())
         let newYear = jalaali.jy
@@ -296,32 +296,32 @@ const ShamsiDateModal = ({
   }
 
   const renderError = () => {
-      if (!error) return null
-      
-      return (
-          <div className={`flex items-center gap-2 mt-2 ${errorColor === "red" ? 'text-red-800' : 'text-blue-900'} text-sm`}>
-              <AlertCircle className="h-4 w-4" />
-              <span>{error}</span>
-          </div>
-      )
+    if (!error) return null
+
+    return (
+      <div className={`flex items-center gap-2 mt-2 ${errorColor === "red" ? 'text-red-800' : 'text-blue-900'} text-sm`}>
+        <AlertCircle className="h-4 w-4" />
+        <span>{error}</span>
+      </div>
+    )
   }
 
   const getDisplayMonthNames = () => {
     if (calendarType === "shamsi") {
       const firstMonthJalaali = toJalaali(currentMonth.getFullYear(), currentMonth.getMonth() + 1, currentMonth.getDate())
-      
+
       let secondMonth = firstMonthJalaali.jm + 1
       let secondYear = firstMonthJalaali.jy
       if (secondMonth > 12) {
         secondMonth = 1
         secondYear++
       }
-      
+
       const shamsiMonths = [
         "فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور",
         "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"
       ]
-      
+
       return {
         firstMonth: `${shamsiMonths[firstMonthJalaali.jm - 1]} ${firstMonthJalaali.jy}`,
         secondMonth: `${shamsiMonths[secondMonth - 1]} ${secondYear}`
@@ -330,12 +330,12 @@ const ShamsiDateModal = ({
       const firstMonth = currentMonth
       const secondMonth = new Date(currentMonth)
       secondMonth.setMonth(secondMonth.getMonth() + 1)
-      
+
       const gregorianMonths = [
         "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
       ]
-      
+
       return {
         firstMonth: `${gregorianMonths[firstMonth.getMonth()]} ${firstMonth.getFullYear()}`,
         secondMonth: `${gregorianMonths[secondMonth.getMonth()]} ${secondMonth.getFullYear()}`
@@ -346,19 +346,19 @@ const ShamsiDateModal = ({
   const getMobileMonthNames = () => {
     if (calendarType === "shamsi") {
       const firstMonthJalaali = toJalaali(mobileCurrentMonth.getFullYear(), mobileCurrentMonth.getMonth() + 1, mobileCurrentMonth.getDate())
-      
+
       let secondMonth = firstMonthJalaali.jm + 1
       let secondYear = firstMonthJalaali.jy
       if (secondMonth > 12) {
         secondMonth = 1
         secondYear++
       }
-      
+
       const shamsiMonths = [
         "فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور",
         "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"
       ]
-      
+
       return {
         firstMonth: `${shamsiMonths[firstMonthJalaali.jm - 1]} ${firstMonthJalaali.jy}`,
         secondMonth: `${shamsiMonths[secondMonth - 1]} ${secondYear}`
@@ -367,12 +367,12 @@ const ShamsiDateModal = ({
       const firstMonth = mobileCurrentMonth
       const secondMonth = new Date(mobileCurrentMonth)
       secondMonth.setMonth(secondMonth.getMonth() + 1)
-      
+
       const gregorianMonths = [
         "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
       ]
-      
+
       return {
         firstMonth: `${gregorianMonths[firstMonth.getMonth()]} ${firstMonth.getFullYear()}`,
         secondMonth: `${gregorianMonths[secondMonth.getMonth()]} ${secondMonth.getFullYear()}`
@@ -387,7 +387,7 @@ const ShamsiDateModal = ({
     }
 
     const tooltipText = selectionMode === "departure" ? "تاریخ رفت" : "تاریخ برگشت"
-    
+
     setHoverTooltip({
       show: true,
       text: tooltipText,
@@ -407,7 +407,7 @@ const ShamsiDateModal = ({
     <>
       {/* Hover Tooltip for Desktop */}
       {isOpen && hoverTooltip.show && (
-        <div 
+        <div
           className="fixed z-40 px-3 py-2 text-sm bg-gray-800 text-white rounded-lg shadow-lg pointer-events-none transition-opacity duration-200 hidden md:block"
           style={{
             left: hoverTooltip.x + 15,
@@ -415,7 +415,7 @@ const ShamsiDateModal = ({
           }}
         >
           {hoverTooltip.text}
-          <div 
+          <div
             className="absolute w-3 h-3 bg-gray-800 transform rotate-45 -left-1 top-1/2 -translate-y-1/2"
             style={{ left: '-6px' }}
           />
@@ -427,8 +427,8 @@ const ShamsiDateModal = ({
         <div className="space-y-2 cursor-pointer">
           <div className="relative">
             <CalendarIcon className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
-            <div 
-              className="w-full h-12 border border-gray-300 bg-[#fffefe] text-blue-900 flex items-center justify-between px-3 pr-10 cursor-pointer"
+            <div
+              className="w-full h-12 border border-gray-300 rounded-lg bg-[#fffefe] text-blue-900 flex items-center justify-between px-3 pr-10 cursor-pointer"
               onClick={() => handleOpenChange(!isOpen)}
             >
               <span className="text-black">
@@ -464,7 +464,7 @@ const ShamsiDateModal = ({
                   </Button>
                 </div>
               </div>
-              
+
               {!normalReturnCal && (
                 <div className="flex items-center gap-4 mb-4">
                   <label className="flex items-center gap-2 cursor-pointer">
@@ -482,21 +482,19 @@ const ShamsiDateModal = ({
               {localTripType === "roundtrip" && (
                 <div className="flex bg-gray-100 p-1 mb-4 rounded">
                   <button
-                    className={`flex-1 py-1 px-3 text-xs font-medium rounded ${
-                      selectionMode === "departure"
+                    className={`flex-1 py-1 px-3 text-xs font-medium rounded ${selectionMode === "departure"
                         ? "bg-[#fffefe] text-blue-800 shadow-sm"
                         : "text-blue-900 hover:text-blue-950"
-                    }`}
+                      }`}
                     onClick={() => setSelectionMode("departure")}
                   >
                     تاریخ رفت
                   </button>
                   <button
-                    className={`flex-1 py-1 px-3 text-xs font-medium rounded ${
-                      selectionMode === "return"
+                    className={`flex-1 py-1 px-3 text-xs font-medium rounded ${selectionMode === "return"
                         ? "bg-[#fffefe] text-blue-800 shadow-sm"
                         : "text-blue-900 hover:text-blue-950"
-                    } ${!selectedDepartureDate ? "opacity-50 cursor-not-allowed" : ""}`}
+                      } ${!selectedDepartureDate ? "opacity-50 cursor-not-allowed" : ""}`}
                     onClick={() => selectedDepartureDate && setSelectionMode("return")}
                     disabled={!selectedDepartureDate}
                   >
@@ -515,13 +513,13 @@ const ShamsiDateModal = ({
                   >
                     ‹
                   </Button>
-                  
+
                   <div className="flex gap-2 text-sm font-bold text-blue-900">
                     <span>{monthNames.firstMonth}</span>
                     <span>—</span>
                     <span>{monthNames.secondMonth}</span>
                   </div>
-                  
+
                   <Button
                     variant="ghost"
                     size="icon"
@@ -613,7 +611,7 @@ const ShamsiDateModal = ({
                 </Button>
               </div>
             </div>
-            
+
             {!normalReturnCal && (
               <div className="p-3 border-b border-gray-300">
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -631,21 +629,19 @@ const ShamsiDateModal = ({
             {localTripType === "roundtrip" && (
               <div className="flex bg-gray-100 p-1 mx-3 mt-3">
                 <button
-                  className={`flex-1 py-2 px-4 text-sm font-medium ${
-                    selectionMode === "departure"
+                  className={`flex-1 py-2 px-4 text-sm font-medium ${selectionMode === "departure"
                       ? "bg-[#fffefe] text-blue-800"
                       : "text-blue-900 hover:text-blue-950"
-                  }`}
+                    }`}
                   onClick={() => setSelectionMode("departure")}
                 >
                   تاریخ رفت
                 </button>
                 <button
-                  className={`flex-1 py-2 px-4 text-sm font-medium ${
-                    selectionMode === "return"
+                  className={`flex-1 py-2 px-4 text-sm font-medium ${selectionMode === "return"
                       ? "bg-[#fffefe] text-blue-800"
                       : "text-blue-900 hover:text-blue-950"
-                  } ${!selectedDepartureDate ? "opacity-50 cursor-not-allowed" : ""}`}
+                    } ${!selectedDepartureDate ? "opacity-50 cursor-not-allowed" : ""}`}
                   onClick={() => selectedDepartureDate && setSelectionMode("return")}
                   disabled={!selectedDepartureDate}
                 >
@@ -664,13 +660,13 @@ const ShamsiDateModal = ({
               >
                 ‹
               </Button>
-              
+
               <div className="flex flex-col items-center text-sm font-bold text-blue-900">
                 <span>{mobileMonthNames.firstMonth}</span>
                 <span className="text-xs text-gray-500">و</span>
                 <span>{mobileMonthNames.secondMonth}</span>
               </div>
-              
+
               <Button
                 variant="ghost"
                 size="icon"
@@ -785,7 +781,7 @@ const Calendar = ({
   })
 
   useEffect(() => {
-    
+
   }, [flightLowestPricesWithDate])
 
   useEffect(() => {
@@ -821,7 +817,7 @@ const Calendar = ({
     "July", "August", "September", "October", "November", "December"
   ]
 
-  const weekDays = calendarType === "shamsi" 
+  const weekDays = calendarType === "shamsi"
     ? ["ش", "ی", "د", "س", "چ", "پ", "ج"]
     : ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
 
@@ -862,7 +858,7 @@ const Calendar = ({
     const month = getCurrentMonth()
     const daysInMonth = getDaysInMonth(year, month)
     const firstDay = getFirstDayOfMonth(year, month)
-    
+
     const calendar = []
     let dayCounter = 1
 
@@ -896,7 +892,7 @@ const Calendar = ({
     const year = getCurrentYear()
     const month = getCurrentMonth()
     const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-    
+
     // Convert to Date object and then to ISO string to match your price data format
     if (calendarType === "shamsi") {
       // For Shamsi dates, convert to Gregorian first, then to ISO
@@ -914,27 +910,27 @@ const Calendar = ({
     const year = getCurrentYear()
     const month = getCurrentMonth()
     const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-    
+
     if (calendarType === "shamsi") {
       const isBeforeMin = !isJalaaliDateAfterOrEqual(dateStr, minDate)
-      
+
       if (tripType === "roundtrip" && selectionMode === "return" && selectedDepartureDate) {
         const isBeforeDeparture = compareJalaaliDates(dateStr, selectedDepartureDate) < 0
         return isBeforeMin || isBeforeDeparture
       }
-      
+
       return isBeforeMin
     } else {
       const dateObj = new Date(dateStr)
       const minDateObj = new Date(minDate)
       const isBeforeMin = dateObj < minDateObj
-      
+
       if (tripType === "roundtrip" && selectionMode === "return" && selectedDepartureDate) {
         const departureDateObj = new Date(selectedDepartureDate)
         const isBeforeDeparture = dateObj < departureDateObj
         return isBeforeMin || isBeforeDeparture
       }
-      
+
       return isBeforeMin
     }
   }
@@ -943,7 +939,7 @@ const Calendar = ({
     const year = getCurrentYear()
     const month = getCurrentMonth()
     const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-    
+
     return dateStr === selectedDepartureDate || dateStr === selectedReturnDate
   }
 
@@ -951,14 +947,14 @@ const Calendar = ({
     if (tripType !== "roundtrip" || !selectedDepartureDate || !selectedReturnDate) {
       return false
     }
-    
+
     const year = getCurrentYear()
     const month = getCurrentMonth()
     const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-    
+
     if (calendarType === "shamsi") {
-      return compareJalaaliDates(dateStr, selectedDepartureDate) > 0 && 
-             compareJalaaliDates(dateStr, selectedReturnDate) < 0
+      return compareJalaaliDates(dateStr, selectedDepartureDate) > 0 &&
+        compareJalaaliDates(dateStr, selectedReturnDate) < 0
     } else {
       const dateObj = new Date(dateStr)
       const departureObj = new Date(selectedDepartureDate)
@@ -984,7 +980,7 @@ const Calendar = ({
   const getMonthName = (): string => {
     const year = getCurrentYear()
     const month = getCurrentMonth()
-    
+
     if (calendarType === "shamsi") {
       return shamsiMonths[month - 1]
     } else {
@@ -1008,7 +1004,7 @@ const Calendar = ({
 
   return (
     <div className={`bg-[#fffefe] ${isMobile ? 'p-2' : isDesktop ? 'p-1' : 'p-3'}`}>
-    
+
       <div className="text-center mb-2">
         <div className={`font-bold text-blue-900 ${isDesktop ? 'text-sm' : 'text-md'}`}>
           {getMonthName()} {getCurrentYear()}
@@ -1030,8 +1026,8 @@ const Calendar = ({
               key={`${weekIndex}-${dayIndex}`}
               className={`aspect-square flex flex-col items-center justify-center font-medium relative
                 ${isDesktop ? 'text-xs' : 'text-xs'}
-                ${!day 
-                  ? 'invisible' 
+                ${!day
+                  ? 'invisible'
                   : isDateDisabled(day)
                     ? 'text-gray-300 cursor-not-allowed bg-gray-100'
                     : isDateSelected(day)
@@ -1050,7 +1046,7 @@ const Calendar = ({
                 {day?.toLocaleString('fa-IR')}
               </span>
               {
-                day && flightLowestPricesWithDate && 
+                day && flightLowestPricesWithDate &&
                 (() => {
                   const currentDate = getTheIsoDate(day);
                   const matchingPrice = flightLowestPricesWithDate.find(

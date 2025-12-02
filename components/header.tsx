@@ -18,7 +18,7 @@ export function Header() {
   const [loading, setLoading] = useState(true)
   const [activeHoverMenu, setActiveHoverMenu] = useState<string | null>(null)
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null)
-  
+
   const profileMenuRef = useRef<HTMLDivElement>(null)
   const mobileMenuRef = useRef<HTMLDivElement>(null)
   const flightMenuRef = useRef<HTMLDivElement>(null)
@@ -80,25 +80,25 @@ export function Header() {
   const handleMenuClick = (menuType: string) => {
     // Close mobile menu first
     setMobileMenuOpen(false)
-    
+
     // Check if we're already on home page
     if (window.location.pathname === '/') {
       // If already on home page, just update the URL with search param
       const params = new URLSearchParams(searchParams.toString())
-      
-      if ( menuType == "flight" || menuType == "domesticFlights" || menuType == "hotel" || menuType == "domesticHotel") {
+
+      if (menuType == "flight" || menuType == "domesticFlights" || menuType == "hotel" || menuType == "domesticHotel") {
         params.set('search', menuType)
         router.push(`/?${params.toString()}`, { scroll: false })
       } else {
         router.push(`/${menuType}`)
       }
-      
+
       // Trigger custom event to open modal
       window.dispatchEvent(new CustomEvent('openSearchModal', { detail: menuType }))
     } else {
       const params = new URLSearchParams(searchParams.toString())
       // If not on home page, navigate to home page with search param
-      if ( menuType == "flight" || menuType == "domesticFlights" || menuType == "hotel" || menuType == "domesticHotel") {
+      if (menuType == "flight" || menuType == "domesticFlights" || menuType == "hotel" || menuType == "domesticHotel") {
         params.set('search', menuType)
         router.push(`/?${params.toString()}`, { scroll: false })
       } else {
@@ -121,7 +121,7 @@ export function Header() {
       setActiveHoverMenu(null)
     }, 200) // Small delay to allow moving to submenu
     setHoverTimeout(timeout)
-  }   
+  }
 
   const ProfileMenu = () => (
     <div className="absolute left-0 lg:left-[-20px] lg:top-[50px] top-full mt-2 w-72 border border-gray-300 bg-[#fffefe] z-50">
@@ -229,7 +229,7 @@ export function Header() {
     if (!isOpen) return null
     // console.log(items)
     return (
-      <div 
+      <div
         ref={menuRef}
         className="absolute top-full right-0 mt-0 w-48 bg-[#fffefe] border border-gray-300 shadow-lg z-40"
         onMouseEnter={onSubmenuHover}
@@ -251,9 +251,9 @@ export function Header() {
     )
   }
 
-   const MobileMenu = () => (
+  const MobileMenu = () => (
     <div className="fixed inset-0 z-40 h-[100vh] lg:hidden">
-      <div 
+      <div
         ref={mobileMenuRef}
         className="absolute inset-0 bg-[#fffefe]"
       >
@@ -262,11 +262,14 @@ export function Header() {
           <div className="flex items-center justify-between p-4 border-b border-gray-300 bg-[#fffefe]">
             <div className="flex items-center gap-3">
               <Image
-              src={'/assets/images/logo.png'}
-              width={200}
-              height={100}
-              alt="O'MOSAFER Logo"
+                src={'/assets/images/logo.png'}
+                width={30}
+                height={30}
+                alt="O'MOSAFER Logo"
               />
+              <span className="block text-lg font-bold ms-[-6px]">
+                مُسافِر
+              </span>
             </div>
             <button
               onClick={() => setMobileMenuOpen(false)}
@@ -281,7 +284,7 @@ export function Header() {
             {/* Main Navigation */}
             <div className="space-y-2 mb-6">
               <h3 className="text-right text-lg font-bold text-black mb-3">منوی اصلی</h3>
-              
+
               {/* Flight Menu */}
               <div className="border border-gray-300 bg-[#fffefe]">
                 <div className="flex items-center gap-4 w-full px-4 py-3 text-right bg-gray-50">
@@ -410,7 +413,7 @@ export function Header() {
             {/* Secondary Navigation */}
             <div className="space-y-2 border-t border-gray-300 pt-4">
               <h3 className="text-right text-lg font-bold text-black mb-3">صفحات دیگر</h3>
-              
+
               <Link
                 href="/"
                 className="flex items-center gap-4 w-full px-4 py-3 text-right text-black hover:bg-gray-100"
@@ -512,22 +515,25 @@ export function Header() {
             </button>
 
             {/* Logo */}
-            <Link 
-              href="/" 
-              className="flex items-center gap-2"
+            <Link
+              href="/"
+              className="flex items-end gap-2"
             >
               <Image
-              src={'/assets/images/logo.png'}
-              width={150}
-              height={75}
-              alt="O'MOSAFER Logo"
+                src={'/assets/images/logo.png'}
+                width={30}
+                height={30}
+                alt="O'MOSAFER Logo"
               />
+              <span className="block text-xl font-black ms-[-6px]">
+                مُسافِر
+              </span>
             </Link>
 
             {/* Desktop Navigation - Moved closer to logo */}
             <div className="hidden lg:flex items-center gap-1">
               {/* Flight Menu */}
-              <div 
+              <div
                 className="relative"
                 ref={flightMenuRef}
                 onMouseEnter={() => handleMenuHover('flight')}
@@ -548,7 +554,7 @@ export function Header() {
               </div>
 
               {/* Hotel Menu */}
-              <div 
+              <div
                 className="relative"
                 ref={hotelMenuRef}
                 onMouseEnter={() => handleMenuHover('hotel')}
@@ -569,7 +575,7 @@ export function Header() {
               </div>
 
               {/* Other Menu */}
-              <div 
+              <div
                 className="relative"
                 ref={otherMenuRef}
                 onMouseEnter={() => handleMenuHover('other')}
