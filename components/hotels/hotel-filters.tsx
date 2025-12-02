@@ -1,22 +1,22 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { useHotel } from "@/contexts/search/HotelContext"
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetHeader, 
-  SheetTitle, 
-  SheetTrigger 
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger
 } from "@/components/ui/sheet"
-import { 
-  Filter, 
-  X, 
+import {
+  Filter,
+  X,
   Star,
   Wifi,
   Utensils,
@@ -55,6 +55,7 @@ export function HotelFilters() {
   })
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const [activeFilterSection, setActiveFilterSection] = useState<string | null>(null)
+  const [hasInitialized, setHasInitialized] = useState(false)
 
   const availablePriceRange = hotelData && hotelData.PricedItineraries.length > 0 ? [
     Math.min(...hotelData.PricedItineraries.map(f => f.NetRate / 10).filter(rate => typeof rate === 'number' && !isNaN(rate))),
@@ -63,62 +64,119 @@ export function HotelFilters() {
 
   // Initialize price range when data loads
   useEffect(() => {
-    if (hotelData && hotelData.PricedItineraries.length > 0) {
+    if (hotelData && hotelData.PricedItineraries.length > 0 && !hasInitialized) {
       setFilters(prev => ({
         ...prev,
         priceRange: [availablePriceRange[0], availablePriceRange[1]]
       }))
+      setHasInitialized(true)
     }
-  }, [hotelData])
+  }, [hotelData, hasInitialized])
+
+  // Apply filters immediately on desktop when any filter changes
+  useEffect(() => {
+    // Don't apply on initial load
+    if (hotelData && hotelData.PricedItineraries.length === 0) return
+
+    // Only auto-apply for desktop (where there's no apply button)
+    const isDesktop = window.innerWidth >= 1024
+    if (isDesktop && hasInitialized) {
+      // Small delay to ensure state is updated
+      const timeoutId = setTimeout(() => {
+        applyFilters(filters)
+      }, 10)
+
+      return () => clearTimeout(timeoutId)
+    }
+  }, [filters, hotelData, hasInitialized])
 
   const handlePriceChange = (value: number[]) => {
-    setFilters(prev => ({
-      ...prev,
+    const newFilters = {
+      ...filters,
       priceRange: value as [number, number]
-    }))
+    }
+    setFilters(newFilters)
+
+    // Apply immediately on desktop
+    const isDesktop = window.innerWidth >= 1024
+    if (isDesktop && hasInitialized) {
+      setTimeout(() => applyFilters(newFilters), 10)
+    }
   }
 
   const handleRatingChange = (rating: string, checked: boolean) => {
-    setFilters(prev => ({
-      ...prev,
-      hotelRatings: checked 
-        ? [...prev.hotelRatings, rating]
-        : prev.hotelRatings.filter(r => r !== rating)
-    }))
+    const newHotelRatings = checked
+      ? [...filters.hotelRatings, rating]
+      : filters.hotelRatings.filter(r => r !== rating)
+
+    const newFilters = {
+      ...filters,
+      hotelRatings: newHotelRatings
+    }
+    setFilters(newFilters)
+
+    // Apply immediately on desktop
+    const isDesktop = window.innerWidth >= 1024
+    if (isDesktop && hasInitialized) {
+      setTimeout(() => applyFilters(newFilters), 10)
+    }
   }
 
   const handleAmenityChange = (amenity: string, checked: boolean) => {
-    setFilters(prev => ({
-      ...prev,
-      amenities: checked 
-        ? [...prev.amenities, amenity]
-        : prev.amenities.filter(a => a !== amenity)
-    }))
+    const newAmenities = checked
+      ? [...filters.amenities, amenity]
+      : filters.amenities.filter(a => a !== amenity)
+
+    const newFilters = {
+      ...filters,
+      amenities: newAmenities
+    }
+    setFilters(newFilters)
+
+    // Apply immediately on desktop
+    const isDesktop = window.innerWidth >= 1024
+    if (isDesktop && hasInitialized) {
+      setTimeout(() => applyFilters(newFilters), 10)
+    }
   }
 
   const handleHotelTypeChange = (type: string, checked: boolean) => {
-    setFilters(prev => ({
-      ...prev,
-      hotelTypes: checked 
-        ? [...prev.hotelTypes, type]
-        : prev.hotelTypes.filter(t => t !== type)
-    }))
+    const newHotelTypes = checked
+      ? [...filters.hotelTypes, type]
+      : filters.hotelTypes.filter(t => t !== type)
+
+    const newFilters = {
+      ...filters,
+      hotelTypes: newHotelTypes
+    }
+    setFilters(newFilters)
+
+    // Apply immediately on desktop
+    const isDesktop = window.innerWidth >= 1024
+    if (isDesktop && hasInitialized) {
+      setTimeout(() => applyFilters(newFilters), 10)
+    }
   }
 
   const handleApplyFilters = () => {
-    applyFilters(filters)
+    // For mobile, apply filters when button is clicked
+    const isMobile = window.innerWidth < 1024
+    if (isMobile) {
+      applyFilters(filters)
+    }
     setIsSheetOpen(false)
     setActiveFilterSection(null)
   }
 
-  const handleClearFilters = () => {
-    setFilters({
+  const clearAllFilters = () => {
+    const newFilters = {
       priceRange: availablePriceRange as [number, number],
       hotelRatings: [],
       amenities: [],
       hotelTypes: []
-    })
-    clearFilters()
+    }
+    setFilters(newFilters)
+    applyFilters(newFilters)
   }
 
   const toggleSection = (section: string) => {
@@ -182,12 +240,12 @@ export function HotelFilters() {
   const totalHotels = hotelData?.PricedItineraries?.length || 0
   const showingHotels = filteredHotels.length
 
-  const FilterSection = ({ 
-    title, 
-    sectionKey, 
-    icon: Icon, 
-    children 
-  }: { 
+  const FilterSection = ({
+    title,
+    sectionKey,
+    icon: Icon,
+    children
+  }: {
     title: string
     sectionKey: string
     icon: any
@@ -216,157 +274,161 @@ export function HotelFilters() {
     </div>
   )
 
-  const FilterContent = ({ showAllSections = true }) => (
-    <div className="space-y-6">
-      {/* Results Count */}
-      {showAllSections && (
-        <div className="bg-blue-50 rounded-lg p-3">
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-blue-700 font-medium">نتایج جستجو:</span>
-            <span className="text-blue-800 font-semibold">
-              {showingHotels} از {totalHotels} هتل
-            </span>
-          </div>
-        </div>
-      )}
+  const FilterContent = ({ showAllSections = true }) => {
+    const isMobile = typeof window !== 'undefined' ? window.innerWidth < 1024 : false;
 
-      {/* Active Filters Badge */}
-      {showAllSections && getActiveFiltersCount() > 0 && (
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-600">فیلترهای فعال:</span>
-          <Badge variant="secondary" className="bg-emerald-50 text-emerald-700">
-            {getActiveFiltersCount()} فیلتر
-          </Badge>
-        </div>
-      )}
-
-      {/* Price Range Filter */}
-      {(showAllSections || activeFilterSection === 'price') && (
-        <FilterSection title="محدوده قیمت" sectionKey="price" icon={DollarSign}>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <Label className="text-sm font-medium">قیمت هر شب (تومان)</Label>
-              <span className="text-xs bg-emerald-50 text-emerald-700 px-2 py-1 rounded-full">
-                {filters.priceRange[0].toLocaleString('fa-IR')} - {filters.priceRange[1].toLocaleString('fa-IR')}
+    return (
+      <div className="space-y-6">
+        {/* Results Count */}
+        {showAllSections && (
+          <div className="bg-blue-50 rounded-lg p-3">
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-blue-700 font-medium">نتایج جستجو:</span>
+              <span className="text-blue-800 font-semibold">
+                {showingHotels} از {totalHotels} هتل
               </span>
             </div>
-            <Slider 
-              value={filters.priceRange}
-              onValueChange={handlePriceChange}
-              min={availablePriceRange[0]}
-              max={availablePriceRange[1]}
-              step={100000}
-              className="mt-2"
-            />
-            <div className="flex justify-between text-xs text-gray-500">
-              <span>{availablePriceRange[0].toLocaleString('fa-IR')}</span>
-              <span>{availablePriceRange[1].toLocaleString('fa-IR')}</span>
-            </div>
           </div>
-        </FilterSection>
-      )}
+        )}
 
-      {/* Hotel Rating Filter */}
-      {(showAllSections || activeFilterSection === 'rating') && (
-        <FilterSection title="ستاره هتل" sectionKey="rating" icon={Star}>
-          <div className="space-y-3">
-            {ratingOptions.map((rating) => (
-              <div key={rating.value} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                <Checkbox 
-                  id={`rating-${rating.value}`}
-                  checked={filters.hotelRatings.includes(rating.value)}
-                  className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
-                  onCheckedChange={(checked) => 
-                    handleRatingChange(rating.value, checked as boolean)
-                  }
-                />
-                <div className="flex-1 text-right">
-                  <label 
-                    htmlFor={`rating-${rating.value}`} 
-                    className="text-sm font-medium cursor-pointer block"
-                  >
-                    {rating.label}
-                  </label>
-                  <div className="flex gap-1 mt-1 justify-end">
-                    {Array.from({ length: rating.stars }).map((_, i) => (
-                      <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </div>
-                </div>
+        {/* Active Filters Badge */}
+        {showAllSections && getActiveFiltersCount() > 0 && (
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-600">فیلترهای فعال:</span>
+            <Badge variant="secondary" className="bg-blue-50 text-blue-700">
+              {getActiveFiltersCount()} فیلتر
+            </Badge>
+          </div>
+        )}
+
+        {/* Price Range Filter */}
+        {(showAllSections || activeFilterSection === 'price') && (
+          <FilterSection title="محدوده قیمت" sectionKey="price" icon={DollarSign}>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <Label className="text-sm font-medium">قیمت هر شب (تومان)</Label>
+                <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full">
+                  {filters.priceRange[0].toLocaleString('fa-IR')} - {filters.priceRange[1].toLocaleString('fa-IR')}
+                </span>
               </div>
-            ))}
-          </div>
-        </FilterSection>
-      )}
+              <Slider
+                value={filters.priceRange}
+                onValueChange={handlePriceChange}
+                min={availablePriceRange[0]}
+                max={availablePriceRange[1]}
+                step={100000}
+                className="mt-2"
+              />
+              <div className="flex justify-between text-xs text-gray-500">
+                <span>{availablePriceRange[0].toLocaleString('fa-IR')}</span>
+                <span>{availablePriceRange[1].toLocaleString('fa-IR')}</span>
+              </div>
+            </div>
+          </FilterSection>
+        )}
 
-      {/* Amenities Filter */}
-      {(showAllSections || activeFilterSection === 'amenities') && (
-        <FilterSection title="امکانات هتل" sectionKey="amenities" icon={Sparkles}>
-          <div className="space-y-3">
-            {amenityOptions.map((amenity) => {
-              const AmenityIcon = amenity.icon
-              return (
-                <div key={amenity.value} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                  <Checkbox 
-                    id={`amenity-${amenity.value}`}
-                    checked={filters.amenities.includes(amenity.value)}
-                    className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
-                    onCheckedChange={(checked) => 
-                      handleAmenityChange(amenity.value, checked as boolean)
+        {/* Hotel Rating Filter */}
+        {(showAllSections || activeFilterSection === 'rating') && (
+          <FilterSection title="ستاره هتل" sectionKey="rating" icon={Star}>
+            <div className="space-y-3">
+              {ratingOptions.map((rating) => (
+                <div key={rating.value} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                  <Checkbox
+                    id={`rating-${rating.value}`}
+                    checked={filters.hotelRatings.includes(rating.value)}
+                    className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                    onCheckedChange={(checked) =>
+                      handleRatingChange(rating.value, checked as boolean)
                     }
                   />
-                  <div className="flex items-center gap-2 flex-1 text-right">
-                    <AmenityIcon className="h-4 w-4 text-gray-500" />
-                    <label 
-                      htmlFor={`amenity-${amenity.value}`} 
-                      className="text-sm font-medium cursor-pointer flex-1"
+                  <div className="flex-1 text-right">
+                    <label
+                      htmlFor={`rating-${rating.value}`}
+                      className="text-sm font-medium cursor-pointer block"
                     >
-                      {amenity.label}
+                      {rating.label}
                     </label>
+                    <div className="flex gap-1 mt-1 justify-end">
+                      {Array.from({ length: rating.stars }).map((_, i) => (
+                        <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                      ))}
+                    </div>
                   </div>
                 </div>
-              )
-            })}
-          </div>
-        </FilterSection>
-      )}
+              ))}
+            </div>
+          </FilterSection>
+        )}
 
-      {/* Hotel Type Filter */}
-      {(showAllSections || activeFilterSection === 'type') && (
-        <FilterSection title="نوع اقامتگاه" sectionKey="type" icon={Building}>
-          <div className="space-y-3">
-            {hotelTypeOptions.map((type) => (
-              <div key={type.value} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                <Checkbox 
-                  id={`type-${type.value}`}
-                  checked={filters.hotelTypes.includes(type.value)}
-                  className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
-                  onCheckedChange={(checked) => 
-                    handleHotelTypeChange(type.value, checked as boolean)
-                  }
-                />
-                <div className="flex-1 text-right">
-                  <label 
-                    htmlFor={`type-${type.value}`} 
-                    className="text-sm font-medium cursor-pointer block"
-                  >
-                    {type.label}
-                  </label>
-                  <span className="text-xs text-gray-500">{type.description}</span>
+        {/* Amenities Filter */}
+        {(showAllSections || activeFilterSection === 'amenities') && (
+          <FilterSection title="امکانات هتل" sectionKey="amenities" icon={Sparkles}>
+            <div className="space-y-3">
+              {amenityOptions.map((amenity) => {
+                const AmenityIcon = amenity.icon
+                return (
+                  <div key={amenity.value} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                    <Checkbox
+                      id={`amenity-${amenity.value}`}
+                      checked={filters.amenities.includes(amenity.value)}
+                      className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                      onCheckedChange={(checked) =>
+                        handleAmenityChange(amenity.value, checked as boolean)
+                      }
+                    />
+                    <div className="flex items-center gap-2 flex-1 text-right">
+                      <AmenityIcon className="h-4 w-4 text-gray-500" />
+                      <label
+                        htmlFor={`amenity-${amenity.value}`}
+                        className="text-sm font-medium cursor-pointer flex-1"
+                      >
+                        {amenity.label}
+                      </label>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </FilterSection>
+        )}
+
+        {/* Hotel Type Filter */}
+        {(showAllSections || activeFilterSection === 'type') && (
+          <FilterSection title="نوع اقامتگاه" sectionKey="type" icon={Building}>
+            <div className="space-y-3">
+              {hotelTypeOptions.map((type) => (
+                <div key={type.value} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                  <Checkbox
+                    id={`type-${type.value}`}
+                    checked={filters.hotelTypes.includes(type.value)}
+                    className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                    onCheckedChange={(checked) =>
+                      handleHotelTypeChange(type.value, checked as boolean)
+                    }
+                  />
+                  <div className="flex-1 text-right">
+                    <label
+                      htmlFor={`type-${type.value}`}
+                      className="text-sm font-medium cursor-pointer block"
+                    >
+                      {type.label}
+                    </label>
+                    <span className="text-xs text-gray-500">{type.description}</span>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </FilterSection>
-      )}
-    </div>
-  )
+              ))}
+            </div>
+          </FilterSection>
+        )}
+      </div>
+    )
+  }
 
-  const FilterTriggerButton = ({ 
-    section, 
-    title, 
-    icon: Icon 
-  }: { 
+  const FilterTriggerButton = ({
+    section,
+    title,
+    icon: Icon
+  }: {
     section: string
     title: string
     icon: any
@@ -379,7 +441,7 @@ export function HotelFilters() {
       <Icon className="h-4 w-4" />
       {title}
       {getFilterBadgeCount(section) > 0 && (
-        <Badge variant="secondary" className="h-5 w-5 min-w-5 p-0 flex items-center justify-center text-xs bg-emerald-500 text-white">
+        <Badge variant="secondary" className="h-5 w-5 min-w-5 p-0 flex items-center justify-center text-xs bg-blue-500 text-white">
           {getFilterBadgeCount(section)}
         </Badge>
       )}
@@ -388,51 +450,38 @@ export function HotelFilters() {
 
   return (
     <>
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:block">
-        <Card className="sticky top-20 shadow-sm border-0">
-          <CardHeader className="pb-3 border-b">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Filter className="h-5 w-5" />
-                فیلترهای هتل
-              </CardTitle>
-              {getActiveFiltersCount() > 0 && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={handleClearFilters}
-                  className="text-xs text-gray-500 hover:text-gray-700 h-8"
-                >
-                  حذف همه
-                </Button>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent className="p-4">
-            <FilterContent showAllSections={true} />
-            <div className="flex gap-2 pt-4">
-              <Button 
-                onClick={handleApplyFilters}
-                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium h-12 text-base"
-              >
-                اعمال فیلترها
-              </Button>
-              <Button 
-                onClick={handleClearFilters}
-                variant="outline"
-                className="h-12"
-              >
-                حذف
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Desktop Sidebar - NOW SCROLLABLE AND STICKY PARENT */}
+      <div className="hidden lg:block lg:sticky lg:top-20 h-[calc(100vh-6rem)]">
+        <div className="h-full flex flex-col">
+          <Card className="h-full flex flex-col border-blue-900 shadow-sm overflow-hidden">
+            <CardHeader className="pb-3 border-b flex-shrink-0">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg flex items-center gap-2 text-blue-900">
+                  <Filter className="h-5 w-5" />
+                  فیلترهای هتل
+                </CardTitle>
+                {getActiveFiltersCount() > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearAllFilters}
+                    className="text-xs text-gray-500 hover:text-gray-700 h-8"
+                  >
+                    حذف همه
+                  </Button>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className="flex-1 overflow-y-auto p-4" style={{ scrollbarWidth: 'none' }}>
+              <FilterContent showAllSections={true} />
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* Mobile Filter Buttons */}
       <div className="lg:hidden absolute top-16 left-6 right-6 z-40">
-        <div className="flex items-center gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none'}}>
+        <div className="flex items-center gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
           {/* Main Filters Button */}
           <Sheet open={isSheetOpen && !activeFilterSection} onOpenChange={(open) => {
             setIsSheetOpen(open)
@@ -443,14 +492,14 @@ export function HotelFilters() {
                 <Filter className="h-5 w-5 ml-2" />
                 فیلترها
                 {getActiveFiltersCount() > 0 && (
-                  <Badge className="mr-2 bg-[#fffefe] text-emerald-600 px-2 py-1 text-xs">
+                  <Badge className="mr-2 bg-[#fffefe] text-blue-600 px-2 py-1 text-xs">
                     {getActiveFiltersCount()}
                   </Badge>
                 )}
               </Button>
             </SheetTrigger>
             <SheetContent side="bottom" className="h-[90vh] rounded-t-3xl">
-              <SheetHeader className="border-b pb-4">
+              <SheetHeader className="border-b py-4">
                 <div className="flex items-center justify-between">
                   <SheetTitle className="flex items-center gap-2 text-lg">
                     <Filter className="h-5 w-5" />
@@ -458,18 +507,18 @@ export function HotelFilters() {
                   </SheetTitle>
                   <div className="flex items-center gap-2">
                     {getActiveFiltersCount() > 0 && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={handleClearFilters}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearAllFilters}
                         className="text-xs text-gray-500 hover:text-gray-700"
                       >
                         حذف همه
                       </Button>
                     )}
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => setIsSheetOpen(false)}
                       className="p-2"
                     >
@@ -483,23 +532,23 @@ export function HotelFilters() {
               </div>
               <div className="absolute bottom-0 left-0 right-0 p-4 bg-[#fffefe] border-t">
                 <div className="flex gap-2">
-                  <Button 
+                  <Button
                     onClick={handleApplyFilters}
-                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium h-14 text-lg"
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium h-14 text-lg"
                     size="lg"
                   >
                     نمایش نتایج
-                    <span className="text-emerald-100 mr-2">
+                    <span className="text-blue-100 mr-2">
                       ({showingHotels} هتل)
                     </span>
                   </Button>
-                  <Button 
-                    onClick={handleClearFilters}
+                  <Button
+                    onClick={clearAllFilters}
                     variant="outline"
                     className="h-14 text-lg"
                     size="lg"
                   >
-                    حذف
+                    حذف همه
                   </Button>
                 </div>
               </div>
@@ -531,9 +580,9 @@ export function HotelFilters() {
                   {activeFilterSection === 'amenities' && 'امکانات هتل'}
                   {activeFilterSection === 'type' && 'نوع اقامتگاه'}
                 </SheetTitle>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => {
                     setIsSheetOpen(false)
                     setActiveFilterSection(null)
@@ -548,9 +597,9 @@ export function HotelFilters() {
               <FilterContent showAllSections={false} />
             </div>
             <div className="absolute bottom-0 left-0 right-0 p-4 bg-[#fffefe] border-t">
-              <Button 
+              <Button
                 onClick={handleApplyFilters}
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium h-14 text-lg"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium h-14 text-lg"
                 size="lg"
               >
                 اعمال فیلتر
