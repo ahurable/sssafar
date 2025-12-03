@@ -72,7 +72,7 @@ interface HotelOrder {
   Amenities: string[]
   AvailableRoom: number
   FareSourceCode: string
-  
+
   RevalidatedData?: {
     Success: boolean
     Error: any | null
@@ -219,12 +219,12 @@ interface InvoiceComponentProps {
   loading?: boolean
 }
 
-export function InvoiceComponent({ 
-  invoice, 
-  userCredit, 
-  userPanels = [], 
-  onPayment, 
-  loading = false 
+export function InvoiceComponent({
+  invoice,
+  userCredit,
+  userPanels = [],
+  onPayment,
+  loading = false
 }: InvoiceComponentProps) {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<"CREDIT" | "PANELCREDIT" | "STRAIGHT">("STRAIGHT")
   const [selectedPanelId, setSelectedPanelId] = useState<string>("")
@@ -245,7 +245,7 @@ export function InvoiceComponent({
   const cipOrder = isCIPInvoice ? invoice.order as CIPOrder : null
   const activityOrder = isActivityInvoice ? invoice.order as ActivityOrder : null
 
-  
+
   // Manual revalidation function
   const handleManualRevalidate = async () => {
     if (!isHotelInvoice || !hotelOrder) return
@@ -388,11 +388,11 @@ export function InvoiceComponent({
         error(data.message)
       }
     } else if (selectedPaymentMethod === "PANELCREDIT") {
-      const response = await fetch(`/api/invoice/${invoice.id}/payment/panel`, 
+      const response = await fetch(`/api/invoice/${invoice.id}/payment/panel`,
         {
           method: 'POST',
           headers: {
-            'Content-Type':'application/json'
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({
             panelId: selectedPanelId
@@ -408,7 +408,7 @@ export function InvoiceComponent({
         error(data.message)
       }
     }
-    
+
     else {
       onPayment(selectedPaymentMethod, selectedPanelId || undefined)
     }
@@ -539,7 +539,7 @@ export function InvoiceComponent({
     }
   }, [paid])
 
-  const canUseCredit = userCredit && userCredit.balance >= amount 
+  const canUseCredit = userCredit && userCredit.balance >= amount
   const availablePanels = userPanels.filter(panel => getPanelAvailableCredit(panel) >= amount)
 
   const formatDate = (dateString: string) => {
@@ -572,7 +572,7 @@ export function InvoiceComponent({
   const getAirlineName = (iataCode: string) => {
     const airlines: { [key: string]: string } = {
       "EK": "امارات",
-      "QR": "قطر ایرویز", 
+      "QR": "قطر ایرویز",
       "EY": "اتیهاد ایرویز",
       "TK": "ترکیش ایرلاینز",
       "OV": "سلام ایر",
@@ -603,7 +603,7 @@ export function InvoiceComponent({
   const getPassengerTypeText = (passengerType: string) => {
     const types: Record<string, string> = {
       "0": "کهنسال",
-      "1": "بزرگسال", 
+      "1": "بزرگسال",
       "2": "کودک",
       "3": "نوزاد"
     }
@@ -665,10 +665,10 @@ export function InvoiceComponent({
               <Clock className="h-5 w-5 text-amber-600" />
               <div>
                 <h2 className="text-lg font-semibold">
-                  {isFlightInvoice ? "صورت حساب پرواز" : 
-                   isHotelInvoice ? "صورت حساب رزرو هتل" :
-                   isCIPInvoice ? "صورت حساب خدمات CIP" :
-                   isActivityInvoice ? "صورت حساب گشت شهری" : "صورت حساب"}
+                  {isFlightInvoice ? "صورت حساب پرواز" :
+                    isHotelInvoice ? "صورت حساب رزرو هتل" :
+                      isCIPInvoice ? "صورت حساب خدمات CIP" :
+                        isActivityInvoice ? "صورت حساب گشت شهری" : "صورت حساب"}
                 </h2>
                 <p className="text-sm text-muted-foreground">
                   زمان باقی‌مانده برای پرداخت:{" "}
@@ -727,7 +727,7 @@ export function InvoiceComponent({
                     <Label className="text-sm text-blue-700 font-medium">عنوان گشت</Label>
                     <p className="font-bold text-blue-900 mt-1">{activityOrder.tourTitle}</p>
                   </div>
-                  
+
                   <div className="bg-green-50 p-4 rounded-lg border border-green-200">
                     <Label className="text-sm text-green-700 font-medium">تاریخ</Label>
                     <p className="font-bold text-green-900 mt-1">{activityOrder.selectedDate}</p>
@@ -745,7 +745,7 @@ export function InvoiceComponent({
                 </div>
 
                 {/* Selected Prices */}
-                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <div className="bg-gray-50 p-4 rounded-lg border border-blue-900">
                   <Label className="text-sm font-medium mb-3 block">جزئیات مسافران</Label>
                   <div className="space-y-3">
                     {activityOrder.selectedPrices.map((price, index) => (
@@ -802,7 +802,7 @@ export function InvoiceComponent({
                     <Label className="text-sm text-blue-700 font-medium">عنوان سرویس</Label>
                     <p className="font-bold text-blue-900 mt-1">{cipOrder.title}</p>
                   </div>
-                  
+
                   <div className="bg-green-50 p-4 rounded-lg border border-green-200">
                     <Label className="text-sm text-green-700 font-medium">فرودگاه</Label>
                     <p className="font-bold text-green-900 mt-1">{cipOrder.airport}</p>
@@ -836,7 +836,7 @@ export function InvoiceComponent({
 
                 {/* Features */}
                 {cipOrder.features && cipOrder.features.length > 0 && (
-                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <div className="bg-gray-50 p-4 rounded-lg border border-blue-900">
                     <Label className="text-sm font-medium mb-3 block">ویژگی‌های سرویس</Label>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                       {cipOrder.features.map((feature, index) => (
@@ -974,7 +974,7 @@ export function InvoiceComponent({
                   {/* Additional Flight Information */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                     {/* Flight Details */}
-                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <div className="bg-gray-50 p-4 rounded-lg border border-blue-900">
                       <Label className="text-sm text-gray-700 font-medium mb-3">جزئیات پرواز</Label>
                       <div className="space-y-2">
                         <div className="flex justify-between">
@@ -999,7 +999,7 @@ export function InvoiceComponent({
                     </div>
 
                     {/* Passenger Requirements */}
-                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <div className="bg-gray-50 p-4 rounded-lg border border-blue-900">
                       <Label className="text-sm text-gray-700 font-medium mb-3">الزامات مسافر</Label>
                       <div className="space-y-2">
                         <div className="flex justify-between">
@@ -1084,19 +1084,19 @@ export function InvoiceComponent({
                     )}
                   </div>
                 </div>
-              
-              {invoice.selectedServices && invoice.selectedServices.length > 0 && (
-                <div>
-                  <Label className="text-sm text-muted-foreground">خدمات اضافی</Label>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {invoice.selectedServices.map((service, index) => (
-                      <Badge key={index} variant="secondary">
-                        {service.name}
-                      </Badge>
-                    ))}
+
+                {invoice.selectedServices && invoice.selectedServices.length > 0 && (
+                  <div>
+                    <Label className="text-sm text-muted-foreground">خدمات اضافی</Label>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {invoice.selectedServices.map((service, index) => (
+                        <Badge key={index} variant="secondary">
+                          {service.name}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               </CardContent>
             </Card>
@@ -1120,7 +1120,7 @@ export function InvoiceComponent({
                       {hotelOrder.HotelName || `هتل ${hotelOrder.HotelId}`}
                     </p>
                   </div>
-                  
+
                   <div className="bg-green-50 p-4 rounded-lg border border-green-200">
                     <Label className="text-sm text-green-700 font-medium">اتاق‌های موجود</Label>
                     <p className="font-bold text-green-900 mt-1">
@@ -1141,7 +1141,7 @@ export function InvoiceComponent({
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center gap-3 p-4 border rounded-lg">
                     <Calendar className="h-5 w-5 text-green-600" />
                     <div>
@@ -1166,7 +1166,7 @@ export function InvoiceComponent({
                             {getMealTypeText(room.MealType)}
                           </Badge>
                         </div>
-                        
+
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                           <div>
                             <Label className="text-muted-foreground">بزرگسالان</Label>
@@ -1198,7 +1198,7 @@ export function InvoiceComponent({
 
                 {/* Hotel Policies */}
                 {hotelOrder.HotelPolicy.InstructionsFa && (
-                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <div className="bg-gray-50 p-4 rounded-lg border border-blue-900">
                     <Label className="text-sm font-medium mb-2 block">قوانین هتل</Label>
                     <p className="text-sm text-muted-foreground">
                       {hotelOrder.HotelPolicy.InstructionsFa}
@@ -1226,18 +1226,17 @@ export function InvoiceComponent({
                 )}
 
                 {/* Cancellation Policy */}
-                <div className={`p-4 rounded-lg border ${
-                  hotelOrder.NonRefundable 
-                    ? 'bg-red-50 border-red-200' 
-                    : 'bg-green-50 border-green-200'
-                }`}>
+                <div className={`p-4 rounded-lg border ${hotelOrder.NonRefundable
+                  ? 'bg-red-50 border-red-200'
+                  : 'bg-green-50 border-green-200'
+                  }`}>
                   <div className="flex items-center gap-2">
                     <Badge variant={hotelOrder.NonRefundable ? "destructive" : "default"}>
                       {hotelOrder.NonRefundable ? "غیرقابل استرداد" : "قابل استرداد"}
                     </Badge>
                     <span className="text-sm text-muted-foreground">
-                      {hotelOrder.NonRefundable 
-                        ? "این رزرو غیرقابل کنسلی است" 
+                      {hotelOrder.NonRefundable
+                        ? "این رزرو غیرقابل کنسلی است"
                         : "امکان کنسلی طبق قوانین هتل وجود دارد"}
                     </span>
                   </div>
@@ -1248,73 +1247,73 @@ export function InvoiceComponent({
 
           {/* Travelers Information */}
           {invoice.travelers &&
-          <Card className="py-6 mb-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                اطلاعات مسافران ({invoice.travelers.length} نفر)
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {invoice.travelers.map((traveler, index) => (
-                <div key={traveler.id} className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-medium">مسافر {index + 1}</h4>
-                    <Badge variant="outline">
-                      {traveler.age ? `سن: ${traveler.age} سال` : getPassengerTypeText(traveler.passengerType)}
-                    </Badge>
+            <Card className="py-6 mb-8">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  اطلاعات مسافران ({invoice.travelers.length} نفر)
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {invoice.travelers.map((traveler, index) => (
+                  <div key={traveler.id} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-medium">مسافر {index + 1}</h4>
+                      <Badge variant="outline">
+                        {traveler.age ? `سن: ${traveler.age} سال` : getPassengerTypeText(traveler.passengerType)}
+                      </Badge>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <Label className="text-muted-foreground">نام کامل</Label>
+                        <p className="font-medium">{traveler.firstName} {traveler.lastName}</p>
+                      </div>
+                      <div>
+                        <Label className="text-muted-foreground">کد ملی</Label>
+                        <p className="font-medium">{traveler.nationalId}</p>
+                      </div>
+                      <div>
+                        <Label className="text-muted-foreground">تاریخ تولد</Label>
+                        <p className="font-medium">{formatDate(traveler.dateOfBirth)}</p>
+                      </div>
+                      {traveler.passportNumber && (
+                        <div>
+                          <Label className="text-muted-foreground">شماره پاسپورت</Label>
+                          <p className="font-medium">{traveler.passportNumber}</p>
+                        </div>
+                      )}
+                      {traveler.passportExpiry && (
+                        <div>
+                          <Label className="text-muted-foreground">انقضای پاسپورت</Label>
+                          <p className="font-medium">{formatDate(traveler.passportExpiry)}</p>
+                        </div>
+                      )}
+                      {traveler.email && (
+                        <div>
+                          <Label className="text-muted-foreground">ایمیل</Label>
+                          <p className="font-medium">{traveler.email}</p>
+                        </div>
+                      )}
+                      {traveler.phoneNumber && (
+                        <div>
+                          <Label className="text-muted-foreground">شماره همراه</Label>
+                          <p className="font-medium">{traveler.phoneNumber}</p>
+                        </div>
+                      )}
+                      <div>
+                        <Label className="text-muted-foreground">جنسیت</Label>
+                        <p className="font-medium">{getGenderText(traveler.gender)}</p>
+                      </div>
+                      <div>
+                        <Label className="text-muted-foreground">رده سنی</Label>
+                        <p className="font-medium">{getPassengerTypeText(traveler.passengerType)}</p>
+                      </div>
+                    </div>
                   </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <Label className="text-muted-foreground">نام کامل</Label>
-                      <p className="font-medium">{traveler.firstName} {traveler.lastName}</p>
-                    </div>
-                    <div>
-                      <Label className="text-muted-foreground">کد ملی</Label>
-                      <p className="font-medium">{traveler.nationalId}</p>
-                    </div>
-                    <div>
-                      <Label className="text-muted-foreground">تاریخ تولد</Label>
-                      <p className="font-medium">{formatDate(traveler.dateOfBirth)}</p>
-                    </div>
-                    {traveler.passportNumber && (
-                      <div>
-                        <Label className="text-muted-foreground">شماره پاسپورت</Label>
-                        <p className="font-medium">{traveler.passportNumber}</p>
-                      </div>
-                    )}
-                    {traveler.passportExpiry && (
-                      <div>
-                        <Label className="text-muted-foreground">انقضای پاسپورت</Label>
-                        <p className="font-medium">{formatDate(traveler.passportExpiry)}</p>
-                      </div>
-                    )}
-                    {traveler.email && (
-                      <div>
-                        <Label className="text-muted-foreground">ایمیل</Label>
-                        <p className="font-medium">{traveler.email}</p>
-                      </div>
-                    )}
-                    {traveler.phoneNumber && (
-                      <div>
-                        <Label className="text-muted-foreground">شماره همراه</Label>
-                        <p className="font-medium">{traveler.phoneNumber}</p>
-                      </div>
-                    )}
-                    <div>
-                      <Label className="text-muted-foreground">جنسیت</Label>
-                      <p className="font-medium">{getGenderText(traveler.gender)}</p>
-                    </div>
-                    <div>
-                      <Label className="text-muted-foreground">رده سنی</Label>
-                      <p className="font-medium">{getPassengerTypeText(traveler.passengerType)}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+                ))}
+              </CardContent>
+            </Card>
           }
         </div>
 
@@ -1330,7 +1329,7 @@ export function InvoiceComponent({
                 <span className="text-muted-foreground">مبلغ کل:</span>
                 <span className="text-2xl font-bold text-green-600">{formattedAmount}</span>
               </div>
-              
+
               {isExpired && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-3">
                   <div className="flex items-center gap-2 text-red-700">
@@ -1389,11 +1388,11 @@ export function InvoiceComponent({
                             <span>پرداخت از اعتبار پنل</span>
                           </div>
                         </div>
-                        
+
                         {selectedPaymentMethod === "PANELCREDIT" && (
                           <div className="mt-3 space-y-2">
                             <Label>انتخاب پنل:</Label>
-                            <select 
+                            <select
                               className="w-full p-2 border rounded-md"
                               value={selectedPanelId}
                               onChange={(e) => setSelectedPanelId(e.target.value)}
@@ -1406,7 +1405,7 @@ export function InvoiceComponent({
                                 </option>
                               ))}
                             </select>
-                            
+
                             {userPanels.length === 0 && (
                               <p className="text-sm text-red-600">هیچ پنلی با اعتبار کافی موجود نیست</p>
                             )}
@@ -1432,13 +1431,13 @@ export function InvoiceComponent({
                 </RadioGroup>
 
                 {/* Payment Button */}
-                <Button 
-                  className="w-full" 
+                <Button
+                  className="w-full"
                   size="lg"
                   onClick={handlePayment}
                   disabled={
-                    loading || 
-                    isExpired || 
+                    loading ||
+                    isExpired ||
                     (selectedPaymentMethod === "CREDIT" && !canUseCredit) ||
                     (selectedPaymentMethod === "PANELCREDIT" && !selectedPanelId)
                   }
@@ -1468,7 +1467,7 @@ export function InvoiceComponent({
                       مبلغ {formattedAmount} از اعتبار پنل کسر خواهد شد
                       {(() => {
                         const selectedPanel = userPanels?.find(p => p.id === selectedPanelId);
-                        return selectedPanelId && selectedPanel && selectedPanel.discountPercentage > 0 
+                        return selectedPanelId && selectedPanel && selectedPanel.discountPercentage > 0
                           ? ` (با تخفیف ${selectedPanel.discountPercentage}%)`
                           : '';
                       })()}

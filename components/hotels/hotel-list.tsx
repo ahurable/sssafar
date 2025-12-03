@@ -109,7 +109,7 @@ const getRandomPlaceholderImage = (hotelId: number) => {
 const LoadingSkeleton = ({ count = 3 }: { count?: number }) => (
   <div className="grid gap-4">
     {Array.from({ length: count }).map((_, index) => (
-      <div key={index} className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+      <div key={index} className="bg-white border border-blue-900 rounded-lg overflow-hidden">
         <div className="flex flex-col lg:flex-row">
           <div className="lg:w-80 h-64 bg-gray-200 animate-pulse" />
           <div className="flex-1 p-6 space-y-4">
@@ -270,7 +270,7 @@ const HotelCard = React.memo(({
                 <Button
                   variant="secondary"
                   size="icon"
-                  className="h-9 w-9 bg-white/90 hover:bg-white shadow-md rounded-full border border-gray-300"
+                  className="h-9 w-9 bg-white/90 hover:bg-white shadow-md rounded-full border border-blue-900"
                   onClick={() => toggleFavorite(hotel.HotelId)}
                 >
                   <Heart
@@ -320,7 +320,7 @@ const HotelCard = React.memo(({
                   {/* Room Information */}
                   <div className="space-y-2">
                     {hotel.Rooms && hotel.Rooms.map((room, roomIndex) => (
-                      <div key={roomIndex} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                      <div key={roomIndex} className="bg-gray-50 p-4 rounded-lg border border-blue-900">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                           <div className="space-y-2">
                             <h4 className="font-bold text-gray-900 text-sm">
@@ -396,7 +396,7 @@ const HotelCard = React.memo(({
                         <Badge
                           key={amenityIndex}
                           variant="outline"
-                          className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                          className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-white border-blue-900 text-gray-700 hover:bg-gray-50"
                         >
                           {Icon && <Icon className="h-3.5 w-3.5 text-blue-600" />}
                           <span>{amenity}</span>
@@ -413,7 +413,7 @@ const HotelCard = React.memo(({
               )}
 
               {/* Footer Actions */}
-              <div className="flex flex-col lg:flex-row justify-between items-center gap-4 mt-auto pt-5 border-t border-gray-200">
+              <div className="flex flex-col lg:flex-row justify-between items-center gap-4 mt-auto pt-5 border-t border-blue-900">
                 <div className="flex flex-wrap gap-3 text-xs">
                   {hotel.AvailableRoom > 4 && (
                     <div className="flex items-center gap-1.5 bg-green-50 px-3 py-1.5 rounded-lg border border-green-200">
@@ -432,7 +432,7 @@ const HotelCard = React.memo(({
                 <div className="flex gap-3 w-full lg:w-auto">
                   <Button
                     variant="outline"
-                    className="flex-1 lg:flex-none bg-white hover:bg-gray-50 text-gray-700 border-gray-300"
+                    className="flex-1 lg:flex-none bg-white hover:bg-gray-50 text-gray-700 border-blue-900"
                     onClick={() => window.open(`/hotels/${hotel.HotelId}`, '_blank')}
                   >
                     <span>مشاهده جزئیات</span>
@@ -728,7 +728,7 @@ export function HotelList() {
               <div className="flex items-center gap-2">
                 <User className="h-4 w-4" />
                 <span>
-                  {request?.adults || 2} بزرگسال • {request?.children || 0} کودک
+                  {request?.guests} مهمان
                 </span>
               </div>
             </div>

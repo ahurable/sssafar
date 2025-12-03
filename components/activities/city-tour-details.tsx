@@ -45,7 +45,7 @@ interface CityTourDetailsProps {
     featured: boolean
     isActive: boolean
     images: string[]
-    prices: { 
+    prices: {
       id: string
       type: string
       price: number
@@ -106,13 +106,13 @@ export function CityTourDetails({ tour }: CityTourDetailsProps) {
   return (
     <div className="space-y-6 bg-[#fffefe] p-4 lg:p-0">
       {/* Navigation */}
-      <Card className="sticky top-16 z-[10000] bg-[#fffefe] border border-gray-300 shadow-sm">
+      <Card className="sticky top-16 z-[10000] bg-[#fffefe] border border-blue-900 shadow-sm">
         <CardContent className="p-4">
           <div className="flex flex-wrap gap-2 justify-center">
             {sections.map((section) => (
-              <Button 
+              <Button
                 key={section.id}
-                variant="outline" 
+                variant="outline"
                 size="sm"
                 className="border-blue-900 text-blue-900 hover:bg-blue-900 hover:text-white"
                 onClick={() => scrollToSection(section.id)}
@@ -125,7 +125,7 @@ export function CityTourDetails({ tour }: CityTourDetailsProps) {
       </Card>
 
       {/* Header */}
-      <Card className="border border-gray-300 bg-blue-900 text-white">
+      <Card className="border border-blue-900 bg-blue-900 text-white">
         <CardContent className="p-6">
           <div className="mb-4">
             <div className="flex items-center gap-2 mb-3">
@@ -185,7 +185,7 @@ export function CityTourDetails({ tour }: CityTourDetailsProps) {
 
       {/* Image Gallery */}
       {tour.images.length > 0 && (
-        <Card className="border border-gray-300">
+        <Card className="border border-blue-900">
           <CardContent className="p-0">
             <div className="relative h-96 bg-gray-100 overflow-hidden">
               <Image
@@ -195,7 +195,7 @@ export function CityTourDetails({ tour }: CityTourDetailsProps) {
                 className="object-cover"
                 priority
               />
-              
+
               {tour.images.length > 1 && (
                 <>
                   <Button
@@ -214,7 +214,7 @@ export function CityTourDetails({ tour }: CityTourDetailsProps) {
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
-                  
+
                   <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-3 py-1 text-sm">
                     {currentImageIndex + 1} / {tour.images.length}
                   </div>
@@ -224,14 +224,13 @@ export function CityTourDetails({ tour }: CityTourDetailsProps) {
 
             {/* Thumbnails */}
             {tour.images.length > 1 && (
-              <div className="p-4 border-t border-gray-300">
+              <div className="p-4 border-t border-blue-900">
                 <div className="flex gap-2 overflow-x-auto">
                   {tour.images.map((image, index) => (
                     <button
                       key={index}
-                      className={`flex-shrink-0 w-20 h-16 overflow-hidden border-2 ${
-                        index === currentImageIndex ? 'border-blue-900' : 'border-gray-300'
-                      }`}
+                      className={`flex-shrink-0 w-20 h-16 overflow-hidden border-2 ${index === currentImageIndex ? 'border-blue-900' : 'border-blue-900'
+                        }`}
                       onClick={() => setCurrentImageIndex(index)}
                     >
                       <Image
@@ -251,8 +250,8 @@ export function CityTourDetails({ tour }: CityTourDetailsProps) {
       )}
 
       {/* Description */}
-      <Card className="border border-gray-300 py-6">
-        <CardHeader className="border-b border-gray-300">
+      <Card className="border border-blue-900 py-6">
+        <CardHeader className="border-b border-blue-900">
           <CardTitle className="text-blue-900">توضیحات گشت</CardTitle>
         </CardHeader>
         <CardContent className="p-6">
@@ -261,8 +260,8 @@ export function CityTourDetails({ tour }: CityTourDetailsProps) {
       </Card>
 
       {/* Itinerary */}
-      <Card id="itinerary" className="border border-gray-300 py-6">
-        <CardHeader className="border-b border-gray-300">
+      <Card id="itinerary" className="border border-blue-900 py-6">
+        <CardHeader className="border-b border-blue-900">
           <CardTitle className="text-blue-900">برنامه گشت</CardTitle>
         </CardHeader>
         <CardContent className="p-6 space-y-6">
@@ -286,8 +285,8 @@ export function CityTourDetails({ tour }: CityTourDetailsProps) {
 
       {/* Inclusions & Exclusions */}
       <div id="inclusions" className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="border border-gray-300 py-6">
-          <CardHeader className="border-b border-gray-300">
+        <Card className="border border-blue-900 py-6">
+          <CardHeader className="border-b border-blue-900">
             <CardTitle className="flex items-center gap-2 text-green-700">
               <Check className="h-5 w-5" />
               شامل‌ها
@@ -305,8 +304,8 @@ export function CityTourDetails({ tour }: CityTourDetailsProps) {
           </CardContent>
         </Card>
 
-        <Card className="border border-gray-300 py-6">
-          <CardHeader className="border-b border-gray-300">
+        <Card className="border border-blue-900 py-6">
+          <CardHeader className="border-b border-blue-900">
             <CardTitle className="flex items-center gap-2 text-red-700">
               <X className="h-5 w-5" />
               غیر شامل‌ها
@@ -326,8 +325,8 @@ export function CityTourDetails({ tour }: CityTourDetailsProps) {
       </div>
 
       {/* Location */}
-      <Card id="location" className="border border-gray-300 py-6">
-        <CardHeader className="border-b border-gray-300">
+      <Card id="location" className="border border-blue-900 py-6">
+        <CardHeader className="border-b border-blue-900">
           <CardTitle className="text-blue-900">موقعیت مکانی</CardTitle>
         </CardHeader>
         <CardContent className="p-6 space-y-6">
@@ -339,8 +338,8 @@ export function CityTourDetails({ tour }: CityTourDetailsProps) {
                 <span>{tour.location}</span>
               </div>
               {tour.latitude && tour.longitude && (
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   className="border-blue-900 text-blue-900 hover:bg-blue-900 hover:text-white"
                   onClick={() => openInOpenStreetMap(tour.latitude!, tour.longitude!)}
@@ -358,8 +357,8 @@ export function CityTourDetails({ tour }: CityTourDetailsProps) {
                 <span>{tour.meetingPoint}</span>
               </div>
               {tour.meetingLatitude && tour.meetingLongitude && (
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   className="border-blue-900 text-blue-900 hover:bg-blue-900 hover:text-white"
                   onClick={() => openInOpenStreetMap(tour.meetingLatitude!, tour.meetingLongitude!)}
@@ -373,9 +372,9 @@ export function CityTourDetails({ tour }: CityTourDetailsProps) {
 
           {/* Map */}
           {tour.latitude && tour.longitude && (
-            <div className="h-96 border border-gray-300">
-              <Map 
-                center={[tour.latitude, tour.longitude]} 
+            <div className="h-96 border border-blue-900">
+              <Map
+                center={[tour.latitude, tour.longitude]}
                 zoom={15}
                 className="h-full w-full"
                 markers={[
@@ -395,14 +394,14 @@ export function CityTourDetails({ tour }: CityTourDetailsProps) {
       </Card>
 
       {/* Prices & Dates */}
-      <Card id="prices" className="border border-gray-300 py-6">
-        <CardHeader className="border-b border-gray-300">
+      <Card id="prices" className="border border-blue-900 py-6">
+        <CardHeader className="border-b border-blue-900">
           <CardTitle className="text-blue-900">قیمت‌ها و تاریخ‌ها</CardTitle>
         </CardHeader>
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {tour.prices.map((price, index) => (
-              <Card key={price.id} className="border border-gray-300 bg-gray-50 py-6">
+              <Card key={price.id} className="border border-blue-900 bg-gray-50 py-6">
                 <CardContent className="p-4 text-center">
                   <div className="font-semibold text-lg text-gray-900 mb-2">
                     {price.type}
@@ -425,7 +424,7 @@ export function CityTourDetails({ tour }: CityTourDetailsProps) {
       </Card>
 
       {/* Activity Status */}
-      <Card className="border border-gray-300 py-6">
+      <Card className="border border-blue-900 py-6">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>

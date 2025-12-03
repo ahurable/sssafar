@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Search, Calendar, MapPin, Users, Loader2, Bed, Plus, Minus, CalendarIcon, AlertCircle } from "lucide-react"
+import { Search, Calendar, MapPin, Users, Loader2, Bed, Plus, Minus, CalendarIcon, AlertCircle, Heart } from "lucide-react"
 import { useHotel } from "@/contexts/search/HotelContext"
 import { useRouter } from "next/navigation"
 import ShamsiDateModal from "../flights/ShamsiCalendar"
@@ -21,6 +21,41 @@ interface CitySuggestion {
   searchDestinationOrCity?: boolean;
   isActive?: boolean;
 }
+
+
+const FAVORITE_DESTINATIONS: CitySuggestion[] = [
+
+  {
+    id: 1,
+    name: "تهران",
+    type: "domestic",
+    propertyDestinationId: 1
+  },
+  {
+    id: 10,
+    name: "مشهد",
+    type: "domestic",
+    propertyDestinationId: 6
+  },
+  {
+    id: 7,
+    name: "اصفهان",
+    type: "domestic",
+    propertyDestinationId: 5
+  },
+  {
+    id: 2,
+    name: "شیراز",
+    type: "domestic",
+    propertyDestinationId: 2
+  },
+  {
+    id: 13,
+    name: "کیش",
+    type: "domestic",
+    propertyDestinationId: 7
+  },
+]
 
 interface HotelSearchFormData {
   city: string;
@@ -45,6 +80,8 @@ const DomesticHotelSearch = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [searchLoading, setSearchLoading] = useState(false)
   const router = useRouter()
+  const [showFavorites, setShowFavorites] = useState(false)
+  const favoritesRef = useRef<HTMLDivElement>(null)
 
   const [hotelSearch, setHotelSearch] = useState<HotelSearchFormData>({
     city: "",
@@ -98,7 +135,7 @@ const DomesticHotelSearch = () => {
       throw new Error('Failed to fetch suggestions');
     }
     const data = await response.json();
-    // console.log(data)
+    console.log(data)
     return data.results || [];
   };
 
@@ -200,6 +237,7 @@ const DomesticHotelSearch = () => {
     }))
 
     setShowSuggestions(false)
+    setShowFavorites(false)
     setCurrentInput("")
     setIsCityFocused(false)
 
@@ -329,7 +367,7 @@ const DomesticHotelSearch = () => {
     if (!errors[field]) return null
 
     return (
-      <div className="flex items-center gap-2 mt-2 text-black text-sm">
+      <div className="flex items-center gap-2 mt-2 text-blue-950 text-sm">
         <AlertCircle className="h-4 w-4" />
         <span>{errors[field]}</span>
       </div>
@@ -342,14 +380,14 @@ const DomesticHotelSearch = () => {
     return (
       <div
         ref={suggestionsRef}
-        className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 z-50 max-h-80 overflow-y-auto mt-1"
+        className="absolute top-full right-0 left-0 bg-[#fffefe] border border-blue-900 z-50 max-h-80 overflow-y-auto mt-1"
       >
         {suggestions.map((suggestion, index) => (
           <div
             key={`${suggestion.id}-${suggestion.type}`}
-            className={`p-3 cursor-pointer border-b border-gray-300 last:border-b-0 ${index === activeSuggestionIndex
-                ? 'bg-gray-100'
-                : 'hover:bg-gray-50'
+            className={`p-3 cursor-pointer border-b border-blue-900 last:border-b-0 ${index === activeSuggestionIndex
+              ? 'bg-gray-100'
+              : 'hover:bg-gray-50'
               }`}
             onMouseDown={(e) => {
               e.preventDefault()
@@ -358,23 +396,80 @@ const DomesticHotelSearch = () => {
           >
             <div className="flex justify-between items-start">
               <div className="flex-1 text-right">
-                <div className="flex items-center gap-2 justify-end">
-                  <span className="font-bold text-black">
+                <div className="flex items-center gap-2 justify-start">
+                  <span className="font-bold text-blue-950">
                     {suggestion.nameFa || suggestion.name}
                   </span>
                   {suggestion.nameFa && (
-                    <span className="text-sm text-black">({suggestion.name})</span>
+                    <span className="text-sm text-blue-950">({suggestion.name})</span>
                   )}
                 </div>
-                <div className="flex items-center gap-2 mt-1 justify-end">
+                <div className="flex items-center gap-2 mt-1 justify-start">
                   <span className={`text-xs px-2 py-1 font-medium ${suggestion.type === 'domestic'
-                      ? 'bg-gray-200 text-black border border-gray-300'
-                      : 'bg-gray-200 text-black border border-gray-300'
+                    ? 'bg-gray-200 text-blue-950 border border-blue-900'
+                    : 'bg-gray-200 text-blue-950 border border-blue-900'
                     }`}>
                     {suggestion.type === 'domestic' ? 'داخلی' : 'بین‌المللی'}
                   </span>
                   {suggestion.isPopular && (
-                    <span className="text-xs bg-gray-200 text-black px-2 py-1 font-medium border border-gray-300">
+                    <span className="text-xs bg-gray-200 text-blue-950 px-2 py-1 font-medium border border-blue-900">
+                      محبوب
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  const renderFavorites = () => {
+    if (!showFavorites || currentInput.length > 0) return null
+
+    return (
+      <div
+        ref={favoritesRef}
+        className="absolute top-full right-0 left-0 bg-[#fffefe] shadow-lg z-50 max-h-80 overflow-y-auto mt-1 rounded-md"
+      >
+        <div className="p-3 bg-gray-50">
+          <div className="flex items-center gap-2 justify-start">
+            <Heart className="h-4 w-4 text-red-500" />
+            <span className="font-bold text-blue-950">مقاصد محبوب</span>
+          </div>
+        </div>
+        {FAVORITE_DESTINATIONS.map((suggestion, index) => (
+          <div
+            key={`${suggestion.id}-${suggestion.type}`}
+            className={`p-3 cursor-pointer last:border-b-0 ${index === activeSuggestionIndex
+              ? 'bg-gray-100'
+              : 'hover:bg-gray-50'
+              }`}
+            onMouseDown={(e) => {
+              e.preventDefault()
+              handleSuggestionClick(suggestion)
+            }}
+          >
+            <div className="flex justify-between items-start">
+              <div className="flex-1 text-right">
+                <div className="flex items-center gap-2 justify-start">
+                  <span className="font-bold text-blue-950">
+                    {suggestion.nameFa || suggestion.name}
+                  </span>
+                  {suggestion.nameFa && (
+                    <span className="text-sm text-blue-950">({suggestion.name})</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 mt-1 justify-end">
+                  <span className={`text-xs px-2 py-1 font-medium ${suggestion.type === 'domestic'
+                    ? 'bg-gray-200 text-blue-950 border border-blue-900'
+                    : 'bg-gray-200 text-blue-950 border border-blue-900'
+                    }`}>
+                    {suggestion.type === 'domestic' ? 'داخلی' : 'بین‌المللی'}
+                  </span>
+                  {suggestion.isPopular && (
+                    <span className="text-xs bg-gray-200 text-blue-950 px-2 py-1 font-medium border border-blue-900">
                       محبوب
                     </span>
                   )}
@@ -393,30 +488,30 @@ const DomesticHotelSearch = () => {
     return (
       <div
         ref={guestsRoomsRef}
-        className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 z-50 p-4 mt-1"
+        className="absolute top-full right-0 left-0 bg-[#fffefe] border border-blue-900 z-50 p-4 mt-1"
       >
         <div className="space-y-4">
           {/* Guests Selector */}
           <div className="flex items-center justify-between">
             <div className="text-right">
-              <div className="font-bold text-black">تعداد مهمان</div>
-              <div className="text-xs text-black mt-1">حداکثر 10 مهمان</div>
+              <div className="font-bold text-blue-950">تعداد مهمان</div>
+              <div className="text-xs text-blue-950 mt-1">حداکثر 10 مهمان</div>
             </div>
             <div className="flex items-center gap-3">
               <button
                 onClick={() => handleGuestsRoomsChange('guests', 'decrement')}
                 disabled={hotelSearch.guests <= 1}
-                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
+                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-blue-950 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
               >
                 <Minus className="h-4 w-4" />
               </button>
-              <span className="text-lg font-bold text-black min-w-6 text-center">
+              <span className="text-lg font-bold text-blue-950 min-w-6 text-center">
                 {hotelSearch.guests}
               </span>
               <button
                 onClick={() => handleGuestsRoomsChange('guests', 'increment')}
                 disabled={hotelSearch.guests >= 10}
-                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
+                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-blue-950 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
               >
                 <Plus className="h-4 w-4" />
               </button>
@@ -426,24 +521,24 @@ const DomesticHotelSearch = () => {
           {/* Rooms Selector */}
           <div className="flex items-center justify-between">
             <div className="text-right">
-              <div className="font-bold text-black">تعداد اتاق</div>
-              <div className="text-xs text-black mt-1">حداکثر 5 اتاق</div>
+              <div className="font-bold text-blue-950">تعداد اتاق</div>
+              <div className="text-xs text-blue-950 mt-1">حداکثر 5 اتاق</div>
             </div>
             <div className="flex items-center gap-3">
               <button
                 onClick={() => handleGuestsRoomsChange('rooms', 'decrement')}
                 disabled={hotelSearch.rooms <= 1}
-                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
+                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-blue-950 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
               >
                 <Minus className="h-4 w-4" />
               </button>
-              <span className="text-lg font-bold text-black min-w-6 text-center">
+              <span className="text-lg font-bold text-blue-950 min-w-6 text-center">
                 {hotelSearch.rooms}
               </span>
               <button
                 onClick={() => handleGuestsRoomsChange('rooms', 'increment')}
                 disabled={hotelSearch.rooms >= 5}
-                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
+                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-blue-950 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
               >
                 <Plus className="h-4 w-4" />
               </button>
@@ -467,7 +562,7 @@ const DomesticHotelSearch = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {/* City Input */}
         <div className="space-y-2 relative">
-          <Label htmlFor="hotel-city" className="text-black text-right block">شهر مقصد</Label>
+          <Label htmlFor="hotel-city" className="text-blue-950 text-right block">شهر مقصد</Label>
           <div className="relative">
             <MapPin className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
             {suggestionLoading && (
@@ -477,9 +572,9 @@ const DomesticHotelSearch = () => {
               ref={inputRef}
               id="hotel-city"
               placeholder="تهران، استانبول، دبی..."
-              className={`pr-10 h-12 border border-gray-300 bg-[#fffefe] text-black placeholder-gray-500 ${errors.city
-                  ? 'border-red-500 bg-red-500'
-                  : 'border-gray-300'
+              className={`pr-10 h-12 border border-blue-900 bg-[#fffefe] text-blue-950 placeholder-gray-500 ${errors.city
+                ? 'border-red-500 bg-red-500'
+                : 'border-blue-900'
                 }`}
               value={hotelSearch.city}
               onChange={(e) => handleInputChange(e.target.value)}
@@ -487,20 +582,25 @@ const DomesticHotelSearch = () => {
               onFocus={() => {
                 setIsCityFocused(true)
                 setShowSuggestions(suggestions.length > 0)
+                setShowFavorites(true)
+                setHotelSearch((prev: any) => ({ ...prev, city: "" }))
               }}
               onBlur={() => {
                 setIsCityFocused(false)
                 setTimeout(() => setShowSuggestions(false), 200)
+                setTimeout(() => setShowFavorites(false), 200)
               }}
+              autoComplete="off"
             />
             {renderSuggestions()}
+            {renderFavorites()}
             {renderError("city")}
           </div>
         </div>
 
         {/* Check-in Date */}
         <div className="space-y-2 relative">
-          <Label className="text-black text-right block">تاریخ ورود</Label>
+          <Label className="text-blue-950 text-right block">تاریخ ورود</Label>
           <ShamsiDateModal
             calendarId="calendar1"
             onOpenChange={setOpenCalendarId}
@@ -518,7 +618,7 @@ const DomesticHotelSearch = () => {
 
         {/* Check-out Date Display */}
         <div className="space-y-2 relative">
-          <Label className="text-black text-right block">تاریخ خروج</Label>
+          <Label className="text-blue-950 text-right block">تاریخ خروج</Label>
           <ShamsiDateModal
             calendarId="calendar2"
             onOpenChange={setOpenCalendarId}
@@ -538,18 +638,18 @@ const DomesticHotelSearch = () => {
 
         {/* Guests & Rooms Selector */}
         <div className="space-y-2 relative">
-          <Label className="text-black text-right block">مهمان و اتاق</Label>
+          <Label className="text-blue-950 text-right block">مهمان و اتاق</Label>
           <div
             className="guests-rooms-trigger cursor-pointer"
             onClick={() => setShowGuestsRooms(!showGuestsRooms)}
           >
-            <div className="relative h-12 rounded-lg border border-gray-300 bg-[#fffefe] hover:border-gray-400 flex items-center justify-between px-3">
+            <div className="relative h-12 rounded-lg border border-blue-900 bg-[#fffefe] hover:border-gray-400 flex items-center justify-between px-3">
               <div className="flex items-center gap-3">
                 <Users className="h-4 w-4 text-gray-400" />
                 <Bed className="h-4 w-4 text-gray-400" />
               </div>
               <div className="text-right">
-                <div className="text-black text-sm font-medium">
+                <div className="text-blue-950 text-sm font-medium">
                   {hotelSearch.guests} مهمان
                 </div>
                 <div className="text-gray-500 text-xs">

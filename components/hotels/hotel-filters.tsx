@@ -435,7 +435,7 @@ export function HotelFilters() {
   }) => (
     <Button
       variant="outline"
-      className="flex items-center gap-2 py-2 px-3 rounded-full border-gray-300 shadow-sm"
+      className="flex items-center gap-2 py-2 px-3 rounded-full border-blue-900 shadow-sm"
       onClick={() => openFilterSection(section)}
     >
       <Icon className="h-4 w-4" />
@@ -488,7 +488,7 @@ export function HotelFilters() {
             if (!open) setActiveFilterSection(null)
           }}>
             <SheetTrigger asChild>
-              <Button className="flex-1 shadow-lg bg-[#fffefe] rounded-full border text-black">
+              <Button className="flex-1 shadow-lg bg-[#fffefe] rounded-full border text-blue-950">
                 <Filter className="h-5 w-5 ml-2" />
                 فیلترها
                 {getActiveFiltersCount() > 0 && (

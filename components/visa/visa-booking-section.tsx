@@ -7,9 +7,9 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { 
-  MapPin, 
-  Clock, 
+import {
+  MapPin,
+  Clock,
   ArrowRight,
   Shield,
   Check,
@@ -128,44 +128,44 @@ export function VisaBookingSection({ service }: VisaBookingSectionProps) {
         </div>
 
         <div className="space-y-4 mb-6">
-          <div className="flex justify-between items-center py-2 border-b border-gray-200">
+          <div className="flex justify-between items-center py-2 border-b border-blue-900">
             <span className="text-gray-600">کشور</span>
             <span className="font-semibold">{service.country}</span>
           </div>
-          
-          <div className="flex justify-between items-center py-2 border-b border-gray-200">
+
+          <div className="flex justify-between items-center py-2 border-b border-blue-900">
             <span className="text-gray-600">شهر</span>
             <span className="font-semibold">{service.city}</span>
           </div>
-          
+
           {service.processingTime && (
-            <div className="flex justify-between items-center py-2 border-b border-gray-200">
+            <div className="flex justify-between items-center py-2 border-b border-blue-900">
               <span className="text-gray-600">زمان پردازش</span>
               <span className="font-semibold">{service.processingTime}</span>
             </div>
           )}
-          
+
           {service.validity && (
-            <div className="flex justify-between items-center py-2 border-b border-gray-200">
+            <div className="flex justify-between items-center py-2 border-b border-blue-900">
               <span className="text-gray-600">مدت اعتبار</span>
               <span className="font-semibold">{service.validity}</span>
             </div>
           )}
-          
-          <div className="flex justify-between items-center py-2 border-b border-gray-200">
+
+          <div className="flex justify-between items-center py-2 border-b border-blue-900">
             <span className="text-gray-600">نوع ورود</span>
             <span className="font-semibold">{service.entryType}</span>
           </div>
-          
-          <div className="flex justify-between items-center py-2 border-b border-gray-200">
+
+          <div className="flex justify-between items-center py-2 border-b border-blue-900">
             <span className="text-gray-600">وضعیت</span>
             <Badge className="bg-green-500">فعال</Badge>
           </div>
         </div>
 
         {!showReservationForm ? (
-          <Button 
-            className="w-full bg-blue-900" 
+          <Button
+            className="w-full bg-blue-900"
             onClick={handleReserveClick}
           >
             درخواست ویزا
@@ -273,7 +273,7 @@ export function VisaBookingSection({ service }: VisaBookingSectionProps) {
         </div>
 
         {/* Quick Features */}
-        <div className="mt-6 pt-6 border-t border-gray-200">
+        <div className="mt-6 pt-6 border-t border-blue-900">
           <h4 className="font-semibold text-gray-900 mb-3">مزایای این خدمت:</h4>
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm text-gray-600">

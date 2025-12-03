@@ -51,7 +51,7 @@ export function HeroSlider({ posts }: HeroSliderProps) {
   }
 
   return (
-    <div 
+    <div
       className="relative lg:h-[450px] lg:w-full h-screen mx-auto lg:rounded-2xl lg:my-8 w-full overflow-hidden"
       onMouseEnter={() => setIsAutoPlaying(false)}
       onMouseLeave={() => setIsAutoPlaying(true)}
@@ -61,9 +61,8 @@ export function HeroSlider({ posts }: HeroSliderProps) {
         {featuredPosts.map((post, index) => (
           <div
             key={post.id}
-            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-              index === currentSlide ? "opacity-100" : "opacity-0"
-            }`}
+            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentSlide ? "opacity-100" : "opacity-0"
+              }`}
           >
             {/* Background Image */}
             <div
@@ -81,29 +80,29 @@ export function HeroSlider({ posts }: HeroSliderProps) {
                     <span className="px-3 py-1 bg-red-500 text-white text-sm rounded-full font-semibold">
                       ویژه
                     </span>
-                    <span className="px-3 py-1 bg-[#fffefe] bg-opacity-20 text-black text-sm rounded-full backdrop-blur-sm">
+                    <span className="px-3 py-1 bg-[#fffefe] bg-opacity-20 text-blue-950 text-sm rounded-full backdrop-blur-sm">
                       {post.category}
                     </span>
                   </div>
-                  
+
                   <h2 className="text-5xl md:text-6xl font-bold mb-6 leading-tight drop-shadow-2xl">
                     {post.title}
                   </h2>
 
                   <div className="flex items-center gap-4">
                     <Link href={`/posts/${post.id}`}>
-                      <Button 
-                        size="lg" 
+                      <Button
+                        size="lg"
                         className="bg-[#fffefe] text-gray-900 hover:bg-gray-100 font-semibold text-lg px-8 py-3 rounded-full shadow-2xl transition-all duration-300 hover:scale-105"
                       >
                         مطالعه مقاله
                       </Button>
                     </Link>
                     <Link href="/posts">
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="lg"
-                        className="border-white text-black hover:bg-[#fffefe] hover:text-gray-900 font-semibold text-lg px-8 py-3 rounded-full backdrop-blur-sm transition-all duration-300"
+                        className="border-white text-blue-950 hover:bg-[#fffefe] hover:text-gray-900 font-semibold text-lg px-8 py-3 rounded-full backdrop-blur-sm transition-all duration-300"
                       >
                         مشاهده همه مقالات
                       </Button>
@@ -121,14 +120,14 @@ export function HeroSlider({ posts }: HeroSliderProps) {
         <>
           <button
             onClick={prevSlide}
-            className="absolute left-2 top-1/2 transform -translate-y-1/2 z-20 bg-[#fffefe] opacity-20 hover:bg-opacity-30 text-black p-3 rounded-full backdrop-blur-sm transition-all duration-300 hover:scale-110"
+            className="absolute left-2 top-1/2 transform -translate-y-1/2 z-20 bg-[#fffefe] opacity-20 hover:bg-opacity-30 text-blue-950 p-3 rounded-full backdrop-blur-sm transition-all duration-300 hover:scale-110"
             aria-label="مقاله قبلی"
           >
             <ChevronLeft className="h-6 w-6" />
           </button>
           <button
             onClick={nextSlide}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 z-20 bg-[#fffefe] opacity-20 hover:bg-opacity-30 text-black p-3 rounded-full backdrop-blur-sm transition-all duration-300 hover:scale-110"
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 z-20 bg-[#fffefe] opacity-20 hover:bg-opacity-30 text-blue-950 p-3 rounded-full backdrop-blur-sm transition-all duration-300 hover:scale-110"
             aria-label="مقاله بعدی"
           >
             <ChevronRight className="h-6 w-6" />
@@ -143,11 +142,10 @@ export function HeroSlider({ posts }: HeroSliderProps) {
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                index === currentSlide
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentSlide
                   ? "bg-[#fffefe] scale-125"
                   : "bg-[#fffefe] bg-opacity-50 hover:bg-opacity-75"
-              }`}
+                }`}
               aria-label={`برو به اسلاید ${index + 1}`}
             />
           ))}

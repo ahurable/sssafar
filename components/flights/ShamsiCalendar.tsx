@@ -452,10 +452,10 @@ const ShamsiDateModal = ({
           <div className="relative">
             <CalendarIcon className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
             <div
-              className="w-full h-12 border border-gray-300 rounded-lg bg-[#fffefe] text-blue-900 flex items-center justify-between px-3 pr-10 cursor-pointer"
+              className="w-full h-12 border border-blue-900 rounded-lg bg-[#fffefe] text-blue-900 flex items-center justify-between px-3 pr-10 cursor-pointer"
               onClick={() => handleOpenChange(!isOpen)}
             >
-              <span className="text-black">
+              <span className="text-blue-950">
                 {returnCal && returnCal ? formatDate(returnDate) : formatDate(departureDate)}
               </span>
             </div>
@@ -465,7 +465,7 @@ const ShamsiDateModal = ({
 
         {/* Desktop Absolute Calendar Box */}
         {isOpen && (
-          <div ref={calRef} className="absolute top-full left-0 mt-1 w-[720px] z-30 bg-[#fffefe] border-gray-300 shadow-lg">
+          <div ref={calRef} className="absolute top-full left-0 mt-1 w-[720px] z-30 bg-[#fffefe] border-blue-900 shadow-lg">
             <div className="p-4">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-bold text-blue-900">انتخاب تاریخ</h2>
@@ -473,7 +473,7 @@ const ShamsiDateModal = ({
                   <Button
                     variant="outline"
                     onClick={toggleCalendarType}
-                    className="flex items-center gap-2 border border-gray-300 bg-[#fffefe] text-blue-900 hover:bg-gray-100 text-xs h-8 px-2"
+                    className="flex items-center gap-2 border border-blue-900 bg-[#fffefe] text-blue-900 hover:bg-gray-100 text-xs h-8 px-2"
                   >
                     <Globe className="h-3 w-3" />
                     {calendarType === "shamsi" ? "تقویم میلادی" : "Shamsi Calendar"}
@@ -482,7 +482,7 @@ const ShamsiDateModal = ({
                     variant="ghost"
                     size="icon"
                     onClick={() => handleOpenChange(false)}
-                    className="h-6 w-6 p-0 hover:bg-gray-100 border border-gray-300"
+                    className="h-6 w-6 p-0 hover:bg-gray-100 border border-blue-900"
                   >
                     <X className="h-3 w-3" />
                   </Button>
@@ -533,7 +533,7 @@ const ShamsiDateModal = ({
                     variant="ghost"
                     size="icon"
                     onClick={() => navigateMonths('prev')}
-                    className="h-6 w-6 p-0 hover:bg-gray-100 text-sm border border-gray-300"
+                    className="h-6 w-6 p-0 hover:bg-gray-100 text-sm border border-blue-900"
                   >
                     ‹
                   </Button>
@@ -548,7 +548,7 @@ const ShamsiDateModal = ({
                     variant="ghost"
                     size="icon"
                     onClick={() => navigateMonths('next')}
-                    className="h-6 w-6 p-0 hover:bg-gray-100 text-sm border border-gray-300"
+                    className="h-6 w-6 p-0 hover:bg-gray-100 text-sm border border-blue-900"
                   >
                     ›
                   </Button>
@@ -601,7 +601,7 @@ const ShamsiDateModal = ({
           <div className="block md:hidden space-y-2 cursor-pointer">
             <div className="relative">
               <CalendarIcon className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
-              <div className="w-full h-12 border border-gray-300 bg-[#fffefe] text-blue-900 flex items-center justify-between px-3 pr-10 cursor-pointer">
+              <div className="w-full h-12 border border-blue-900 bg-[#fffefe] text-blue-900 flex items-center justify-between px-3 pr-10 cursor-pointer">
                 <span className="text-blue-900">
                   {returnCal && returnCal ? formatDate(returnDate) : formatDate(departureDate)}
                 </span>
@@ -611,16 +611,16 @@ const ShamsiDateModal = ({
           </div>
         </DialogTrigger>
 
-        <DialogContent className="sm:max-w-4xl p-0 bg-[#fffefe] border border-gray-300">
-          <div className="md:hidden max-h-[90vh] bg-[#fffefe] flex flex-col">
-            <div className="flex justify-between items-center p-3 border-b border-gray-300 sticky top-0 bg-[#fffefe] z-10">
+        <DialogContent className="sm:max-w-[100vw] p-0 bg-[#fffefe] border border-blue-900">
+          <div className="md:hidden max-h-[100vh] bg-[#fffefe] flex flex-col">
+            <div className="flex justify-between items-center p-3 border-b border-blue-900 sticky top-0 bg-[#fffefe] z-10">
               <h2 className="text-lg font-bold text-blue-900">انتخاب تاریخ</h2>
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={toggleCalendarType}
-                  className="flex items-center gap-1 text-sm border border-gray-300 bg-[#fffefe] text-blue-900 hover:bg-gray-100"
+                  className="flex items-center gap-1 text-sm border border-blue-900 bg-[#fffefe] text-blue-900 hover:bg-gray-100"
                 >
                   <Globe className="h-3 w-3" />
                   {calendarType === "shamsi" ? "شمسی" : "میلادی"}
@@ -629,7 +629,7 @@ const ShamsiDateModal = ({
                   variant="ghost"
                   size="icon"
                   onClick={() => handleOpenChange(false)}
-                  className="h-8 w-8 p-0 hover:bg-gray-100 border border-gray-300"
+                  className="h-8 w-8 p-0 hover:bg-gray-100 border border-blue-900"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -637,7 +637,7 @@ const ShamsiDateModal = ({
             </div>
 
             {!normalReturnCal && (
-              <div className="p-3 border-b border-gray-300">
+              <div className="p-3 border-b border-blue-900">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -675,12 +675,12 @@ const ShamsiDateModal = ({
             )}
 
             {/* Mobile Calendar Navigation */}
-            <div className="flex justify-between items-center p-3 border-b border-gray-300">
+            <div className="flex justify-between items-center p-3 border-b border-blue-900">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => navigateMobileMonths('prev')}
-                className="h-8 w-8 p-0 hover:bg-gray-100 text-lg border border-gray-300"
+                className="h-8 w-8 p-0 hover:bg-gray-100 text-lg border border-blue-900"
               >
                 ‹
               </Button>
@@ -695,7 +695,7 @@ const ShamsiDateModal = ({
                 variant="ghost"
                 size="icon"
                 onClick={() => navigateMobileMonths('next')}
-                className="h-8 w-8 p-0 hover:bg-gray-100 text-lg border border-gray-300"
+                className="h-8 w-8 p-0 hover:bg-gray-100 text-lg border border-blue-900"
               >
                 ›
               </Button>
@@ -705,7 +705,7 @@ const ShamsiDateModal = ({
             <div className="flex-1 overflow-y-auto">
               <div className="space-y-4 p-3">
                 {/* First Month */}
-                <div className="bg-white rounded-lg border border-gray-200">
+                <div className="bg-white rounded-lg border border-blue-900">
                   <Calendar
                     baseDate={mobileCurrentMonth}
                     selectedDepartureDate={convertDateForCalendar(selectedDepartureDate)}
@@ -722,7 +722,7 @@ const ShamsiDateModal = ({
                 </div>
 
                 {/* Second Month */}
-                <div className="bg-white rounded-lg border border-gray-200">
+                <div className="bg-white rounded-lg border border-blue-900">
                   <Calendar
                     baseDate={mobileCurrentMonth}
                     selectedDepartureDate={convertDateForCalendar(selectedDepartureDate)}

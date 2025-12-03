@@ -194,7 +194,7 @@ export default function PaymentFailedPage() {
           </div>
 
           {/* Common Solutions */}
-          <Card className="mt-6 border-gray-200">
+          <Card className="mt-6 border-blue-900">
             <CardContent className="p-6">
               <h3 className="font-semibold text-gray-800 mb-4 text-center">راهکارهای رفع مشکل</h3>
               <div className="grid md:grid-cols-2 gap-4 text-sm text-right">

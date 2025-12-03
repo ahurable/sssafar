@@ -60,7 +60,7 @@ export function EditVisaForm({ visa }: EditVisaFormProps) {
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [imagePreview, setImagePreview] = useState<string | null>(visa.image || null)
-  
+
   const [formData, setFormData] = useState({
     title: visa.title,
     description: visa.description || "",
@@ -99,7 +99,7 @@ export function EditVisaForm({ visa }: EditVisaFormProps) {
 
   const handleImageUpload = async (file: File) => {
     setUploading(true)
-    
+
     try {
       const formData = new FormData()
       formData.append("file", file)
@@ -145,7 +145,7 @@ export function EditVisaForm({ visa }: EditVisaFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!formData.country || !formData.city) {
       toast.error("لطفا کشور و شهر را وارد کنید")
       return
@@ -231,7 +231,7 @@ export function EditVisaForm({ visa }: EditVisaFormProps) {
         }
       ]
     }
-    
+
     setFormData(prev => ({
       ...prev,
       priceTables: [...prev.priceTables, newTable]
@@ -248,7 +248,7 @@ export function EditVisaForm({ visa }: EditVisaFormProps) {
   const updatePriceTableTitle = (tableIndex: number, title: string) => {
     setFormData(prev => ({
       ...prev,
-      priceTables: prev.priceTables.map((table, i) => 
+      priceTables: prev.priceTables.map((table, i) =>
         i === tableIndex ? { ...table, title } : table
       )
     }))
@@ -257,7 +257,7 @@ export function EditVisaForm({ visa }: EditVisaFormProps) {
   const addPriceTableColumn = (tableIndex: number) => {
     setFormData(prev => ({
       ...prev,
-      priceTables: prev.priceTables.map((table, i) => 
+      priceTables: prev.priceTables.map((table, i) =>
         i === tableIndex ? {
           ...table,
           columns: [...table.columns, 'دوره جدید'],
@@ -273,7 +273,7 @@ export function EditVisaForm({ visa }: EditVisaFormProps) {
   const removePriceTableColumn = (tableIndex: number, columnIndex: number) => {
     setFormData(prev => ({
       ...prev,
-      priceTables: prev.priceTables.map((table, i) => 
+      priceTables: prev.priceTables.map((table, i) =>
         i === tableIndex ? {
           ...table,
           columns: table.columns.filter((_, j) => j !== columnIndex),
@@ -289,7 +289,7 @@ export function EditVisaForm({ visa }: EditVisaFormProps) {
   const updatePriceTableColumn = (tableIndex: number, columnIndex: number, value: string) => {
     setFormData(prev => ({
       ...prev,
-      priceTables: prev.priceTables.map((table, i) => 
+      priceTables: prev.priceTables.map((table, i) =>
         i === tableIndex ? {
           ...table,
           columns: table.columns.map((col, j) => j === columnIndex ? value : col)
@@ -304,10 +304,10 @@ export function EditVisaForm({ visa }: EditVisaFormProps) {
       label: 'نوع جدید',
       values: Array(formData.priceTables[tableIndex].columns.length).fill('')
     }
-    
+
     setFormData(prev => ({
       ...prev,
-      priceTables: prev.priceTables.map((table, i) => 
+      priceTables: prev.priceTables.map((table, i) =>
         i === tableIndex ? {
           ...table,
           rows: [...table.rows, newRow]
@@ -319,7 +319,7 @@ export function EditVisaForm({ visa }: EditVisaFormProps) {
   const removePriceTableRow = (tableIndex: number, rowIndex: number) => {
     setFormData(prev => ({
       ...prev,
-      priceTables: prev.priceTables.map((table, i) => 
+      priceTables: prev.priceTables.map((table, i) =>
         i === tableIndex ? {
           ...table,
           rows: table.rows.filter((_, j) => j !== rowIndex)
@@ -331,10 +331,10 @@ export function EditVisaForm({ visa }: EditVisaFormProps) {
   const updatePriceTableRowLabel = (tableIndex: number, rowIndex: number, label: string) => {
     setFormData(prev => ({
       ...prev,
-      priceTables: prev.priceTables.map((table, i) => 
+      priceTables: prev.priceTables.map((table, i) =>
         i === tableIndex ? {
           ...table,
-          rows: table.rows.map((row, j) => 
+          rows: table.rows.map((row, j) =>
             j === rowIndex ? { ...row, label } : row
           )
         } : table
@@ -345,10 +345,10 @@ export function EditVisaForm({ visa }: EditVisaFormProps) {
   const updatePriceTableRowValue = (tableIndex: number, rowIndex: number, valueIndex: number, value: string) => {
     setFormData(prev => ({
       ...prev,
-      priceTables: prev.priceTables.map((table, i) => 
+      priceTables: prev.priceTables.map((table, i) =>
         i === tableIndex ? {
           ...table,
-          rows: table.rows.map((row, j) => 
+          rows: table.rows.map((row, j) =>
             j === rowIndex ? {
               ...row,
               values: row.values.map((val, k) => k === valueIndex ? value : val)
@@ -440,10 +440,10 @@ export function EditVisaForm({ visa }: EditVisaFormProps) {
             {/* Image Upload Section */}
             <div className="space-y-4">
               <Label>تصویر ویزا</Label>
-              
+
               {imagePreview ? (
                 <div className="relative inline-block">
-                  <div className="w-64 h-48 rounded-lg border-2 border-dashed border-gray-300 overflow-hidden">
+                  <div className="w-64 h-48 rounded-lg border-2 border-dashed border-blue-900 overflow-hidden">
                     <img
                       src={imagePreview}
                       alt="Preview"
@@ -464,9 +464,8 @@ export function EditVisaForm({ visa }: EditVisaFormProps) {
                 <div className="flex items-center justify-center w-full">
                   <label
                     htmlFor="image-upload"
-                    className={`flex flex-col items-center justify-center w-64 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors ${
-                      uploading ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
+                    className={`flex flex-col items-center justify-center w-64 h-32 border-2 border-dashed border-blue-900 rounded-lg cursor-pointer hover:border-gray-400 transition-colors ${uploading ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
                   >
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                       {uploading ? (
@@ -599,10 +598,10 @@ export function EditVisaForm({ visa }: EditVisaFormProps) {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>ویژگی‌های ویزا</CardTitle>
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="sm" 
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
                 onClick={() => addItem("features")}
               >
                 <Plus className="h-4 w-4 ml-1" />
@@ -639,10 +638,10 @@ export function EditVisaForm({ visa }: EditVisaFormProps) {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>مدارک مورد نیاز</CardTitle>
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="sm" 
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
                 onClick={() => addItem("documents")}
               >
                 <Plus className="h-4 w-4 ml-1" />
@@ -679,10 +678,10 @@ export function EditVisaForm({ visa }: EditVisaFormProps) {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>شرایط و ضوابط</CardTitle>
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="sm" 
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
                 onClick={() => addItem("requirements")}
               >
                 <Plus className="h-4 w-4 ml-1" />
@@ -719,10 +718,10 @@ export function EditVisaForm({ visa }: EditVisaFormProps) {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>جدول‌های قیمت</CardTitle>
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="sm" 
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
                 onClick={addPriceTable}
               >
                 <Plus className="h-4 w-4 ml-1" />

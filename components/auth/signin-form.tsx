@@ -40,10 +40,10 @@ export function SignInForm() {
       // console.log("Response status:", res.status)
       const data = await res.json()
       // console.log("Response data:", data)
-      
+
       if (res.ok) {
         success('وارد حساب کاربری شدید', '', 1000)
-        
+
         // Wait a bit for the cookie to be processed
         setTimeout(() => {
           // console.log("Redirecting to:", data.user.role === "ADMIN" ? "/admin" : "/dashboard")
@@ -82,14 +82,14 @@ export function SignInForm() {
         <form onSubmit={handleSubmit} className="space-y-6 mt-6">
           <Tabs value={loginMethod} onValueChange={handleTabChange}>
             <TabsList className="grid w-full grid-cols-2 mb-6 bg-gray-100 p-1">
-              <TabsTrigger 
-                value="email" 
+              <TabsTrigger
+                value="email"
                 className="data-[state=active]:bg-blue-900 data-[state=active]:text-white transition-all duration-300"
               >
                 <Mail className="h-4 w-4 ml-2" />
                 ایمیل
               </TabsTrigger>
-              <TabsTrigger 
+              <TabsTrigger
                 value="phone"
                 className="data-[state=active]:bg-blue-900 data-[state=active]:text-white transition-all duration-300"
               >
@@ -109,7 +109,7 @@ export function SignInForm() {
                     id="email"
                     type="email"
                     placeholder="example@email.com"
-                    className="pr-12 h-12 border border-gray-300 focus:border-blue-900 focus:ring-1 focus:ring-blue-900 transition-all duration-300 bg-[#fffefe]"
+                    className="pr-12 h-12 border border-blue-900 focus:border-blue-900 focus:ring-1 focus:ring-blue-900 transition-all duration-300 bg-[#fffefe]"
                     value={formData.identifier}
                     onChange={(e) => setFormData({ ...formData, identifier: e.target.value })}
                     required
@@ -129,7 +129,7 @@ export function SignInForm() {
                     id="phone"
                     type="tel"
                     placeholder="09123456789"
-                    className="pr-12 h-12 border border-gray-300 focus:border-blue-900 focus:ring-1 focus:ring-blue-900 transition-all duration-300 bg-[#fffefe]"
+                    className="pr-12 h-12 border border-blue-900 focus:border-blue-900 focus:ring-1 focus:ring-blue-900 transition-all duration-300 bg-[#fffefe]"
                     value={formData.identifier}
                     onChange={(e) => setFormData({ ...formData, identifier: e.target.value })}
                     required
@@ -149,7 +149,7 @@ export function SignInForm() {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="رمز عبور خود را وارد کنید"
-                className="pr-12 pl-12 h-12 border border-gray-300 focus:border-blue-900 focus:ring-1 focus:ring-blue-900 transition-all duration-300 bg-[#fffefe]"
+                className="pr-12 pl-12 h-12 border border-blue-900 focus:border-blue-900 focus:ring-1 focus:ring-blue-900 transition-all duration-300 bg-[#fffefe]"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
@@ -167,23 +167,23 @@ export function SignInForm() {
           <div className="flex items-center justify-between text-sm">
             <label className="flex items-center gap-3 cursor-pointer group">
               <div className="relative">
-                <input 
-                  type="checkbox" 
-                  className="w-5 h-5 border border-gray-300 checked:border-blue-900 checked:bg-blue-900 transition-all duration-200 appearance-none checked:before:content-['✓'] checked:before:text-white checked:before:flex checked:before:items-center checked:before:justify-center" 
+                <input
+                  type="checkbox"
+                  className="w-5 h-5 border border-blue-900 checked:border-blue-900 checked:bg-blue-900 transition-all duration-200 appearance-none checked:before:content-['✓'] checked:before:text-white checked:before:flex checked:before:items-center checked:before:justify-center"
                 />
               </div>
               <span className="text-gray-600 group-hover:text-gray-800 transition-colors">مرا به خاطر بسپار</span>
             </label>
-            <Link 
-              href="/auth/forgot-password" 
+            <Link
+              href="/auth/forgot-password"
               className="text-blue-900 hover:text-blue-800 font-medium hover:underline transition-colors"
             >
               فراموشی رمز عبور؟
             </Link>
           </div>
 
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             className="w-full h-12 bg-blue-900 hover:bg-blue-800 shadow hover:shadow-md transition-all duration-300 text-white font-bold text-lg"
             disabled={loading}
           >
@@ -207,8 +207,8 @@ export function SignInForm() {
             <span className="text-sm">حساب کاربری ندارید؟</span>
             <div className="h-px bg-gray-300 flex-1"></div>
           </div>
-          <Link 
-            href="/auth/signup" 
+          <Link
+            href="/auth/signup"
             className="inline-flex items-center gap-2 text-blue-900 hover:text-blue-800 font-medium transition-colors group"
           >
             <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />

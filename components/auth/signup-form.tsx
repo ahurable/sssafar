@@ -100,14 +100,14 @@ export function SignUpForm() {
 
           <Tabs value={signupMethod} onValueChange={handleTabChange}>
             <TabsList className="grid w-full grid-cols-2 mb-6 bg-gray-100 p-1">
-              <TabsTrigger 
-                value="email" 
+              <TabsTrigger
+                value="email"
                 className="data-[state=active]:bg-blue-900 data-[state=active]:text-white transition-all duration-300"
               >
                 <Mail className="h-4 w-4 ml-2" />
                 ایمیل
               </TabsTrigger>
-              <TabsTrigger 
+              <TabsTrigger
                 value="phone"
                 className="data-[state=active]:bg-blue-900 data-[state=active]:text-white transition-all duration-300"
               >
@@ -127,7 +127,7 @@ export function SignUpForm() {
                     id="signup-email"
                     type="email"
                     placeholder="example@email.com"
-                    className="pr-12 h-12 border border-gray-300 focus:border-blue-900 focus:ring-1 focus:ring-blue-900 transition-all duration-300 bg-white"
+                    className="pr-12 h-12 border border-blue-900 focus:border-blue-900 focus:ring-1 focus:ring-blue-900 transition-all duration-300 bg-white"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     required={signupMethod === "email"}
@@ -147,7 +147,7 @@ export function SignUpForm() {
                     id="signup-phone"
                     type="tel"
                     placeholder="09123456789"
-                    className="pr-12 h-12 border border-gray-300 focus:border-blue-900 focus:ring-1 focus:ring-blue-900 transition-all duration-300 bg-white"
+                    className="pr-12 h-12 border border-blue-900 focus:border-blue-900 focus:ring-1 focus:ring-blue-900 transition-all duration-300 bg-white"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     required={signupMethod === "phone"}
@@ -167,7 +167,7 @@ export function SignUpForm() {
                 id="signup-password"
                 type={showPassword ? "text" : "password"}
                 placeholder="حداقل 8 کاراکتر"
-                className="pr-12 pl-12 h-12 border border-gray-300 focus:border-blue-900 focus:ring-1 focus:ring-blue-900 transition-all duration-300 bg-white"
+                className="pr-12 pl-12 h-12 border border-blue-900 focus:border-blue-900 focus:ring-1 focus:ring-blue-900 transition-all duration-300 bg-white"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
@@ -194,7 +194,7 @@ export function SignUpForm() {
                 id="confirm-password"
                 type={showConfirmPassword ? "text" : "password"}
                 placeholder="رمز عبور را دوباره وارد کنید"
-                className="pr-12 pl-12 h-12 border border-gray-300 focus:border-blue-900 focus:ring-1 focus:ring-blue-900 transition-all duration-300 bg-white"
+                className="pr-12 pl-12 h-12 border border-blue-900 focus:border-blue-900 focus:ring-1 focus:ring-blue-900 transition-all duration-300 bg-white"
                 value={formData.confirmPassword}
                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                 required
@@ -210,12 +210,12 @@ export function SignUpForm() {
             </div>
           </div>
 
-          <div className="flex items-start gap-3 text-sm p-4 bg-gray-50 border border-gray-200">
+          <div className="flex items-start gap-3 text-sm p-4 bg-gray-50 border border-blue-900">
             <div className="relative flex-shrink-0 mt-0.5">
-              <input 
-                type="checkbox" 
-                className="w-5 h-5 border border-gray-300 checked:border-blue-900 checked:bg-blue-900 transition-all duration-200 appearance-none checked:before:content-['✓'] checked:before:text-white checked:before:flex checked:before:items-center checked:before:justify-center" 
-                required 
+              <input
+                type="checkbox"
+                className="w-5 h-5 border border-blue-900 checked:border-blue-900 checked:bg-blue-900 transition-all duration-200 appearance-none checked:before:content-['✓'] checked:before:text-white checked:before:flex checked:before:items-center checked:before:justify-center"
+                required
               />
             </div>
             <span className="text-gray-600 leading-relaxed">
@@ -231,8 +231,8 @@ export function SignUpForm() {
             </span>
           </div>
 
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             className="w-full h-12 bg-blue-900 hover:bg-blue-800 shadow hover:shadow-md transition-all duration-300 text-white font-bold text-lg"
             disabled={loading}
           >
@@ -256,8 +256,8 @@ export function SignUpForm() {
             <span className="text-sm">حساب کاربری دارید؟</span>
             <div className="h-px bg-gray-300 flex-1"></div>
           </div>
-          <Link 
-            href="/auth/signin" 
+          <Link
+            href="/auth/signin"
             className="inline-flex items-center gap-2 text-blue-900 hover:text-blue-800 font-medium transition-colors group"
           >
             ورود به حساب کاربری

@@ -19,15 +19,15 @@ interface TourDetailsProps {
     itineraries: { day: number; title: string; description: string; activities?: any }[]
     routes: { order: number; city: string; country: string; duration?: number; description?: string }[]
     rules: { title: string; description: string }[]
-    transports: { 
-      type: string; 
-      departure: Date; 
-      arrival: Date; 
-      fromCity: string; 
-      toCity: string; 
-      carrier?: string; 
-      flightNumber?: string; 
-      trainNumber?: string 
+    transports: {
+      type: string;
+      departure: Date;
+      arrival: Date;
+      fromCity: string;
+      toCity: string;
+      carrier?: string;
+      flightNumber?: string;
+      trainNumber?: string
     }[]
     images: {
       id: string
@@ -81,13 +81,13 @@ export function TourDetails({ tour }: TourDetailsProps) {
   }
 
   const nextImage = () => {
-    setCurrentImageIndex((prev) => 
+    setCurrentImageIndex((prev) =>
       prev === tour.images.length - 1 ? 0 : prev + 1
     )
   }
 
   const prevImage = () => {
-    setCurrentImageIndex((prev) => 
+    setCurrentImageIndex((prev) =>
       prev === 0 ? tour.images.length - 1 : prev - 1
     )
   }
@@ -98,7 +98,7 @@ export function TourDetails({ tour }: TourDetailsProps) {
   return (
     <div className="space-y-6">
       {/* Navigation Buttons */}
-      
+
 
       {/* Header */}
       <div className="bg-gradient-to-r bg-blue-900 p-8 text-white">
@@ -155,7 +155,7 @@ export function TourDetails({ tour }: TourDetailsProps) {
                 alt={currentImage.altText || tour.title}
                 className="w-full h-full object-cover"
               />
-              
+
               {/* Navigation Arrows */}
               {tour.images.length > 1 && (
                 <>
@@ -193,11 +193,10 @@ export function TourDetails({ tour }: TourDetailsProps) {
                   {tour.images.map((image, index) => (
                     <button
                       key={image.id}
-                      className={`flex-shrink-0 w-20 h-16 rounded-md overflow-hidden border-2 ${
-                        index === currentImageIndex 
-                          ? 'border-blue-800' 
-                          : 'border-gray-200'
-                      }`}
+                      className={`flex-shrink-0 w-20 h-16 rounded-md overflow-hidden border-2 ${index === currentImageIndex
+                          ? 'border-blue-800'
+                          : 'border-blue-900'
+                        }`}
                       onClick={() => setCurrentImageIndex(index)}
                     >
                       <img
@@ -216,29 +215,29 @@ export function TourDetails({ tour }: TourDetailsProps) {
       <Card className="sticky top-4 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <CardContent className="p-4">
           <div className="flex flex-wrap gap-2 justify-center">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
               onClick={() => scrollToSection(itineraryRef)}
             >
               برنامه سفر
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
               onClick={() => scrollToSection(routesRef)}
             >
               مسیر تور
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
               onClick={() => scrollToSection(transportRef)}
             >
               حمل و نقل
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
               onClick={() => scrollToSection(rulesRef)}
             >
@@ -325,14 +324,14 @@ export function TourDetails({ tour }: TourDetailsProps) {
                   {getTransportIcon(transport.type)}
                   <span className="font-semibold">
                     {transport.type === 'FLIGHT' ? 'پرواز' :
-                     transport.type === 'TRAIN' ? 'قطار' :
-                     transport.type === 'BUS' ? 'اتوبوس' : 'کشتی'}
+                      transport.type === 'TRAIN' ? 'قطار' :
+                        transport.type === 'BUS' ? 'اتوبوس' : 'کشتی'}
                   </span>
                   {transport.carrier && (
                     <Badge variant="outline">{transport.carrier}</Badge>
                   )}
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div>
                     <div className="text-muted-foreground">مبدا</div>
@@ -341,7 +340,7 @@ export function TourDetails({ tour }: TourDetailsProps) {
                       {formatDateTime(transport.departure)}
                     </div>
                   </div>
-                  
+
                   <div>
                     <div className="text-muted-foreground">مقصد</div>
                     <div className="font-medium">{transport.toCity}</div>

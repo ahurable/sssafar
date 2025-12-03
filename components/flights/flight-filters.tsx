@@ -457,7 +457,7 @@ export function FlightFilters() {
   }) => (
     <Button
       variant="outline"
-      className="flex items-center gap-2 py-2 px-3 rounded-full border-gray-300 shadow-sm"
+      className="flex items-center gap-2 py-2 px-3 rounded-full border-blue-900 shadow-sm"
       onClick={() => openFilterSection(section)}
     >
       <Icon className="h-4 w-4" />
@@ -508,11 +508,11 @@ export function FlightFilters() {
             if (!open) setActiveFilterSection(null)
           }}>
             <SheetTrigger asChild>
-              <Button className="shadow-lg py-2 px-4 text-lg font-medium text-black bg-[#fffefe] border-black border rounded-full">
+              <Button className="shadow-lg py-2 px-4 text-lg font-medium text-blue-950 bg-[#fffefe] border-black border rounded-full">
                 <Filter className="h-5 w-5 ml-2" />
                 فیلترها
                 {getActiveFiltersCount() > 0 && (
-                  <Badge className="mr-2 bg-[#fffefe] text-black px-2 py-1 text-xs">
+                  <Badge className="mr-2 bg-[#fffefe] text-blue-950 px-2 py-1 text-xs">
                     {getActiveFiltersCount()}
                   </Badge>
                 )}

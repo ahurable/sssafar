@@ -8,17 +8,17 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { 
-  Hotel, 
-  MapPin, 
-  Calendar, 
-  Users, 
-  Star, 
-  Wifi, 
-  Car, 
-  Dumbbell, 
-  Utensils, 
-  Snowflake, 
+import {
+  Hotel,
+  MapPin,
+  Calendar,
+  Users,
+  Star,
+  Wifi,
+  Car,
+  Dumbbell,
+  Utensils,
+  Snowflake,
   Tv,
   User2,
   Trash2,
@@ -74,7 +74,7 @@ export default function HotelReservation() {
   const params = useParams()
   const fareSourceCode = params.id as string
   const { getHotelName, getHotelImages } = useHotel()
-  
+
   const [hotelDetails, setHotelDetails] = useState<any>(null)
   const [hotelName, setHotelName] = useState("")
   const [hotelImages, setHotelImages] = useState<any[]>([])
@@ -90,7 +90,7 @@ export default function HotelReservation() {
     const loadHotelDetails = async () => {
       try {
         setLoading(true)
-        
+
         // Revalidate the hotel booking
         const revalidateResponse = await fetch('/api/hotels/details', {
           method: 'POST',
@@ -110,7 +110,7 @@ export default function HotelReservation() {
 
         const revalidateResult = await revalidateResponse.json()
         setRevalidateData(revalidateResult)
-        
+
         // Extract hotel details from revalidate response
         if (revalidateResult.success && revalidateResult.data?.Success) {
           const hotelData = revalidateResult.data
@@ -121,7 +121,7 @@ export default function HotelReservation() {
             getHotelName(hotelData.PricedItinerary.HotelId),
             getHotelImages(hotelData.PricedItinerary.HotelId)
           ])
-          
+
           setHotelName(name)
           setHotelImages(imagesData.length > 0 ? imagesData : ['/hotels/hotel-1.jpg'])
         }
@@ -194,7 +194,7 @@ export default function HotelReservation() {
 
   const calculateTotalPrice = () => {
     if (!hotelDetails?.PricedItinerary?.NetRate) return 0
-    
+
     const basePrice = hotelDetails.PricedItinerary.NetRate
     const nights = calculateNights()
     return basePrice * nights * selectedTravelers.length
@@ -210,7 +210,7 @@ export default function HotelReservation() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (selectedTravelers.length === 0) {
       alert("لطفاً حداقل یک مسافر انتخاب کنید")
       return
@@ -246,7 +246,7 @@ export default function HotelReservation() {
       if (response.ok) {
         const result = await response.json()
         // console.log("Hotel booking successful:", result)
-        
+
         // Redirect to payment page
         router.push(`/invoice/${result.invoiceId}`)
       } else {
@@ -382,7 +382,7 @@ export default function HotelReservation() {
                                 {getMealTypeText(room.MealType)}
                               </Badge>
                             </div>
-                            
+
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                               <div>
                                 <Label className="text-muted-foreground">بزرگسالان</Label>
@@ -412,7 +412,7 @@ export default function HotelReservation() {
 
                     {/* Hotel Policies */}
                     {(hotel.HotelPolicy.InstructionsFa || hotel.HotelPolicy.SpecialInstructionsFa) && (
-                      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                      <div className="bg-gray-50 p-4 rounded-lg border border-blue-900">
                         <h3 className="font-bold text-lg mb-2 flex items-center gap-2">
                           <Shield className="h-5 w-5 text-gray-600" />
                           قوانین هتل
@@ -429,18 +429,17 @@ export default function HotelReservation() {
                     )}
 
                     {/* Cancellation Policy */}
-                    <div className={`p-4 rounded-lg border ${
-                      hotel.NonRefundable 
-                        ? 'bg-red-50 border-red-200' 
+                    <div className={`p-4 rounded-lg border ${hotel.NonRefundable
+                        ? 'bg-red-50 border-red-200'
                         : 'bg-blue-50 border-blue-200'
-                    }`}>
+                      }`}>
                       <div className="flex items-center gap-2">
                         <Badge variant={hotel.NonRefundable ? "destructive" : "default"}>
                           {hotel.NonRefundable ? "غیرقابل استرداد" : "قابل استرداد"}
                         </Badge>
                         <span className="text-sm text-gray-600">
-                          {hotel.NonRefundable 
-                            ? "این رزرو غیرقابل کنسلی است" 
+                          {hotel.NonRefundable
+                            ? "این رزرو غیرقابل کنسلی است"
                             : "امکان کنسلی طبق قوانین هتل وجود دارد"}
                         </span>
                       </div>
@@ -499,7 +498,7 @@ export default function HotelReservation() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-6">
-                  <TravelerForm 
+                  <TravelerForm
                     onTravelerAdded={handleTravelerAdded}
                     onTravelerSelect={handleTravelerSelect}
                     onTravelerRemove={handleTravelerRemove}
@@ -535,17 +534,17 @@ export default function HotelReservation() {
                         {formatPrice(hotel.NetRate * nights * selectedTravelers.length, hotel.Currency)}
                       </span>
                     </div>
-                    
+
                     <Separator />
-                    
+
                     <div className="flex justify-between items-center text-lg font-bold">
                       <span>مبلغ قابل پرداخت:</span>
                       <span className="text-blue-600">
                         {formatPrice(calculateTotalPrice(), hotel.Currency)}
                       </span>
                     </div>
-                    
-                    <Button 
+
+                    <Button
                       onClick={handleSubmit}
                       className="w-full bg-blue-600 hover:bg-blue-700 h-12 text-lg mt-4"
                       disabled={loading}

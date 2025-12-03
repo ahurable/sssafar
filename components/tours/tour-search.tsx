@@ -39,7 +39,7 @@ const TourSearch = () => {
   const [currentInput, setCurrentInput] = useState("")
   const [openCalendarId, setOpenCalendarId] = useState<string | null>(null)
   const [isDestinationFocused, setIsDestinationFocused] = useState(false)
-  
+
   const router = useRouter()
   const suggestionsRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -62,7 +62,7 @@ const TourSearch = () => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        suggestionsRef.current && 
+        suggestionsRef.current &&
         !suggestionsRef.current.contains(event.target as Node) &&
         inputRef.current &&
         !inputRef.current.contains(event.target as Node)
@@ -82,7 +82,7 @@ const TourSearch = () => {
       ...prev,
       destination: query
     }))
-    
+
     if (query.length < 2) {
       setSuggestions([])
       setShowSuggestions(false)
@@ -92,7 +92,7 @@ const TourSearch = () => {
     setSuggestionLoading(true)
     try {
       const response = await fetch(`/api/activities/suggestions?q=${encodeURIComponent(query)}`)
-      
+
       if (response.ok) {
         const data = await response.json()
         setSuggestions(data)
@@ -133,11 +133,11 @@ const TourSearch = () => {
       ...prev,
       destination: suggestion.name
     }))
-    
+
     setShowSuggestions(false)
     setCurrentInput("")
     setIsDestinationFocused(false)
-    
+
     setErrors(prev => ({ ...prev, destination: undefined }))
   }
 
@@ -146,7 +146,7 @@ const TourSearch = () => {
 
     if (e.key === "ArrowDown") {
       e.preventDefault()
-      setActiveSuggestionIndex(prev => 
+      setActiveSuggestionIndex(prev =>
         prev < suggestions.length - 1 ? prev + 1 : prev
       )
     } else if (e.key === "ArrowUp") {
@@ -164,7 +164,7 @@ const TourSearch = () => {
 
   const handleSearch = async () => {
     setErrors({})
-    
+
     if (!validateForm()) {
       return
     }
@@ -173,9 +173,9 @@ const TourSearch = () => {
       setSearchData(tourSearch)
     } catch (error) {
       console.error("Error searching tours:", error)
-      setErrors(prev => ({ 
-        ...prev, 
-        general: "خطا در جستجوی گشت. لطفا دوباره تلاش کنید." 
+      setErrors(prev => ({
+        ...prev,
+        general: "خطا در جستجوی گشت. لطفا دوباره تلاش کنید."
       }))
     }
   }
@@ -196,9 +196,9 @@ const TourSearch = () => {
 
   const renderError = (field: keyof FormErrors) => {
     if (!errors[field]) return null
-    
+
     return (
-      <div className="flex items-center gap-2 mt-2 text-black text-sm">
+      <div className="flex items-center gap-2 mt-2 text-blue-950 text-sm">
         <AlertCircle className="h-4 w-4" />
         <span>{errors[field]}</span>
       </div>
@@ -209,18 +209,17 @@ const TourSearch = () => {
     if (!showSuggestions || suggestions.length === 0) return null
 
     return (
-      <div 
+      <div
         ref={suggestionsRef}
-        className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 z-50 max-h-80 overflow-y-auto mt-1"
+        className="absolute top-full right-0 left-0 bg-[#fffefe] border border-blue-900 z-50 max-h-80 overflow-y-auto mt-1"
       >
         {suggestions.map((suggestion, index) => (
           <div
             key={suggestion.id}
-            className={`p-3 cursor-pointer border-b border-gray-300 last:border-b-0 ${
-              index === activeSuggestionIndex 
-                ? 'bg-gray-100' 
-                : 'hover:bg-gray-50'
-            }`}
+            className={`p-3 cursor-pointer border-b border-blue-900 last:border-b-0 ${index === activeSuggestionIndex
+              ? 'bg-gray-100'
+              : 'hover:bg-gray-50'
+              }`}
             onMouseDown={(e) => {
               e.preventDefault()
               handleSuggestionClick(suggestion)
@@ -229,12 +228,12 @@ const TourSearch = () => {
             <div className="flex justify-between items-start">
               <div className="flex-1 text-right">
                 <div className="flex items-center gap-2 justify-end">
-                  <span className="font-bold text-black">
+                  <span className="font-bold text-blue-950">
                     {suggestion.name}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 mt-1 justify-end">
-                  <span className="text-xs bg-gray-200 text-black px-2 py-1 font-medium border border-gray-300">
+                  <span className="text-xs bg-gray-200 text-blue-950 px-2 py-1 font-medium border border-blue-900">
                     {suggestion.city}
                   </span>
                 </div>
@@ -249,7 +248,7 @@ const TourSearch = () => {
   const handleTripTypeChange = () => null
 
   return (
-    <div style={{direction:'rtl'}} className="container mx-auto">
+    <div style={{ direction: 'rtl' }} className="container mx-auto">
       {/* General Error Display */}
       {errors.general && (
         <div className="mb-4 p-3 bg-red-500 border border-red-700 flex items-center gap-3">
@@ -261,21 +260,20 @@ const TourSearch = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {/* Destination Input */}
         <div className="space-y-2 relative">
-          <Label htmlFor="tour-destination" className="text-black text-right block">شهر</Label>
+          <Label htmlFor="tour-destination" className="text-blue-950 text-right block">شهر</Label>
           <div className="relative">
             <Map className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
             {suggestionLoading && (
               <Loader2 className="absolute left-3 top-3 h-4 w-4 animate-spin text-blue-500" />
             )}
-            <Input 
+            <Input
               ref={inputRef}
-              id="tour-destination" 
-              placeholder="کیش، استانبول، آنتالیا..." 
-              className={`pr-10 h-12 border border-gray-300 bg-[#fffefe] text-black placeholder-gray-500 ${
-                errors.destination 
-                  ? 'border-red-500 bg-red-500' 
-                  : 'border-gray-300'
-              }`}
+              id="tour-destination"
+              placeholder="کیش، استانبول، آنتالیا..."
+              className={`pr-10 h-12 border border-blue-900 bg-[#fffefe] text-blue-950 placeholder-gray-500 ${errors.destination
+                ? 'border-red-500 bg-red-500'
+                : 'border-blue-900'
+                }`}
               value={tourSearch.destination}
               onChange={(e) => fetchSuggestions(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -296,7 +294,7 @@ const TourSearch = () => {
 
         {/* Start Date */}
         <div className="space-y-2 relative">
-          <Label className="text-black text-right block mb-2">تاریخ ورود</Label>
+          <Label className="text-blue-950 text-right block mb-2">تاریخ ورود</Label>
 
           <ShamsiDateModal
             calendarId="calendar1"
@@ -316,7 +314,7 @@ const TourSearch = () => {
 
         {/* End Date */}
         <div className="space-y-2 relative">
-          <Label className="text-black text-right block mb-2">تاریخ خروج</Label>
+          <Label className="text-blue-950 text-right block mb-2">تاریخ خروج</Label>
 
           <ShamsiDateModal
             calendarId="calendar2"
@@ -337,7 +335,7 @@ const TourSearch = () => {
       </div>
 
       {/* Search Button */}
-      <Button 
+      <Button
         className="w-full h-12 bg-blue-500 text-white hover:bg-blue-900 mt-6"
         onClick={handleSearch}
       >

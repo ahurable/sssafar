@@ -20,7 +20,7 @@ export default function MapSelector({ onLocationSelect, selectedLocation }: MapS
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [tempLocation, setTempLocation] = useState<Location | null>(null)
   const [isMapInitialized, setIsMapInitialized] = useState(false)
-  
+
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<L.Map | null>(null)
   const markerRef = useRef<L.Marker | null>(null)
@@ -133,13 +133,13 @@ export default function MapSelector({ onLocationSelect, selectedLocation }: MapS
     const customIcon = createCustomIcon(L)
 
     // Add new marker
-    const newMarker = L.marker([lat, lng], { 
+    const newMarker = L.marker([lat, lng], {
       icon: customIcon,
       zIndexOffset: 1000
     }).addTo(mapInstanceRef.current)
-    
+
     markerRef.current = newMarker
-    
+
     // Pan to the new location with smooth animation
     mapInstanceRef.current.setView([lat, lng], mapInstanceRef.current.getZoom(), {
       animate: true
@@ -160,9 +160,9 @@ export default function MapSelector({ onLocationSelect, selectedLocation }: MapS
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=fa`
       )
       const data = await response.json()
-      
+
       const address = data.display_name || "آدرس نامشخص"
-      
+
       setTempLocation({
         lat,
         lng,
@@ -196,14 +196,14 @@ export default function MapSelector({ onLocationSelect, selectedLocation }: MapS
           const L = (await import('leaflet')).default
           const lat = position.coords.latitude
           const lng = position.coords.longitude
-          
+
           try {
             // Get address for current location
             const response = await fetch(
               `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=fa`
             )
             const data = await response.json()
-            
+
             const location: Location = {
               lat,
               lng,
@@ -261,16 +261,16 @@ export default function MapSelector({ onLocationSelect, selectedLocation }: MapS
 
       {/* دکمه باز کردن نقشه */}
       <div>
-        <Button 
-          type="button" 
-          variant="outline" 
+        <Button
+          type="button"
+          variant="outline"
           className="w-full h-12"
           onClick={() => setIsDialogOpen(true)}
         >
           <MapPin className="h-4 w-4 ml-2" />
           {selectedLocation ? "تغییر موقعیت روی نقشه" : "انتخاب موقعیت روی نقشه"}
         </Button>
-        
+
         {/* Map Modal */}
         {isDialogOpen && (
           <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
@@ -288,14 +288,14 @@ export default function MapSelector({ onLocationSelect, selectedLocation }: MapS
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
-                
+
                 {/* Map Container */}
                 <div className="flex-1 p-6 overflow-hidden">
                   <div className="space-y-4 h-full">
                     {/* Leaflet Map Container - Fixed Rectangle Box */}
-                    <div className="border-2 border-gray-300 rounded-lg overflow-hidden bg-gray-100">
-                      <div 
-                        ref={mapRef} 
+                    <div className="border-2 border-blue-900 rounded-lg overflow-hidden bg-gray-100">
+                      <div
+                        ref={mapRef}
                         className="w-full h-96" // Fixed height for rectangle
                         style={{ minHeight: '384px' }}
                       >
@@ -309,7 +309,7 @@ export default function MapSelector({ onLocationSelect, selectedLocation }: MapS
                         )}
                       </div>
                     </div>
-                    
+
                     <div className="text-sm text-muted-foreground text-center">
                       برای انتخاب موقعیت، روی نقشه کلیک کنید
                     </div>
@@ -325,7 +325,7 @@ export default function MapSelector({ onLocationSelect, selectedLocation }: MapS
                         <Navigation className="h-4 w-4 ml-2" />
                         استفاده از موقعیت فعلی
                       </Button>
-                      
+
                       <Button
                         type="button"
                         variant="outline"
@@ -365,7 +365,7 @@ export default function MapSelector({ onLocationSelect, selectedLocation }: MapS
                       <Check className="h-4 w-4 ml-2" />
                       تایید موقعیت
                     </Button>
-                    
+
                     <Button
                       type="button"
                       variant="outline"

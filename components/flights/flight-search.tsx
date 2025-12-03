@@ -4,13 +4,15 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useFlight } from "@/contexts/search/FlightContext"
 import { useSearch } from "@/hooks/use-search"
-import { Search, Calendar, MapPin, ChevronDown, Loader2, Users, Baby, User, Plus, Minus, CalendarIcon, AlertCircle, RotateCcw, Heart } from "lucide-react"
+import { Search, Calendar, MapPin, ChevronDown, Loader2, Users, Baby, User, Plus, Minus, CalendarIcon, AlertCircle, RotateCcw, Heart, ArrowDownNarrowWide } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState, useRef } from "react"
 import ShamsiDateModal from "./ShamsiCalendar"
 import { formatShamsiDate } from "./utils"
 import { shamsiToGregorianString } from "@/lib/jalaalil"
 import { motion, AnimatePresence } from 'framer-motion';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faExchange } from "@fortawesome/free-solid-svg-icons"
 
 interface Suggestion {
     id: string
@@ -356,7 +358,16 @@ const FlightSearch = () => {
     const handleFocus = (field: "from" | "to") => {
         setCurrentField(field)
         setIsFieldFocused(field)
-
+        if (field === "from") {
+            setFlightSearch((prev: any) => ({ ...prev, displayFrom: "" }))
+            setShowFavorites(true)
+            setFavoriteField("from")
+        }
+        else {
+            setFlightSearch((prev: any) => ({ ...prev, displayTo: "" }))
+            setShowFavorites(true)
+            setFavoriteField("to")
+        }
         // Show favorites only if the field is empty and it's the first focus
         if (!flightSearch[`display${field.charAt(0).toUpperCase() + field.slice(1)}` as keyof Pick<FlightSearchState, 'displayFrom' | 'displayTo'>]) {
             setShowFavorites(true)
@@ -527,7 +538,7 @@ const FlightSearch = () => {
         if (!errors[field]) return null
 
         return (
-            <div className="flex items-center gap-2 mt-2 text-black text-sm">
+            <div className="flex items-center gap-2 mt-2 text-blue-950 text-sm">
                 <AlertCircle className="h-4 w-4" />
                 <span>{errors[field]}</span>
             </div>
@@ -540,12 +551,12 @@ const FlightSearch = () => {
         return (
             <div
                 ref={suggestionsRef}
-                className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 shadow-lg z-50 max-h-80 overflow-y-auto mt-1 rounded-md"
+                className="absolute top-full right-0 left-0 bg-[#fffefe] shadow-lg z-50 max-h-80 overflow-y-auto mt-1 rounded-md"
             >
                 {suggestions.map((suggestion, index) => (
                     <div
                         key={`${suggestion.id}-${index}`}
-                        className={`p-3 cursor-pointer border-b border-gray-200 last:border-b-0 ${index === activeSuggestionIndex
+                        className={`p-3 cursor-pointer last:border-b-0 ${index === activeSuggestionIndex
                             ? 'bg-blue-50 border-blue-200'
                             : 'hover:bg-gray-50'
                             }`}
@@ -559,8 +570,8 @@ const FlightSearch = () => {
                             <div className="flex-1 text-right">
                                 {suggestion.type === 'airport' ? (
                                     <>
-                                        <div className="flex items-center gap-2 justify-end">
-                                            <span className="font-bold text-black">
+                                        <div className="flex items-center gap-2 justify-start">
+                                            <span className="font-bold text-blue-950">
                                                 {suggestion.showName || suggestion.city}
                                             </span>
                                             <span className="text-blue-500 font-bold">({suggestion.code})</span>
@@ -568,25 +579,25 @@ const FlightSearch = () => {
                                         <div className="text-sm text-gray-600 mt-1">
                                             {suggestion.name}
                                         </div>
-                                        <div className="flex items-center gap-2 mt-1 justify-end">
+                                        <div className="flex items-center gap-2 mt-1 justify-start">
                                             <span className="text-xs text-gray-500">
                                                 {suggestion.country}
                                             </span>
-                                            <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded border border-gray-300">
+                                            <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded border border-blue-900">
                                                 فرودگاه
                                             </span>
                                         </div>
                                     </>
                                 ) : (
                                     <>
-                                        <div className="font-bold text-black">
+                                        <div className="font-bold text-blue-950">
                                             {suggestion.name}
                                         </div>
-                                        <div className="flex items-center gap-2 mt-1 justify-end">
+                                        <div className="flex items-center gap-2 mt-1 justify-start">
                                             <span className="text-xs text-gray-500">
                                                 {suggestion.country}
                                             </span>
-                                            <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded border border-gray-300">
+                                            <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded border border-blue-900">
                                                 شهر
                                             </span>
                                         </div>
@@ -606,18 +617,18 @@ const FlightSearch = () => {
         return (
             <div
                 ref={favoritesRef}
-                className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 shadow-lg z-50 max-h-80 overflow-y-auto mt-1 rounded-md"
+                className="absolute top-full right-0 left-0 bg-[#fffefe] shadow-lg z-50 max-h-80 overflow-y-auto mt-1 rounded-md"
             >
-                <div className="p-3 border-b border-gray-200 bg-gray-50">
-                    <div className="flex items-center gap-2 justify-end">
+                <div className="p-3 bg-gray-50">
+                    <div className="flex items-center gap-2 justify-start">
                         <Heart className="h-4 w-4 text-red-500" />
-                        <span className="font-bold text-black">مقاصد محبوب</span>
+                        <span className="font-bold text-blue-950">مقاصد محبوب</span>
                     </div>
                 </div>
                 {FAVORITE_DESTINATIONS.map((favorite, index) => (
                     <div
                         key={`${favorite.id}-${index}`}
-                        className="p-3 cursor-pointer border-b border-gray-200 last:border-b-0 hover:bg-gray-50"
+                        className="p-3 cursor-pointer last:border-b-0 hover:bg-gray-50"
                         onMouseDown={(e) => {
                             e.preventDefault() // Prevent input blur
                             handleFavoriteClick(favorite, field)
@@ -627,8 +638,8 @@ const FlightSearch = () => {
                             <div className="flex-1 text-right">
                                 {favorite.type === 'airport' ? (
                                     <>
-                                        <div className="flex items-center gap-2 justify-end">
-                                            <span className="font-bold text-black">
+                                        <div className="flex items-center gap-2 justify-start">
+                                            <span className="font-bold text-blue-950">
                                                 {favorite.city}
                                             </span>
                                             <span className="text-blue-500 font-bold">({favorite.code})</span>
@@ -636,25 +647,25 @@ const FlightSearch = () => {
                                         <div className="text-sm text-gray-600 mt-1">
                                             {favorite.name}
                                         </div>
-                                        <div className="flex items-center gap-2 mt-1 justify-end">
+                                        <div className="flex items-center gap-2 mt-1 justify-start">
                                             <span className="text-xs text-gray-500">
                                                 {favorite.country}
                                             </span>
-                                            <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded border border-gray-300">
+                                            <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded border border-blue-900">
                                                 فرودگاه
                                             </span>
                                         </div>
                                     </>
                                 ) : (
                                     <>
-                                        <div className="font-bold text-black">
+                                        <div className="font-bold text-blue-950">
                                             {favorite.name}
                                         </div>
                                         <div className="flex items-center gap-2 mt-1 justify-end">
                                             <span className="text-xs text-gray-500">
                                                 {favorite.country}
                                             </span>
-                                            <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded border border-gray-300">
+                                            <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded border border-blue-900">
                                                 شهر
                                             </span>
                                         </div>
@@ -674,7 +685,7 @@ const FlightSearch = () => {
         return (
             <div
                 ref={passengersRef}
-                className="absolute top-full right-0 left-0 bg-[#fffefe] border border-gray-300 shadow-lg z-50 p-4 mt-1 rounded-md"
+                className="absolute top-full right-0 left-0 bg-[#fffefe] border border-blue-900 shadow-lg z-50 p-4 mt-1 rounded-md"
             >
                 {loading &&
                     <div className="w-full h-full absolute top-0 right-0">
@@ -693,24 +704,24 @@ const FlightSearch = () => {
                     {/* Adults Selector */}
                     <div className="flex items-center justify-between">
                         <div className="text-right">
-                            <div className="font-bold text-black">بزرگسالان</div>
+                            <div className="font-bold text-blue-950">بزرگسالان</div>
                             <div className="text-xs text-gray-600 mt-1">(12 سال به بالا)</div>
                         </div>
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={() => handlePassengerChange('adults', 'decrement')}
                                 disabled={flightSearch.adults <= 1}
-                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
+                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-blue-950 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
                             >
                                 <Minus className="h-4 w-4" />
                             </button>
-                            <span className="text-lg font-bold text-black min-w-6 text-center">
+                            <span className="text-lg font-bold text-blue-950 min-w-6 text-center">
                                 {flightSearch.adults}
                             </span>
                             <button
                                 onClick={() => handlePassengerChange('adults', 'increment')}
                                 disabled={flightSearch.adults >= 9}
-                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
+                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-blue-950 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
                             >
                                 <Plus className="h-4 w-4" />
                             </button>
@@ -720,24 +731,24 @@ const FlightSearch = () => {
                     {/* Children Selector */}
                     <div className="flex items-center justify-between">
                         <div className="text-right">
-                            <div className="font-bold text-black">کودکان</div>
+                            <div className="font-bold text-blue-950">کودکان</div>
                             <div className="text-xs text-gray-600 mt-1">(2 تا 12 سال)</div>
                         </div>
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={() => handlePassengerChange('children', 'decrement')}
                                 disabled={flightSearch.children <= 0}
-                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
+                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-blue-950 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
                             >
                                 <Minus className="h-4 w-4" />
                             </button>
-                            <span className="text-lg font-bold text-black min-w-6 text-center">
+                            <span className="text-lg font-bold text-blue-950 min-w-6 text-center">
                                 {flightSearch.children}
                             </span>
                             <button
                                 onClick={() => handlePassengerChange('children', 'increment')}
                                 disabled={flightSearch.children >= 8}
-                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
+                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-blue-950 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
                             >
                                 <Plus className="h-4 w-4" />
                             </button>
@@ -747,24 +758,24 @@ const FlightSearch = () => {
                     {/* Infants Selector */}
                     <div className="flex items-center justify-between">
                         <div className="text-right">
-                            <div className="font-bold text-black">نوزادان</div>
+                            <div className="font-bold text-blue-950">نوزادان</div>
                             <div className="text-xs text-gray-600 mt-1">(زیر 2 سال)</div>
                         </div>
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={() => handlePassengerChange('infants', 'decrement')}
                                 disabled={flightSearch.infants <= 0}
-                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
+                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-blue-950 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
                             >
                                 <Minus className="h-4 w-4" />
                             </button>
-                            <span className="text-lg font-bold text-black min-w-6 text-center">
+                            <span className="text-lg font-bold text-blue-950 min-w-6 text-center">
                                 {flightSearch.infants}
                             </span>
                             <button
                                 onClick={() => handlePassengerChange('infants', 'increment')}
                                 disabled={flightSearch.infants >= 4}
-                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
+                                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-blue-950 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
                             >
                                 <Plus className="h-4 w-4" />
                             </button>
@@ -862,11 +873,11 @@ const FlightSearch = () => {
             <div className="w-full flex gap-2">
                 {/* Trip Type */}
                 <div className="w-[150px]">
-                    <Label htmlFor="flight-trip-type" className="text-black text-right block mb-2">نوع سفر</Label>
+                    <Label htmlFor="flight-trip-type" className="text-blue-950 text-right block mb-2">نوع سفر</Label>
                     <div className="relative">
                         <select
                             id="flight-trip-type"
-                            className="w-full h-12 border rounded-full border-gray-300 bg-[#fffefe] text-black px-3 pr-10 appearance-none focus:outline-none focus:border-blue-500"
+                            className="w-full h-12 border rounded-full border-blue-900 bg-[#fffefe] text-blue-950 px-3 pr-10 appearance-none focus:outline-none focus:border-blue-500"
                             value={flightSearch.tripType}
                             onChange={(e) => setFlightSearch(prev => ({ ...prev, tripType: e.target.value }))}
                         >
@@ -878,11 +889,11 @@ const FlightSearch = () => {
                 </div>
                 {/* Cabin Class */}
                 <div className="w-[150px]">
-                    <Label htmlFor="flight-cabin-class" className="text-black text-right block mb-2">کلاس پرواز</Label>
+                    <Label htmlFor="flight-cabin-class" className="text-blue-950 text-right block mb-2">کلاس پرواز</Label>
                     <div className="relative">
                         <select
                             id="flight-cabin-class"
-                            className="w-full rounded-full h-12 border border-gray-300 bg-[#fffefe] text-black px-3 pr-10 appearance-none focus:outline-none focus:border-blue-500"
+                            className="w-full rounded-full h-12 border border-blue-900 bg-[#fffefe] text-blue-950 px-3 pr-10 appearance-none focus:outline-none focus:border-blue-500"
                             value={flightSearch.cabinClass}
                             onChange={(e) => setFlightSearch(prev => ({ ...prev, cabinClass: e.target.value }))}
                         >
@@ -902,7 +913,7 @@ const FlightSearch = () => {
             <div className={`grid gap-4 md:grid-cols-2 relative pt-10 ${flightSearch.tripType === "oneway" ? "lg:grid-cols-4" : "lg:grid-cols-5"}`}>
                 {/* From Input */}
                 <div className="space-y-2 col-span-1 relative">
-                    <Label htmlFor="flight-from" className="text-black text-right block">مبدا (فرودگاه)</Label>
+                    <Label htmlFor="flight-from" className="text-blue-950 text-right block">مبدا (فرودگاه)</Label>
                     <div className="relative">
                         <MapPin className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
                         {suggestionLoading && currentField === "from" && (
@@ -912,9 +923,9 @@ const FlightSearch = () => {
                             ref={fromInputRef}
                             id="flight-from"
                             placeholder="نام فرودگاه، مثال: تهران (IKA)"
-                            className={`pr-10 h-12 border bg-[#fffefe] text-black placeholder-gray-500 focus:outline-none ${errors.from
+                            className={`pr-10 h-12 border bg-[#fffefe] text-blue-950 placeholder-gray-500 focus:outline-none ${errors.from
                                 ? 'border-red-500 focus:border-red-500'
-                                : 'border-gray-300 focus:border-blue-500'
+                                : 'border-blue-900 focus:border-blue-500'
                                 }`}
                             value={flightSearch.displayFrom}
                             onChange={(e) => handleInputChange(e.target.value, "from")}
@@ -931,7 +942,7 @@ const FlightSearch = () => {
                             variant="outline"
                             size="icon"
                             className="h-12 w-12 rounded-full border-2 
-                            border-gray-300 bg-white hover:border-blue-500 
+                            border-blue-900 bg-white hover:border-blue-500 
                             hover:bg-blue-50 hover:text-blue-600 transition-all 
                             duration-200 transform md:top-0 md:left-[-31px] md:scale-75 top-[43px] left-0
                             scale-100
@@ -939,14 +950,14 @@ const FlightSearch = () => {
                             onClick={handleReverseLocations}
                             title="جابجایی مبدا و مقصد"
                         >
-                            <RotateCcw className="h-5 w-5" />
+                            <FontAwesomeIcon icon={faExchange} className="h-5 w-5" />
                         </Button>
                     </div>
                 </div>
 
                 {/* To Input */}
                 <div className="space-y-2 col-span-1 relative">
-                    <Label htmlFor="flight-to" className="text-black text-right block">مقصد (فرودگاه)</Label>
+                    <Label htmlFor="flight-to" className="text-blue-950 text-right block">مقصد (فرودگاه)</Label>
                     <div className="relative">
                         <MapPin className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
                         {suggestionLoading && currentField === "to" && (
@@ -956,9 +967,9 @@ const FlightSearch = () => {
                             ref={toInputRef}
                             id="flight-to"
                             placeholder="نام فرودگاه مقصد مثال: استانبول (IST)"
-                            className={`pr-10 h-12 border bg-[#fffefe] text-black placeholder-gray-500 focus:outline-none ${errors.to
+                            className={`pr-10 h-12 border bg-[#fffefe] text-blue-950 placeholder-gray-500 focus:outline-none ${errors.to
                                 ? 'border-red-500 focus:border-red-500'
-                                : 'border-gray-300 focus:border-blue-500'
+                                : 'border-blue-900 focus:border-blue-500'
                                 }`}
                             value={flightSearch.displayTo}
                             onChange={(e) => handleInputChange(e.target.value, "to")}
@@ -975,7 +986,7 @@ const FlightSearch = () => {
 
                 {/* Departure Date */}
                 <div className="space-y-2 col-span-1 relative">
-                    <Label className="text-black text-right block">تاریخ رفت</Label>
+                    <Label className="text-blue-950 text-right block">تاریخ رفت</Label>
                     <div className="relative">
                         <CalendarIcon className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
                         <ShamsiDateModal
@@ -999,7 +1010,7 @@ const FlightSearch = () => {
                 {/* Return Date */}
                 {flightSearch.tripType === "roundtrip" && (
                     <div className="space-y-2 col-span-1 relative">
-                        <Label className="text-black text-right block">تاریخ برگشت</Label>
+                        <Label className="text-blue-950 text-right block">تاریخ برگشت</Label>
                         <div className="relative">
                             <CalendarIcon className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
                             <ShamsiDateModal
@@ -1023,12 +1034,12 @@ const FlightSearch = () => {
 
                 {/* Passengers Selector */}
                 <div className="space-y-2 col-span-1 relative">
-                    <Label className="text-black text-right block">مسافران</Label>
+                    <Label className="text-blue-950 text-right block">مسافران</Label>
                     <div
                         className="passengers-trigger cursor-pointer"
                         onClick={() => setShowPassengers(!showPassengers)}
                     >
-                        <div className={`relative h-12 border rounded-lg bg-[#fffefe] hover:border-gray-400 flex items-center justify-between px-3 ${showPassengers ? 'border-blue-500' : 'border-gray-300'
+                        <div className={`relative h-12 border rounded-lg bg-[#fffefe] hover:border-gray-400 flex items-center justify-between px-3 ${showPassengers ? 'border-blue-500' : 'border-blue-900'
                             }`}>
                             <div className="flex items-center gap-2">
                                 <Users className="h-4 w-4 text-gray-400" />
@@ -1036,7 +1047,7 @@ const FlightSearch = () => {
                                 <Baby className="h-4 w-4 text-gray-400" />
                             </div>
                             <div className="text-right">
-                                <div className="text-black text-sm font-medium">
+                                <div className="text-blue-950 text-sm font-medium">
                                     {totalPassengers} مسافر
                                 </div>
                                 <div className="text-gray-500 text-xs">

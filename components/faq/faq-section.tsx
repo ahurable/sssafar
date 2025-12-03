@@ -31,8 +31,8 @@ const TAB_CONFIG = [
   { key: 'OTHER', label: 'سایر' },
 ] as const
 
-export function FAQSection({ 
-  initialTab = 'ALL', 
+export function FAQSection({
+  initialTab = 'ALL',
   showTitle = true,
   className = "",
   maxHeight = ""
@@ -47,11 +47,11 @@ export function FAQSection({
       try {
         setLoading(true)
         const response = await fetch('/api/faqs')
-        
+
         if (!response.ok) {
           throw new Error('Failed to fetch FAQs')
         }
-        
+
         const data = await response.json()
         setFaqs(data.faqs || [])
       } catch (err) {
@@ -85,7 +85,7 @@ export function FAQSection({
   if (loading) {
     return (
       <div className={`text-center py-12 ${className}`}>
-        <div className="text-black text-lg">در حال بارگذاری سوالات...</div>
+        <div className="text-blue-950 text-lg">در حال بارگذاری سوالات...</div>
       </div>
     )
   }
@@ -99,23 +99,23 @@ export function FAQSection({
     <div className={`w-full mx-auto py-8 ${className}`}>
       {showTitle && (
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-black mb-4">سوالات متداول</h2>
+          <h2 className="text-3xl font-bold text-blue-950 mb-4">سوالات متداول</h2>
         </div>
       )}
 
       {/* Tabs Section */}
       <div className="mb-8">
-        <div className="flex justify-start border-b border-gray-300 overflow-x-auto">
+        <div className="flex justify-start border-b border-blue-900 overflow-x-auto">
           <div className="flex min-w-max">
             {TAB_CONFIG.map((tab) => {
               // Calculate count for each tab
-              const count = tab.key === 'ALL' 
-                ? allFAQs.length 
+              const count = tab.key === 'ALL'
+                ? allFAQs.length
                 : allFAQs.filter(faq => faq.type === tab.key).length
-              
+
               // Only show tabs that have FAQs or the ALL tab
               if (count === 0 && tab.key !== 'ALL') return null
-              
+
               return (
                 <button
                   key={tab.key}
@@ -125,7 +125,7 @@ export function FAQSection({
                     transition-colors duration-200
                     ${activeTab === tab.key
                       ? 'text-blue-800 border-b-2 border-blue-800'
-                      : 'text-black hover:text-gray-600'
+                      : 'text-blue-950 hover:text-gray-600'
                     }
                   `}
                 >
@@ -141,9 +141,9 @@ export function FAQSection({
       </div>
 
       {/* FAQ Items Container - Scrollable */}
-      <div 
+      <div
         className="space-y-4 overflow-y-auto"
-        style={{ 
+        style={{
           maxHeight,
           scrollbarWidth: 'none', // Firefox
           msOverflowStyle: 'none', // IE and Edge
@@ -157,7 +157,7 @@ export function FAQSection({
         `}</style>
 
         {currentFAQs.length === 0 ? (
-          <div className="text-center py-8 text-black text-lg">
+          <div className="text-center py-8 text-blue-950 text-lg">
             سوالی در این دسته یافت نشد
           </div>
         ) : (

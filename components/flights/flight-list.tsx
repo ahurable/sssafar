@@ -586,7 +586,7 @@ export function FlightList({ flights, area, itemsPerPage = 10 }: FlightListProps
                               h-4 w-4 rounded border flex items-center justify-center
                               ${filters.stops.includes(stop.value)
                                 ? 'bg-blue-900 border-blue-900'
-                                : 'border-gray-300'
+                                : 'border-blue-900'
                               }
                             `}>
                               {filters.stops.includes(stop.value) && (
@@ -643,7 +643,7 @@ export function FlightList({ flights, area, itemsPerPage = 10 }: FlightListProps
                               h-4 w-4 rounded border flex items-center justify-center
                               ${filters.airlines.includes(airline[1])
                                 ? 'bg-blue-900 border-blue-900'
-                                : 'border-gray-300'
+                                : 'border-blue-900'
                               }
                             `}>
                               {filters.airlines.includes(airline[1]) && (

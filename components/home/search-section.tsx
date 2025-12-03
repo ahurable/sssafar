@@ -12,6 +12,7 @@ import CipSearch from "../cip/cip-search"
 import TourSearch from "../tours/tour-search"
 import DomesticHotelSearch from "../hotels/domestic-hotel-search"
 import { useFlight } from "@/contexts/search/FlightContext"
+import Image from "next/image"
 
 interface SearchSectionProps {
   onSearchResults: (results: any, type: string) => void
@@ -58,7 +59,7 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
     flight: { icon: Plane, label: "پرواز خارجی" },
     domesticHotel: { icon: Hotel, label: "هتل داخلی" },
     hotel: { icon: Hotel, label: "هتل خارجی" },
-    cip: { icon: Crown, label: "فرودگاهی CIP" },
+    cip: { icon: Crown, label: "خدمات فرودگاهی" },
     tour: { icon: Map, label: "گشت شهری" },
   }
 
@@ -84,15 +85,14 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
           <button
             key={key}
             onClick={() => handleTabSelect(key)}
-            className="flex flex-col items-center justify-center gap-3 h-32 bg-[#fffefe] border-gray-300 hover:bg-gray-50 transition-colors p-4 group"
+            className="flex flex-col items-center justify-center gap-3 h-32 bg-[#fffefe] border-blue-900 hover:bg-gray-50 transition-colors p-4 group"
           >
-            <div className="p-3 bg-blue-500 group-hover:bg-blue-900 transition-colors">
+            <div className="p-3 bg-blue-900 rounded-lg group-hover:bg-blue-900 transition-colors">
               <Icon className="h-6 w-6 text-white" />
             </div>
-            <span className="text-sm font-medium text-black text-center">
+            <span className="text-sm font-bold text-blue-950 text-center">
               {config.label}
             </span>
-            <ArrowRight className="h-4 w-4 text-blue-500" />
           </button>
         )
       })}
@@ -125,19 +125,19 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
     return (
       <div className="fixed inset-0 z-[100000] bg-[#fffefe]">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-300 bg-[#fffefe]">
+        <div className="flex items-center justify-between p-4 border-b border-blue-900 bg-[#fffefe]">
           <div className="flex items-center gap-3">
             <button
               onClick={handleCloseModal}
-              className="p-2 border border-gray-300 hover:bg-gray-50"
+              className="p-2 border border-blue-900 rounded-lg hover:bg-gray-50"
             >
-              <X className="h-5 w-5 text-black" />
+              <X className="h-5 w-5 text-blue-950" />
             </button>
             <div className="flex items-center gap-2">
-              <div className="p-2 bg-blue-500">
+              <div className="p-2 bg-blue-900 rounded-lg">
                 <currentConfig.icon className="h-5 w-5 text-white" />
               </div>
-              <h2 className="text-xl font-bold text-black">{currentConfig.label}</h2>
+              <h2 className="text-xl font-bold text-blue-950">{currentConfig.label}</h2>
             </div>
           </div>
         </div>
@@ -156,7 +156,7 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
       setActiveTab(value as any)
       localStorage.setItem('activeSearchTab', value)
     }} className="w-full">
-      <TabsList className="flex w-full h-max bg-[#fffefe] border-b border-gray-300 p-0"
+      <TabsList className="flex w-full h-max bg-[#fffefe] border-b border-blue-900 relative z-[50] p-0"
         style={{
           direction: "rtl"
         }}>
@@ -169,11 +169,11 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
               value={key}
               className={`flex-1 flex items-center justify-center gap-3 py-4 border-b-2 transition-colors ${isSelected
                 ? 'border-b-2 border-blue-900 text-blue-900'
-                : 'border-b-2 border-transparent text-black hover:text-gray-600'
+                : 'border-b-2 border-transparent text-blue-950 hover:text-gray-600'
                 }`}
             >
-              <span className={isSelected ? 'bg-[#d0181f] rounded-full p-1' : 'text-black'}>
-                <Icon className={`h-5 w-5 ${isSelected ? 'text-white rounded-full' : 'text-black'}`} />
+              <span className={isSelected ? 'bg-[#d0181f] rounded-full p-1' : 'text-blue-950'}>
+                <Icon className={`h-5 w-5 ${isSelected ? 'text-white rounded-full' : 'text-blue-950'}`} />
               </span>
               <span className=" font-black">{config.label}</span>
             </TabsTrigger>
@@ -211,25 +211,35 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
   return (
     <section ref={cardRef} className=" bg-[#fffefe]">
       <div className="mx-auto">
-        <div className="text-center bg-blue-950 md:pt-8 md:pb-20 py-8">
-          <h2 className="text-3xl font-bold text-white mb-4">
+        <div className="text-center relative md:pt-8 md:pb-20 py-8">
+          <div className="bg-blue-950/80 w-full h-full z-30 absolute top-0 right-0"></div>
+          <div className="absolute w-full h-full z-20 top-0 right-0">
+            <Image
+              src="/assets/images/banner_1.jpg"
+              width={1200}
+              height={400}
+              alt=""
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <h2 className="text-3xl font-bold relative z-50 text-white mb-4">
             سفر بعدی خود را پیدا کنید
           </h2>
-          <p className="text-lg text-white max-w-2xl mx-auto">
+          <p className="text-lg text-white relative z-50 max-w-2xl mx-auto">
             بهترین هتل ها، پروازها، CIP، تورها و قطارها را با بهترین قیمت ها کشف کنید
           </p>
         </div>
 
         {/* Desktop Version - Tabs */}
         <div className="hidden lg:block mt-[-50px]">
-          <div className="bg-[#fffefe] border rounded-lg px-8 border-gray-300">
+          <div className="bg-[#fffefe] border relative z-50 rounded-lg px-8 border-blue-900">
             <DesktopTabs />
           </div>
         </div>
 
         {/* Mobile Version - Grid Buttons */}
         <div className="block lg:hidden">
-          <div className="bg-[#fffefe] border border-gray-300">
+          <div className="bg-[#fffefe] border border-blue-900">
             <MobileMainModal />
           </div>
         </div>
@@ -274,7 +284,7 @@ export function FlightSearchSection({ onSearchResults }: SearchSectionProps) {
       setActiveTab(value as any)
       localStorage.setItem('activeSearchTab', value)
     }} className="w-full">
-      <TabsList className="flex w-full h-max bg-[#fffefe] border-b border-gray-300 p-0">
+      <TabsList className="flex w-full h-max bg-[#fffefe] border-b border-blue-900 p-0">
         {Object.entries(tabConfig).map(([key, config]) => {
           const Icon = config.icon
           const isSelected = activeTab === key
@@ -284,10 +294,10 @@ export function FlightSearchSection({ onSearchResults }: SearchSectionProps) {
               value={key}
               className={`flex-1 flex items-center justify-center gap-3 py-4 border-b-2 transition-colors ${isSelected
                 ? 'border-b-2 border-blue-900 text-blue-900'
-                : 'border-b-2 border-transparent text-black hover:text-gray-600'
+                : 'border-b-2 border-transparent text-blue-950 hover:text-gray-600'
                 }`}
             >
-              <Icon className={`h-5 w-5 ${isSelected ? 'text-blue-900' : 'text-black'}`} />
+              <Icon className={`h-5 w-5 ${isSelected ? 'text-blue-900' : 'text-blue-950'}`} />
               <span className=" font-black">{config.label}</span>
             </TabsTrigger>
           )
@@ -321,7 +331,7 @@ export function FlightSearchSection({ onSearchResults }: SearchSectionProps) {
 
         {/* Desktop Version - Tabs */}
         <div className="block lg:mt-[-50px]">
-          <div className="bg-[#fffefe] border rounded-lg lg:px-8 border-gray-300">
+          <div className="bg-[#fffefe] border rounded-lg lg:px-8 border-blue-900">
             <DesktopTabs />
           </div>
         </div>
@@ -358,7 +368,7 @@ export function HotelSearchSection({ onSearchResults }: SearchSectionProps) {
       setActiveTab(value as any)
       localStorage.setItem('activeSearchTab', value)
     }} className="w-full">
-      <TabsList className="flex w-full h-max bg-[#fffefe] border-b border-gray-300 p-0">
+      <TabsList className="flex w-full h-max bg-[#fffefe] border-b border-blue-900 p-0">
         {Object.entries(tabConfig).map(([key, config]) => {
           const Icon = config.icon
           const isSelected = activeTab === key
@@ -368,10 +378,10 @@ export function HotelSearchSection({ onSearchResults }: SearchSectionProps) {
               value={key}
               className={`flex-1 flex items-center justify-center gap-3 py-4 border-b-2 transition-colors ${isSelected
                 ? 'border-b-2 border-blue-900 text-blue-900'
-                : 'border-b-2 border-transparent text-black hover:text-gray-600'
+                : 'border-b-2 border-transparent text-blue-950 hover:text-gray-600'
                 }`}
             >
-              <Icon className={`h-5 w-5 ${isSelected ? 'text-blue-900' : 'text-black'}`} />
+              <Icon className={`h-5 w-5 ${isSelected ? 'text-blue-900' : 'text-blue-950'}`} />
               <span className=" font-black">{config.label}</span>
             </TabsTrigger>
           )
@@ -393,7 +403,17 @@ export function HotelSearchSection({ onSearchResults }: SearchSectionProps) {
   return (
     <section ref={cardRef} className=" bg-[#fffefe]">
       <div className="mx-auto">
-        <div className="text-center bg-blue-900 md:pt-8 md:pb-20 py-8">
+        <div className="text-center relative md:pt-8 md:pb-20 py-8">
+          <div className="bg-blue-950/70 z-50 absolute top-0 right-0"></div>
+          <div className="absolute z-40 top-0 right-0">
+            <Image
+              src="/assets/images/banner_1.jpg"
+              width={1200}
+              height={400}
+              alt=""
+              className="w-full h-full object-cover"
+            />
+          </div>
           <h2 className="text-3xl font-bold text-white mb-4">
             سفر بعدی خود را پیدا کنید
           </h2>
@@ -404,7 +424,7 @@ export function HotelSearchSection({ onSearchResults }: SearchSectionProps) {
 
         {/* Desktop Version - Tabs */}
         <div className="block lg:mt-[-50px]">
-          <div className="bg-[#fffefe] border rounded-lg lg:px-8 border-gray-300">
+          <div className="bg-[#fffefe] border rounded-lg lg:px-8 border-blue-900">
             <DesktopTabs />
           </div>
         </div>

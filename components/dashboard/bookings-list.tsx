@@ -72,7 +72,7 @@ const getStatusLabel = (status: string, bookingData: any) => {
   if (!bookingData.Success) {
     return "ناموفق"
   }
-  
+
   switch (status) {
     case "CONFIRMED":
       return "تایید شده"
@@ -89,7 +89,7 @@ const getStatusBadgeColor = (status: string, bookingData: any): string => {
   if (!bookingData.Success) {
     return "bg-red-100 text-red-800 border-red-200"
   }
-  
+
   switch (status) {
     case "CONFIRMED":
       return "bg-green-100 text-green-800 border-green-200"
@@ -98,7 +98,7 @@ const getStatusBadgeColor = (status: string, bookingData: any): string => {
     case "CANCELLED":
       return "bg-red-100 text-red-800 border-red-200"
     default:
-      return "bg-gray-100 text-gray-800 border-gray-200"
+      return "bg-gray-100 text-gray-800 border-blue-900"
   }
 }
 
@@ -106,11 +106,11 @@ const getStatusIcon = (status: string, bookingData: any) => {
   if (!bookingData.Success) {
     return AlertCircle
   }
-  
+
   if (status === "CONFIRMED") {
     return CheckCircle2
   }
-  
+
   return null
 }
 
@@ -118,10 +118,10 @@ const getStatusIcon = (status: string, bookingData: any) => {
 
 // Helper function to extract display information from booking data
 const getBookingDisplayInfo = (booking: Booking): BookingDisplayInfo => {
-  
+
   try {
     const bookingInfo = JSON.parse(booking.bookingInformation)
-    
+
     switch (booking.type) {
       case "FLIGHT":
         const segments = bookingInfo.OriginDestinationOptions?.[0]?.FlightSegments
@@ -137,26 +137,26 @@ const getBookingDisplayInfo = (booking: Booking): BookingDisplayInfo => {
           title: booking.data.UniqueId ? `پرواز ${booking.data.UniqueId}` : `پرواز ${booking.bookingCode}`,
           subtitle: bookingInfo.ValidatingAirlineCode || "ایران ایر"
         }
-      
+
       case "HOTEL":
         // Return temporary title, we'll update it later with the actual hotel name
         return {
           title: `${bookingInfo.HotelName}`,
           subtitle: "اقامتگاه"
         }
-      
+
       case "CIP":
         return {
           title: `${bookingInfo.order?.title || `CIP ${booking.bookingCode}`}`,
           subtitle: ""
         }
-      
+
       case "ACTIVITY":
         return {
           title: `${bookingInfo.tourTitle || `فعالیت ${booking.bookingCode}`}`,
           subtitle: "فعالیت تفریحی"
         }
-      
+
       default:
         return {
           title: `رزرو ${booking.bookingCode}`,
@@ -179,7 +179,7 @@ const getBookingDate = (booking: Booking): string => {
 
   try {
     const bookingInfo = JSON.parse(booking.bookingInformation)
-    
+
     switch (booking.type) {
       case "FLIGHT":
         const segments = bookingInfo.OriginDestinationOptions?.[0]?.FlightSegments
@@ -193,7 +193,7 @@ const getBookingDate = (booking: Booking): string => {
           return ticketDate.toLocaleDateString('fa-IR')
         }
         break
-      
+
       case "HOTEL":
         if (booking.data.PaymentDeadline) {
           const paymentDate = new Date(booking.data.PaymentDeadline)
@@ -226,13 +226,13 @@ export function BookingsList() {
     { key: "ACTIVITY", label: "فعالیت" }
   ]
 
-  
+
   useEffect(() => {
     const fetchBookings = async () => {
       try {
         setLoading(true)
         const response = await fetch("/api/bookings")
-        
+
         if (!response.ok) {
           if (response.status === 401) {
             throw new Error("لطفاً ابتدا وارد حساب کاربری خود شوید")
@@ -244,7 +244,7 @@ export function BookingsList() {
             throw new Error("خطایی در دریافت اطلاعات رزروها رخ داد")
           }
         }
-        
+
         const data = await response.json()
         console.log(data)
         setBookings(data)
@@ -269,11 +269,11 @@ export function BookingsList() {
     }
   }
 
-  const handleDownloadTicket = async (bookingId: string, bookingType: string, bookingData: any, bookingInformation:string) => {
+  const handleDownloadTicket = async (bookingId: string, bookingType: string, bookingData: any, bookingInformation: string) => {
     console.log('clicked')
     try {
       console.log('clicked on download ticket', bookingId);
-      
+
       const response = await fetch('/api/generate-tickets', {
         method: "POST",
         headers: {
@@ -329,7 +329,7 @@ export function BookingsList() {
           </div>
           <h3 className="mb-2 text-lg font-bold text-red-800">خطا در دریافت اطلاعات</h3>
           <p className="text-red-600 mb-6 text-sm">{error}</p>
-          <Button 
+          <Button
             onClick={() => window.location.reload()}
             className="bg-sky-600 hover:bg-sky-700 text-sm"
           >
@@ -367,9 +367,9 @@ export function BookingsList() {
             onClick={() => handleFilter(filter.key)}
             className={`
               text-xs px-3 py-1 h-auto
-              ${activeFilter === filter.key 
-                ? "bg-sky-600 text-white hover:bg-sky-700" 
-                : "bg-white text-gray-700 hover:bg-gray-50 border-gray-300"
+              ${activeFilter === filter.key
+                ? "bg-sky-600 text-white hover:bg-sky-700"
+                : "bg-white text-gray-700 hover:bg-gray-50 border-blue-900"
               }
             `}
           >
@@ -380,9 +380,9 @@ export function BookingsList() {
 
       {/* Responsive Container */}
       <div className="w-full">
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-lg border border-blue-900 overflow-hidden">
           {/* Table Header - Hidden on mobile */}
-          <div className="hidden md:grid md:grid-cols-12 gap-4 px-4 lg:px-6 py-3 bg-gray-50 border-b border-gray-200 text-xs font-medium text-gray-600">
+          <div className="hidden md:grid md:grid-cols-12 gap-4 px-4 lg:px-6 py-3 bg-gray-50 border-b border-blue-900 text-xs font-medium text-gray-600">
             <div className="col-span-2">نوع رزرو</div>
             <div className="col-span-3">مقصد / نام</div>
             <div className="col-span-2">تاریخ</div>
@@ -398,7 +398,7 @@ export function BookingsList() {
               const StatusIcon = getStatusIcon(booking.status, booking.data)
               const displayInfo = displayInfoMap[booking.id] || getBookingDisplayInfo(booking)
               const bookingDate = getBookingDate(booking)
-              
+
               return (
                 <div key={booking.id}>
                   {/* Desktop View */}
@@ -428,8 +428,8 @@ export function BookingsList() {
 
                     {/* Status */}
                     <div className="col-span-2">
-                      <Badge 
-                        variant="outline" 
+                      <Badge
+                        variant="outline"
                         className={`text-xs px-2 py-1 ${getStatusBadgeColor(booking.status, booking.data)}`}
                       >
                         {StatusIcon && <StatusIcon className="h-3 w-3 ml-1" />}
@@ -440,7 +440,7 @@ export function BookingsList() {
                     {/* Price */}
                     <div className="col-span-2 text-left">
                       <p className="text-sm font-bold text-sky-600">
-                        {booking.totalPrice.toLocaleString("fa-IR")} 
+                        {booking.totalPrice.toLocaleString("fa-IR")}
                         <span className="text-xs font-normal text-gray-500 mr-1">تومان</span>
                       </p>
                     </div>
@@ -449,8 +449,8 @@ export function BookingsList() {
                     <div className="col-span-1">
                       {booking.data.Success && (
                         <TicketGenerator booking={booking} bookingType={booking.type}>
-                          <Button 
-                            variant="ghost" 
+                          <Button
+                            variant="ghost"
                             size="sm"
                             className="h-8 w-8 p-0 text-gray-500 hover:text-sky-600 hover:bg-sky-50"
                             title="دانلود بلیط"
@@ -464,7 +464,7 @@ export function BookingsList() {
 
                   {/* Mobile View */}
                   <div className="md:hidden p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <Card className="border-gray-200 shadow-sm">
+                    <Card className="border-blue-900 shadow-sm">
                       <CardContent className="p-4 space-y-3">
                         {/* Header */}
                         <div className="flex items-center justify-between">
@@ -477,9 +477,9 @@ export function BookingsList() {
                               <div className="text-xs text-gray-500">{booking.bookingCode}</div>
                             </div>
                           </div>
-                          
-                          <Badge 
-                            variant="outline" 
+
+                          <Badge
+                            variant="outline"
                             className={`text-xs px-2 py-1 ${getStatusBadgeColor(booking.status, booking.data)}`}
                           >
                             {StatusIcon && <StatusIcon className="h-3 w-3 ml-1" />}
@@ -502,10 +502,10 @@ export function BookingsList() {
                               <Calendar className="h-3 w-3" />
                               {bookingDate}
                             </div>
-                            
+
                             <div className="text-left">
                               <div className="font-bold text-sky-600 text-sm">
-                                {booking.totalPrice.toLocaleString("fa-IR")} 
+                                {booking.totalPrice.toLocaleString("fa-IR")}
                                 <span className="text-xs font-normal text-gray-500 mr-1">تومان</span>
                               </div>
                             </div>
@@ -514,19 +514,19 @@ export function BookingsList() {
 
                         {/* Actions */}
                         <div className="flex justify-between items-center pt-3 border-t border-gray-100">
-                          <Button 
-                            variant="outline" 
+                          <Button
+                            variant="outline"
                             size="sm"
                             className="text-xs h-8"
-                            onClick={() => {/* View details action */}}
+                            onClick={() => {/* View details action */ }}
                           >
                             مشاهده جزئیات
                           </Button>
-                          
+
                           {booking.data.Success && (
                             <TicketGenerator booking={booking} bookingType={booking.type}>
-                              <Button 
-                                variant="ghost" 
+                              <Button
+                                variant="ghost"
                                 size="sm"
                                 className="h-8 w-8 p-0 text-gray-500 hover:text-sky-600 hover:bg-sky-50"
                                 title="دانلود بلیط"

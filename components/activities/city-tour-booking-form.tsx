@@ -17,13 +17,13 @@ interface BookingFormProps {
   tour: {
     id: string
     title: string
-    prices: { 
+    prices: {
       id: string
       type: string
       price: number
       currency: string
       date: string
-      description?: string 
+      description?: string
     }[]
   }
 }
@@ -55,26 +55,26 @@ export function CityProceedToBook({ tour }: BookingFormProps) {
   const [loading, setLoading] = useState(false)
 
   // Get unique available dates from prices
-  const availableDates = [...new Set(tour.prices.map(price => 
+  const availableDates = [...new Set(tour.prices.map(price =>
     new Date(price.date).toLocaleDateString('fa-IR')
   ))]
 
   // Get available times for selected date
-  const availableTimes = selectedDate ? 
+  const availableTimes = selectedDate ?
     [...new Set(tour.prices
       .filter(price => new Date(price.date).toLocaleDateString('fa-IR') === selectedDate)
-      .map(price => new Date(price.date).toLocaleTimeString('fa-IR', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
+      .map(price => new Date(price.date).toLocaleTimeString('fa-IR', {
+        hour: '2-digit',
+        minute: '2-digit'
       }))
     )] : []
 
   // Filter prices by selected date and time
   const filteredPrices = tour.prices.filter(price => {
     const priceDate = new Date(price.date).toLocaleDateString('fa-IR')
-    const priceTime = new Date(price.date).toLocaleTimeString('fa-IR', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    const priceTime = new Date(price.date).toLocaleTimeString('fa-IR', {
+      hour: '2-digit',
+      minute: '2-digit'
     })
     return priceDate === selectedDate && priceTime === selectedTime
   })
@@ -97,15 +97,15 @@ export function CityProceedToBook({ tour }: BookingFormProps) {
 
   const handlePriceSelect = (priceId: string, type: string, price: number) => {
     const existing = selectedPrices.find(sp => sp.priceId === priceId)
-    
+
     if (existing) {
       setSelectedPrices(selectedPrices.filter(sp => sp.priceId !== priceId))
     } else {
-      setSelectedPrices([...selectedPrices, { 
-        priceId, 
-        type, 
-        price, 
-        quantity: 1, 
+      setSelectedPrices([...selectedPrices, {
+        priceId,
+        type,
+        price,
+        quantity: 1,
         date: selectedDate,
         time: selectedTime
       }])
@@ -114,7 +114,7 @@ export function CityProceedToBook({ tour }: BookingFormProps) {
 
   const updateQuantity = (priceId: string, newQuantity: number) => {
     if (newQuantity < 1) return
-    
+
     const selectedPrice = selectedPrices.find(sp => sp.priceId === priceId)
     if (!selectedPrice) return
 
@@ -123,14 +123,14 @@ export function CityProceedToBook({ tour }: BookingFormProps) {
       const adultCount = selectedPrices
         .filter(sp => (sp.type === 'ADULT' || sp.type === 'بزرگسال') && sp.date === selectedPrice.date)
         .reduce((sum, sp) => sum + sp.quantity, 0)
-      
+
       if (newQuantity > adultCount) {
         alert("تعداد کودکان نمی‌تواند بیشتر از تعداد بزرگسالان باشد")
         return
       }
     }
 
-    setSelectedPrices(selectedPrices.map(sp => 
+    setSelectedPrices(selectedPrices.map(sp =>
       sp.priceId === priceId ? { ...sp, quantity: newQuantity } : sp
     ))
   }
@@ -169,7 +169,7 @@ export function CityProceedToBook({ tour }: BookingFormProps) {
 
     try {
       // Prepare travelers data for invoice
-      const travelers = selectedPrices.flatMap(price => 
+      const travelers = selectedPrices.flatMap(price =>
         Array.from({ length: price.quantity }, (_, index) => ({
           firstName: contactInfo.firstName,
           lastName: contactInfo.lastName,
@@ -229,7 +229,7 @@ export function CityProceedToBook({ tour }: BookingFormProps) {
       {/* Date and Time Selection */}
       <div className="space-y-4">
         <Label className="text-lg font-semibold text-blue-900">انتخاب تاریخ و زمان</Label>
-        
+
         {/* Date Selection */}
         <div>
           <Label className="text-blue-900 mb-2">تاریخ *</Label>
@@ -239,11 +239,10 @@ export function CityProceedToBook({ tour }: BookingFormProps) {
                 key={date}
                 type="button"
                 variant={selectedDate === date ? "default" : "outline"}
-                className={`border border-gray-300 ${
-                  selectedDate === date 
-                    ? 'bg-blue-900 text-white' 
+                className={`border border-blue-900 ${selectedDate === date
+                    ? 'bg-blue-900 text-white'
                     : 'bg-white text-blue-900 hover:bg-blue-50'
-                }`}
+                  }`}
                 onClick={() => {
                   setSelectedDate(date)
                   setSelectedTime("")
@@ -267,11 +266,10 @@ export function CityProceedToBook({ tour }: BookingFormProps) {
                   key={time}
                   type="button"
                   variant={selectedTime === time ? "default" : "outline"}
-                  className={`border border-gray-300 ${
-                    selectedTime === time 
-                      ? 'bg-blue-900 text-white' 
+                  className={`border border-blue-900 ${selectedTime === time
+                      ? 'bg-blue-900 text-white'
                       : 'bg-white text-blue-900 hover:bg-blue-50'
-                  }`}
+                    }`}
                   onClick={() => {
                     setSelectedTime(time)
                     setSelectedPrices([])
@@ -290,16 +288,16 @@ export function CityProceedToBook({ tour }: BookingFormProps) {
       {selectedDate && selectedTime && (
         <div className="space-y-4">
           <Label className="text-lg font-semibold text-blue-900">انتخاب نوع مسافران</Label>
-          
+
           <div className="space-y-3">
             {filteredPrices.map((price) => (
-              <div key={price.id} className="flex items-center justify-between p-3 border border-gray-300">
+              <div key={price.id} className="flex items-center justify-between p-3 border border-blue-900">
                 <div className="flex items-center gap-3">
                   <Checkbox
                     checked={selectedPrices.some(sp => sp.priceId === price.id)}
                     onCheckedChange={() => handlePriceSelect(price.id, price.type, price.price)}
                     disabled={
-                      (price.type === 'CHILD' || price.type === 'کودک') && 
+                      (price.type === 'CHILD' || price.type === 'کودک') &&
                       getAdultCount() === 0
                     }
                   />
@@ -315,12 +313,12 @@ export function CityProceedToBook({ tour }: BookingFormProps) {
                     )}
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-4">
                   <div className="text-lg font-bold text-green-700">
                     {price.price.toLocaleString('fa-IR')} تومان
                   </div>
-                  
+
                   {selectedPrices.some(sp => sp.priceId === price.id) && (
                     <div className="flex items-center gap-2">
                       <Button
@@ -332,11 +330,11 @@ export function CityProceedToBook({ tour }: BookingFormProps) {
                       >
                         <Minus className="h-3 w-3" />
                       </Button>
-                      
+
                       <span className="w-8 text-center font-medium">
                         {selectedPrices.find(sp => sp.priceId === price.id)?.quantity}
                       </span>
-                      
+
                       <Button
                         type="button"
                         variant="outline"
@@ -367,11 +365,11 @@ export function CityProceedToBook({ tour }: BookingFormProps) {
                   {getTotalPassengers()} نفر
                 </Badge>
               </div>
-              
+
               <div className="text-sm text-blue-900 font-medium">
                 تاریخ: {selectedDate} - ساعت: {selectedTime}
               </div>
-              
+
               {selectedPrices.map((sp) => (
                 <div key={sp.priceId} className="flex justify-between text-sm">
                   <span className="text-gray-700">
@@ -382,7 +380,7 @@ export function CityProceedToBook({ tour }: BookingFormProps) {
                   </span>
                 </div>
               ))}
-              
+
               <div className="border-t border-blue-200 pt-2">
                 <div className="flex justify-between font-bold text-lg">
                   <span className="text-blue-900">جمع کل:</span>
@@ -397,7 +395,7 @@ export function CityProceedToBook({ tour }: BookingFormProps) {
       {/* Contact Information */}
       <div className="space-y-4">
         <Label className="text-lg font-semibold text-blue-900">اطلاعات تماس</Label>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label htmlFor="firstName">نام *</Label>
@@ -406,10 +404,10 @@ export function CityProceedToBook({ tour }: BookingFormProps) {
               value={contactInfo.firstName}
               onChange={(e) => setContactInfo({ ...contactInfo, firstName: e.target.value })}
               placeholder="نام خود را وارد کنید"
-              className="border-gray-300"
+              className="border-blue-900"
             />
           </div>
-          
+
           <div>
             <Label htmlFor="lastName">نام خانوادگی *</Label>
             <Input
@@ -417,7 +415,7 @@ export function CityProceedToBook({ tour }: BookingFormProps) {
               value={contactInfo.lastName}
               onChange={(e) => setContactInfo({ ...contactInfo, lastName: e.target.value })}
               placeholder="نام خانوادگی خود را وارد کنید"
-              className="border-gray-300"
+              className="border-blue-900"
             />
           </div>
         </div>
@@ -431,7 +429,7 @@ export function CityProceedToBook({ tour }: BookingFormProps) {
               value={contactInfo.phoneNumber}
               onChange={(e) => setContactInfo({ ...contactInfo, phoneNumber: e.target.value })}
               placeholder="09xxxxxxxxx"
-              className="border-gray-300"
+              className="border-blue-900"
             />
           </div>
         </div>
@@ -443,7 +441,7 @@ export function CityProceedToBook({ tour }: BookingFormProps) {
             value={contactInfo.nationalId}
             onChange={(e) => setContactInfo({ ...contactInfo, nationalId: e.target.value })}
             placeholder="کد ملی خود را وارد کنید"
-            className="border-gray-300"
+            className="border-blue-900"
           />
         </div>
 
@@ -454,20 +452,20 @@ export function CityProceedToBook({ tour }: BookingFormProps) {
             value={contactInfo.description}
             onChange={(e) => setContactInfo({ ...contactInfo, description: e.target.value })}
             placeholder="درخواست‌های خاص یا توضیحات اضافی"
-            className="border-gray-300"
+            className="border-blue-900"
           />
         </div>
       </div>
 
       {/* Proceed Button */}
-      <Button 
+      <Button
         onClick={handleProceedToBooking}
         className="w-full bg-blue-900 hover:bg-blue-800 text-white text-lg py-6"
         size="lg"
         disabled={selectedPrices.length === 0 || loading}
       >
-        {loading ? "در حال ایجاد صورت حساب..." : 
-         selectedPrices.length === 0 ? 'لطفا نوع مسافر را انتخاب کنید' : 'ادامه فرآیند رزرو'}
+        {loading ? "در حال ایجاد صورت حساب..." :
+          selectedPrices.length === 0 ? 'لطفا نوع مسافر را انتخاب کنید' : 'ادامه فرآیند رزرو'}
       </Button>
 
       <p className="text-xs text-gray-600 text-center">
@@ -480,8 +478,8 @@ export function CityProceedToBook({ tour }: BookingFormProps) {
     <>
       {/* Desktop View */}
       <div className="hidden lg:block lg:sticky lg:top-16">
-        <Card className="sticky py-6 top-4 border border-gray-300">
-          <CardHeader className="border-b border-gray-300">
+        <Card className="sticky py-6 top-4 border border-blue-900">
+          <CardHeader className="border-b border-blue-900">
             <CardTitle className="text-xl text-blue-900">رزرو گشت شهری</CardTitle>
           </CardHeader>
           <CardContent className="p-6">
@@ -501,7 +499,7 @@ export function CityProceedToBook({ tour }: BookingFormProps) {
           <DialogContent className="max-w-none h-screen w-screen m-0 p-0 border-0 bg-[#fffefe]">
             <div className="h-full flex flex-col">
               {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b border-gray-300 bg-white">
+              <div className="flex items-center justify-between p-4 border-b border-blue-900 bg-white">
                 <Button
                   variant="ghost"
                   size="sm"

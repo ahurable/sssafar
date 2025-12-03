@@ -96,14 +96,14 @@ export function DashboardNav() {
 
   return (
     <div className="sticky top-20">
-      <Card className="text-center p-4 border border-gray-300 bg-[#fffefe]">
-        <span className="text-black">
+      <Card className="text-center p-4 border border-blue-900 bg-[#fffefe]">
+        <span className="text-blue-950">
           اعتبار کیف پول
         </span>
-        <span className="text-3xl font-black text-black">
+        <span className="text-3xl font-black text-blue-950">
           {me?.userCredit.balance.toLocaleString('fa-IR')} ریال
         </span>
-        <span className="text-black">
+        <span className="text-blue-950">
           آخرین بروزرسانی در: {lastupdate}
         </span>
         <Link href={'/dashboard/charge'} className="p-4 block">
@@ -122,10 +122,10 @@ export function DashboardNav() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex gap-3 px-3 items-center py-4 border text-sm font-medium  border-gray-300 rounded-lg",
+                  "flex gap-3 px-3 items-center py-4 border text-sm font-medium  border-blue-900 rounded-lg",
                   isActive
                     ? "text-blue-950 border-2 border-blue-950 bg-blue-50 font-bold"
-                    : "text-black hover:bg-gray-100",
+                    : "text-blue-950 hover:bg-gray-100",
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -143,10 +143,10 @@ export function DashboardNav() {
             <Link
               href="/dashboard/panels"
               className={cn(
-                "flex items-center gap-3 px-3 py-4 text-sm font-medium border border-gray-300 rounded-lg",
+                "flex items-center gap-3 px-3 py-4 text-sm font-medium border border-blue-900 rounded-lg",
                 pathname == "/dashboard/panels"
                   ? "text-blue-950 border-2 border-blue-950 bg-blue-50 font-bold"
-                  : "text-black hover:bg-gray-100",
+                  : "text-blue-950 hover:bg-gray-100",
               )}
             >
               <PanelBottom className="h-4 w-4" />
@@ -163,10 +163,10 @@ export function DashboardNav() {
             <Link
               href="/dashboard/travelers"
               className={cn(
-                "flex items-center gap-3 px-3 py-4 text-sm font-medium border border-gray-300 rounded-lg",
+                "flex items-center gap-3 px-3 py-4 text-sm font-medium border border-blue-900 rounded-lg",
                 pathname == "/dashboard/travelers"
                   ? "text-blue-800 border-2 border-blue-800 font-bold"
-                  : "text-black hover:bg-gray-100",
+                  : "text-blue-950 hover:bg-gray-100",
               )}
             >
               <Users className="h-4 w-4" />

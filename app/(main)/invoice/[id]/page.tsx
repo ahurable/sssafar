@@ -6,9 +6,9 @@ import { useEffect, useState } from "react"
 import { Loader2 } from "lucide-react"
 
 
-const InvoicePage = ({ params } : { params : { id : string }}) => {
+const InvoicePage = ({ params }: { params: { id: string } }) => {
 
-    const [invoiceData, setInvoiceData] = useState() 
+    const [invoiceData, setInvoiceData] = useState()
     const [userCredit, setUserCredit] = useState()
     const [userPanels, setUserPanels] = useState()
 
@@ -40,12 +40,12 @@ const InvoicePage = ({ params } : { params : { id : string }}) => {
 
     if (!invoiceData) {
         return (
-        <div className="min-h-screen flex items-center justify-center">
-            <div className="text-center">
-            <Loader2 className="h-12 w-12 animate-spin text-black mx-auto mb-4" />
-            <p className="text-white text-lg">در حال دریافت اطلاعات صورت حساب...</p>
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="text-center">
+                    <Loader2 className="h-12 w-12 animate-spin text-blue-950 mx-auto mb-4" />
+                    <p className="text-white text-lg">در حال دریافت اطلاعات صورت حساب...</p>
+                </div>
             </div>
-        </div>
         )
     }
 
@@ -54,18 +54,18 @@ const InvoicePage = ({ params } : { params : { id : string }}) => {
         <>
             <Header />
             {
-                invoiceData && 
+                invoiceData &&
                 <InvoiceComponent
                     invoice={invoiceData}
                     userCredit={userCredit}
                     userPanels={userPanels}
-                    onPayment={() => null }
+                    onPayment={() => null}
                 />
             }
-            
+
 
             <Footer />
-        
+
         </>
     )
 }

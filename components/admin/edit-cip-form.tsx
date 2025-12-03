@@ -78,7 +78,7 @@ export function EditCipForm({ service }: EditCipFormProps) {
     airportId: "",
     airport: {
       id: "",
-      name:"",
+      name: "",
       code: "",
       city: ""
     },
@@ -105,7 +105,7 @@ export function EditCipForm({ service }: EditCipFormProps) {
       airportId: service.airportId || "",
       airport: service.airport || {
         id: "",
-        name:"",
+        name: "",
         code: "",
         city: ""
       },
@@ -121,7 +121,7 @@ export function EditCipForm({ service }: EditCipFormProps) {
       entry: service.entry,
       deferent: service.deferent
     })
-    
+
     if (service.image) {
       setImagePreview(service.image)
     }
@@ -198,7 +198,7 @@ export function EditCipForm({ service }: EditCipFormProps) {
     }
 
     return (
-      <div className="absolute top-full left-0 right-0 bg-[#fffefe] border border-gray-200 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto airport-suggestions-container">
+      <div className="absolute top-full left-0 right-0 bg-[#fffefe] border border-blue-900 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto airport-suggestions-container">
         {airportSuggestions.map((airport) => (
           <div
             key={airport.id}
@@ -217,7 +217,7 @@ export function EditCipForm({ service }: EditCipFormProps) {
 
   const handleImageUpload = async (file: File) => {
     setUploading(true)
-    
+
     try {
       const formData = new FormData()
       formData.append("file", file)
@@ -250,7 +250,7 @@ export function EditCipForm({ service }: EditCipFormProps) {
       // Create preview
       const previewUrl = URL.createObjectURL(file)
       setImagePreview(previewUrl)
-      
+
       // Upload file
       handleImageUpload(file)
     }
@@ -279,7 +279,7 @@ export function EditCipForm({ service }: EditCipFormProps) {
   }
 
   const updateFaq = (index: number, field: keyof FAQItem, value: string | boolean | number) => {
-    setFaqs(prev => prev.map((faq, i) => 
+    setFaqs(prev => prev.map((faq, i) =>
       i === index ? { ...faq, [field]: value } : faq
     ))
   }
@@ -454,10 +454,10 @@ export function EditCipForm({ service }: EditCipFormProps) {
             {/* Image Upload Section */}
             <div className="space-y-4">
               <Label>تصویر خدمت</Label>
-              
+
               {imagePreview ? (
                 <div className="relative inline-block">
-                  <div className="w-64 h-48 rounded-lg border-2 border-gray-300 overflow-hidden">
+                  <div className="w-64 h-48 rounded-lg border-2 border-blue-900 overflow-hidden">
                     <img
                       src={imagePreview}
                       alt="Preview"
@@ -478,9 +478,8 @@ export function EditCipForm({ service }: EditCipFormProps) {
                 <div className="flex items-center justify-center w-full">
                   <label
                     htmlFor="image-upload"
-                    className={`flex flex-col items-center justify-center w-64 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors ${
-                      uploading ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
+                    className={`flex flex-col items-center justify-center w-64 h-32 border-2 border-dashed border-blue-900 rounded-lg cursor-pointer hover:border-gray-400 transition-colors ${uploading ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
                   >
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                       {uploading ? (
@@ -658,10 +657,10 @@ export function EditCipForm({ service }: EditCipFormProps) {
                 <HelpCircle className="h-5 w-5 text-blue-600" />
                 سوالات متداول (FAQ)
               </CardTitle>
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="sm" 
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
                 onClick={addFaq}
               >
                 <Plus className="h-4 w-4 ml-1" />
@@ -672,7 +671,7 @@ export function EditCipForm({ service }: EditCipFormProps) {
           <CardContent>
             <div className="space-y-6">
               {faqs.map((faq, index) => (
-                <Card key={index} className="border border-gray-200">
+                <Card key={index} className="border border-blue-900">
                   <CardContent className="p-4 space-y-4">
                     <div className="flex items-center justify-between">
                       <h4 className="font-medium text-gray-900">
@@ -749,7 +748,7 @@ export function EditCipForm({ service }: EditCipFormProps) {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Active/Published Switch */}
-              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div className="flex items-center justify-between p-4 border border-blue-900 rounded-lg">
                 <div className="flex items-center gap-3">
                   <div className={`p-2 rounded-full ${formData.published ? 'bg-green-100' : 'bg-gray-100'}`}>
                     <Eye className={`h-5 w-5 ${formData.published ? 'text-green-600' : 'text-gray-400'}`} />
@@ -771,7 +770,7 @@ export function EditCipForm({ service }: EditCipFormProps) {
               </div>
 
               {/* Featured/Special Switch */}
-              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div className="flex items-center justify-between p-4 border border-blue-900 rounded-lg">
                 <div className="flex items-center gap-3">
                   <div className={`p-2 rounded-full ${formData.featured ? 'bg-purple-100' : 'bg-gray-100'}`}>
                     <Star className={`h-5 w-5 ${formData.featured ? 'text-purple-600' : 'text-gray-400'}`} />
@@ -792,7 +791,7 @@ export function EditCipForm({ service }: EditCipFormProps) {
                 />
               </div>
 
-              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div className="flex items-center justify-between p-4 border border-blue-900 rounded-lg">
                 <div className="flex items-center gap-3">
                   <div className={`p-2 rounded-full ${formData.entry ? 'bg-blue-100' : 'bg-gray-100'}`}>
                     <FormInput className={`h-5 w-5 ${formData.entry ? 'text-blue-600' : 'text-gray-400'}`} />
@@ -813,7 +812,7 @@ export function EditCipForm({ service }: EditCipFormProps) {
                 />
               </div>
 
-              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div className="flex items-center justify-between p-4 border border-blue-900 rounded-lg">
                 <div className="flex items-center gap-3">
                   <div className={`p-2 rounded-full ${formData.deferent ? 'bg-orange-100' : 'bg-gray-100'}`}>
                     <FileOutput className={`h-5 w-5 ${formData.deferent ? 'text-orange-600' : 'text-gray-400'}`} />
@@ -836,7 +835,7 @@ export function EditCipForm({ service }: EditCipFormProps) {
             </div>
 
             {/* Priority Setting */}
-            <div className="mt-6 p-4 border border-gray-200 rounded-lg">
+            <div className="mt-6 p-4 border border-blue-900 rounded-lg">
               <div className="space-y-2">
                 <Label htmlFor="priority" className="text-base font-medium">
                   اولویت نمایش

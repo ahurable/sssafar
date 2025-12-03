@@ -141,7 +141,7 @@ export function TourImageUpload({ tourId, images, onImagesChange }: TourImageUpl
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Upload Section */}
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+        <div className="border-2 border-dashed border-blue-900 rounded-lg p-6 text-center">
           <Input
             ref={fileInputRef}
             type="file"
@@ -179,14 +179,14 @@ export function TourImageUpload({ tourId, images, onImagesChange }: TourImageUpl
                     className="w-full h-full object-cover"
                   />
                 </div>
-                
+
                 {/* Overlay Actions */}
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                   <Button
                     size="sm"
                     variant={image.isPrimary ? "default" : "outline"}
                     onClick={() => handleSetPrimary(image.id)}
-                    className="text-white border-white hover:bg-[#fffefe] hover:text-black"
+                    className="text-white border-white hover:bg-[#fffefe] hover:text-blue-950"
                   >
                     {image.isPrimary ? <Star className="h-4 w-4 fill-current" /> : <StarOff className="h-4 w-4" />}
                   </Button>

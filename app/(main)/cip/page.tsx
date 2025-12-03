@@ -31,12 +31,12 @@ interface CipService {
 }
 
 // Modal Component
-function ServiceModal({ 
-  service, 
-  isOpen, 
+function ServiceModal({
+  service,
+  isOpen,
   onClose,
-  onCreateInvoice 
-}: { 
+  onCreateInvoice
+}: {
   service: CipService
   isOpen: boolean
   onClose: () => void
@@ -58,11 +58,11 @@ function ServiceModal({
   return (
     <div className="fixed inset-0 z-50">
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-black bg-opacity-50 z-40"
         onClick={onClose}
       />
-      
+
       {/* Modal Container - Full screen on mobile, centered on desktop */}
       <div className="relative w-full h-full md:flex md:items-center md:justify-center md:p-4 z-50">
         {/* Modal Content - Full screen on mobile, contained on desktop */}
@@ -72,9 +72,9 @@ function ServiceModal({
             <h2 className="text-lg md:text-xl font-bold text-gray-900 truncate flex-1 mr-3">
               {service.title}
             </h2>
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={onClose}
               className="flex-shrink-0"
             >
@@ -166,15 +166,15 @@ function ServiceModal({
 
           {/* Footer - Sticky */}
           <div className="flex gap-3 p-4 md:p-6 border-t bg-[#fffefe] sticky bottom-0 z-10">
-            <Button 
-              variant="outline" 
-              onClick={onClose} 
+            <Button
+              variant="outline"
+              onClick={onClose}
               className="flex-1 py-3 text-sm md:text-base"
             >
               بازگشت
             </Button>
-            <Button 
-              onClick={handleCreateInvoice} 
+            <Button
+              onClick={handleCreateInvoice}
               className="flex-1 bg-blue-600 hover:bg-blue-700 py-3 text-sm md:text-base"
               disabled={loading}
             >
@@ -188,12 +188,12 @@ function ServiceModal({
 }
 
 // Search Results Header Component
-function SearchResultsHeader({ 
-  searchData, 
-  resultsCount 
-}: { 
+function SearchResultsHeader({
+  searchData,
+  resultsCount
+}: {
   searchData: { airport?: string; date?: string; passengers?: number }
-  resultsCount: number 
+  resultsCount: number
 }) {
   const formatDate = (dateString: string) => {
     try {
@@ -226,7 +226,7 @@ function SearchResultsHeader({
                 </p>
               </div>
             </div>
-            
+
             <Link href="/cip">
               <Button variant="outline" size="sm" className="flex items-center gap-1 h-8 px-3">
                 <X className="h-3 w-3" />
@@ -270,7 +270,7 @@ function SearchResultsHeader({
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-4 text-sm text-blue-800">
               {searchData.airport && (
@@ -291,7 +291,7 @@ function SearchResultsHeader({
                 </div>
               )}
             </div>
-            
+
             <Link href="/cip">
               <Button variant="outline" className="flex items-center gap-2">
                 <X className="h-4 w-4" />
@@ -336,9 +336,9 @@ function CipServicesLoading() {
 }
 
 // Service Card Component for Grid View
-function ServiceGridCard({ service, onViewService }: { 
+function ServiceGridCard({ service, onViewService }: {
   service: CipService
-  onViewService: (service: CipService) => void 
+  onViewService: (service: CipService) => void
 }) {
   const formatPrice = (price: number | null, currency: string) => {
     if (!price) return "رایگان"
@@ -346,7 +346,7 @@ function ServiceGridCard({ service, onViewService }: {
   }
   const router = useRouter()
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 border border-gray-200">
+    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 border border-blue-900">
       {service.image && (
         <div className="h-48 overflow-hidden">
           <img
@@ -356,7 +356,7 @@ function ServiceGridCard({ service, onViewService }: {
           />
         </div>
       )}
-      
+
       <CardContent className="p-6">
         <div className="flex items-start justify-between mb-3">
           <h3 className="text-xl font-bold text-gray-900">{service.title}</h3>
@@ -377,20 +377,20 @@ function ServiceGridCard({ service, onViewService }: {
             <MapPin className="h-4 w-4 ml-1" />
             <span>فرودگاه {service.airport?.name}</span>
           </div>
-          
+
           {service.duration && (
             <div className="flex items-center text-sm text-gray-500">
               <Clock className="h-4 w-4 ml-1" />
               <span>مدت: {service.duration}</span>
             </div>
           )}
-          
+
           <div className="text-lg font-bold text-blue-600">
             {formatPrice(service.price, service.currency)}
           </div>
         </div>
 
-        <Button 
+        <Button
           className="w-full bg-blue-600 hover:bg-blue-700"
           onClick={() => router.push(`/cip/${service.slug}`)}
         >
@@ -403,9 +403,9 @@ function ServiceGridCard({ service, onViewService }: {
 
 // Service Row Component for Search Results
 // Service Row Component for Search Results
-function ServiceRow({ service, onViewService }: { 
+function ServiceRow({ service, onViewService }: {
   service: CipService
-  onViewService: (service: CipService) => void 
+  onViewService: (service: CipService) => void
 }) {
   const formatPrice = (price: number | null, currency: string) => {
     if (!price) return "رایگان"
@@ -413,7 +413,7 @@ function ServiceRow({ service, onViewService }: {
   }
 
   return (
-    <Card className="hover:shadow-lg transition-all duration-300 border border-gray-200">
+    <Card className="hover:shadow-lg transition-all duration-300 border border-blue-900">
       <CardContent className="p-4">
         {/* Mobile Layout - Simple Row Structure */}
         <div className="md:hidden">
@@ -429,7 +429,7 @@ function ServiceRow({ service, onViewService }: {
                 />
               </div>
             )}
-            
+
             {/* Title and Featured Badge */}
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between">
@@ -441,7 +441,7 @@ function ServiceRow({ service, onViewService }: {
                   </Badge>
                 )}
               </div>
-              
+
               {/* Location and Duration */}
               <div className="flex items-center gap-3 mt-2 text-xs text-gray-600">
                 <div className="flex items-center gap-1">
@@ -466,8 +466,8 @@ function ServiceRow({ service, onViewService }: {
               </div>
               <div className="text-xs text-gray-500">برای هر نفر</div>
             </div>
-            
-            <Button 
+
+            <Button
               className="bg-blue-600 hover:bg-blue-700 whitespace-nowrap"
               onClick={() => onViewService(service)}
             >
@@ -502,7 +502,7 @@ function ServiceRow({ service, onViewService }: {
               />
             </div>
           )}
-          
+
           {/* Service Details */}
           <div className="flex-1">
             <div className="flex items-start justify-between mb-3">
@@ -558,8 +558,8 @@ function ServiceRow({ service, onViewService }: {
               </div>
               <div className="text-sm text-gray-500">برای هر نفر</div>
             </div>
-            
-            <Button 
+
+            <Button
               className="min-w-[140px] bg-blue-600 hover:bg-blue-700"
               onClick={() => onViewService(service)}
             >
@@ -578,7 +578,7 @@ function CipServicesContent() {
   const { error } = useSnack()
   const [services, setServices] = useState<CipService[]>([])
   const [loading, setLoading] = useState(true)
-  const [user, setUser] = useState<any|null>(null)
+  const [user, setUser] = useState<any | null>(null)
   const [hasSearchParams, setHasSearchParams] = useState(false)
   const [selectedService, setSelectedService] = useState<CipService | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -588,10 +588,10 @@ function CipServicesContent() {
     const fetchCipServices = async () => {
       try {
         setLoading(true)
-        
+
         const queryParams = new URLSearchParams()
         queryParams.append('published', 'true')
-        
+
         if (searchData?.airportId) {
           queryParams.append('airport', searchData.airportId)
         }
@@ -603,13 +603,13 @@ function CipServicesContent() {
         }
 
         const res = await fetch(`/api/cip?${queryParams.toString()}`)
-        
+
         if (!res.ok) {
           console.error('Failed to fetch CIP services:', res.status)
           setServices([])
           return
         }
-        
+
         const data = await res.json()
         setServices(data.services || [])
       } catch (error) {
@@ -662,7 +662,7 @@ function CipServicesContent() {
     if (!user) {
       error("شما ابتدا باید وارد حساب کاربری خود شوید")
       return
-    } 
+    }
     if (!searchData) {
       error("شما ابتدا باید سرویس مورد نظر خود را جستجو کنید")
       return
@@ -713,10 +713,10 @@ function CipServicesContent() {
       }
 
       const result = await response.json()
-      
+
       // Redirect to invoice page
       router.push(`/invoice/${result.invoiceId}`)
-      
+
     } catch (error) {
       console.error('Error creating invoice:', error)
       alert(error instanceof Error ? error.message : 'خطا در ایجاد صورت حساب')
@@ -734,7 +734,7 @@ function CipServicesContent() {
           {hasSearchParams && searchData && (
             <SearchResultsHeader searchData={searchData} resultsCount={0} />
           )}
-          
+
           <Card className="border-blue-100 bg-blue-50">
             <CardContent className="flex flex-col items-center justify-center py-12 text-center">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
@@ -744,7 +744,7 @@ function CipServicesContent() {
                 {hasSearchParams ? "خدمت CIP با این مشخصات یافت نشد" : "هنوز خدمات CIP تعریف نشده"}
               </h3>
               <p className="text-blue-600 mb-6">
-                {hasSearchParams 
+                {hasSearchParams
                   ? "لطفاً فیلترهای جستجو را تغییر دهید یا خدمات دیگر را بررسی کنید"
                   : "برای شروع سفر، اولین رزرو خود را انجام دهید"
                 }
@@ -788,9 +788,9 @@ function CipServicesContent() {
           // Row layout for search results
           <div className="space-y-4">
             {services.map((service) => (
-              <ServiceRow 
-                key={service.id} 
-                service={service} 
+              <ServiceRow
+                key={service.id}
+                service={service}
                 onViewService={handleViewService}
               />
             ))}
@@ -799,9 +799,9 @@ function CipServicesContent() {
           // Grid layout for normal view
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map((service) => (
-              <ServiceGridCard 
-                key={service.id} 
-                service={service} 
+              <ServiceGridCard
+                key={service.id}
+                service={service}
                 onViewService={handleViewService}
               />
             ))}

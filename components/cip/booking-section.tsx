@@ -6,9 +6,9 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { 
-  MapPin, 
-  Clock, 
+import {
+  MapPin,
+  Clock,
   ArrowRight,
   Shield,
   Check,
@@ -43,12 +43,12 @@ export function BookingSection({ service }: BookingSectionProps) {
 
   useEffect(() => {
     if (searchData) {
-      setFormData((prev:any) => ({
+      setFormData((prev: any) => ({
         ...prev,
         search: searchData
       }))
     }
-  },[searchData])
+  }, [searchData])
 
   const formatPrice = (price: number | null, currency: string) => {
     if (!price) return "رایگان"
@@ -85,7 +85,7 @@ export function BookingSection({ service }: BookingSectionProps) {
         {
           method: 'POST',
           headers: {
-            "Content-Type":"application/json"
+            "Content-Type": "application/json"
           },
           body: JSON.stringify({
             serviceId: service.id,
@@ -99,7 +99,7 @@ export function BookingSection({ service }: BookingSectionProps) {
       const data = await response.json()
 
       if (response.ok) {
-         // Here you would typically send the data to your API
+        // Here you would typically send the data to your API
         // console.log("Reservation data:", {
         //   data
         // })
@@ -109,17 +109,17 @@ export function BookingSection({ service }: BookingSectionProps) {
           firstName: "",
           lastName: "",
           phoneNumber: "",
-          search:{}
+          search: {}
         })
         setShowReservationForm(false)
-      
+
       }
       else {
         toast.error("خطا در ثبت رزرو")
         // console.log(data)
       }
 
-     
+
     } catch (error) {
       // console.log('its the catch ', error)
       toast.error("خطا در ثبت رزرو. لطفا مجددا تلاش کنید.")
@@ -147,27 +147,27 @@ export function BookingSection({ service }: BookingSectionProps) {
         </div>
 
         <div className="space-y-4 mb-6">
-          <div className="flex justify-between items-center py-2 border-b border-gray-200">
+          <div className="flex justify-between items-center py-2 border-b border-blue-900">
             <span className="text-gray-600">فرودگاه</span>
             <span className="font-semibold">{service.airport}</span>
           </div>
-          
+
           {service.duration && (
-            <div className="flex justify-between items-center py-2 border-b border-gray-200">
+            <div className="flex justify-between items-center py-2 border-b border-blue-900">
               <span className="text-gray-600">مدت زمان</span>
               <span className="font-semibold">{service.duration}</span>
             </div>
           )}
-          
-          <div className="flex justify-between items-center py-2 border-b border-gray-200">
+
+          <div className="flex justify-between items-center py-2 border-b border-blue-900">
             <span className="text-gray-600">وضعیت</span>
             <Badge className="bg-green-500">فعال</Badge>
           </div>
         </div>
 
         {!showReservationForm ? (
-          <Button 
-            className="w-full" 
+          <Button
+            className="w-full"
             size="lg"
             onClick={handleReserveClick}
           >
@@ -276,7 +276,7 @@ export function BookingSection({ service }: BookingSectionProps) {
         </div>
 
         {/* Quick Features */}
-        <div className="mt-6 pt-6 border-t border-gray-200">
+        <div className="mt-6 pt-6 border-t border-blue-900">
           <h4 className="font-semibold text-gray-900 mb-3">مزایای این خدمت:</h4>
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm text-gray-600">

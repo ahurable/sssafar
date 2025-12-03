@@ -92,7 +92,7 @@ export function CreateTourCityForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     // Check if all required fields are filled
     if (!formData.name.trim() || !formData.description.trim() || !formData.image) {
       alert("لطفا تمام فیلدهای ضروری را پر کنید")
@@ -131,10 +131,10 @@ export function CreateTourCityForm() {
   }
 
   // Check if form is valid for submission
-  const isFormValid = formData.name.trim() && 
-                     formData.description.trim() && 
-                     formData.image && 
-                     !uploading
+  const isFormValid = formData.name.trim() &&
+    formData.description.trim() &&
+    formData.image &&
+    !uploading
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
@@ -168,11 +168,11 @@ export function CreateTourCityForm() {
 
           <div>
             <Label htmlFor="image">تصویر شهر *</Label>
-            
+
             {/* Image Upload Area */}
             <div className="mt-2">
               {!previewUrl ? (
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+                <div className="border-2 border-dashed border-blue-900 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -254,8 +254,8 @@ export function CreateTourCityForm() {
       </Card>
 
       <div className="flex gap-4">
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           disabled={!isFormValid || loading}
         >
           {loading ? (
@@ -267,9 +267,9 @@ export function CreateTourCityForm() {
             "ایجاد شهر"
           )}
         </Button>
-        <Button 
-          type="button" 
-          variant="outline" 
+        <Button
+          type="button"
+          variant="outline"
           onClick={() => router.push("/admin/tours")}
         >
           انصراف

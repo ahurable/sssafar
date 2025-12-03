@@ -19,21 +19,21 @@ interface FAQItemProps {
 
 export function FAQItem({ faq, isOpen, onToggle }: FAQItemProps) {
   return (
-    <div className="border-b border-gray-300">
+    <div className="border-b border-blue-900">
       {/* Question */}
       <button
         onClick={onToggle}
-        className="w-full px-4 py-4 text-right flex items-center justify-between gap-4 hover:bg-gray-50"
+        className="w-full px-4 py-4 text-right flex items-center justify-between gap-4 cursor-pointer"
       >
-        <span className="font-medium text-lg text-black text-right flex-1">
+        <span className="font-medium text-lg text-blue-950 text-right flex-1">
           {faq.question}
         </span>
-        
+
         <div>
           {isOpen ? (
-            <ChevronUp className="h-5 w-5 text-black" />
+            <ChevronUp className="h-5 w-5 text-blue-950" />
           ) : (
-            <ChevronDown className="h-5 w-5 text-black" />
+            <ChevronDown className="h-5 w-5 text-blue-950" />
           )}
         </div>
       </button>
@@ -41,7 +41,7 @@ export function FAQItem({ faq, isOpen, onToggle }: FAQItemProps) {
       {/* Answer */}
       {isOpen && (
         <div className="px-4 pb-4">
-          <div className="text-black leading-relaxed whitespace-pre-wrap">
+          <div className="text-blue-950 leading-relaxed whitespace-pre-wrap">
             {faq.answer}
           </div>
         </div>

@@ -54,22 +54,21 @@ interface TourCity {
 }
 
 // Tour City Card Component
-function TourCityCard({ 
-  city, 
-  isSelected, 
-  onSelect 
-}: { 
+function TourCityCard({
+  city,
+  isSelected,
+  onSelect
+}: {
   city: TourCity
   isSelected: boolean
-  onSelect: (city: TourCity) => void 
+  onSelect: (city: TourCity) => void
 }) {
   return (
-    <Card 
-      className={`cursor-pointer transition-all duration-300 overflow-hidden border-2 ${
-        isSelected 
-          ? 'border-blue-500 shadow-lg scale-105' 
-          : 'border-gray-200 hover:border-blue-300 hover:shadow-md'
-      }`}
+    <Card
+      className={`cursor-pointer transition-all duration-300 overflow-hidden border-2 ${isSelected
+        ? 'border-blue-500 shadow-lg scale-105'
+        : 'border-blue-900 hover:border-blue-300 hover:shadow-md'
+        }`} border-blue-900
       onClick={() => onSelect(city)}
     >
       <div className="relative h-48 overflow-hidden">
@@ -86,7 +85,7 @@ function TourCityCard({
           </Badge>
         </div>
       </div>
-      
+
       <CardContent className="p-4">
         <p className="text-gray-600 text-sm line-clamp-2">
           {city.description}
@@ -99,7 +98,7 @@ function TourCityCard({
 // Tour Card Component
 function TourCard({ tour }: { tour: Tour }) {
   const router = useRouter()
-  
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('fa-IR')
   }
@@ -108,7 +107,7 @@ function TourCard({ tour }: { tour: Tour }) {
     if (!prices || prices && !prices.length) return "تعیین نشده"
     const minPrice = Math.min(...prices.map(p => p.price))
     const maxPrice = Math.max(...prices.map(p => p.price))
-    return minPrice === maxPrice 
+    return minPrice === maxPrice
       ? `${minPrice.toLocaleString('fa-IR')} تومان`
       : `${minPrice.toLocaleString('fa-IR')} - ${maxPrice.toLocaleString('fa-IR')} تومان`
   }
@@ -125,7 +124,7 @@ function TourCard({ tour }: { tour: Tour }) {
 
   return (
     <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-200 group">
-      {/* Image Section */}
+      {/* Image Section */}border-blue-900border-blue-900
       {primaryImage && (
         <div className="relative h-48 overflow-hidden">
           <img
@@ -144,7 +143,7 @@ function TourCard({ tour }: { tour: Tour }) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
         </div>
       )}
-      
+
       <CardContent className="p-6">
         {/* Title and Description */}
         <div className="mb-4">
@@ -181,7 +180,7 @@ function TourCard({ tour }: { tour: Tour }) {
         </div>
 
         {/* Action Button */}
-        <Button 
+        <Button
           className="w-full bg-blue-600 hover:bg-blue-700 py-2"
           onClick={() => router.push(`/tours/${tour.id}`)}
         >
@@ -201,7 +200,7 @@ function ToursLoading() {
           <h1 className="text-2xl font-bold text-gray-900 mb-2">تورهای مسافرتی</h1>
           <div className="h-4 bg-gray-200 rounded w-48 mx-auto mb-4 animate-pulse"></div>
         </div>
-        
+
         {/* Cities Loading */}
         <div className="mb-8">
           <div className="h-6 bg-gray-200 rounded w-32 mb-4 animate-pulse"></div>
@@ -258,7 +257,7 @@ function ToursContent() {
         if (response.ok) {
           const data = await response.json()
           setTourCities(data.cities || [])
-          
+
           // Select first city by default
           if (data.cities?.length > 0) {
             setSelectedCity(data.cities[0])
@@ -278,12 +277,12 @@ function ToursContent() {
   useEffect(() => {
     const fetchTours = async () => {
       if (!selectedCity) return
-      
+
       try {
         setLoading(true)
         const queryParams = new URLSearchParams()
         queryParams.append('city', selectedCity.id)
-        
+
         const response = await fetch(`/api/tours/search?${queryParams.toString()}`)
         if (response.ok) {
           const data = await response.json()
@@ -399,7 +398,7 @@ function ToursContent() {
                 <span className="text-blue-600 mr-2"> در {selectedCity.name}</span>
               )}
             </h2>
-            
+
             {tours.length > 0 && (
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Users className="h-4 w-4" />
@@ -435,13 +434,13 @@ function ToursContent() {
                   {selectedCity ? `هیچ توری برای ${selectedCity.name} یافت نشد` : "تور فعالی یافت نشد"}
                 </h3>
                 <p className="text-blue-600 mb-6">
-                  {selectedCity 
+                  {selectedCity
                     ? "به زودی تورهای جدیدی برای این شهر اضافه خواهد شد"
                     : "لطفاً یک شهر را انتخاب کنید"
                   }
                 </p>
                 {!selectedCity && tourCities.length > 0 && (
-                  <Button 
+                  <Button
                     className="bg-blue-600 hover:bg-blue-700"
                     onClick={() => setSelectedCity(tourCities[0])}
                   >

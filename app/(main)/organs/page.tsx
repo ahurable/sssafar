@@ -7,14 +7,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { 
-  Plane, 
-  Hotel, 
-  Shield, 
-  Users, 
-  CreditCard, 
-  Building, 
-  CheckCircle, 
+import {
+  Plane,
+  Hotel,
+  Shield,
+  Users,
+  CreditCard,
+  Building,
+  CheckCircle,
   ArrowLeft,
   PhoneCall,
   FileText,
@@ -40,27 +40,27 @@ export default function CorporateLandingPage() {
     const loadGSAP = async () => {
       const gsap = (await import('gsap')).default;
       const ScrollTrigger = (await import('gsap/ScrollTrigger')).default;
-      
+
       gsap.registerPlugin(ScrollTrigger);
 
       const isMobile = window.innerWidth < 768;
 
       // Hero animation
-      gsap.fromTo('.hero-content', 
+      gsap.fromTo('.hero-content',
         { y: isMobile ? 30 : 50, opacity: 0 },
-        { 
-          y: 0, 
-          opacity: 1, 
-          duration: 1, 
+        {
+          y: 0,
+          opacity: 1,
+          duration: 1,
           ease: 'power3.out',
-          x: 0 
+          x: 0
         }
       )
 
       // Services animation
-      gsap.fromTo('.service-card', 
-        { 
-          y: isMobile ? 20 : 30, 
+      gsap.fromTo('.service-card',
+        {
+          y: isMobile ? 20 : 30,
           opacity: 0,
           x: 0
         },
@@ -82,9 +82,9 @@ export default function CorporateLandingPage() {
       )
 
       // Process steps animation
-      gsap.fromTo('.process-step', 
-        { 
-          y: isMobile ? 20 : 30, 
+      gsap.fromTo('.process-step',
+        {
+          y: isMobile ? 20 : 30,
           opacity: 0,
           x: 0
         },
@@ -105,9 +105,9 @@ export default function CorporateLandingPage() {
       )
 
       // Benefits animation
-      gsap.fromTo('.benefit-item', 
-        { 
-          y: isMobile ? 15 : 30, 
+      gsap.fromTo('.benefit-item',
+        {
+          y: isMobile ? 15 : 30,
           opacity: 0,
           x: 0
         },
@@ -150,7 +150,7 @@ export default function CorporateLandingPage() {
 
     preventHorizontalScroll();
     window.addEventListener('resize', preventHorizontalScroll);
-    
+
     return () => {
       window.removeEventListener('resize', preventHorizontalScroll);
       document.body.style.overflowX = '';
@@ -159,7 +159,7 @@ export default function CorporateLandingPage() {
   }, [])
 
   const scrollToForm = () => {
-    formRef.current?.scrollIntoView({ 
+    formRef.current?.scrollIntoView({
       behavior: 'smooth',
       block: 'start'
     })
@@ -168,9 +168,9 @@ export default function CorporateLandingPage() {
   return (
     <>
       <Header />
-      
+
       {/* Hero Section */}
-      <section ref={heroRef} className="relative bg-[#fffefe] text-gray-900 py-20 overflow-hidden border-b border-gray-200" dir="rtl">
+      <section ref={heroRef} className="relative bg-[#fffefe] text-gray-900 py-20 overflow-hidden border-b border-blue-900" dir="rtl">
         {/* Background Elements */}
         <div className="absolute inset-0 opacity-10">
           {/* Top Row */}
@@ -246,12 +246,12 @@ export default function CorporateLandingPage() {
               <span className="block text-blue-900">سفرهای سازمانی</span>
             </h1>
             <p className="text-lg md:text-xl mb-8 text-gray-600 leading-relaxed">
-              پنل اختصاصی برای شرکت‌ها و سازمان‌ها | اعتبار سفر برای کارکنان | 
+              پنل اختصاصی برای شرکت‌ها و سازمان‌ها | اعتبار سفر برای کارکنان |
               <span className="block">رزرو بلیط هواپیما، هتل، CIP و تور</span>
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="bg-blue-900 text-white hover:bg-blue-800 font-medium text-base py-2.5 px-6 floating-element"
                 style={{ animationDelay: '0.4s' }}
                 onClick={scrollToForm}
@@ -283,7 +283,7 @@ export default function CorporateLandingPage() {
               { icon: CreditCardIcon, title: "اعتبار سفر اختصاصی", desc: "سیستم اعتباردهی هوشمند برای مدیریت هزینه‌های سفر" },
               { icon: BarChart3, title: "گزارش‌گیری پیشرفته", desc: "سیستم گزارش‌گیری جامع برای تحلیل هزینه‌ها" }
             ].map((service, index) => (
-              <Card key={index} className="service-card p-6 hover:shadow-lg transition-all duration-300 border border-gray-200 bg-white">
+              <Card key={index} className="service-card p-6 hover:shadow-lg transition-all duration-300 border border-blue-900 bg-white">
                 <div className="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                   <service.icon className="h-8 w-8 text-blue-900" />
                 </div>
@@ -298,7 +298,7 @@ export default function CorporateLandingPage() {
       </section>
 
       {/* How It Works */}
-      <section ref={processRef} className="py-16 bg-[#fffefe] border-t border-gray-200" dir="rtl">
+      <section ref={processRef} className="py-16 bg-[#fffefe] border-t border-blue-900" dir="rtl">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">فرآیند فعال‌سازی</h2>
@@ -320,7 +320,7 @@ export default function CorporateLandingPage() {
                 <div className="bg-blue-900 text-white w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-lg font-medium">
                   {index + 1}
                 </div>
-                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <div className="bg-gray-50 p-4 rounded-lg border border-blue-900">
                   <step.icon className="h-8 w-8 text-blue-900 mx-auto mb-3" />
                   <h3 className="text-lg font-bold mb-2 text-gray-900">{step.title}</h3>
                   <p className="text-gray-600 text-sm leading-relaxed">
@@ -334,7 +334,7 @@ export default function CorporateLandingPage() {
       </section>
 
       {/* Benefits Section */}
-      <section ref={benefitsRef} className="py-16 bg-[#fffefe] border-t border-gray-200" dir="rtl">
+      <section ref={benefitsRef} className="py-16 bg-[#fffefe] border-t border-blue-900" dir="rtl">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
@@ -350,7 +350,7 @@ export default function CorporateLandingPage() {
                 "پشتیبانی تلفنی و آنلاین ۲۴ ساعته برای سازمان‌های عضو",
                 "رابط کاربری ساده برای رزرو تمام خدمات تنها با چند کلیک"
               ].map((benefit, index) => (
-                <div key={index} className="benefit-item bg-white p-4 rounded-lg border border-gray-200">
+                <div key={index} className="benefit-item bg-white p-4 rounded-lg border border-blue-900">
                   <div className="flex items-start">
                     <div className="bg-blue-900 p-2 rounded-lg ml-3">
                       <CheckCircle className="h-5 w-5 text-white" />
@@ -367,10 +367,10 @@ export default function CorporateLandingPage() {
       </section>
 
       {/* Registration Form */}
-      <section ref={formRef} className="py-16 bg-[#fffefe] border-t border-gray-200" dir="rtl">
+      <section ref={formRef} className="py-16 bg-[#fffefe] border-t border-blue-900" dir="rtl">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
-            <Card className="p-6 border border-gray-200">
+            <Card className="p-6 border border-blue-900">
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold text-gray-900 mb-3">فرم درخواست پنل سازمانی</h2>
                 <p className="text-gray-600 max-w-xl mx-auto">
@@ -385,15 +385,15 @@ export default function CorporateLandingPage() {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-16 bg-gray-50 border-t border-gray-200" dir="rtl">
+      <section className="py-16 bg-gray-50 border-t border-blue-900" dir="rtl">
         <div className="container mx-auto px-4 text-center">
           <HeadphonesIcon className="h-12 w-12 mx-auto mb-4 text-blue-900" />
           <h2 className="text-2xl font-bold mb-4 text-gray-900">آماده ایجاد پنل سازمانی هستید؟</h2>
           <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
             همین امروز درخواست خود را ثبت کنید. کارشناسان ما در کمتر از ۲۴ ساعت با شما تماس خواهند گرفت.
           </p>
-          <Button 
-            size="lg" 
+          <Button
+            size="lg"
             className="bg-blue-900 text-white hover:bg-blue-800 font-medium py-2.5 px-8"
             onClick={scrollToForm}
           >

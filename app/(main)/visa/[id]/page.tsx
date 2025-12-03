@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { 
-  MapPin, 
-  Clock, 
-  Calendar, 
-  Users, 
-  Check, 
-  X, 
+import {
+  MapPin,
+  Clock,
+  Calendar,
+  Users,
+  Check,
+  X,
   Star,
   FileText,
   Shield,
@@ -23,7 +23,7 @@ import { VisaBookingSection } from "@/components/visa/visa-booking-section"
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const service = await getVisaService(params.id)
-  
+
   if (!service) {
     return {
       title: 'خدمت ویزا یافت نشد'
@@ -42,11 +42,11 @@ async function getVisaService(id: string) {
     const res = await fetch(`${baseUrl}/api/visa/${id}`, {
       next: { revalidate: 60 }
     })
-    
+
     if (!res.ok) {
       return null
     }
-    
+
     return await res.json()
   } catch (error) {
     console.error('Error fetching visa service:', error)
@@ -99,7 +99,7 @@ export default async function VisaDetailPage({ params }: Params) {
                     />
                   </div>
                 )}
-                
+
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div>
@@ -119,7 +119,7 @@ export default async function VisaDetailPage({ params }: Params) {
                         )}
                       </div>
                     </div>
-                    
+
                     <div className="text-2xl font-bold text-green-600">
                       {formatPrice(service.price, service.currency)}
                     </div>
@@ -142,7 +142,7 @@ export default async function VisaDetailPage({ params }: Params) {
                         </div>
                       </div>
                     )}
-                    
+
                     {service.validity && (
                       <div className="flex items-center p-3 bg-green-50">
                         <Calendar className="h-6 w-6 text-green-600 ml-2" />
@@ -152,7 +152,7 @@ export default async function VisaDetailPage({ params }: Params) {
                         </div>
                       </div>
                     )}
-                    
+
                     <div className="flex items-center p-3 bg-purple-50">
                       <Users className="h-6 w-6 text-purple-600 ml-2" />
                       <div>
@@ -160,7 +160,7 @@ export default async function VisaDetailPage({ params }: Params) {
                         <div className="text-gray-600">{service.entryType}</div>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center p-3 bg-orange-50">
                       <Shield className="h-6 w-6 text-orange-600 ml-2" />
                       <div>
@@ -227,71 +227,71 @@ export default async function VisaDetailPage({ params }: Params) {
                   )}
                   {service.priceTables && service.priceTables.length > 0 && (
                     <div className="mb-8">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                      <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
                         <DollarSign className="h-6 w-6 text-green-500 ml-2" />
                         جدول‌های قیمت
-                        </h2>
-                        
-                        <div className="space-y-8">
+                      </h2>
+
+                      <div className="space-y-8">
                         {service.priceTables.map((table: any, tableIndex: number) => (
-                            <Card key={tableIndex} className="border-2 border-blue-100">
+                          <Card key={tableIndex} className="border-2 border-blue-100">
                             <CardContent className="p-6">
-                                <h3 className="text-xl font-bold text-gray-900 mb-4 text-center">
+                              <h3 className="text-xl font-bold text-gray-900 mb-4 text-center">
                                 {table.title}
-                                </h3>
-                                
-                                <div className="overflow-x-auto">
-                                <table className="w-full border-collapse border border-gray-300">
-                                    <thead>
+                              </h3>
+
+                              <div className="overflow-x-auto">
+                                <table className="w-full border-collapse border border-blue-900">
+                                  <thead>
                                     <tr className="bg-blue-50">
-                                        <th className="border border-gray-300 p-3 text-right font-semibold">
+                                      <th className="border border-blue-900 p-3 text-right font-semibold">
                                         نوع ویزا
-                                        </th>
-                                        {table.columns.map((column: string, colIndex: number) => (
-                                        <th 
-                                            key={colIndex} 
-                                            className="border border-gray-300 p-3 text-center font-semibold"
+                                      </th>
+                                      {table.columns.map((column: string, colIndex: number) => (
+                                        <th
+                                          key={colIndex}
+                                          className="border border-blue-900 p-3 text-center font-semibold"
                                         >
-                                            {column}
+                                          {column}
                                         </th>
-                                        ))}
+                                      ))}
                                     </tr>
-                                    </thead>
-                                    <tbody>
+                                  </thead>
+                                  <tbody>
                                     {table.rows.map((row: any, rowIndex: number) => (
-                                        <tr 
-                                        key={rowIndex} 
+                                      <tr
+                                        key={rowIndex}
                                         className={rowIndex % 2 === 0 ? 'bg-[#fffefe]' : 'bg-gray-50'}
-                                        >
-                                        <td className="border border-gray-300 p-3 font-semibold text-right">
-                                            {row.label}
+                                      >
+                                        <td className="border border-blue-900 p-3 font-semibold text-right">
+                                          {row.label}
                                         </td>
                                         {row.values.map((value: string, valueIndex: number) => (
-                                            <td 
-                                            key={valueIndex} 
-                                            className="border border-gray-300 p-3 text-center"
-                                            >
+                                          <td
+                                            key={valueIndex}
+                                            className="border border-blue-900 p-3 text-center"
+                                          >
                                             {value || '-'}
-                                            </td>
+                                          </td>
                                         ))}
-                                        </tr>
+                                      </tr>
                                     ))}
-                                    </tbody>
+                                  </tbody>
                                 </table>
-                                </div>
+                              </div>
                             </CardContent>
-                            </Card>
+                          </Card>
                         ))}
-                        </div>
+                      </div>
                     </div>
-                    )}
+                  )}
                 </CardContent>
               </Card>
             </div>
 
             {/* Sidebar - Booking Card */}
             <div className="lg:col-span-1">
-              
+
               <VisaBookingSection service={service} />
 
             </div>

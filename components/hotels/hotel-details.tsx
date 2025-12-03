@@ -7,16 +7,16 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { 
-  Star, 
-  MapPin, 
-  Wifi, 
-  Coffee, 
-  Car, 
-  Dumbbell, 
-  Utensils, 
-  Snowflake, 
-  Tv, 
+import {
+  Star,
+  MapPin,
+  Wifi,
+  Coffee,
+  Car,
+  Dumbbell,
+  Utensils,
+  Snowflake,
+  Tv,
   Users,
   Clock,
   Calendar,
@@ -194,7 +194,7 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
   const [hotelImages, setHotelImages] = useState<any[]>([])
   const [hotelName, setHotelName] = useState("")
   const [favorites, setFavorites] = useState<Set<number>>(new Set())
-  const [roomImages, setRoomImages] = useState<{[key: string]: any[]}>({}) // key: roomMapId
+  const [roomImages, setRoomImages] = useState<{ [key: string]: any[] }>({}) // key: roomMapId
   const [isImageModalOpen, setIsImageModalOpen] = useState(false)
   const [modalImageIndex, setModalImageIndex] = useState(0)
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null)
@@ -230,9 +230,9 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
           cityId: 1
         })
       })
-      
+
       const data = await res.json()
-      
+
       if (res.ok && Array.isArray(data)) {
         setHotelItinenaries(data)
         return data
@@ -246,15 +246,15 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
   }
 
   // Function to get room images using RoomMapId
-  
+
 
   // Load room images for all unique roomMapIds
   useEffect(() => {
     const loadRoomImages = async () => {
       if (hotelItinenaries && hotelItinenaries.length > 0) {
-        const imagesMap: {[key: string]: any[]} = {}
-        
-        
+        const imagesMap: { [key: string]: any[] } = {}
+
+
         setRoomImages(hotelImages[0])
       }
     }
@@ -266,7 +266,7 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
     const fetchHotelDetails = async () => {
       try {
         setLoading(true)
-        
+
         if (!currentHotelId) {
           error("شناسه هتل مشخص نیست")
           return
@@ -274,20 +274,20 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
 
         const hotelIdNum = parseInt(currentHotelId)
         const hotelsWithFare = await hotelWithFare(hotelIdNum)
-        
+
         if (hotelsWithFare.length > 0) {
           const hotel = hotelsWithFare[0]
           setHotelData(hotel)
-          
+
           const [name, imagesData] = await Promise.all([
             getHotelName(hotel.HotelId),
             getHotelImages(hotel.HotelId)
           ])
-          
+
           setHotelName(name)
           const images = imagesData.slice(0, 10)
           setHotelImages(images.length > 0 ? images : ['/hotels/hotel-1.jpg'])
-          
+
           success("اطلاعات هتل با موفقیت دریافت شد")
         } else {
           error("هتل مورد نظر یافت نشد")
@@ -328,7 +328,7 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
   }
 
   const getRoomImage = (roomMapId: string) => {
-    
+
     return hotelImages[0]
   }
 
@@ -355,9 +355,9 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
       error("لطفاً یک اتاق انتخاب کنید")
       return
     }
-    
+
     if (!hotelData) return
-    
+
     // Find the selected room details
     const selectedRoomData = allRooms.find(room => room.RoomId === selectedRoom)
     if (!selectedRoomData) {
@@ -422,7 +422,7 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
   }
 
   const hasDiscount = hotelData.NetRateWithoutDiscount > hotelData.NetRate
-  const discountPercentage = hasDiscount 
+  const discountPercentage = hasDiscount
     ? Math.round(((hotelData.NetRateWithoutDiscount - hotelData.NetRate) / hotelData.NetRateWithoutDiscount) * 100)
     : 0
 
@@ -461,12 +461,11 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
                   className="h-8 w-8 bg-[#fffefe]/20 hover:bg-[#fffefe]/30 border-0"
                   onClick={() => toggleFavorite(hotelData.HotelId)}
                 >
-                  <Heart 
-                    className={`h-4 w-4 ${
-                      favorites.has(hotelData.HotelId) 
-                        ? "fill-red-500 text-red-500" 
-                        : "text-white"
-                    }`} 
+                  <Heart
+                    className={`h-4 w-4 ${favorites.has(hotelData.HotelId)
+                      ? "fill-red-500 text-red-500"
+                      : "text-white"
+                      }`}
                   />
                 </Button>
               </div>
@@ -485,9 +484,8 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
-                  className={`relative h-20 lg:h-1/4 w-20 lg:w-full flex-shrink-0 ${
-                    selectedImage === index ? 'ring-2 ring-blue-500' : ''
-                  }`}
+                  className={`relative h-20 lg:h-1/4 w-20 lg:w-full flex-shrink-0 ${selectedImage === index ? 'ring-2 ring-blue-500' : ''
+                    }`}
                 >
                   <Image
                     src={img.imageUrl}
@@ -498,10 +496,10 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
                 </button>
               ))}
             </div>
-            
+
             {/* Right Side - Big Image */}
             <div className="lg:w-3/4 relative flex-1">
-              <button 
+              <button
                 onClick={() => openImageModal(selectedImage)}
                 className="w-full h-full"
               >
@@ -512,7 +510,7 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
                   className="object-cover hover:opacity-90 transition-opacity"
                 />
               </button>
-              
+
               {/* Navigation Arrows */}
               {hotelImages.length > 1 && (
                 <>
@@ -550,21 +548,21 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
           >
             <X className="h-6 w-6" />
           </button>
-          
+
           <button
             onClick={prevImage}
             className="absolute left-4 text-white p-2 hover:bg-[#fffefe]/20"
           >
             <ChevronLeftIcon className="h-6 w-6" />
           </button>
-          
+
           <button
             onClick={nextImage}
             className="absolute right-4 text-white p-2 hover:bg-[#fffefe]/20"
           >
             <ChevronRight className="h-6 w-6" />
           </button>
-          
+
           <div className="relative w-full h-full max-w-4xl max-h-4xl">
             <Image
               src={hotelImages[modalImageIndex]?.imageUrl || '/hotels/hotel-1.jpg'}
@@ -573,7 +571,7 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
               className="object-contain"
             />
           </div>
-          
+
           <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white">
             {modalImageIndex + 1} / {hotelImages.length}
           </div>
@@ -645,11 +643,10 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
                 {allRooms.map((room, index) => {
                   const isSelected = selectedRoom === room.RoomId
                   return (
-                    <div 
-                      key={`${room.RoomId}-${index}`} 
-                      className={`border-2 transition-all duration-200 ${
-                        isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                    <div
+                      key={`${room.RoomId}-${index}`}
+                      className={`border-2 transition-all duration-200 ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-blue-900 hover:border-blue-900'
+                        }`}
                     >
                       <div className="flex flex-col lg:flex-row">
                         {/* Room Image */}
@@ -662,7 +659,7 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
                               className="object-cover"
                             />
                             <div className="absolute inset-0 bg-black/10"></div>
-                            
+
                             {/* Room Badges */}
                             <div className="absolute top-2 left-2 flex flex-col gap-1">
                               {room.MealType && (
@@ -705,7 +702,7 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
                                   )}
                                 </div>
                               </div>
-                              
+
                               <div className="flex flex-wrap gap-3 text-sm text-gray-600 mb-3">
                                 <div className="flex items-center gap-1">
                                   <User className="h-4 w-4" />
@@ -723,7 +720,7 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
                                   </div>
                                 )}
                               </div>
-                              
+
                               {room.BedGroups && (
                                 <div className="mb-3">
                                   <span className="text-sm font-medium text-gray-700">ترتیب تخت: </span>
@@ -754,17 +751,17 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
                             </div>
 
                             {/* Room Actions */}
-                            <div className="flex justify-between items-center pt-3 border-t border-gray-200 mt-3">
+                            <div className="flex justify-between items-center pt-3 border-t border-blue-900 mt-3">
                               {/* <div className="text-xs text-gray-600">
                                 <span className="text-green-600 font-medium">
                                   {hotelData.AvailableRoom} اتاق موجود
                                 </span>
                               </div> */}
-                              <Button 
+                              <Button
                                 onClick={() => handleRoomSelection(room.RoomId)}
                                 variant={isSelected ? "default" : "outline"}
-                                className={isSelected 
-                                  ? "bg-blue-600 hover:bg-blue-700 text-white" 
+                                className={isSelected
+                                  ? "bg-blue-600 hover:bg-blue-700 text-white"
                                   : "border-blue-600 text-blue-600 hover:bg-blue-50"
                                 }
                                 disabled={hotelData.AvailableRoom === 0}
@@ -796,7 +793,7 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
                   {hotelData.Amenities.map((amenity, index) => {
                     const Icon = amenityIcons[amenity]
                     return (
-                      <div key={index} className="flex items-center gap-2 p-2 border border-gray-200">
+                      <div key={index} className="flex items-center gap-2 p-2 border border-blue-900">
                         {Icon && <Icon className="h-4 w-4 text-blue-600" />}
                         <span className="text-sm font-medium">{amenity}</span>
                       </div>
@@ -821,7 +818,7 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
                     <p className="text-sm text-gray-600 leading-relaxed">{hotelData.HotelPolicy.InstructionsFa}</p>
                   </div>
                 )}
-                
+
                 {hotelData.HotelPolicy.SpecialInstructionsFa && (
                   <div>
                     <h4 className="font-bold text-gray-800 mb-2">دستورالعمل‌های ویژه:</h4>
@@ -877,7 +874,7 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
                   <p className="text-sm text-gray-600">{hotelData.ExtraCharge && hotelData.ExtraCharge.Excluded || "همه هزینه‌ها شامل شده است"}</p>
                 </div>
               </div>
-              
+
               {hotelData.Surcharges && hotelData.Surcharges.length > 0 && (
                 <div className="mt-4">
                   <h4 className="font-bold text-gray-800 mb-2">هزینه‌های فوق‌العاده:</h4>
@@ -971,16 +968,16 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
 
         {/* Right Column - Booking Card */}
         <div className="space-y-4">
-          <Card className="sticky top-14 border bg-[#fffefe] border-gray-200">
+          <Card className="sticky top-14 border bg-[#fffefe] border-blue-900">
             <CardContent className="p-4">
               <h3 className="text-lg font-bold mb-3">رزرو هتل</h3>
-              
+
               {/* Selected Room Info */}
               {selectedRoom && (
                 <div className="mb-4 p-3 bg-blue-50 border border-blue-200">
                   <h4 className="font-bold text-sm mb-2">اتاق انتخاب شده:</h4>
-                  {allRooms.find(room => room.RoomId === selectedRoom)?.Name || 
-                   allRooms.find(room => room.RoomId === selectedRoom)?.RoomMapName}
+                  {allRooms.find(room => room.RoomId === selectedRoom)?.Name ||
+                    allRooms.find(room => room.RoomId === selectedRoom)?.RoomMapName}
                 </div>
               )}
 
@@ -1021,8 +1018,8 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
                   className="w-full h-10 bg-blue-900 hover:bg-blue-800 text-white border-0"
                   disabled={hotelData.AvailableRoom === 0 || !selectedRoom}
                 >
-                  {!selectedRoom ? "لطفاً اتاق انتخاب کنید" : 
-                   hotelData.AvailableRoom > 0 ? "رزرو الآن" : "اتاقی موجود نیست"}
+                  {!selectedRoom ? "لطفاً اتاق انتخاب کنید" :
+                    hotelData.AvailableRoom > 0 ? "رزرو الآن" : "اتاقی موجود نیست"}
                 </Button>
 
                 {!selectedRoom && (

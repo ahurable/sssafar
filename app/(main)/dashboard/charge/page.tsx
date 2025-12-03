@@ -103,12 +103,12 @@ export default function ChargeCreditPage() {
 
       if (result.success && result.paymentUrl) {
         success("در حال انتقال به درگاه پرداخت...")
-        
+
         // Redirect to Zibal payment gateway
         setTimeout(() => {
           window.location.href = result.paymentUrl!
         }, 1000)
-        
+
       } else {
         throw new Error(result.message || 'خطا در ایجاد درگاه پرداخت')
       }
@@ -139,9 +139,9 @@ export default function ChargeCreditPage() {
         <div className="container mx-auto px-4">
           <div className="mb-8">
             <div className="flex items-center gap-4 mb-4">
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 className="flex items-center gap-2"
                 onClick={() => router.back()}
               >
@@ -159,7 +159,7 @@ export default function ChargeCreditPage() {
             <aside className="lg:col-span-1">
               <DashboardNav />
             </aside>
-            
+
             <div className="lg:col-span-3">
               <div className="grid gap-6 lg:grid-cols-3">
                 {/* Main Content */}
@@ -185,11 +185,10 @@ export default function ChargeCreditPage() {
                               key={preset.value}
                               type="button"
                               onClick={() => handleAmountSelect(preset.value)}
-                              className={`p-4 border rounded-lg text-center transition-all hover:border-green-500 hover:bg-green-50 ${
-                                amount === preset.value 
-                                  ? 'border-green-500 bg-green-50 ring-2 ring-green-500 ring-opacity-20' 
-                                  : 'border-gray-200'
-                              }`}
+                              className={`p-4 border rounded-lg text-center transition-all hover:border-green-500 hover:bg-green-50 ${amount === preset.value
+                                ? 'border-green-500 bg-green-50 ring-2 ring-green-500 ring-opacity-20'
+                                : 'border-blue-900'
+                                }`}
                             >
                               <div className="font-medium text-gray-900">{preset.label}</div>
                               {amount === preset.value && (
@@ -240,11 +239,10 @@ export default function ChargeCreditPage() {
                           key={method.id}
                           type="button"
                           onClick={() => setSelectedMethod(method.id)}
-                          className={`w-full p-4 border rounded-lg text-right transition-all hover:border-blue-500 hover:shadow-md ${
-                            selectedMethod === method.id 
-                              ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-500 ring-opacity-20' 
-                              : 'border-gray-200'
-                          }`}
+                          className={`w-full p-4 border rounded-lg text-right transition-all hover:border-blue-500 hover:shadow-md ${selectedMethod === method.id
+                            ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-500 ring-opacity-20'
+                            : 'border-blue-900'
+                            }`}
                         >
                           <div className="flex items-center justify-between">
                             <div className={`p-2 rounded-lg ${method.bgColor} ${method.color}`}>
@@ -288,12 +286,12 @@ export default function ChargeCreditPage() {
                             {amount ? `${formatAmount(amount)} ریال` : "---"}
                           </span>
                         </div>
-                        
+
                         <div className="flex justify-between items-center">
                           <span className="text-muted-foreground">کارمزد:</span>
                           <span className="font-medium">۰ ریال</span>
                         </div>
-                        
+
                         <div className="pt-3 border-t">
                           <div className="flex justify-between items-center">
                             <span className="font-medium">مبلغ قابل پرداخت:</span>
@@ -304,8 +302,8 @@ export default function ChargeCreditPage() {
                         </div>
                       </div>
 
-                      <Button 
-                        className="w-full" 
+                      <Button
+                        className="w-full"
                         size="lg"
                         onClick={handlePayment}
                         disabled={!amount || !selectedMethod || isProcessing || parseInt(amount) < 100000}
@@ -348,7 +346,7 @@ export default function ChargeCreditPage() {
                             </p>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                             <Shield className="h-4 w-4 text-blue-600" />
@@ -360,7 +358,7 @@ export default function ChargeCreditPage() {
                             </p>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
                             <CheckCircle className="h-4 w-4 text-purple-600" />
@@ -391,7 +389,7 @@ export default function ChargeCreditPage() {
                         تمامی پرداخت‌ها با پروتکل SSL انجام می‌شود
                       </p>
                     </div>
-                    
+
                     <div className="text-center">
                       <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
                         <Zap className="h-6 w-6 text-green-600" />
@@ -401,7 +399,7 @@ export default function ChargeCreditPage() {
                         اعتبار بلافاصله پس از پرداخت به حساب اضافه می‌شود
                       </p>
                     </div>
-                    
+
                     <div className="text-center">
                       <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
                         <Shield className="h-6 w-6 text-orange-600" />

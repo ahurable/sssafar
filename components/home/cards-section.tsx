@@ -56,9 +56,9 @@ const ServiceCardsSection = () => {
             <Link key={index} href={service.href} className="block">
               <Card
                 className={`
-                  relative overflow-hidden border-2 border-blue-950/20 bg-white
+                  relative overflow-hidden border border-blue-950 bg-white
                   transition-all duration-500 ease-out
-                  hover:border-blue-950 hover:shadow-2xl
+                  hover:border-blue-950 hover:shadow-2xl hover:border-2
                   ${hoveredCard === index ? 'scale-105' : 'scale-100'}
                   cursor-pointer
                 `}

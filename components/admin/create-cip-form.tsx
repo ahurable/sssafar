@@ -112,7 +112,7 @@ export function CreateCipForm() {
     }
 
     return (
-      <div className="absolute top-full left-0 right-0 bg-[#fffefe] border border-gray-200 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto airport-suggestions-container">
+      <div className="absolute top-full left-0 right-0 bg-[#fffefe] border border-blue-900 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto airport-suggestions-container">
         {airportSuggestions.map((airport) => (
           <div
             key={airport.id}
@@ -131,7 +131,7 @@ export function CreateCipForm() {
 
   const handleImageUpload = async (file: File) => {
     setUploading(true)
-    
+
     try {
       const formData = new FormData()
       formData.append("file", file)
@@ -164,7 +164,7 @@ export function CreateCipForm() {
       // Create preview
       const previewUrl = URL.createObjectURL(file)
       setImagePreview(previewUrl)
-      
+
       // Upload file
       handleImageUpload(file)
     }
@@ -193,14 +193,14 @@ export function CreateCipForm() {
   }
 
   const updateFaq = (index: number, field: keyof FAQItem, value: string | boolean | number) => {
-    setFaqs(prev => prev.map((faq, i) => 
+    setFaqs(prev => prev.map((faq, i) =>
       i === index ? { ...faq, [field]: value } : faq
     ))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!formData.airportId) {
       toast.error("لطفا یک فرودگاه انتخاب کنید")
       return
@@ -322,10 +322,10 @@ export function CreateCipForm() {
             {/* Image Upload Section */}
             <div className="space-y-4">
               <Label>تصویر خدمت</Label>
-              
+
               {imagePreview ? (
                 <div className="relative inline-block">
-                  <div className="w-64 h-48 rounded-lg border-2 border-dashed border-gray-300 overflow-hidden">
+                  <div className="w-64 h-48 rounded-lg border-2 border-dashed border-blue-900 overflow-hidden">
                     <img
                       src={imagePreview}
                       alt="Preview"
@@ -346,9 +346,8 @@ export function CreateCipForm() {
                 <div className="flex items-center justify-center w-full">
                   <label
                     htmlFor="image-upload"
-                    className={`flex flex-col items-center justify-center w-64 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors ${
-                      uploading ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
+                    className={`flex flex-col items-center justify-center w-64 h-32 border-2 border-dashed border-blue-900 rounded-lg cursor-pointer hover:border-gray-400 transition-colors ${uploading ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
                   >
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                       {uploading ? (
@@ -455,10 +454,10 @@ export function CreateCipForm() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>ویژگی‌های اصلی</CardTitle>
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="sm" 
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
                 onClick={() => addFeature("features")}
               >
                 <Plus className="h-4 w-4 ml-1" />
@@ -495,10 +494,10 @@ export function CreateCipForm() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>خدمات شامل شده</CardTitle>
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="sm" 
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
                 onClick={() => addFeature("included")}
               >
                 <Plus className="h-4 w-4 ml-1" />
@@ -535,10 +534,10 @@ export function CreateCipForm() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>خدمات شامل نشده</CardTitle>
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="sm" 
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
                 onClick={() => addFeature("notIncluded")}
               >
                 <Plus className="h-4 w-4 ml-1" />
@@ -578,10 +577,10 @@ export function CreateCipForm() {
                 <HelpCircle className="h-5 w-5 text-blue-600" />
                 سوالات متداول (FAQ)
               </CardTitle>
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="sm" 
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
                 onClick={addFaq}
               >
                 <Plus className="h-4 w-4 ml-1" />
@@ -592,8 +591,8 @@ export function CreateCipForm() {
           <CardContent>
             <div className="space-y-6">
               {faqs.map((faq, index) => (
-                <Card key={index} className="border border-gray-200">
-                  <CardContent className="p-4 space-y-4">
+                <Card key={index} className="border border-blue-900">
+                  <CardContent className="p-4 space-border-blue-900
                     <div className="flex items-center justify-between">
                       <h4 className="font-medium text-gray-900">
                         سوال #{index + 1}
@@ -655,14 +654,14 @@ export function CreateCipForm() {
                       </div>
                     </div>
                   </CardContent>
-                </Card>
-              ))}
-            </div>
-          </CardContent>
         </Card>
+              ))}
+    </div>
+          </CardContent >
+        </Card >
 
-        {/* تنظیمات */}
-        <Card className="py-6">
+    {/* تنظیمات */ }
+    < Card className = "py-6" >
           <CardHeader>
             <CardTitle>تنظیمات</CardTitle>
           </CardHeader>
@@ -723,10 +722,10 @@ export function CreateCipForm() {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card >
 
-        {/* دکمه‌های اقدام */}
-        <div className="flex gap-4 justify-end pt-6 border-t">
+    {/* دکمه‌های اقدام */ }
+    < div className = "flex gap-4 justify-end pt-6 border-t" >
           <Button
             type="button"
             variant="outline"
@@ -744,8 +743,8 @@ export function CreateCipForm() {
               </>
             )}
           </Button>
-        </div>
-      </form>
-    </div>
+        </div >
+      </form >
+    </div >
   )
 }

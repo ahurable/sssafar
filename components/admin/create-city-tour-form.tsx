@@ -90,7 +90,7 @@ export function CreateCityTourForm() {
   const today = new Date()
 
   const [prices, setPrices] = useState<Price[]>([
-    { type: "بزرگسال", price: 0, currency: "IRR", date:  today },
+    { type: "بزرگسال", price: 0, currency: "IRR", date: today },
     { type: "کودک", price: 0, currency: "IRR", date: today }
   ])
 
@@ -100,7 +100,7 @@ export function CreateCityTourForm() {
     { id: "1", order: 1, title: "", description: "", duration: 0 }
   ])
 
-  const formatDate = (date:any) => {
+  const formatDate = (date: any) => {
     if (!date) return "";
     return new Date(date).toISOString().split("T")[0];
   };
@@ -130,7 +130,7 @@ export function CreateCityTourForm() {
   }
 
   const updateInclusion = (id: string, value: string) => {
-    setInclusions(inclusions.map(item => 
+    setInclusions(inclusions.map(item =>
       item.id === id ? { ...item, item: value } : item
     ))
   }
@@ -146,7 +146,7 @@ export function CreateCityTourForm() {
   }
 
   const updateExclusion = (id: string, value: string) => {
-    setExclusions(exclusions.map(item => 
+    setExclusions(exclusions.map(item =>
       item.id === id ? { ...item, item: value } : item
     ))
   }
@@ -158,17 +158,17 @@ export function CreateCityTourForm() {
   }
 
   const addItinerary = () => {
-    setItineraries([...itineraries, { 
-      id: Date.now().toString(), 
-      order: itineraries.length + 1, 
-      title: "", 
-      description: "", 
-      duration: 0 
+    setItineraries([...itineraries, {
+      id: Date.now().toString(),
+      order: itineraries.length + 1,
+      title: "",
+      description: "",
+      duration: 0
     }])
   }
 
   const updateItinerary = (id: string, field: string, value: string | number) => {
-    setItineraries(itineraries.map(item => 
+    setItineraries(itineraries.map(item =>
       item.id === id ? { ...item, [field]: value } : item
     ))
   }
@@ -365,7 +365,7 @@ export function CreateCityTourForm() {
         <CardContent className="space-y-4">
           <div>
             <Label>آپلود تصاویر</Label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+            <div className="border-2 border-dashed border-blue-900 rounded-lg p-6 text-center">
               <Input
                 type="file"
                 multiple
@@ -375,8 +375,8 @@ export function CreateCityTourForm() {
                 className="hidden"
                 id="image-upload"
               />
-              <Label 
-                htmlFor="image-upload" 
+              <Label
+                htmlFor="image-upload"
                 className="cursor-pointer flex flex-col items-center justify-center space-y-2"
               >
                 <Upload className="h-8 w-8 text-gray-400" />
@@ -493,17 +493,17 @@ export function CreateCityTourForm() {
                   />
                 </div>
               </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => removePrice(index)}
-                  disabled={prices.length === 1}
-                  className="mb-1"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => removePrice(index)}
+                disabled={prices.length === 1}
+                className="mb-1"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
           ))}
           <Button type="button" variant="outline" onClick={addPrice}>
             <Plus className="h-4 w-4 ml-2" />
@@ -595,7 +595,7 @@ export function CreateCityTourForm() {
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
-              
+
               <div>
                 <Label>عنوان مرحله</Label>
                 <Input
@@ -604,7 +604,7 @@ export function CreateCityTourForm() {
                   placeholder="مثلا: بازدید از برج ایفل"
                 />
               </div>
-              
+
               <div>
                 <Label>توضیحات</Label>
                 <Textarea
@@ -614,7 +614,7 @@ export function CreateCityTourForm() {
                   placeholder="توضیحات کامل این مرحله از سفر"
                 />
               </div>
-              
+
               <div className="w-48">
                 <Label>مدت زمان (دقیقه)</Label>
                 <Input
@@ -626,7 +626,7 @@ export function CreateCityTourForm() {
               </div>
             </div>
           ))}
-          
+
           <Button type="button" variant="outline" onClick={addItinerary}>
             <Plus className="h-4 w-4 ml-2" />
             افزودن مرحله جدید
@@ -650,7 +650,7 @@ export function CreateCityTourForm() {
               onCheckedChange={(checked) => handleInputChange("featured", checked)}
             />
           </div>
-          
+
           <div className="flex items-center justify-between">
             <Label htmlFor="isActive" className="cursor-pointer">
               فعال
@@ -665,17 +665,17 @@ export function CreateCityTourForm() {
       </Card>
 
       <div className="flex gap-4 pt-6">
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           disabled={loading || uploading}
           className="flex-1"
           size="lg"
         >
           {loading ? "در حال ایجاد..." : uploading ? "در حال آپلود..." : "ایجاد گشت شهری"}
         </Button>
-        <Button 
-          type="button" 
-          variant="outline" 
+        <Button
+          type="button"
+          variant="outline"
           onClick={() => router.back()}
           className="flex-1"
           size="lg"

@@ -14,7 +14,7 @@ const RequestCorporateForm = () => {
         setIsSubmitting(true)
 
         const formData = new FormData(e.currentTarget)
-        
+
         const formDataObject: any = {}
         for (let [key, value] of formData.entries()) {
             formDataObject[key] = value
@@ -175,22 +175,22 @@ const RequestCorporateForm = () => {
                 />
             </div>
 
-            <div className="flex items-start p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="flex items-start p-3 bg-gray-50 rounded-lg border border-blue-900">
                 <input
                     id="agreement"
                     name="agreement"
                     type="checkbox"
-                    className="h-4 w-4 text-blue-900 border-gray-300 rounded ml-2 mt-1"
+                    className="h-4 w-4 text-blue-900 border-blue-900 rounded ml-2 mt-1"
                     required
                 />
                 <label htmlFor="agreement" className="text-sm text-gray-700 leading-relaxed">
-                    با شرایط و قوانین استفاده از پنل سازمانی موافقم. می‌پذیرم که اطلاعات ارائه شده 
+                    با شرایط و قوانین استفاده از پنل سازمانی موافقم. می‌پذیرم که اطلاعات ارائه شده
                     توسط کارشناسان ما بررسی شده و برای فعال‌سازی پنل، نیاز به انعقاد قرارداد رسمی می‌باشد.
                 </label>
             </div>
 
-            <Button 
-                type="submit" 
+            <Button
+                type="submit"
                 disabled={isSubmitting}
                 className="w-full bg-blue-900 hover:bg-blue-800 text-white py-3 font-medium h-12 disabled:opacity-50 disabled:cursor-not-allowed"
             >

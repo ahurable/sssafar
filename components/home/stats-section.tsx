@@ -17,22 +17,22 @@ export function StatsSection() {
     stats.forEach((stat, index) => {
       let startTimestamp: number | null = null
       const duration = 2000 // 2 seconds
-      
+
       const step = (timestamp: number) => {
         if (!startTimestamp) startTimestamp = timestamp
         const progress = Math.min((timestamp - startTimestamp) / duration, 1)
-        
+
         setAnimatedValues(prev => {
           const newValues = [...prev]
           newValues[index] = Math.floor(stat.value * progress)
           return newValues
         })
-        
+
         if (progress < 1) {
           requestAnimationFrame(step)
         }
       }
-      
+
       requestAnimationFrame(step)
     })
   }, [])
@@ -43,11 +43,11 @@ export function StatsSection() {
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat, index) => (
             <div key={index} className="text-center">
-              <div className="mb-2 text-4xl font-bold text-black md:text-5xl">
+              <div className="mb-2 text-4xl font-bold text-blue-950 md:text-5xl">
                 {animatedValues[index].toLocaleString("fa-IR")}
                 {stat.suffix}
               </div>
-              <div className="text-lg text-black">{stat.label}</div>
+              <div className="text-lg text-blue-950">{stat.label}</div>
             </div>
           ))}
         </div>

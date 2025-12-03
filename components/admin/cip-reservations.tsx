@@ -34,13 +34,13 @@ export function CipReservations({ serviceId, reservations }: CipReservationsProp
   const [statusFilter, setStatusFilter] = useState("ALL")
 
   const filteredReservations = reservations.filter(reservation => {
-    const matchesSearch = 
+    const matchesSearch =
       reservation.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       reservation.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       reservation.phoneNumber.includes(searchTerm)
-    
+
     const matchesStatus = statusFilter === "ALL" || reservation.status === statusFilter
-    
+
     return matchesSearch && matchesStatus
   })
 
@@ -51,9 +51,9 @@ export function CipReservations({ serviceId, reservations }: CipReservationsProp
       CANCELLED: { label: "لغو شده", color: "bg-red-500" },
       COMPLETED: { label: "تکمیل شده", color: "bg-blue-500" }
     }
-    
+
     const config = statusConfig[status as keyof typeof statusConfig] || { label: status, color: "bg-gray-500" }
-    
+
     return (
       <Badge className={`${config.color} text-white text-xs`}>
         {config.label}
@@ -96,11 +96,11 @@ export function CipReservations({ serviceId, reservations }: CipReservationsProp
       res.status,
       formatDate(res.createdAt)
     ])
-    
+
     const csvContent = [headers, ...csvData]
       .map(row => row.join(","))
       .join("\n")
-    
+
     const blob = new Blob([csvContent], { type: "text/csv" })
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
@@ -162,7 +162,7 @@ export function CipReservations({ serviceId, reservations }: CipReservationsProp
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md"
+                className="w-full p-2 border border-blue-900 rounded-md"
               >
                 <option value="ALL">همه وضعیت‌ها</option>
                 <option value="PENDING">در انتظار</option>
@@ -183,7 +183,7 @@ export function CipReservations({ serviceId, reservations }: CipReservationsProp
               filteredReservations.map((reservation) => (
                 <div
                   key={reservation.id}
-                  className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="p-4 border border-blue-900 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-2">

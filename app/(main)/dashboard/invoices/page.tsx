@@ -64,23 +64,23 @@ export default function InvoicesPage() {
 
   const getStatusBadge = (state: string) => {
     const statusConfig = {
-      WAITING: { 
-        label: "در انتظار پرداخت", 
+      WAITING: {
+        label: "در انتظار پرداخت",
         color: "bg-yellow-100 text-yellow-800 border-yellow-200",
         icon: <CreditCard className="h-3 w-3 ml-1" />
       },
-      PAID: { 
-        label: "پرداخت شده", 
+      PAID: {
+        label: "پرداخت شده",
         color: "bg-green-100 text-green-800 border-green-200",
         icon: <FileText className="h-3 w-3 ml-1" />
       },
-      CANCELLED: { 
-        label: "لغو شده", 
+      CANCELLED: {
+        label: "لغو شده",
         color: "bg-red-100 text-red-800 border-red-200",
         icon: <Calendar className="h-3 w-3 ml-1" />
       }
     };
-    
+
     const config = statusConfig[state as keyof typeof statusConfig] || statusConfig.WAITING;
     return (
       <Badge className={`${config.color} flex flex-wrap items-center gap-1`}>
@@ -95,9 +95,9 @@ export default function InvoicesPage() {
       FLIGHT: { icon: <Plane className="h-5 w-5" />, label: "پرواز", color: "text-blue-600" },
       HOTEL: { icon: <Hotel className="h-5 w-5" />, label: "هتل", color: "text-green-600" },
       TRAIN: { icon: <Train className="h-5 w-5" />, label: "قطار", color: "text-purple-600" },
-      CHARGE: { icon: <CreditCardIcon className="h-5 w-5" />, label: "شارژ اعتبار", color: "text-pink-700"}
+      CHARGE: { icon: <CreditCardIcon className="h-5 w-5" />, label: "شارژ اعتبار", color: "text-pink-700" }
     };
-    
+
     return iconConfig[kind as keyof typeof iconConfig] || iconConfig.FLIGHT;
   };
 
@@ -137,7 +137,7 @@ export default function InvoicesPage() {
     );
   }
 
-  return (    
+  return (
     <div className="min-h-screen">
       <Header />
       <main className="py-12">
@@ -145,7 +145,7 @@ export default function InvoicesPage() {
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2">صورت حساب ها</h1>
             <p className="text-muted-foreground">
-              {invoices.length > 0 
+              {invoices.length > 0
                 ? `مدیریت ${invoices.length} صورت حساب رزرو`
                 : "مدیریت صورت حساب های رزرو"
               }
@@ -156,7 +156,7 @@ export default function InvoicesPage() {
             <aside className="lg:col-span-1">
               <DashboardNav />
             </aside>
-            
+
             <div className="lg:col-span-3">
               {invoices.length === 0 ? (
                 <Card>
@@ -172,7 +172,7 @@ export default function InvoicesPage() {
                 <div className="space-y-6">
                   {invoices.map((invoice) => {
                     const kindConfig = getKindIcon(invoice.kind);
-                    
+
                     return (
                       <Card key={invoice.id} className="border shadow-sm hover:shadow-md transition-shadow p-4">
                         <CardHeader className="pb-4 flex-wrap">
@@ -202,11 +202,11 @@ export default function InvoicesPage() {
                                 </div>
                               </div>
                             </div>
-                            
+
                             <div className="text-right">
                               {getStatusBadge(invoice.state)}
                               <p className="text-2xl font-bold text-green-600 mt-2">
-                                {parseInt(invoice.amount).toLocaleString('fa-IR')} 
+                                {parseInt(invoice.amount).toLocaleString('fa-IR')}
                                 <span className="text-sm font-normal text-muted-foreground mr-1">تومان</span>
                               </p>
                             </div>
@@ -240,7 +240,7 @@ export default function InvoicesPage() {
                                   </p>
                                 </div>
                               </div>
-                              
+
                               {invoice.order.AirItineraryPricingInfo?.ItinTotalFare && (
                                 <div className="mt-4 pt-4 border-t border-blue-200">
                                   <div className="flex flex-wrap gap-6 text-sm">
@@ -284,47 +284,47 @@ export default function InvoicesPage() {
 
                           {/* Travelers Information */}
                           {invoice.travelers && Array.isArray(invoice.travelers) &&
-                          <div className="border rounded-lg p-4">
-                            <div className="flex items-center gap-2 mb-4">
-                              <User className="h-5 w-5 text-muted-foreground" />
-                              <Label className="font-medium">مسافران ({invoice.travelers.length} نفر)</Label>
-                            </div>
-                            <div className="grid gap-3">
-                              {invoice.travelers.map((traveler, index) => (
-                                <div key={traveler.id || index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                  <div className="flex flex-wrap items-center gap-4">
-                                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                                      <span className="text-sm font-medium">{index + 1}</span>
-                                    </div>
-                                    <div>
-                                      <p className="font-medium">{traveler.firstName} {traveler.lastName}</p>
-                                      <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mt-1">
-                                        <span>کد ملی: {traveler.nationalId}</span>
-                                        <span>سن: {traveler.age} سال</span>
-                                        {traveler.passengerType && (
-                                          <span>
-                                            {traveler.passengerType === "1" ? "بزرگسال" : 
-                                             traveler.passengerType === "2" ? "کودک" : "نوزاد"}
-                                          </span>
-                                        )}
+                            <div className="border rounded-lg p-4">
+                              <div className="flex items-center gap-2 mb-4">
+                                <User className="h-5 w-5 text-muted-foreground" />
+                                <Label className="font-medium">مسافران ({invoice.travelers.length} نفر)</Label>
+                              </div>
+                              <div className="grid gap-3">
+                                {invoice.travelers.map((traveler, index) => (
+                                  <div key={traveler.id || index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div className="flex flex-wrap items-center gap-4">
+                                      <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                                        <span className="text-sm font-medium">{index + 1}</span>
+                                      </div>
+                                      <div>
+                                        <p className="font-medium">{traveler.firstName} {traveler.lastName}</p>
+                                        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mt-1">
+                                          <span>کد ملی: {traveler.nationalId}</span>
+                                          <span>سن: {traveler.age} سال</span>
+                                          {traveler.passengerType && (
+                                            <span>
+                                              {traveler.passengerType === "1" ? "بزرگسال" :
+                                                traveler.passengerType === "2" ? "کودک" : "نوزاد"}
+                                            </span>
+                                          )}
+                                        </div>
                                       </div>
                                     </div>
+                                    <div className="text-right text-sm text-muted-foreground">
+                                      {traveler.phoneNumber && <p>{traveler.phoneNumber}</p>}
+                                      {traveler.email && <p>{traveler.email}</p>}
+                                    </div>
                                   </div>
-                                  <div className="text-right text-sm text-muted-foreground">
-                                    {traveler.phoneNumber && <p>{traveler.phoneNumber}</p>}
-                                    {traveler.email && <p>{traveler.email}</p>}
-                                  </div>
-                                </div>
-                              ))}
+                                ))}
+                              </div>
                             </div>
-                          </div>
                           }
 
                           {/* Action Buttons */}
                           <div className="flex flex-wrap gap-3 pt-4 border-t">
                             <button
-                            onClick={() => router.push(`/invoice/${invoice.id}`)} 
-                            className="border border-gray-300 px-6 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+                              onClick={() => router.push(`/invoice/${invoice.id}`)}
+                              className="border border-blue-900 px-6 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors">
                               مشاهده جزئیات
                             </button>
                           </div>
