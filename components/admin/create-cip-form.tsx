@@ -592,7 +592,7 @@ export function CreateCipForm() {
             <div className="space-y-6">
               {faqs.map((faq, index) => (
                 <Card key={index} className="border border-blue-900">
-                  <CardContent className="p-4 space-border-blue-900
+                  <CardContent className="p-4 space-border-blue-900">
                     <div className="flex items-center justify-between">
                       <h4 className="font-medium text-gray-900">
                         سوال #{index + 1}
@@ -654,14 +654,14 @@ export function CreateCipForm() {
                       </div>
                     </div>
                   </CardContent>
-        </Card>
+                </Card>
               ))}
-    </div>
+            </div>
           </CardContent >
         </Card >
 
-    {/* تنظیمات */ }
-    < Card className = "py-6" >
+        {/* تنظیمات */}
+        < Card className="py-6" >
           <CardHeader>
             <CardTitle>تنظیمات</CardTitle>
           </CardHeader>
@@ -724,8 +724,8 @@ export function CreateCipForm() {
           </CardContent>
         </Card >
 
-    {/* دکمه‌های اقدام */ }
-    < div className = "flex gap-4 justify-end pt-6 border-t" >
+        {/* دکمه‌های اقدام */}
+        < div className="flex gap-4 justify-end pt-6 border-t" >
           <Button
             type="button"
             variant="outline"
