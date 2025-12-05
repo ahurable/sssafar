@@ -923,7 +923,7 @@ const FlightSearch = () => {
                             ref={fromInputRef}
                             id="flight-from"
                             placeholder="نام فرودگاه، مثال: تهران (IKA)"
-                            className={`pr-10 h-12 border bg-[#fffefe] text-blue-950 placeholder-gray-500 focus:outline-none ${errors.from
+                            className={`pr-10 h-12 border bg-[#fffefe] text-blue-950 placeholder-gray-500 cursor-pointer focus:outline-none ${errors.from
                                 ? 'border-red-500 focus:border-red-500'
                                 : 'border-blue-900 focus:border-blue-500'
                                 }`}
@@ -931,6 +931,7 @@ const FlightSearch = () => {
                             onChange={(e) => handleInputChange(e.target.value, "from")}
                             onKeyDown={(e) => handleKeyDown(e, "from")}
                             onFocus={() => handleFocus("from")}
+                            onClick={() => handleFocus('from')}
                             onBlur={handleBlur}
                             autoComplete="off"
                         />
@@ -967,7 +968,7 @@ const FlightSearch = () => {
                             ref={toInputRef}
                             id="flight-to"
                             placeholder="نام فرودگاه مقصد مثال: استانبول (IST)"
-                            className={`pr-10 h-12 border bg-[#fffefe] text-blue-950 placeholder-gray-500 focus:outline-none ${errors.to
+                            className={`pr-10 h-12 border bg-[#fffefe] text-blue-950 placeholder-gray-500 cursor-pointer focus:outline-none ${errors.to
                                 ? 'border-red-500 focus:border-red-500'
                                 : 'border-blue-900 focus:border-blue-500'
                                 }`}
@@ -975,6 +976,7 @@ const FlightSearch = () => {
                             onChange={(e) => handleInputChange(e.target.value, "to")}
                             onKeyDown={(e) => handleKeyDown(e, "to")}
                             onFocus={() => handleFocus("to")}
+                            onClick={() => handleFocus('to')}
                             onBlur={handleBlur}
                             autoComplete="off"
                         />

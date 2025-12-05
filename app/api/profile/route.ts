@@ -21,7 +21,8 @@ export async function GET() {
           }
         },
         panelMember: true,
-        userCredit: true
+        userCredit: true,
+        cards: true
       }
     })
 
@@ -29,7 +30,7 @@ export async function GET() {
       return typeof value === 'bigint' ? parseInt(value.toString()) : value;
     }));
 
-    return NextResponse.json({user: serializedUser})
+    return NextResponse.json({ user: serializedUser })
   } catch (error: any) {
     console.error("Get profile error:", error)
     return NextResponse.json({ error: "خطا در دریافت پروفایل" }, { status: 500 })

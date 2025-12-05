@@ -64,9 +64,21 @@ model User {
   userCredit              Credit?
   userTransactions        UserTransaction[]
   otpCodes                OtpCode[]
+  cards                   CreditCard[]
 
   @@index([email])
   @@index([phone])
+}
+
+model CreditCard {
+  id         String @id @default(cuid())
+  cardNumber String
+  cardShaba  String
+  fullName   String
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+
+  @@map("credit_card")
 }
 
 model OtpCode {

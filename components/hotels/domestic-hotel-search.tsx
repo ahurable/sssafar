@@ -19,50 +19,57 @@ interface CitySuggestion {
   type: 'domestic' | 'international';
   isPopular?: boolean;
   searchDestinationOrCity?: boolean;
+  hotelId: string | null;
   isActive?: boolean;
 }
 
 
 const FAVORITE_DESTINATIONS: CitySuggestion[] = [
-
   {
     id: 1,
     name: "تهران",
     type: "domestic",
-    propertyDestinationId: 1
+    propertyDestinationId: 1,
+    hotelId: null
   },
   {
     id: 10,
     name: "مشهد",
     type: "domestic",
-    propertyDestinationId: 6
+    propertyDestinationId: 6,
+    hotelId: null
   },
   {
     id: 7,
     name: "اصفهان",
     type: "domestic",
-    propertyDestinationId: 5
+    propertyDestinationId: 5,
+    hotelId: null
   },
   {
     id: 2,
     name: "شیراز",
     type: "domestic",
-    propertyDestinationId: 2
+    propertyDestinationId: 2,
+    hotelId: null
   },
   {
     id: 13,
     name: "کیش",
     type: "domestic",
-    propertyDestinationId: 7
+    propertyDestinationId: 7,
+    hotelId: null
   },
 ]
 
 interface HotelSearchFormData {
-  city: string;
-  cityId?: number;
-  cityType?: 'domestic' | 'international';
-  propertyDestinationId?: number;
+  city: string | null;
+  cityId: number | null;
+  name?: string;
+  cityType: 'domestic' | 'international' | null;
+  propertyDestinationId: number | null;
   checkIn: string;
+  hotelId: string | null;
   checkOut: string;
   guests: number;
   rooms: number;
@@ -84,12 +91,13 @@ const DomesticHotelSearch = () => {
   const favoritesRef = useRef<HTMLDivElement>(null)
 
   const [hotelSearch, setHotelSearch] = useState<HotelSearchFormData>({
-    city: "",
-    cityId: undefined,
-    cityType: undefined,
-    propertyDestinationId: undefined,
+    city: null,
+    cityId: null,
+    cityType: null,
+    propertyDestinationId: null,
     checkIn: "",
     checkOut: "",
+    hotelId: null,
     guests: 1,
     rooms: 1,
     type: 'domestic'
@@ -196,9 +204,9 @@ const DomesticHotelSearch = () => {
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {}
 
-    if (!hotelSearch.city.trim()) {
+    if (!hotelSearch.name || !hotelSearch.city || !hotelSearch.city.trim()) {
       newErrors.city = "لطفاً یک شهر معتبر انتخاب کنید"
-    } else if (!hotelSearch.cityId) {
+    } else if (!hotelSearch.name && !hotelSearch.cityId) {
       newErrors.city = "لطفاً از لیست پیشنهادی یک شهر انتخاب کنید"
     }
 
@@ -227,14 +235,25 @@ const DomesticHotelSearch = () => {
     const displayValue = suggestion.nameFa
       ? `${suggestion.nameFa} (${suggestion.name})`
       : suggestion.name;
-
-    setHotelSearch(prev => ({
-      ...prev,
-      city: displayValue,
-      cityId: suggestion.id,
-      cityType: suggestion.type,
-      propertyDestinationId: suggestion.propertyDestinationId
-    }))
+    if (suggestion.hotelId === null || suggestion.hotelId.length === 0) {
+      setHotelSearch(prev => ({
+        ...prev,
+        city: displayValue,
+        cityId: suggestion.id,
+        cityType: suggestion.type,
+        propertyDestinationId: suggestion.propertyDestinationId
+      }))
+    } else {
+      setHotelSearch((prev) => ({
+        ...prev,
+        city: null,
+        cityId: null,
+        cityType: null,
+        propertyDestinationId: null,
+        hotelId: suggestion.hotelId,
+        name: suggestion.name
+      }));
+    }
 
     setShowSuggestions(false)
     setShowFavorites(false)
@@ -249,9 +268,9 @@ const DomesticHotelSearch = () => {
     setHotelSearch(prev => ({
       ...prev,
       city: value,
-      cityId: undefined,
-      cityType: undefined,
-      propertyDestinationId: undefined
+      cityId: null,
+      cityType: null,
+      propertyDestinationId: null
     }))
 
     if (errors.city) {
@@ -385,7 +404,7 @@ const DomesticHotelSearch = () => {
         {suggestions.map((suggestion, index) => (
           <div
             key={`${suggestion.id}-${suggestion.type}`}
-            className={`p-3 cursor-pointer border-b border-blue-900 last:border-b-0 ${index === activeSuggestionIndex
+            className={`p-3 cursor-pointer last:border-b-0 ${index === activeSuggestionIndex
               ? 'bg-gray-100'
               : 'hover:bg-gray-50'
               }`}
@@ -409,7 +428,7 @@ const DomesticHotelSearch = () => {
                     ? 'bg-gray-200 text-blue-950 border border-blue-900'
                     : 'bg-gray-200 text-blue-950 border border-blue-900'
                     }`}>
-                    {suggestion.type === 'domestic' ? 'داخلی' : 'بین‌المللی'}
+                    {suggestion.type.toLowerCase() === 'domestic' ? 'داخلی' : 'بین‌المللی'}
                   </span>
                   {suggestion.isPopular && (
                     <span className="text-xs bg-gray-200 text-blue-950 px-2 py-1 font-medium border border-blue-900">
@@ -466,7 +485,7 @@ const DomesticHotelSearch = () => {
                     ? 'bg-gray-200 text-blue-950 border border-blue-900'
                     : 'bg-gray-200 text-blue-950 border border-blue-900'
                     }`}>
-                    {suggestion.type === 'domestic' ? 'داخلی' : 'بین‌المللی'}
+                    {suggestion.type.toLowerCase() === 'domestic' ? 'داخلی' : 'بین‌المللی'}
                   </span>
                   {suggestion.isPopular && (
                     <span className="text-xs bg-gray-200 text-blue-950 px-2 py-1 font-medium border border-blue-900">
@@ -572,14 +591,20 @@ const DomesticHotelSearch = () => {
               ref={inputRef}
               id="hotel-city"
               placeholder="تهران، استانبول، دبی..."
-              className={`pr-10 h-12 border border-blue-900 bg-[#fffefe] text-blue-950 placeholder-gray-500 ${errors.city
+              className={`pr-10 h-12 border border-blue-900 bg-[#fffefe] text-blue-950 cursor-pointer placeholder-gray-500 ${errors.city
                 ? 'border-red-500 bg-red-500'
                 : 'border-blue-900'
                 }`}
-              value={hotelSearch.city}
+              value={hotelSearch.city || hotelSearch.name}
               onChange={(e) => handleInputChange(e.target.value)}
               onKeyDown={handleKeyDown}
               onFocus={() => {
+                setIsCityFocused(true)
+                setShowSuggestions(suggestions.length > 0)
+                setShowFavorites(true)
+                setHotelSearch((prev: any) => ({ ...prev, city: "" }))
+              }}
+              onClick={() => {
                 setIsCityFocused(true)
                 setShowSuggestions(suggestions.length > 0)
                 setShowFavorites(true)

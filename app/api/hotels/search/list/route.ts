@@ -4,8 +4,8 @@ import { flightSessionService } from '@/lib/flight-session';
 interface HotelSearchRequest {
   checkIn: string;
   checkOut: string;
-  cityId: number;
-  cityType: string;
+  cityId: number | null;
+  cityType: string | null;
   guests: number;
   rooms: number;
   childAges?: number[];
@@ -21,9 +21,9 @@ export async function POST(request: NextRequest) {
     const requestData: HotelSearchRequest = await request.json();
     // console.log(requestData)
     // Validate required fields
-    const { checkIn, checkOut, cityId } = requestData;
+    const { checkIn, checkOut, cityId, hotelId } = requestData;
 
-    if (!checkIn || !checkOut || !cityId) {
+    if (!checkIn || !checkOut || !hotelId && !cityId) {
       return NextResponse.json(
         { error: 'checkIn, checkOut, and cityId are required' },
         { status: 400 }
@@ -65,12 +65,12 @@ export async function POST(request: NextRequest) {
       HotelIdList: requestData.hotelIdList || null,
       CityId: cityId,
       RegionCode: requestData.regionCode || null,
-      CountryCode: requestData.cityType =="domestic" && "IR" || null,
+      CountryCode: requestData.cityType == "domestic" && "IR" || null,
       Occupancies: occupancies,
       IsAccommodation: false
     };
 
-    // console.log('Sending hotel availability request:', externalRequest);
+    console.log('Sending hotel availability request:', externalRequest);
 
     const response = await fetch('https://apidemo.partocrs.com/api/Hotel/HotelAvailability', {
       method: 'POST',
@@ -87,8 +87,8 @@ export async function POST(request: NextRequest) {
     const externalResponse = await response.json();
     // const hotelIds = externalResponse.PricedItineraries.map((hotel:any) => hotel.id)
 
-   
-    // // console.log(externalResponse)
+
+    console.log(externalResponse)
 
     return NextResponse.json({
       success: true,
@@ -99,9 +99,9 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Error in hotel search API:', error);
-    
+
     return NextResponse.json(
-      { 
+      {
         error: 'Internal server error',
         details: error instanceof Error ? error.message : 'Unknown error'
       },
@@ -110,155 +110,155 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export const PUT =  async ( request: NextRequest ) => {
+export const PUT = async (request: NextRequest) => {
 
 
-   const sessionId = await flightSessionService.getSession()
-   
+  const sessionId = await flightSessionService.getSession()
 
-   const requestData: HotelSearchRequest = await request.json();
 
-    // Validate required fields
-    const { checkIn, checkOut, cityId, hotelId } = requestData;
+  const requestData: HotelSearchRequest = await request.json();
 
-    if (!checkIn || !checkOut || !cityId) {
-      return NextResponse.json(
-        { error: 'checkIn, checkOut, and cityId are required' },
-        { status: 400 }
-      );
-    }
+  // Validate required fields
+  const { checkIn, checkOut, cityId, hotelId } = requestData;
 
-    const occupancies = Array.from({ length: requestData.rooms || 1 }, (_, index) => ({
-      AdultCount: index === 0 ? requestData.guests || 2 : 0, // All adults in first room, or distribute as needed
-      ChildCount: requestData.childAges?.length || 0,
-      ChildAges: requestData.childAges || []
-    }));
+  if (!checkIn || !checkOut || !cityId) {
+    return NextResponse.json(
+      { error: 'checkIn, checkOut, and cityId are required' },
+      { status: 400 }
+    );
+  }
 
-    // Adjust adult distribution if needed
-    if (requestData.rooms > 1) {
-      // Distribute adults across rooms (simplified logic)
-      const adultsPerRoom = Math.floor((requestData.guests || 2) / requestData.rooms);
-      occupancies.forEach((occupancy, index) => {
-        if (index === requestData.rooms - 1) {
-          // Last room gets remaining adults
-          occupancy.AdultCount = (requestData.guests || 2) - (adultsPerRoom * (requestData.rooms - 1));
-        } else {
-          occupancy.AdultCount = adultsPerRoom;
-        }
-      });
-    }
+  const occupancies = Array.from({ length: requestData.rooms || 1 }, (_, index) => ({
+    AdultCount: index === 0 ? requestData.guests || 2 : 0, // All adults in first room, or distribute as needed
+    ChildCount: requestData.childAges?.length || 0,
+    ChildAges: requestData.childAges || []
+  }));
 
-    // console.log(`before : ${requestData.hotelIdList}`)
+  // Adjust adult distribution if needed
+  if (requestData.rooms > 1) {
+    // Distribute adults across rooms (simplified logic)
+    const adultsPerRoom = Math.floor((requestData.guests || 2) / requestData.rooms);
+    occupancies.forEach((occupancy, index) => {
+      if (index === requestData.rooms - 1) {
+        // Last room gets remaining adults
+        occupancy.AdultCount = (requestData.guests || 2) - (adultsPerRoom * (requestData.rooms - 1));
+      } else {
+        occupancy.AdultCount = adultsPerRoom;
+      }
+    });
+  }
 
-    if (requestData.hotelIdList && requestData.hotelIdList.length > 0) {
-        const hotels = []
-        // // console.log(`afterer: ${requestData.hotelIdList}`)
-        // Make individual requests for each hotel ID
-        for (const _hotelId of requestData.hotelIdList) {
-          // console.log(hotelId)
-            const _request = {
-                SessionId: sessionId,
-                CheckIn: `${checkIn}`,
-                CheckOut: `${checkOut}`,
-                NationalityId: requestData.nationality || "US",
-                HotelId: _hotelId, // Use individual hotel ID
-                HotelIdList: null, // Set to null when using HotelId
-                CityId: null, // Set to null when using HotelId
-                RegionCode: requestData.regionCode || null,
-                CountryCode: requestData.countryCode || null,
-                Occupancies: occupancies,
-                IsAccommodation: false
-            };
-            
-            // console.log(`Request for hotel ${hotelId}:`, _request)
-            
-            try {
-                const hotelsWithFareSourceCode = await fetch(
-                    'https://apidemo.partocrs.com/api/Hotel/HotelAvailability',
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify(_request)
-                    }
-                )
+  // console.log(`before : ${requestData.hotelIdList}`)
 
-                const data = await hotelsWithFareSourceCode.json()
-
-                if (hotelsWithFareSourceCode.ok && data.Success) {
-                    // Add all PricedItineraries from this hotel to the hotels array
-                    if (data.PricedItineraries && data.PricedItineraries.length > 0) {
-                        hotels.push(...data.PricedItineraries)
-                    }
-                } else {
-                    console.error(`Error for hotel ${hotelId}:`, data)
-                }
-            } catch (error) {
-                console.error(`Request failed for hotel ${hotelId}:`, error)
-            }
-        }
-
-        // console.log("All hotels combined:", hotels)
-        return NextResponse.json(hotels, { status: 200 })
-    } 
-
-    if (hotelId && hotelId != 0) {
+  if (requestData.hotelIdList && requestData.hotelIdList.length > 0) {
+    const hotels = []
+    // // console.log(`afterer: ${requestData.hotelIdList}`)
+    // Make individual requests for each hotel ID
+    for (const _hotelId of requestData.hotelIdList) {
+      // console.log(hotelId)
       const _request = {
-              SessionId: sessionId,
-              CheckIn: `${checkIn}`,
-              CheckOut: `${checkOut}`,
-              NationalityId: requestData.nationality || "US",
-              HotelId: hotelId, // Use individual hotel ID
-              HotelIdList: null, // Set to null when using HotelId
-              CityId: null, // Set to null when using HotelId
-              RegionCode: requestData.regionCode || null,
-              CountryCode: requestData.countryCode || null,
-              Occupancies: occupancies,
-              IsAccommodation: false
-          };
-          // console.log(_request)
-       try {
-            const hotels = []
-            const hotelsWithFareSourceCode = await fetch(
-                'https://apidemo.partocrs.com/api/Hotel/HotelAvailability',
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(_request)
-                }
-            )
+        SessionId: sessionId,
+        CheckIn: `${checkIn}`,
+        CheckOut: `${checkOut}`,
+        NationalityId: requestData.nationality || "US",
+        HotelId: _hotelId, // Use individual hotel ID
+        HotelIdList: null, // Set to null when using HotelId
+        CityId: null, // Set to null when using HotelId
+        RegionCode: requestData.regionCode || null,
+        CountryCode: requestData.countryCode || null,
+        Occupancies: occupancies,
+        IsAccommodation: false
+      };
 
-            const data = await hotelsWithFareSourceCode.json()
+      // console.log(`Request for hotel ${hotelId}:`, _request)
 
-            if (hotelsWithFareSourceCode.ok && data.Success) {
-                // Add all PricedItineraries from this hotel to the hotels array
-                if (data.PricedItineraries && data.PricedItineraries.length > 0) {
-                    hotels.push(...data.PricedItineraries)
-                }
-            } else {
-                console.error(`Error for hotel ${hotelId}:`, data)
-            }
-            
-        return NextResponse.json(hotels, { status: 200 })
-        } catch (error) {
-            console.error(`Request failed for hotel ${hotelId}:`, error)
+      try {
+        const hotelsWithFareSourceCode = await fetch(
+          'https://apidemo.partocrs.com/api/Hotel/HotelAvailability',
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(_request)
+          }
+        )
+
+        const data = await hotelsWithFareSourceCode.json()
+
+        if (hotelsWithFareSourceCode.ok && data.Success) {
+          // Add all PricedItineraries from this hotel to the hotels array
+          if (data.PricedItineraries && data.PricedItineraries.length > 0) {
+            hotels.push(...data.PricedItineraries)
+          }
+        } else {
+          console.error(`Error for hotel ${hotelId}:`, data)
         }
-        
+      } catch (error) {
+        console.error(`Request failed for hotel ${hotelId}:`, error)
+      }
     }
 
-    // return NextResponse.json(hotels, {status:200})
+    // console.log("All hotels combined:", hotels)
+    return NextResponse.json(hotels, { status: 200 })
+  }
 
-  } 
+  if (hotelId && hotelId != 0) {
+    const _request = {
+      SessionId: sessionId,
+      CheckIn: `${checkIn}`,
+      CheckOut: `${checkOut}`,
+      NationalityId: requestData.nationality || "US",
+      HotelId: hotelId, // Use individual hotel ID
+      HotelIdList: null, // Set to null when using HotelId
+      CityId: null, // Set to null when using HotelId
+      RegionCode: requestData.regionCode || null,
+      CountryCode: requestData.countryCode || null,
+      Occupancies: occupancies,
+      IsAccommodation: false
+    };
+    // console.log(_request)
+    try {
+      const hotels = []
+      const hotelsWithFareSourceCode = await fetch(
+        'https://apidemo.partocrs.com/api/Hotel/HotelAvailability',
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(_request)
+        }
+      )
 
-   
-    
+      const data = await hotelsWithFareSourceCode.json()
 
-    // return NextResponse.json({
-    //   success: false,
-    //   data: null,
-    //   sessionId: sessionId,
-    //   request: null
-    // })
+      if (hotelsWithFareSourceCode.ok && data.Success) {
+        // Add all PricedItineraries from this hotel to the hotels array
+        if (data.PricedItineraries && data.PricedItineraries.length > 0) {
+          hotels.push(...data.PricedItineraries)
+        }
+      } else {
+        console.error(`Error for hotel ${hotelId}:`, data)
+      }
+
+      return NextResponse.json(hotels, { status: 200 })
+    } catch (error) {
+      console.error(`Request failed for hotel ${hotelId}:`, error)
+    }
+
+  }
+
+  // return NextResponse.json(hotels, {status:200})
+
+}
+
+
+
+
+// return NextResponse.json({
+//   success: false,
+//   data: null,
+//   sessionId: sessionId,
+//   request: null
+// })

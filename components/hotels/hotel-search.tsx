@@ -11,6 +11,7 @@ import ShamsiDateModal from "../flights/ShamsiCalendar"
 import { formatShamsiDate } from "../flights/utils"
 import { shamsiToGregorianString } from "@/lib/jalaalil"
 import { motion, AnimatePresence } from 'framer-motion';
+import { hotels } from "@/lib/data/hotels"
 
 interface CitySuggestion {
   id: number;
@@ -21,10 +22,12 @@ interface CitySuggestion {
   isPopular?: boolean;
   searchDestinationOrCity?: boolean;
   isActive?: boolean;
+  hotelId?: string
 }
 
 interface HotelSearchFormData {
-  city: string;
+  city: string | null;
+  name?: string;
   cityId?: number;
   cityType?: 'domestic' | 'international';
   propertyDestinationId?: number;
@@ -32,6 +35,7 @@ interface HotelSearchFormData {
   checkOut: string;
   guests: number;
   rooms: number;
+  hotelId?: string
 }
 
 interface FormErrors {
@@ -88,14 +92,16 @@ const HotelSearch = () => {
   const favoritesRef = useRef<HTMLDivElement>(null)
 
   const [hotelSearch, setHotelSearch] = useState<HotelSearchFormData>({
-    city: "",
+    city: null,
+    name: undefined,
     cityId: undefined,
     cityType: undefined,
     propertyDestinationId: undefined,
     checkIn: "",
     checkOut: "",
     guests: 1,
-    rooms: 1
+    rooms: 1,
+    hotelId: undefined
   })
 
   const [errors, setErrors] = useState<FormErrors>({})
@@ -200,9 +206,9 @@ const HotelSearch = () => {
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {}
 
-    if (!hotelSearch.city.trim()) {
+    if (!hotelSearch.name || !hotelSearch.city || !hotelSearch.city.trim()) {
       newErrors.city = "لطفاً یک شهر معتبر انتخاب کنید"
-    } else if (!hotelSearch.cityId) {
+    } else if (!hotelSearch.name && !hotelSearch.cityId) {
       newErrors.city = "لطفاً از لیست پیشنهادی یک شهر انتخاب کنید"
     }
 
@@ -231,14 +237,21 @@ const HotelSearch = () => {
     const displayValue = suggestion.nameFa
       ? `${suggestion.nameFa} (${suggestion.name})`
       : suggestion.name;
-
-    setHotelSearch(prev => ({
-      ...prev,
-      city: displayValue,
-      cityId: suggestion.id,
-      cityType: suggestion.type,
-      propertyDestinationId: suggestion.propertyDestinationId
-    }))
+    if (!suggestion.hotelId || suggestion.hotelId.length === 0) {
+      setHotelSearch(prev => ({
+        ...prev,
+        city: displayValue,
+        cityId: suggestion.id,
+        cityType: suggestion.type,
+        propertyDestinationId: suggestion.propertyDestinationId
+      }))
+    } else {
+      setHotelSearch(prev => ({
+        ...prev,
+        hotelId: suggestion.hotelId,
+        name: suggestion.name
+      }))
+    }
 
     setShowSuggestions(false)
     setShowFavorites(false)
@@ -384,12 +397,12 @@ const HotelSearch = () => {
     return (
       <div
         ref={suggestionsRef}
-        className="absolute top-full right-0 left-0 bg-[#fffefe] border border-blue-900 z-50 max-h-80 overflow-y-auto mt-1"
+        className="absolute top-full right-0 left-0 bg-[#fffefe] z-50 max-h-80 overflow-y-auto mt-1"
       >
         {suggestions.map((suggestion, index) => (
           <div
             key={`${suggestion.id}-${suggestion.type}`}
-            className={`p-3 cursor-pointer border-b border-blue-900 last:border-b-0 ${index === activeSuggestionIndex
+            className={`p-3 cursor-pointer last:border-b-0 ${index === activeSuggestionIndex
               ? 'bg-gray-100'
               : 'hover:bg-gray-50'
               }`}
@@ -413,7 +426,7 @@ const HotelSearch = () => {
                     ? 'bg-gray-200 text-blue-950 border border-blue-900'
                     : 'bg-gray-200 text-blue-950 border border-blue-900'
                     }`}>
-                    {suggestion.type === 'domestic' ? 'داخلی' : 'بین‌المللی'}
+                    {suggestion.type.toLowerCase() === 'domestic' ? 'داخلی' : 'بین‌المللی'}
                   </span>
                   {suggestion.isPopular && (
                     <span className="text-xs bg-gray-200 text-blue-950 px-2 py-1 font-medium border border-blue-900">
@@ -482,7 +495,7 @@ const HotelSearch = () => {
                     ? 'bg-gray-200 text-blue-950 border border-blue-900'
                     : 'bg-gray-200 text-blue-950 border border-blue-900'
                     }`}>
-                    {suggestion.type === 'domestic' ? 'داخلی' : 'بین‌المللی'}
+                    {suggestion.type.toLowerCase() === 'domestic' ? 'داخلی' : 'بین‌المللی'}
                   </span>
                   {suggestion.isPopular && (
                     <span className="text-xs bg-gray-200 text-blue-950 px-2 py-1 font-medium border border-blue-900">
@@ -668,16 +681,17 @@ const HotelSearch = () => {
               id="hotel-city"
               placeholder="تهران، استانبول، دبی..."
 
-              className={`pr-10 h-12 border border-blue-900 bg-[#fffefe] text-blue-950 placeholder-gray-500 ${errors.city
+              className={`pr-10 h-12 border border-blue-900 bg-[#fffefe] text-blue-950 cursor-pointer placeholder-gray-500 ${errors.city
                 ? 'border-red-500 bg-red-500'
                 : 'border-blue-900'
                 }`}
-              value={hotelSearch.city}
+              value={hotelSearch.city ? hotelSearch.city : hotelSearch.name && hotelSearch.name || ""}
               onChange={(e) => handleInputChange(e.target.value)}
               onKeyDown={handleKeyDown}
               onFocus={() => {
                 handleFocus()
               }}
+              onClick={() => handleFocus()}
               onBlur={() => {
                 setIsCityFocused(false)
                 setTimeout(() => setShowSuggestions(false), 200)

@@ -43,7 +43,7 @@ export function ProfileForm() {
   const [selectedDate, setSelectedDate] = useState<DateObject | null>(null)
   const [hasOtpSent, setHasOtpSent] = useState(false)
   const [hasEmailVerificationSent, setHasEmailVerificationSent] = useState(false)
-
+  const [hasCard, setHasCard] = useState(false)
   // Credit Card State
   const [cardData, setCardData] = useState({
     cardNumber: "",
@@ -85,6 +85,7 @@ export function ProfileForm() {
           }
 
           setFormData(userData)
+
           // Set Persian date if exists
           if (userData.dateOfBirth) {
             try {
@@ -111,6 +112,15 @@ export function ProfileForm() {
             setIsEmailVerified(true)
           if (!data.user.email || data.user.email.length == 0)
             setHasEmail(false)
+          if (data.user.cards.length > 0) {
+            setHasCard(true)
+            setCardData({
+              cardNumber: data.user.cards[0].cardNumber,
+              cardName: data.user.cards[0].fullName,
+              shabaCode: data.user.cards[0].cardShaba
+            })
+          }
+
           else {
             setEmail(data.user.email)
             setHasEmail(true)
@@ -271,9 +281,21 @@ export function ProfileForm() {
   // Credit Card Submit Handler
   const handleCardSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Add credit card API integration later
-    console.log("Card data to be submitted:", cardData)
-    success("اطلاعات کارت بانکی با موفقیت ذخیره شد", "", 3000)
+
+    const res = await fetch(`/api/auth/add-card`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        ...cardData
+      })
+    })
+    const data = await res.json()
+    if (res.ok)
+      success("اطلاعات کارت بانکی با موفقیت ذخیره شد", "", 3000)
+    else
+      error(data.message)
   }
 
   // Corporate Request Submit Handler
@@ -1105,6 +1127,17 @@ export function ProfileForm() {
           <CardDescription>اطلاعات کارت بانکی خود را برای تراکنش‌های آینده وارد کنید</CardDescription>
         </CardHeader>
         <CardContent>
+          {hasCard && (
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center gap-3 text-blue-700">
+                <Mail className="h-5 w-5" />
+                <div>
+                  <p className="font-medium">اطلاعات حساب بانکی شما قبلا ذخیره شده است</p>
+                  <p className="text-sm mt-1">برای ویرایش اطلاعات لطفا با پشتیبانی تماس بگیرید</p>
+                </div>
+              </div>
+            </div>
+          )}
           <form onSubmit={handleCardSubmit} className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
@@ -1117,6 +1150,7 @@ export function ProfileForm() {
                   <Input
                     id="cardNumber"
                     name="cardNumber"
+                    disabled={hasCard}
                     placeholder="XXXX-XXXX-XXXX-XXXX"
                     value={cardData.cardNumber}
                     onChange={handleCardChange}
@@ -1133,6 +1167,7 @@ export function ProfileForm() {
                 <Input
                   id="cardName"
                   name="cardName"
+                  disabled={hasCard}
                   placeholder="نام کامل صاحب کارت"
                   value={cardData.cardName}
                   onChange={handleCardChange}
@@ -1148,6 +1183,7 @@ export function ProfileForm() {
               <Input
                 id="shabaCode"
                 name="shabaCode"
+                disabled={hasCard}
                 placeholder="IRXXXXXXXXXXXXXXXXXXXXXX"
                 value={cardData.shabaCode}
                 onChange={handleCardChange}
@@ -1155,10 +1191,10 @@ export function ProfileForm() {
             </div>
 
             <div className="flex justify-end gap-3">
-              <Button type="button" variant="outline">
+              <Button type="button" variant="outline" disabled={hasCard}>
                 انصراف
               </Button>
-              <Button type="submit">
+              <Button type="submit" disabled={hasCard}>
                 <Save className="ml-2 h-4 w-4" />
                 ذخیره اطلاعات بانکی
               </Button>

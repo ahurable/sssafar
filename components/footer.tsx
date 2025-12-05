@@ -35,7 +35,7 @@ export function Footer() {
                   خدمات ویزا
                 </Link>
               </li>
-              
+
               <li>
                 <Link href="/tours" className="text-muted-foreground hover:text-primary transition-colors">
                   تور ها
@@ -58,7 +58,7 @@ export function Footer() {
 
           <div className="flex flex-wrap gap-2">
             <div className="w-14 h-14 p-2 bg-gray-300">
-              <Link href={''}>
+              <Link href={'https://aira.ir/'}>
                 <Image
                   src={'/assets/images/aira.webp'}
                   width={100}
@@ -69,7 +69,7 @@ export function Footer() {
               </Link>
             </div>
             <div className="w-14 h-14 p-2 bg-gray-300">
-              <Link href={''}>
+              <Link href={'https://caa.gov.ir/'}>
                 <Image
                   src={'/assets/images/cao.svg'}
                   width={100}
@@ -80,7 +80,7 @@ export function Footer() {
               </Link>
             </div>
             <div className="w-14 h-14 p-2 bg-gray-300">
-              <Link href={''}>
+              <Link href={'https://farasa.cao.ir/'}>
                 <Image
                   src={'/assets/images/cao-paxright.svg'}
                   width={100}

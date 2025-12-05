@@ -264,13 +264,10 @@ export function Header() {
             <div className="flex items-center gap-3">
               <Image
                 src={'/assets/images/logo.png'}
-                width={30}
-                height={30}
+                width={200}
+                height={100}
                 alt="O'MOSAFER Logo"
               />
-              <span className="block text-lg font-bold ms-[-6px]">
-                مُسافِر
-              </span>
             </div>
             <button
               onClick={() => setMobileMenuOpen(false)}
@@ -522,13 +519,10 @@ export function Header() {
             >
               <Image
                 src={'/assets/images/logo.png'}
-                width={30}
-                height={30}
+                width={180}
+                height={90}
                 alt="O'MOSAFER Logo"
               />
-              <span className="block text-xl font-black ms-[-6px]">
-                مُسافِر
-              </span>
             </Link>
 
             {/* Desktop Navigation - Moved closer to logo */}
@@ -607,14 +601,13 @@ export function Header() {
               )}
             >
               {loading ? (
-                <div className="h-8 w-8 bg-gray-300 animate-pulse" />
-              ) : user ? (
-                <div className="flex h-8 w-8 items-center justify-center bg-blue-900 rounded-lg text-white text-sm font-bold">
-                  <User className="h-4 w-4 text-white" />
-                </div>
+                <div className="h-8 w-8 bg-gray-300 rounded-lg animate-pulse" />
               ) : (
-                <div className="flex h-8 w-8 items-center justify-center bg-blue-900 rounded-lg">
-                  <User className="h-4 w-4 text-white" />
+                <div className="flex py-1 h-max w-max px-1 items-center cursor-pointer justify-center bg-grey-100 border border-blue-900 rounded-lg text-blue-900 text-sm font-bold">
+                  <span className="block me-3 font-normal">{user && ` ${user.firstName ? user.firstName + ' ' + user.lastName : user.email ? user.email : user.phone}`}</span>
+                  <span className="p-1 rounded-full border border-blue-900">
+                    <User className="h-4 w-4 text-blue-900" />
+                  </span>
                 </div>
               )}
             </button>
