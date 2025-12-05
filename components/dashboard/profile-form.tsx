@@ -43,7 +43,7 @@ export function ProfileForm() {
   const [selectedDate, setSelectedDate] = useState<DateObject | null>(null)
   const [hasOtpSent, setHasOtpSent] = useState(false)
   const [hasEmailVerificationSent, setHasEmailVerificationSent] = useState(false)
-  
+
   // Credit Card State
   const [cardData, setCardData] = useState({
     cardNumber: "",
@@ -83,7 +83,7 @@ export function ProfileForm() {
             province: data.user.province || "",
             dateOfBirth: data.user.dateOfBirth || "",
           }
-          
+
           setFormData(userData)
           // Set Persian date if exists
           if (userData.dateOfBirth) {
@@ -99,15 +99,15 @@ export function ProfileForm() {
               console.error("Error setting date:", error)
             }
           }
-          if (data.user.phoneVerified == true) 
+          if (data.user.phoneVerified == true)
             setIsPhoneVerified(true)
           if (!data.user.phone || data.user.phone.length == 0)
             setHasPhone(false)
-          else{
+          else {
             setPhoneNumber(data.user.phone)
             setHasPhone(true)
           }
-          if (data.user.emailVerified == true) 
+          if (data.user.emailVerified == true)
             setIsEmailVerified(true)
           if (!data.user.email || data.user.email.length == 0)
             setHasEmail(false)
@@ -214,19 +214,19 @@ export function ProfileForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     // Prevent submission if there's existing data
     if (hasExistingData) {
       setError("برای ویرایش اطلاعات لطفا با پشتیبانی تماس بگیرید")
       return
     }
-    
+
     // Validate form
     if (!validateForm()) {
       setError("لطفا اطلاعات فرم را به درستی تکمیل کنید")
       return
     }
-    
+
     setSaving(true)
     setError("")
     setSuccess(false)
@@ -279,7 +279,7 @@ export function ProfileForm() {
   // Corporate Request Submit Handler
   const handleCorporateSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!validateCorporateForm()) {
       error("لطفا اطلاعات فرم حقوقی را به درستی تکمیل کنید", "", 3000)
       return
@@ -324,9 +324,9 @@ export function ProfileForm() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (hasExistingData) return
-    
+
     const { name, value } = e.target
-    
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -343,7 +343,7 @@ export function ProfileForm() {
 
   const handleCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    
+
     setCardData((prev) => ({
       ...prev,
       [name]: value,
@@ -352,7 +352,7 @@ export function ProfileForm() {
 
   const handleCorporateChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    
+
     setCorporateData((prev) => ({
       ...prev,
       [name]: name === 'employeeCount' ? parseInt(value) || 0 : value,
@@ -369,9 +369,9 @@ export function ProfileForm() {
 
   const handleDateChange = (date: DateObject | null) => {
     if (hasExistingData) return
-    
+
     setSelectedDate(date)
-    
+
     // Clear date error when user selects a date
     if (formErrors.dateOfBirth) {
       setFormErrors(prev => ({
@@ -382,11 +382,11 @@ export function ProfileForm() {
   }
 
   const isFormValid = () => {
-    return formData.firstName.trim().length >= 2 && 
-           formData.lastName.trim().length >= 2 && 
-           formData.address.trim().length >= 10 && 
-           formData.city.trim() && 
-           selectedDate !== null
+    return formData.firstName.trim().length >= 2 &&
+      formData.lastName.trim().length >= 2 &&
+      formData.address.trim().length >= 10 &&
+      formData.city.trim() &&
+      selectedDate !== null
   }
 
   const addPhoneNumber = async () => {
@@ -394,27 +394,27 @@ export function ProfileForm() {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
-      }, 
-      body: JSON.stringify({ phoneNumber : phoneNumber})
+      },
+      body: JSON.stringify({ phoneNumber: phoneNumber })
     })
     const data = await res.json()
-    if (res.ok){
-      success(data.message, "",3000)
+    if (res.ok) {
+      success(data.message, "", 3000)
       setHasPhone(true)
     }
-    else 
+    else
       error(data.message, "", 3000)
-  } 
+  }
 
   const generateOtp = async () => {
     const res = await fetch("/api/auth/generate-otp", {
       method: "POST"
     })
     const data = await res.json()
-    if (res.ok){
+    if (res.ok) {
       success(data.message, "", 3000)
       setHasOtpSent(true)
-    }else
+    } else
       error(data.message, "", 3000)
   }
 
@@ -423,7 +423,7 @@ export function ProfileForm() {
       const res = await fetch("/api/auth/verify-number", {
         method: "POST",
         headers: {
-          "Content-Type":"application/json"
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           otpCode: otpCode
@@ -444,15 +444,15 @@ export function ProfileForm() {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
-      }, 
+      },
       body: JSON.stringify({ email })
     })
     const data = await res.json()
-    if (res.ok){
-      success(data.message, "",3000)
+    if (res.ok) {
+      success(data.message, "", 3000)
       setHasEmail(true)
     }
-    else 
+    else
       error(data.message, "", 3000)
   }
 
@@ -461,7 +461,7 @@ export function ProfileForm() {
       method: "POST"
     })
     const data = await res.json()
-    if (res.ok){
+    if (res.ok) {
       success(data.message, "", 3000)
       setHasEmailVerificationSent(true)
     } else
@@ -473,7 +473,7 @@ export function ProfileForm() {
       const res = await fetch("/api/auth/verify-email", {
         method: "POST",
         headers: {
-          "Content-Type":"application/json"
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           verificationCode: emailVerificationCode
@@ -494,7 +494,7 @@ export function ProfileForm() {
     return (
       <Card>
         <CardContent className="p-6">
-          <div className="text-center py-8">در حال بارگذاری...</div>
+          <div className="text-center text-blue-900 py-8">در حال بارگذاری...</div>
         </CardContent>
       </Card>
     )
@@ -568,10 +568,10 @@ export function ProfileForm() {
               <CardDescription>برای دریافت اطلاعیه‌ها و بازیابی رمز عبور، ایمیل خود را اضافه کنید</CardDescription>
               <div className="grid grid-cols-4 items-center w-full mt-4">
                 <div className="md:col-span-3 col-span-4 pe-2">
-                  <Input 
-                    type="email" 
-                    placeholder="آدرس ایمیل خود را وارد کنید" 
-                    onChange={e => setEmail(e.currentTarget.value)} 
+                  <Input
+                    type="email"
+                    placeholder="آدرس ایمیل خود را وارد کنید"
+                    onChange={e => setEmail(e.currentTarget.value)}
                   />
                 </div>
                 <div className="md:col-span-1 col-span-4 p-2">
@@ -607,11 +607,11 @@ export function ProfileForm() {
               <CardTitle className="text-lg">تایید آدرس ایمیل</CardTitle>
               <div className="grid grid-cols-4 w-full items-center mt-4">
                 <div className="md:col-span-3 col-span-4 pe-2">
-                  <Input 
-                    type="text" 
-                    disabled={!hasEmailVerificationSent} 
-                    onChange={e => setEmailVerificationCode(e.currentTarget.value)} 
-                    placeholder="کد تایید ایمیل را وارد کنید" 
+                  <Input
+                    type="text"
+                    disabled={!hasEmailVerificationSent}
+                    onChange={e => setEmailVerificationCode(e.currentTarget.value)}
+                    placeholder="کد تایید ایمیل را وارد کنید"
                   />
                 </div>
                 <div className="md:col-span-1 col-span-4">
@@ -639,7 +639,7 @@ export function ProfileForm() {
         <CardHeader>
           <CardTitle>اطلاعات شخصی</CardTitle>
           <CardDescription>
-            {hasExistingData 
+            {hasExistingData
               ? "اطلاعات شما قبلا ثبت شده است. برای ویرایش با پشتیبانی تماس بگیرید."
               : "اطلاعات خود را وارد و به‌روزرسانی کنید"
             }
@@ -769,9 +769,8 @@ export function ProfileForm() {
                     render={(value, openCalendar) => (
                       <div className="relative">
                         <input
-                          className={`w-full h-10 px-3 pr-10 border rounded-md text-sm bg-background ${
-                            formErrors.dateOfBirth ? "border-red-500" : "border-input"
-                          } ${hasExistingData ? "bg-muted cursor-not-allowed" : ""}`}
+                          className={`w-full h-10 px-3 pr-10 border rounded-md text-sm bg-background ${formErrors.dateOfBirth ? "border-red-500" : "border-input"
+                            } ${hasExistingData ? "bg-muted cursor-not-allowed" : ""}`}
                           placeholder="تاریخ تولد را انتخاب کنید"
                           value={value || ""}
                           onClick={openCalendar}
@@ -823,13 +822,13 @@ export function ProfileForm() {
                   شهر
                   <span className="text-red-500 mr-1">*</span>
                 </Label>
-                <Input 
-                  id="city" 
-                  name="city" 
-                  placeholder="نام شهر" 
+                <Input
+                  id="city"
+                  name="city"
+                  placeholder="نام شهر"
                   className={formErrors.city ? "border-red-500" : ""}
-                  value={formData.city} 
-                  onChange={handleChange} 
+                  value={formData.city}
+                  onChange={handleChange}
                   disabled={hasExistingData}
                 />
                 {formErrors.city && (
@@ -868,8 +867,8 @@ export function ProfileForm() {
               <Button type="button" variant="outline" disabled={hasExistingData}>
                 انصراف
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={saving || hasExistingData || !isFormValid()}
                 className={hasExistingData || !isFormValid() ? "bg-gray-400 cursor-not-allowed" : ""}
               >
@@ -1087,8 +1086,8 @@ export function ProfileForm() {
               <Button type="button" variant="outline">
                 انصراف
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={corporateSubmitting}
               >
                 <Save className="ml-2 h-4 w-4" />

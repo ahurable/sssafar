@@ -10,8 +10,8 @@ export default function DashboardPage() {
       <main className="py-12">
         <div className="container mx-auto px-4">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">داشبورد کاربری</h1>
-            <p className="text-muted-foreground">مدیریت اطلاعات و رزروهای خود</p>
+            <h1 className="text-3xl font-bold mb-2 text-blue-900">داشبورد کاربری</h1>
+            <p className="text-muted-foreground text-blue-900">مدیریت اطلاعات و رزروهای خود</p>
           </div>
 
           <div className="grid gap-6 lg:grid-cols-4">

@@ -320,18 +320,28 @@ export function FlightSearchSection({ onSearchResults }: SearchSectionProps) {
     <section ref={cardRef} className=" bg-[#fffefe]">
 
       <div className="mx-auto">
-        <div className="text-center bg-blue-900 md:pt-8 md:pb-20 py-8">
-          <h2 className="text-3xl font-bold text-white mb-4">
+        <div className="text-center relative md:pt-8 md:pb-20 py-8">
+          <div className="bg-blue-950/70 w-full h-full z-30 absolute top-0 right-0"></div>
+          <div className="absolute w-full h-full z-20 top-0 right-0">
+            <Image
+              src="/assets/images/banner_1.jpg"
+              width={1200}
+              height={400}
+              alt=""
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <h2 className="text-3xl font-bold text-white mb-4 relative z-40">
             سفر بعدی خود را پیدا کنید
           </h2>
-          <p className="text-lg text-white max-w-2xl mx-auto">
+          <p className="text-lg text-white max-w-2xl mx-auto relative z-40">
             بهترین هتل ها، پروازها، CIP، تورها و قطارها را با بهترین قیمت ها کشف کنید
           </p>
         </div>
 
         {/* Desktop Version - Tabs */}
         <div className="block lg:mt-[-50px]">
-          <div className="bg-[#fffefe] border rounded-lg lg:px-8 border-blue-900">
+          <div className="bg-[#fffefe] relative z-50 border rounded-lg lg:px-8 border-blue-900">
             <DesktopTabs />
           </div>
         </div>
@@ -404,8 +414,8 @@ export function HotelSearchSection({ onSearchResults }: SearchSectionProps) {
     <section ref={cardRef} className=" bg-[#fffefe]">
       <div className="mx-auto">
         <div className="text-center relative md:pt-8 md:pb-20 py-8">
-          <div className="bg-blue-950/70 z-50 absolute top-0 right-0"></div>
-          <div className="absolute z-40 top-0 right-0">
+          <div className="bg-blue-950/70 w-full h-full z-30 absolute top-0 right-0"></div>
+          <div className="absolute w-full h-full z-20 top-0 right-0">
             <Image
               src="/assets/images/banner_1.jpg"
               width={1200}
@@ -414,17 +424,17 @@ export function HotelSearchSection({ onSearchResults }: SearchSectionProps) {
               className="w-full h-full object-cover"
             />
           </div>
-          <h2 className="text-3xl font-bold text-white mb-4">
+          <h2 className="text-3xl font-bold text-white mb-4 relative z-40">
             سفر بعدی خود را پیدا کنید
           </h2>
-          <p className="text-lg text-white max-w-2xl mx-auto">
+          <p className="text-lg text-white max-w-2xl mx-auto relative z-40">
             بهترین هتل ها، پروازها، CIP، تورها و قطارها را با بهترین قیمت ها کشف کنید
           </p>
         </div>
 
         {/* Desktop Version - Tabs */}
         <div className="block lg:mt-[-50px]">
-          <div className="bg-[#fffefe] border rounded-lg lg:px-8 border-blue-900">
+          <div className="bg-[#fffefe] relative z-50 border rounded-lg lg:px-8 border-blue-900">
             <DesktopTabs />
           </div>
         </div>
