@@ -228,11 +228,12 @@ export function Header() {
   // Desktop Dropdown Menu Component
   const DesktopDropdownMenu = ({ menuRef, isOpen, items, onSubmenuHover, onSubmenuLeave }: any) => {
     if (!isOpen) return null
+    const [hovered, setHovered] = useState<number>()
     // console.log(items)
     return (
       <div
         ref={menuRef}
-        className="absolute top-full right-0 mt-0 w-48 bg-[#fffefe] border border-blue-900 shadow-lg z-40"
+        className="absolute top-full right-0 mt-0 w-48 bg-[#fffefe] shadow-lg z-40"
         onMouseEnter={onSubmenuHover}
         onMouseLeave={onSubmenuLeave}
       >
@@ -242,9 +243,17 @@ export function Header() {
             onClick={() => {
               handleMenuClick(item.type)
             }}
-            className="flex items-center gap-3 w-full px-4 py-3 text-sm text-right hover:text-blue-800 text-blue-950 border-b border-gray-100 last:border-b-0"
+            onMouseEnter={() => setHovered(index)}
+            onMouseLeave={() => setHovered(index)}
+            className={`flex items-center gap-3 w-full px-4 py-3 cursor-pointer 
+            text-sm text-right hover:text-blue-950 text-blue-950 border-b border-gray-100 last:border-b-0`
+            }
           >
-            {item.icon && <item.icon className="h-4 w-4" />}
+            {item.icon &&
+              <span className={hovered === index ? 'bg-[#d0181f] text-white p-1 rounded-full transition-all duration-500 transform rotate-10' : 'p-1'}>
+                <item.icon className="h-4 w-4" />
+              </span>
+            }
             <span className="flex-1">{item.label}</span>
           </button>
         ))}
