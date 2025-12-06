@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
-import { Hotel, Plane, Crown, Map, X, ArrowRight, Building } from "lucide-react"
+import { Hotel, Plane, Crown, Map, X, ArrowRight, Building, Train, Bus } from "lucide-react"
 import FlightSearch from "../flights/flight-search"
 import HotelSearch from "../hotels/hotel-search"
 import DomesticFlightSearch from "../flights/domestic-flight-search"
@@ -55,12 +55,14 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
   }, [])
 
   const tabConfig = {
-    domesticFlights: { icon: Plane, label: "پرواز داخلی" },
-    flight: { icon: Plane, label: "پرواز خارجی" },
-    domesticHotel: { icon: Hotel, label: "هتل داخلی" },
-    hotel: { icon: Hotel, label: "هتل خارجی" },
-    cip: { icon: Crown, label: "خدمات فرودگاهی" },
-    tour: { icon: Map, label: "گشت شهری" },
+    domesticFlights: { icon: Plane, label: "پرواز داخلی", soon: false },
+    flight: { icon: Plane, label: "پرواز خارجی", soon: false },
+    domesticHotel: { icon: Hotel, label: "هتل داخلی", soon: false },
+    hotel: { icon: Hotel, label: "هتل خارجی", soon: false },
+    cip: { icon: Crown, label: "خدمات فرودگاهی", soon: false },
+    tour: { icon: Map, label: "گشت شهری", soon: false },
+    train: { icon: Train, label: "قطار", soon: true },
+    bus: { icon: Bus, label: "اتوبوس", soon: true }
   }
 
   const handleTabSelect = (tab: string) => {
@@ -85,7 +87,8 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
           <button
             key={key}
             onClick={() => handleTabSelect(key)}
-            className="flex flex-col items-center justify-center gap-3 h-32 bg-[#fffefe] border-blue-900 hover:bg-gray-50 transition-colors p-4 group"
+            className="flex flex-col items-center relative justify-center gap-3 h-32 bg-[#fffefe] border-blue-900 hover:bg-gray-50 transition-colors p-4 group"
+            disabled={config.soon}
           >
             <div className="p-3 bg-blue-900 rounded-lg group-hover:bg-blue-900 transition-colors">
               <Icon className="h-6 w-6 text-white" />
@@ -93,6 +96,11 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
             <span className="text-sm font-bold text-blue-950 text-center">
               {config.label}
             </span>
+            {
+              config.soon && <span className="text-[8px] font-normal rounded-full bg-red-400 p-1 absolute top-[12px] right-[36px] text-white">
+                به زودی
+              </span>
+            }
           </button>
         )
       })}
@@ -167,15 +175,21 @@ export function SearchSection({ onSearchResults }: SearchSectionProps) {
             <TabsTrigger
               key={key}
               value={key}
-              className={`flex-1 flex items-center justify-center gap-3 py-4 border-b-2 transition-colors ${isSelected
-                ? 'border-b-2 border-blue-900 text-blue-900'
+              className={`flex-1 flex items-center relative justify-center gap-3 py-4 border-b-2 transition-colors ${isSelected
+                ? 'border-b-2 border-[#d0181f] text-[#d0181f]'
                 : 'border-b-2 border-transparent text-blue-950 hover:text-gray-600'
                 }`}
+              disabled={config.soon}
             >
               <span className={isSelected ? 'bg-[#d0181f] rounded-full p-1' : 'text-blue-950'}>
                 <Icon className={`h-5 w-5 ${isSelected ? 'text-white rounded-full' : 'text-blue-950'}`} />
               </span>
               <span className=" font-black">{config.label}</span>
+              {
+                config.soon && <span className="text-[8px] font-normal rounded-full bg-red-400 p-1 absolute top-[0] left-[0] text-white">
+                  به زودی
+                </span>
+              }
             </TabsTrigger>
           )
         })}

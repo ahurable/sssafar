@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo, useCallback } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
@@ -22,7 +22,10 @@ import {
   Layers,
   DollarSign,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Luggage,
+  Calendar,
+  Building
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
@@ -31,8 +34,52 @@ interface FilterState {
   priceRange: [number, number]
   airlines: string[]
   flightClasses: string[]
-  flightTimes: string[]
-  stops: string[]
+  flightTimes: {
+    origin: string[]
+    destination: string[]
+  }
+  stops: {
+    origin: string[]
+    destination: string[]
+  }
+  baggage: {
+    origin: string[]
+    destination: string[]
+  }
+  airports: {
+    origin: string[]
+    destination: string[]
+  }
+  duration: {
+    origin: [number, number]
+    destination: [number, number]
+  }
+}
+
+interface FlightSegment {
+  DepartureDateTime: string
+  ArrivalDateTime: string
+  StopQuantity: number
+  MarketingAirlineCode: string
+  CabinClassCode: number
+  Baggage?: string
+  DepartureAirportLocationCode: string
+  ArrivalAirportLocationCode: string
+  JourneyDurationPerMinute: number
+}
+
+interface FlightData {
+  IsPassportMandatory: boolean
+  ValidatingAirlineCode: string
+  AirItineraryPricingInfo: {
+    ItinTotalFare: {
+      TotalFare: number
+      Currency: string
+    }
+  }
+  OriginDestinationOptions: Array<{
+    FlightSegments: FlightSegment[]
+  }>
 }
 
 export function FlightFilters() {
@@ -41,8 +88,26 @@ export function FlightFilters() {
     priceRange: [0, 50000000],
     airlines: [],
     flightClasses: [],
-    flightTimes: [],
-    stops: []
+    flightTimes: {
+      origin: [],
+      destination: []
+    },
+    stops: {
+      origin: [],
+      destination: []
+    },
+    baggage: {
+      origin: [],
+      destination: []
+    },
+    airports: {
+      origin: [],
+      destination: []
+    },
+    duration: {
+      origin: [0, 1440], // 0 to 24 hours in minutes
+      destination: [0, 1440]
+    }
   })
 
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
@@ -50,52 +115,248 @@ export function FlightFilters() {
     airlines: true,
     class: true,
     time: true,
-    stops: true
+    stops: true,
+    baggage: true,
+    airports: true,
+    duration: true
   })
 
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const [activeFilterSection, setActiveFilterSection] = useState<string | null>(null)
 
-  // Get unique airlines from flight data
-  const availableAirlines = Array.from(
-    new Map(
-      flightData.map(flight => [
-        flight.ValidatingAirlineCode,
-        [getAirlineName(flight.ValidatingAirlineCode), flight.ValidatingAirlineCode]
-      ])
-    ).values()
-  ).sort((a, b) => a[0].localeCompare(b[0]));
+  // Check if it's a roundtrip
+  const isRoundtrip = useMemo(() => {
+    return flightData.some(flight => flight.OriginDestinationOptions?.length > 1)
+  }, [flightData])
 
-  // Get available price range from data
-  const availablePriceRange = flightData.length > 0 ? [
-    Math.min(...flightData.map(f => f.AirItineraryPricingInfo.ItinTotalFare.TotalFare / 10)),
-    Math.max(...flightData.map(f => f.AirItineraryPricingInfo.ItinTotalFare.TotalFare / 10))
-  ] : [0, 50000000]
+  // Get all available data for filters
+  const {
+    availablePriceRange,
+    availableAirlines,
+    availableFlightClasses,
+    availableStops,
+    availableBaggage,
+    availableAirports,
+    availableDurations,
+    timeRanges,
+    baggageOptions,
+    stopOptions
+  } = useMemo(() => {
+    if (flightData.length === 0) {
+      return {
+        availablePriceRange: [0, 50000000] as [number, number],
+        availableAirlines: [],
+        availableFlightClasses: [],
+        availableStops: { origin: [], destination: [] },
+        availableBaggage: { origin: [], destination: [] },
+        availableAirports: { origin: [], destination: [] },
+        availableDurations: { origin: [0, 1440], destination: [0, 1440] },
+        timeRanges: [],
+        baggageOptions: [],
+        stopOptions: []
+      }
+    }
 
-  // Initialize price range when data loads
+    // Extract all prices
+    const prices = flightData.map(f => f.AirItineraryPricingInfo.ItinTotalFare.TotalFare / 10)
+    const minPrice = Math.min(...prices)
+    const maxPrice = Math.max(...prices)
+
+    // Extract all airlines
+    const airlineMap = new Map()
+    flightData.forEach(flight => {
+      const code = flight.ValidatingAirlineCode
+      const name = getAirlineName(code)
+      if (code && name) {
+        airlineMap.set(code, name)
+      }
+    })
+    const airlines = Array.from(airlineMap.entries()).sort((a, b) => a[1].localeCompare(b[1]))
+
+    // Extract all flight classes
+    const flightClasses = new Set<string>()
+    flightData.forEach(flight => {
+      flight.OriginDestinationOptions?.forEach((option, index) => {
+        option.FlightSegments?.forEach(segment => {
+          const cabinCode = segment.CabinClassCode
+          if (cabinCode) {
+            let className = ""
+            switch (cabinCode) {
+              case 1: className = "economy"; break
+              case 2: className = "business"; break
+              case 3: className = "first"; break
+              case 4: className = "premium"; break
+              case 5: className = "economy"; break // Assuming 5 is also economy
+              default: className = "economy"
+            }
+            flightClasses.add(className)
+          }
+        })
+      })
+    })
+
+    // Extract stops information
+    const stops = {
+      origin: new Set<string>(),
+      destination: new Set<string>()
+    }
+
+    // Extract baggage information
+    const baggage = {
+      origin: new Set<string>(),
+      destination: new Set<string>()
+    }
+
+    // Extract airports
+    const airports = {
+      origin: new Set<string>(),
+      destination: new Set<string>()
+    }
+
+    // Extract durations
+    const durations = {
+      origin: { min: 1440, max: 0 },
+      destination: { min: 1440, max: 0 }
+    }
+
+    flightData.forEach(flight => {
+      flight.OriginDestinationOptions?.forEach((option, index) => {
+        const isOrigin = index === 0
+        const isDestination = isRoundtrip ? index === 1 : false
+
+        if (option.FlightSegments?.length > 0) {
+          // Stops
+          const stopCount = option.FlightSegments.length - 1
+          const stopKey = stopCount === 0 ? "direct" :
+            stopCount === 1 ? "1-stop" : "2-stops+"
+
+          if (isOrigin) stops.origin.add(stopKey)
+          if (isDestination) stops.destination.add(stopKey)
+
+          // Baggage
+          option.FlightSegments.forEach(segment => {
+            if (segment.Baggage) {
+              if (isOrigin) baggage.origin.add(segment.Baggage)
+              if (isDestination) baggage.destination.add(segment.Baggage)
+            }
+          })
+
+          // Airports
+          option.FlightSegments.forEach(segment => {
+            if (isOrigin) {
+              airports.origin.add(segment.DepartureAirportLocationCode)
+              airports.origin.add(segment.ArrivalAirportLocationCode)
+            }
+            if (isDestination) {
+              airports.destination.add(segment.DepartureAirportLocationCode)
+              airports.destination.add(segment.ArrivalAirportLocationCode)
+            }
+          })
+
+          // Duration
+          const totalDuration = option.JourneyDurationPerMinute ||
+            option.FlightSegments.reduce((sum, seg) => sum + (seg.JourneyDurationPerMinute || 0), 0)
+
+          if (isOrigin) {
+            durations.origin.min = Math.min(durations.origin.min, totalDuration)
+            durations.origin.max = Math.max(durations.origin.max, totalDuration)
+          }
+          if (isDestination) {
+            durations.destination.min = Math.min(durations.destination.min, totalDuration)
+            durations.destination.max = Math.max(durations.destination.max, totalDuration)
+          }
+        }
+      })
+    })
+
+    // Time ranges for filtering
+    const timeRanges = [
+      { value: "صبح (۶-۱۲)", label: "صبح", time: "۶:۰۰ - ۱۲:۰۰" },
+      { value: "ظهر (۱۲-۱۸)", label: "ظهر", time: "۱۲:۰۰ - ۱۸:۰۰" },
+      { value: "عصر (۱۸-۲۴)", label: "عصر", time: "۱۸:۰۰ - ۲۴:۰۰" },
+      { value: "شب (۰-۶)", label: "شب", time: "۰۰:۰۰ - ۶:۰۰" }
+    ]
+
+    // Baggage options
+    const baggageOptions = [
+      { value: "20 KG", label: "۲۰ کیلوگرم" },
+      { value: "25 KG", label: "۲۵ کیلوگرم" },
+      { value: "30 KG", label: "۳۰ کیلوگرم" },
+      { value: "40 KG", label: "۴۰ کیلوگرم" },
+      { value: "20K", label: "۲۰ کیلوگرم" },
+      { value: "25K", label: "۲۵ کیلوگرم" },
+      { value: "30K", label: "۳۰ کیلوگرم" },
+      { value: "40K", label: "۴۰ کیلوگرم" }
+    ]
+
+    // Stop options
+    const stopOptions = [
+      { value: "direct", label: "بدون توقف", description: "پرواز مستقیم" },
+      { value: "1-stop", label: "۱ توقف", description: "یک توقف" },
+      { value: "2-stops+", label: "۲ توقف یا بیشتر", description: "دو توقف یا بیشتر" }
+    ]
+
+    return {
+      availablePriceRange: [minPrice, maxPrice] as [number, number],
+      availableAirlines: airlines,
+      availableFlightClasses: Array.from(flightClasses),
+      availableStops: {
+        origin: Array.from(stops.origin),
+        destination: Array.from(stops.destination)
+      },
+      availableBaggage: {
+        origin: Array.from(baggage.origin),
+        destination: Array.from(baggage.destination)
+      },
+      availableAirports: {
+        origin: Array.from(airports.origin),
+        destination: Array.from(airports.destination)
+      },
+      availableDurations: {
+        origin: [durations.origin.min, durations.origin.max] as [number, number],
+        destination: [durations.destination.min, durations.destination.max] as [number, number]
+      },
+      timeRanges,
+      baggageOptions,
+      stopOptions
+    }
+  }, [flightData, isRoundtrip])
+
+  // Initialize filters when data loads
   useEffect(() => {
     if (flightData.length > 0) {
       setFilters(prev => ({
         ...prev,
-        priceRange: [availablePriceRange[0], availablePriceRange[1]]
+        priceRange: [availablePriceRange[0], availablePriceRange[1]],
+        duration: {
+          origin: [availableDurations.origin[0], availableDurations.origin[1]],
+          destination: [availableDurations.destination[0], availableDurations.destination[1]]
+        }
       }))
     }
   }, [flightData.length])
 
+  // Helper function to get time range from datetime
+  const getTimeRange = useCallback((timeString: string) => {
+    if (!timeString) return ""
+    const time = new Date(timeString).getHours()
+    if (time >= 6 && time < 12) return "صبح (۶-۱۲)"
+    if (time >= 12 && time < 18) return "ظهر (۱۲-۱۸)"
+    if (time >= 18 && time < 24) return "عصر (۱۸-۲۴)"
+    return "شب (۰-۶)"
+  }, [])
+
   // Function to apply filters immediately (for desktop)
-  const applyFiltersImmediately = () => {
+  const applyFiltersImmediately = useCallback(() => {
     applyFilters(filters)
-  }
+  }, [filters, applyFilters])
 
   // Apply filters when any filter changes (for desktop)
   useEffect(() => {
-    // Don't apply on initial load
     if (flightData.length === 0) return
 
-    // Only auto-apply for desktop (where there's no apply button)
     const isDesktop = window.innerWidth >= 1024
     if (isDesktop) {
-      // Small delay to ensure state is updated
       const timeoutId = setTimeout(() => {
         applyFilters(filters)
       }, 10)
@@ -104,6 +365,7 @@ export function FlightFilters() {
     }
   }, [filters, flightData.length])
 
+  // Filter handlers
   const handlePriceChange = (value: number[]) => {
     setFilters(prev => ({
       ...prev,
@@ -129,21 +391,61 @@ export function FlightFilters() {
     }))
   }
 
-  const handleFlightTimeChange = (timeRange: string, checked: boolean) => {
+  const handleFlightTimeChange = (timeRange: string, checked: boolean, segment: 'origin' | 'destination') => {
     setFilters(prev => ({
       ...prev,
-      flightTimes: checked
-        ? [...prev.flightTimes, timeRange]
-        : prev.flightTimes.filter(t => t !== timeRange)
+      flightTimes: {
+        ...prev.flightTimes,
+        [segment]: checked
+          ? [...prev.flightTimes[segment], timeRange]
+          : prev.flightTimes[segment].filter(t => t !== timeRange)
+      }
     }))
   }
 
-  const handleStopsChange = (stop: string, checked: boolean) => {
+  const handleStopsChange = (stop: string, checked: boolean, segment: 'origin' | 'destination') => {
     setFilters(prev => ({
       ...prev,
-      stops: checked
-        ? [...prev.stops, stop]
-        : prev.stops.filter(s => s !== stop)
+      stops: {
+        ...prev.stops,
+        [segment]: checked
+          ? [...prev.stops[segment], stop]
+          : prev.stops[segment].filter(s => s !== stop)
+      }
+    }))
+  }
+
+  const handleBaggageChange = (baggage: string, checked: boolean, segment: 'origin' | 'destination') => {
+    setFilters(prev => ({
+      ...prev,
+      baggage: {
+        ...prev.baggage,
+        [segment]: checked
+          ? [...prev.baggage[segment], baggage]
+          : prev.baggage[segment].filter(b => b !== baggage)
+      }
+    }))
+  }
+
+  const handleAirportChange = (airport: string, checked: boolean, segment: 'origin' | 'destination') => {
+    setFilters(prev => ({
+      ...prev,
+      airports: {
+        ...prev.airports,
+        [segment]: checked
+          ? [...prev.airports[segment], airport]
+          : prev.airports[segment].filter(a => a !== airport)
+      }
+    }))
+  }
+
+  const handleDurationChange = (value: number[], segment: 'origin' | 'destination') => {
+    setFilters(prev => ({
+      ...prev,
+      duration: {
+        ...prev.duration,
+        [segment]: value as [number, number]
+      }
     }))
   }
 
@@ -152,8 +454,14 @@ export function FlightFilters() {
       priceRange: [availablePriceRange[0], availablePriceRange[1]],
       airlines: [],
       flightClasses: [],
-      flightTimes: [],
-      stops: []
+      flightTimes: { origin: [], destination: [] },
+      stops: { origin: [], destination: [] },
+      baggage: { origin: [], destination: [] },
+      airports: { origin: [], destination: [] },
+      duration: {
+        origin: [availableDurations.origin[0], availableDurations.origin[1]],
+        destination: [availableDurations.destination[0], availableDurations.destination[1]]
+      }
     }
     setFilters(newFilters)
     applyFilters(newFilters)
@@ -167,7 +475,6 @@ export function FlightFilters() {
   }
 
   const handleApplyFilters = () => {
-    // For mobile, apply filters when button is clicked
     const isMobile = window.innerWidth < 1024
     if (isMobile) {
       applyFilters(filters)
@@ -181,8 +488,16 @@ export function FlightFilters() {
     if (filters.priceRange[0] > availablePriceRange[0] || filters.priceRange[1] < availablePriceRange[1]) count++
     count += filters.airlines.length
     count += filters.flightClasses.length
-    count += filters.flightTimes.length
-    count += filters.stops.length
+    count += filters.flightTimes.origin.length
+    count += filters.flightTimes.destination.length
+    count += filters.stops.origin.length
+    count += filters.stops.destination.length
+    count += filters.baggage.origin.length
+    count += filters.baggage.destination.length
+    count += filters.airports.origin.length
+    count += filters.airports.destination.length
+    if (filters.duration.origin[0] > availableDurations.origin[0] || filters.duration.origin[1] < availableDurations.origin[1]) count++
+    if (filters.duration.destination[0] > availableDurations.destination[0] || filters.duration.destination[1] < availableDurations.destination[1]) count++
     return count
   }
 
@@ -200,20 +515,29 @@ export function FlightFilters() {
       case 'class':
         return filters.flightClasses.length
       case 'time':
-        return filters.flightTimes.length
+        return filters.flightTimes.origin.length + filters.flightTimes.destination.length
       case 'stops':
-        return filters.stops.length
+        return filters.stops.origin.length + filters.stops.destination.length
+      case 'baggage':
+        return filters.baggage.origin.length + filters.baggage.destination.length
+      case 'airports':
+        return filters.airports.origin.length + filters.airports.destination.length
+      case 'duration':
+        let count = 0
+        if (filters.duration.origin[0] > availableDurations.origin[0] || filters.duration.origin[1] < availableDurations.origin[1]) count++
+        if (filters.duration.destination[0] > availableDurations.destination[0] || filters.duration.destination[1] < availableDurations.destination[1]) count++
+        return count
       default:
         return 0
     }
   }
 
   const FlightLogo = ({ airlineCode = "", width = 8, height = 8 }) => {
-    const [logoError, setLogoError] = useState(false);
+    const [logoError, setLogoError] = useState(false)
 
     const handleImageError = () => {
-      setLogoError(true);
-    };
+      setLogoError(true)
+    }
 
     return (
       <Image
@@ -224,8 +548,8 @@ export function FlightFilters() {
         className={`w-${width} h-${height}`}
         onError={handleImageError}
       />
-    );
-  };
+    )
+  }
 
   const FilterSection = ({
     title,
@@ -262,7 +586,206 @@ export function FlightFilters() {
   )
 
   const FilterContent = ({ showAllSections = true }) => {
-    const isMobile = typeof window !== 'undefined' ? window.innerWidth < 1024 : false;
+    const isMobile = typeof window !== 'undefined' ? window.innerWidth < 1024 : false
+
+    const renderSegmentFilters = (title: string, segment: 'origin' | 'destination') => (
+      <div className="space-y-4 mb-6 last:mb-0">
+        <div className="flex items-center justify-between">
+          <h4 className="font-medium text-sm text-gray-700">{title}</h4>
+          {segment === 'destination' && !isRoundtrip && (
+            <span className="text-xs text-gray-500">(غیرفعال - پرواز یک‌طرفه)</span>
+          )}
+        </div>
+        {isRoundtrip || segment === 'origin' ? (
+          <div className="space-y-3 pr-2">
+            {timeRanges.map((time) => (
+              <div key={`${segment}-${time.value}`} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                <Checkbox
+                  id={`time-${segment}-${time.value}`}
+                  checked={filters.flightTimes[segment].includes(time.value)}
+                  onCheckedChange={(checked) => {
+                    handleFlightTimeChange(time.value, checked as boolean, segment)
+                    if (!isMobile) {
+                      setTimeout(() => applyFiltersImmediately(), 10)
+                    }
+                  }}
+                  disabled={segment === 'destination' && !isRoundtrip}
+                />
+                <div className="flex-1 text-right">
+                  <label
+                    htmlFor={`time-${segment}-${time.value}`}
+                    className="text-sm font-medium cursor-pointer block"
+                  >
+                    {time.label}
+                  </label>
+                  <span className="text-xs text-gray-500">{time.time}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500 text-center py-2">تنها برای پروازهای دو‌طرفه فعال است</p>
+        )}
+      </div>
+    )
+
+    const renderStopsFilters = (title: string, segment: 'origin' | 'destination') => (
+      <div className="space-y-4 mb-6 last:mb-0">
+        <div className="flex items-center justify-between">
+          <h4 className="font-medium text-sm text-gray-700">{title}</h4>
+          {segment === 'destination' && !isRoundtrip && (
+            <span className="text-xs text-gray-500">(غیرفعال - پرواز یک‌طرفه)</span>
+          )}
+        </div>
+        {isRoundtrip || segment === 'origin' ? (
+          <div className="space-y-3 pr-2">
+            {stopOptions
+              .filter(stop => availableStops[segment].includes(stop.value))
+              .map((stop) => (
+                <div key={`${segment}-${stop.value}`} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                  <Checkbox
+                    id={`stop-${segment}-${stop.value}`}
+                    checked={filters.stops[segment].includes(stop.value)}
+                    onCheckedChange={(checked) => {
+                      handleStopsChange(stop.value, checked as boolean, segment)
+                      if (!isMobile) {
+                        setTimeout(() => applyFiltersImmediately(), 10)
+                      }
+                    }}
+                    disabled={segment === 'destination' && !isRoundtrip}
+                  />
+                  <div className="flex-1 text-right">
+                    <label
+                      htmlFor={`stop-${segment}-${stop.value}`}
+                      className="text-sm font-medium cursor-pointer block"
+                    >
+                      {stop.label}
+                    </label>
+                    <span className="text-xs text-gray-500">{stop.description}</span>
+                  </div>
+                </div>
+              ))}
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500 text-center py-2">تنها برای پروازهای دو‌طرفه فعال است</p>
+        )}
+      </div>
+    )
+
+    const renderBaggageFilters = (title: string, segment: 'origin' | 'destination') => (
+      <div className="space-y-4 mb-6 last:mb-0">
+        <div className="flex items-center justify-between">
+          <h4 className="font-medium text-sm text-gray-700">{title}</h4>
+          {segment === 'destination' && !isRoundtrip && (
+            <span className="text-xs text-gray-500">(غیرفعال - پرواز یک‌طرفه)</span>
+          )}
+        </div>
+        {isRoundtrip || segment === 'origin' ? (
+          <div className="space-y-3 pr-2">
+            {baggageOptions
+              .filter(bag => availableBaggage[segment].includes(bag.value))
+              .map((baggage) => (
+                <div key={`${segment}-${baggage.value}`} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                  <Checkbox
+                    id={`baggage-${segment}-${baggage.value}`}
+                    checked={filters.baggage[segment].includes(baggage.value)}
+                    onCheckedChange={(checked) => {
+                      handleBaggageChange(baggage.value, checked as boolean, segment)
+                      if (!isMobile) {
+                        setTimeout(() => applyFiltersImmediately(), 10)
+                      }
+                    }}
+                    disabled={segment === 'destination' && !isRoundtrip}
+                  />
+                  <div className="flex-1 text-right">
+                    <label
+                      htmlFor={`baggage-${segment}-${baggage.value}`}
+                      className="text-sm font-medium cursor-pointer block"
+                    >
+                      {baggage.label}
+                    </label>
+                  </div>
+                </div>
+              ))}
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500 text-center py-2">تنها برای پروازهای دو‌طرفه فعال است</p>
+        )}
+      </div>
+    )
+
+    const renderAirportFilters = (title: string, segment: 'origin' | 'destination') => (
+      <div className="space-y-4 mb-6 last:mb-0">
+        <div className="flex items-center justify-between">
+          <h4 className="font-medium text-sm text-gray-700">{title}</h4>
+          {segment === 'destination' && !isRoundtrip && (
+            <span className="text-xs text-gray-500">(غیرفعال - پرواز یک‌طرفه)</span>
+          )}
+        </div>
+        {isRoundtrip || segment === 'origin' ? (
+          <div className="space-y-3 pr-2 max-h-48 overflow-y-auto">
+            {availableAirports[segment].map((airport) => (
+              <div key={`${segment}-${airport}`} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                <Checkbox
+                  id={`airport-${segment}-${airport}`}
+                  checked={filters.airports[segment].includes(airport)}
+                  onCheckedChange={(checked) => {
+                    handleAirportChange(airport, checked as boolean, segment)
+                    if (!isMobile) {
+                      setTimeout(() => applyFiltersImmediately(), 10)
+                    }
+                  }}
+                  disabled={segment === 'destination' && !isRoundtrip}
+                />
+                <label
+                  htmlFor={`airport-${segment}-${airport}`}
+                  className="text-sm cursor-pointer flex-1 text-right"
+                >
+                  {airport}
+                </label>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500 text-center py-2">تنها برای پروازهای دو‌طرفه فعال است</p>
+        )}
+      </div>
+    )
+
+    const renderDurationFilters = (title: string, segment: 'origin' | 'destination') => (
+      <div className="space-y-4 mb-6 last:mb-0">
+        <div className="flex items-center justify-between">
+          <h4 className="font-medium text-sm text-gray-700">{title}</h4>
+          {segment === 'destination' && !isRoundtrip && (
+            <span className="text-xs text-gray-500">(غیرفعال - پرواز یک‌طرفه)</span>
+          )}
+        </div>
+        {isRoundtrip || segment === 'origin' ? (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <Label className="text-sm font-medium">مدت زمان (دقیقه)</Label>
+              <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full">
+                {filters.duration[segment][1]} - {filters.duration[segment][0]}
+              </span>
+            </div>
+            <Slider
+              value={filters.duration[segment]}
+              onValueChange={(value) => handleDurationChange(value, segment)}
+              min={availableDurations[segment][0]}
+              max={availableDurations[segment][1]}
+              step={30}
+              className="mt-2"
+            />
+            <div className="flex justify-between text-xs text-gray-500">
+              <span>{availableDurations[segment][0]} دقیقه</span>
+              <span>{availableDurations[segment][1]} دقیقه</span>
+            </div>
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500 text-center py-2">تنها برای پروازهای دو‌طرفه فعال است</p>
+        )}
+      </div>
+    )
 
     return (
       <div className="space-y-6">
@@ -295,8 +818,8 @@ export function FlightFilters() {
                 className="mt-2"
               />
               <div className="flex justify-between text-xs text-gray-500">
-                <span>{availablePriceRange[1].toLocaleString('fa-IR')}</span>
                 <span>{availablePriceRange[0].toLocaleString('fa-IR')}</span>
+                <span>{availablePriceRange[1].toLocaleString('fa-IR')}</span>
               </div>
             </div>
           </FilterSection>
@@ -306,27 +829,26 @@ export function FlightFilters() {
         {(showAllSections || activeFilterSection === 'airlines') && (
           <FilterSection title="ایرلاین‌ها" sectionKey="airlines" icon={Plane}>
             <div className="space-y-3 max-h-48 overflow-y-auto">
-              {availableAirlines.map((airline) => (
-                <div key={airline[0]} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+              {availableAirlines.map(([code, name]) => (
+                <div key={code} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
                   <div>
-                    <FlightLogo airlineCode={airline[1]} />
+                    <FlightLogo airlineCode={code} />
                   </div>
                   <Checkbox
-                    id={`airline-${airline}`}
-                    checked={filters.airlines.includes(airline[0])}
+                    id={`airline-${code}`}
+                    checked={filters.airlines.includes(name)}
                     onCheckedChange={(checked) => {
-                      handleAirlineChange(airline[0], checked as boolean)
-                      // For mobile, don't apply immediately
+                      handleAirlineChange(name, checked as boolean)
                       if (!isMobile) {
                         setTimeout(() => applyFiltersImmediately(), 10)
                       }
                     }}
                   />
                   <label
-                    htmlFor={`airline-${airline}`}
+                    htmlFor={`airline-${code}`}
                     className="text-sm cursor-pointer flex-1 text-right"
                   >
-                    {airline[0]}
+                    {name}
                   </label>
                 </div>
               ))}
@@ -341,31 +863,32 @@ export function FlightFilters() {
               {[
                 { value: "economy", label: "اکونومی", description: "کلاس اقتصادی" },
                 { value: "business", label: "بیزینس", description: "کلاس تجاری" },
-                { value: "first", label: "فرست کلاس", description: "کلاس اول" }
-              ].map((flightClass) => (
-                <div key={flightClass.value} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                  <Checkbox
-                    id={`class-${flightClass.value}`}
-                    checked={filters.flightClasses.includes(flightClass.value)}
-                    onCheckedChange={(checked) => {
-                      handleFlightClassChange(flightClass.value, checked as boolean)
-                      // For mobile, don't apply immediately
-                      if (!isMobile) {
-                        setTimeout(() => applyFiltersImmediately(), 10)
-                      }
-                    }}
-                  />
-                  <div className="flex-1 text-right">
-                    <label
-                      htmlFor={`class-${flightClass.value}`}
-                      className="text-sm font-medium cursor-pointer block"
-                    >
-                      {flightClass.label}
-                    </label>
-                    <span className="text-xs text-gray-500">{flightClass.description}</span>
+                { value: "first", label: "فرست کلاس", description: "کلاس اول" },
+                { value: "premium", label: "پریمیوم", description: "اکونومی ویژه" }
+              ].filter(fc => availableFlightClasses.includes(fc.value))
+                .map((flightClass) => (
+                  <div key={flightClass.value} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                    <Checkbox
+                      id={`class-${flightClass.value}`}
+                      checked={filters.flightClasses.includes(flightClass.value)}
+                      onCheckedChange={(checked) => {
+                        handleFlightClassChange(flightClass.value, checked as boolean)
+                        if (!isMobile) {
+                          setTimeout(() => applyFiltersImmediately(), 10)
+                        }
+                      }}
+                    />
+                    <div className="flex-1 text-right">
+                      <label
+                        htmlFor={`class-${flightClass.value}`}
+                        className="text-sm font-medium cursor-pointer block"
+                      >
+                        {flightClass.label}
+                      </label>
+                      <span className="text-xs text-gray-500">{flightClass.description}</span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           </FilterSection>
         )}
@@ -373,36 +896,9 @@ export function FlightFilters() {
         {/* Flight Time Filter */}
         {(showAllSections || activeFilterSection === 'time') && (
           <FilterSection title="زمان پرواز" sectionKey="time" icon={Clock}>
-            <div className="space-y-3">
-              {[
-                { value: "صبح (۶-۱۲)", label: "صبح", time: "۶:۰۰ - ۱۲:۰۰" },
-                { value: "ظهر (۱۲-۱۸)", label: "ظهر", time: "۱۲:۰۰ - ۱۸:۰۰" },
-                { value: "عصر (۱۸-۲۴)", label: "عصر", time: "۱۸:۰۰ - ۲۴:۰۰" },
-                { value: "شب (۰-۶)", label: "شب", time: "۰۰:۰۰ - ۶:۰۰" }
-              ].map((time) => (
-                <div key={time.value} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                  <Checkbox
-                    id={`time-${time.value}`}
-                    checked={filters.flightTimes.includes(time.value)}
-                    onCheckedChange={(checked) => {
-                      handleFlightTimeChange(time.value, checked as boolean)
-                      // For mobile, don't apply immediately
-                      if (!isMobile) {
-                        setTimeout(() => applyFiltersImmediately(), 10)
-                      }
-                    }}
-                  />
-                  <div className="flex-1 text-right">
-                    <label
-                      htmlFor={`time-${time.value}`}
-                      className="text-sm font-medium cursor-pointer block"
-                    >
-                      {time.label}
-                    </label>
-                    <span className="text-xs text-gray-500">{time.time}</span>
-                  </div>
-                </div>
-              ))}
+            <div className="space-y-6">
+              {renderSegmentFilters("زمان رفت", "origin")}
+              {isRoundtrip && renderSegmentFilters("زمان برگشت", "destination")}
             </div>
           </FilterSection>
         )}
@@ -410,35 +906,39 @@ export function FlightFilters() {
         {/* Stops Filter */}
         {(showAllSections || activeFilterSection === 'stops') && (
           <FilterSection title="توقف‌ها" sectionKey="stops" icon={Layers}>
-            <div className="space-y-3">
-              {[
-                { value: "direct", label: "بدون توقف", description: "پرواز مستقیم" },
-                { value: "1-stop", label: "۱ توقف", description: "یک توقف" },
-                { value: "2-stops", label: "۲ توقف", description: "دو توقف" }
-              ].map((stop) => (
-                <div key={stop.value} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                  <Checkbox
-                    id={`stop-${stop.value}`}
-                    checked={filters.stops.includes(stop.value)}
-                    onCheckedChange={(checked) => {
-                      handleStopsChange(stop.value, checked as boolean)
-                      // For mobile, don't apply immediately
-                      if (!isMobile) {
-                        setTimeout(() => applyFiltersImmediately(), 10)
-                      }
-                    }}
-                  />
-                  <div className="flex-1 text-right">
-                    <label
-                      htmlFor={`stop-${stop.value}`}
-                      className="text-sm font-medium cursor-pointer block"
-                    >
-                      {stop.label}
-                    </label>
-                    <span className="text-xs text-gray-500">{stop.description}</span>
-                  </div>
-                </div>
-              ))}
+            <div className="space-y-6">
+              {renderStopsFilters("توقف رفت", "origin")}
+              {isRoundtrip && renderStopsFilters("توقف برگشت", "destination")}
+            </div>
+          </FilterSection>
+        )}
+
+        {/* Baggage Filter */}
+        {(showAllSections || activeFilterSection === 'baggage') && (
+          <FilterSection title="بار مجاز" sectionKey="baggage" icon={Luggage}>
+            <div className="space-y-6">
+              {renderBaggageFilters("بار مجاز رفت", "origin")}
+              {isRoundtrip && renderBaggageFilters("بار مجاز برگشت", "destination")}
+            </div>
+          </FilterSection>
+        )}
+
+        {/* Airports Filter */}
+        {(showAllSections || activeFilterSection === 'airports') && (
+          <FilterSection title="فرودگاه‌ها" sectionKey="airports" icon={Building}>
+            <div className="space-y-6">
+              {renderAirportFilters("فرودگاه‌های رفت", "origin")}
+              {isRoundtrip && renderAirportFilters("فرودگاه‌های برگشت", "destination")}
+            </div>
+          </FilterSection>
+        )}
+
+        {/* Duration Filter */}
+        {(showAllSections || activeFilterSection === 'duration') && (
+          <FilterSection title="مدت زمان پرواز" sectionKey="duration" icon={Clock}>
+            <div className="space-y-6">
+              {renderDurationFilters("مدت زمان رفت", "origin")}
+              {isRoundtrip && renderDurationFilters("مدت زمان برگشت", "destination")}
             </div>
           </FilterSection>
         )}
@@ -480,6 +980,11 @@ export function FlightFilters() {
               <CardTitle className="text-lg flex items-center gap-2">
                 <Filter className="h-5 w-5" />
                 فیلترها
+                {isRoundtrip && (
+                  <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                    دو‌طرفه
+                  </Badge>
+                )}
               </CardTitle>
               {getActiveFiltersCount() > 0 && (
                 <Button
@@ -516,6 +1021,11 @@ export function FlightFilters() {
                     {getActiveFiltersCount()}
                   </Badge>
                 )}
+                {isRoundtrip && (
+                  <Badge variant="outline" className="mr-1 text-xs bg-blue-50 text-blue-700 border-blue-200">
+                    دو‌طرفه
+                  </Badge>
+                )}
               </Button>
             </SheetTrigger>
             <SheetContent side="bottom" className="h-[90vh] rounded-t-3xl">
@@ -524,6 +1034,11 @@ export function FlightFilters() {
                   <SheetTitle className="flex items-center gap-2 text-lg">
                     <Filter className="h-5 w-5" />
                     فیلترها
+                    {isRoundtrip && (
+                      <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                        دو‌طرفه
+                      </Badge>
+                    )}
                   </SheetTitle>
                   <div className="flex items-center gap-2">
                     {getActiveFiltersCount() > 0 && (
@@ -563,6 +1078,8 @@ export function FlightFilters() {
           <FilterTriggerButton section="class" title="کلاس" icon={Plane} />
           <FilterTriggerButton section="time" title="زمان" icon={Clock} />
           <FilterTriggerButton section="stops" title="توقف" icon={Layers} />
+          <FilterTriggerButton section="baggage" title="بار" icon={Luggage} />
+          <FilterTriggerButton section="duration" title="مدت" icon={Clock} />
         </div>
 
         {/* Individual Filter Modals */}
@@ -579,11 +1096,15 @@ export function FlightFilters() {
                   {activeFilterSection === 'class' && <Plane className="h-5 w-5" />}
                   {activeFilterSection === 'time' && <Clock className="h-5 w-5" />}
                   {activeFilterSection === 'stops' && <Layers className="h-5 w-5" />}
+                  {activeFilterSection === 'baggage' && <Luggage className="h-5 w-5" />}
+                  {activeFilterSection === 'duration' && <Clock className="h-5 w-5" />}
                   {activeFilterSection === 'price' && 'محدوده قیمت'}
                   {activeFilterSection === 'airlines' && 'ایرلاین‌ها'}
                   {activeFilterSection === 'class' && 'کلاس پرواز'}
                   {activeFilterSection === 'time' && 'زمان پرواز'}
                   {activeFilterSection === 'stops' && 'توقف‌ها'}
+                  {activeFilterSection === 'baggage' && 'بار مجاز'}
+                  {activeFilterSection === 'duration' && 'مدت زمان پرواز'}
                 </SheetTitle>
                 <Button
                   variant="ghost"

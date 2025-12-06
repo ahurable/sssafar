@@ -430,19 +430,12 @@ const HotelCard = React.memo(({
                 </div>
 
                 <div className="flex gap-3 w-full lg:w-auto">
-                  <Button
-                    variant="outline"
-                    className="flex-1 lg:flex-none bg-white hover:bg-gray-50 text-gray-700 border-blue-900"
-                    onClick={() => window.open(`/hotels/${hotel.HotelId}`, '_blank')}
-                  >
-                    <span>مشاهده جزئیات</span>
-                  </Button>
                   <Link
                     href={`/hotels/${hotel.HotelId}?checkIn=${checkIn}&checkOut=${checkOut}&fareSourceCode=${hotel.FareSourceCode}`}
                     className="flex-1 lg:flex-none"
                   >
                     <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-md">
-                      <span className="font-medium">رزرو هتل</span>
+                      <span className="font-medium">مشاهده جزئیات و رزرو اتاق</span>
                       <ChevronLeft className="h-4 w-4 mr-2" />
                     </Button>
                   </Link>

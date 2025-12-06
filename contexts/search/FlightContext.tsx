@@ -1,8 +1,7 @@
 // contexts/flight-context.tsx
 "use client"
 
-import { StdioNull } from 'node:child_process'
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react'
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react'
 import { read, utils } from 'xlsx'
 
 export interface TravelPreference {
@@ -43,38 +42,57 @@ export interface DomesticFlightSearchRequest {
 }
 
 interface FilterState {
-  priceRange?: [number, number]
+  priceRange: [number, number]
   airlines: string[]
-  flightClasses?: string[]
-  flightTimes?: string[]
-  stops?: string[]
-} 
+  flightClasses: string[]
+  flightTimes: {
+    origin: string[]
+    destination: string[]
+  }
+  stops: {
+    origin: string[]
+    destination: string[]
+  }
+  baggage: {
+    origin: string[]
+    destination: string[]
+  }
+  airports: {
+    origin: string[]
+    destination: string[]
+  }
+  duration: {
+    origin: [number, number]
+    destination: [number, number]
+  }
+}
 
 interface FlightContextType {
   flightData: any[]
-  setFlightsData: (flights:any, area: string, from?:string, to?:string) => void
+  setFlightsData: (flights: any, area: string, from?: string, to?: string) => void
   loading: boolean
   origin: string
   destination: string
   searchFlights: (params: any) => any
   clearResults: () => void
   airlineNames: { [iata: string]: string }
-  getAirlineName: (iataCode: string) => string 
+  getAirlineName: (iataCode: string) => string
   applyFilters: (filters: FilterState) => void
   filteredFlights: any[]
   flightRequest: FlightSearchRequest
   setFlightRequest: (request: FlightSearchRequest) => void
   domesticFlightRequest: DomesticFlightSearchRequest
   setDomesticFlightRequest: (request: DomesticFlightSearchRequest) => void
-  searchDomesticFlights: (params:any) => void
+  searchDomesticFlights: (params: any) => void
   area: string
+  isRoundtrip: boolean
 }
 
-// Helper functions remain the same
+// Helper functions
 export const getCabinType = (cabinClass: string): string => {
   const cabinMap: { [key: string]: string } = {
     "economy": "Economy",
-    "business": "Business", 
+    "business": "Business",
     "first": "First",
     "premium": "PremiumEconomy"
   };
@@ -90,100 +108,73 @@ export const getAirTripType = (tripType: string): string => {
   return tripMap[tripType] || "OneWay";
 }
 
-
 async function loadAirlinesFromXLSX(): Promise<{ [iata: string]: string }> {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     const fileUrl = `${baseUrl}/data/Airline.xlsx`
-    
-    // // console.log('🔍 Attempting to fetch airlines file from:', fileUrl)
-    
+
     const response = await fetch(fileUrl, {
       cache: 'force-cache',
       headers: {
         'Cache-Control': 'public, max-age=3600'
       }
     })
-    
-    // // console.log('📄 Airlines response status:', response.status, response.statusText)
-    
+
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: Failed to fetch Airlines XLSX file from ${fileUrl}`)
     }
 
     const arrayBuffer = await response.arrayBuffer()
-    // // console.log('📦 Airlines file size (bytes):', arrayBuffer.byteLength)
-    
+
     if (arrayBuffer.byteLength === 0) {
       throw new Error('Airlines file is empty (0 bytes)')
     }
 
-    // Parse the XLSX file
     const workbook = read(arrayBuffer, { type: 'array' })
-    // // console.log('📋 Airlines sheet names:', workbook.SheetNames)
-    
+
     if (workbook.SheetNames.length === 0) {
       throw new Error('No sheets found in Airlines XLSX file')
     }
 
     const worksheet = workbook.Sheets[workbook.SheetNames[0]]
     const data = utils.sheet_to_json(worksheet)
-    
-    // // console.log('📊 Total rows in airlines sheet:', data.length)
-    
-    if (data.length === 0) {
-      throw new Error('No data found in airlines sheet')
-    }
 
-    // Log the first row to see column names
-    // // console.log('🔍 Airlines first row sample:', data[0])
     const columnNames = Object.keys(data[0] || {})
-    // // console.log('🔍 Airlines column names:', columnNames)
-    
-    // Find the correct column names for IATA code and airline name
-    const iataColumn = columnNames.find(col => 
-      col.toLowerCase().includes('iata') || 
+
+    const iataColumn = columnNames.find(col =>
+      col.toLowerCase().includes('iata') ||
       col.toLowerCase().includes('code') ||
       col.toLowerCase().includes('airline code')
     )
-    const nameColumn = columnNames.find(col => 
-      col.toLowerCase().includes('name') || 
+    const nameColumn = columnNames.find(col =>
+      col.toLowerCase().includes('name') ||
       col.toLowerCase().includes('airline') ||
       col.toLowerCase().includes('airline name')
     )
 
-    // // console.log('🔍 Detected airlines columns:', {
-    //   iata: iataColumn,
-    //   name: nameColumn
-    // })
-
     const airlineMap: { [iata: string]: string } = {}
 
-    data.forEach((row: any, index: number) => {
+    data.forEach((row: any) => {
       const iata = iataColumn ? row[iataColumn] : row[columnNames[0]]
       const name = nameColumn ? row[nameColumn] : row[columnNames[1]]
 
       if (iata && name) {
         const iataCode = iata.toString().trim().toUpperCase()
         const airlineName = name.toString().trim()
-        
+
         if (iataCode && airlineName && iataCode.length === 2) {
           airlineMap[iataCode] = airlineName
         }
       }
     })
 
-    // // console.log(`✅ Successfully loaded ${Object.keys(airlineMap).length} airlines from XLSX`)
-    // // console.log('📝 Sample airlines:', Object.entries(airlineMap).slice(0, 5))
-    
     return airlineMap
 
   } catch (error) {
     console.error('❌ Error loading airlines XLSX file:', error)
-    // Return a fallback map with common airlines
     const fallbackAirlines: { [iata: string]: string } = {
       "EK": "امارات",
-      "QR": "قطر ایرویز", 
+      "QR": "قطر ایرویز",
       "EY": "اتیهاد ایرویز",
       "TK": "ترکیش ایرلاینز",
       "LH": "لوفت هانزا",
@@ -201,13 +192,12 @@ async function loadAirlinesFromXLSX(): Promise<{ [iata: string]: string }> {
       "FZ": "فلای دبی",
       "PC": "پگاسوس ایرلاینز",
       "WY": "عمان ایر",
-      "SV": "سعودیا"
+      "SV": "سعودیا",
+      "HH": "هواپیمایی هما"
     }
-    // // console.log('🔄 Using fallback airlines data')
     return fallbackAirlines
   }
 }
-
 
 const FlightContext = createContext<FlightContextType | undefined>(undefined)
 
@@ -217,13 +207,13 @@ export function FlightProvider({ children }: { children: ReactNode }) {
   const [destination, setDestination] = useState("")
   const [area, setArea] = useState("")
   const [loading, setLoading] = useState(false)
-  const [airlineNames, setAirlineNames] = useState<{ [iata: string]: string }>({}) // Add this
+  const [airlineNames, setAirlineNames] = useState<{ [iata: string]: string }>({})
   const [filteredFlights, setFilteredFlights] = useState<any[]>([])
   const [flightRequest, setFlightRequest] = useState<FlightSearchRequest>({
     PricingSourceType: "All",
     RequestOption: "All",
-    AdultCount: 2,
-    ChildCount: 1,
+    AdultCount: 1,
+    ChildCount: 0,
     InfantCount: 0,
     TravelPreference: {
       CabinType: getCabinType("economy"),
@@ -237,7 +227,7 @@ export function FlightProvider({ children }: { children: ReactNode }) {
         DepartureDateTime: "2024-01-15T00:00:00.0000000+03:30",
         DestinationLocationCode: "THR",
         DestinationType: 0,
-        OriginLocationCode: "IKA", 
+        OriginLocationCode: "IKA",
         OriginType: 0
       }
     ],
@@ -250,87 +240,177 @@ export function FlightProvider({ children }: { children: ReactNode }) {
     adults: 1,
     departureDate: ''
   })
-  const getTimeRange = (timeString: string) => {
-    const time = new Date(timeString).getHours()
-    if (time >= 6 && time < 12) return "صبح (۶-۱۲)"
-    if (time >= 12 && time < 18) return "ظهر (۱۲-۱۸)"
-    if (time >= 18 && time < 24) return "عصر (۱۸-۲۴)"
-    return "شب (۰-۶)"
-  }
-
-  const applyFilters = (filters: FilterState) => {
-
-    const filtered = flightData.filter(flight => {
-        // Price filter
-            const price = flight.AirItineraryPricingInfo.ItinTotalFare.TotalFare / 10 // Convert to Toman
-            if (filters.priceRange && price < filters.priceRange[0] || filters.priceRange && price > filters.priceRange[1]) {
-            return false
-            }
-
-            // Airline filter
-            if (filters.airlines.length > 0) {
-            const airlineName = getAirlineName(flight.ValidatingAirlineCode)
-            if (!filters.airlines.includes(airlineName)) {
-                return false
-            }
-            }
-
-            // Flight time filter
-            if (filters.flightTimes && filters.flightTimes.length > 0) {
-            const departureTime = flight.OriginDestinationOptions[0]?.FlightSegments[0]?.DepartureDateTime
-            const timeRange = getTimeRange(departureTime)
-            if (!filters.flightTimes.includes(timeRange)) {
-                return false
-            }
-            }
-
-            // Stops filter
-            if (filters.stops && filters.stops.length > 0) {
-            const stopsCount = flight.OriginDestinationOptions[0]?.FlightSegments?.length - 1
-            const stopType = stopsCount === 0 ? "direct" : 
-                            stopsCount === 1 ? "1-stop" : "2-stops"
-            if (!filters.stops.includes(stopType)) {
-                return false
-            }
-            }
-
-            return true
-        })
-        // // console.log(filtered)
-
-      setFilteredFlights(filtered)
-    }
-
-    // Update when new flight data arrives
-    useEffect(() => {
-        setFilteredFlights(flightData)
-    }, [flightData])
 
   // Load airlines on component mount
   useEffect(() => {
     const loadAirlines = async () => {
       try {
         const airlines = await loadAirlinesFromXLSX()
-        // // console.log(airlines)
         setAirlineNames(airlines)
       } catch (error) {
         console.error('Failed to load airlines:', error)
       }
     }
-    
+
     loadAirlines()
   }, [])
 
-  const getAirlineName = (iataCode: string): string => {
+  const getAirlineName = useCallback((iataCode: string): string => {
     if (!iataCode) return 'نامشخص'
-    
+
     const normalizedCode = iataCode.trim().toUpperCase()
-    // // console.log(normalizedCode)
     return airlineNames[normalizedCode] || normalizedCode
-  }
+  }, [airlineNames])
+
+  // Check if flight data is roundtrip
+  const isRoundtrip = flightData.some(flight =>
+    flight.OriginDestinationOptions?.length > 1
+  )
+
+  // Helper function to get time range
+  const getTimeRange = useCallback((timeString: string) => {
+    if (!timeString) return ""
+    try {
+      const time = new Date(timeString).getHours()
+      if (time >= 6 && time < 12) return "صبح (۶-۱۲)"
+      if (time >= 12 && time < 18) return "ظهر (۱۲-۱۸)"
+      if (time >= 18 && time < 24) return "عصر (۱۸-۲۴)"
+      return "شب (۰-۶)"
+    } catch {
+      return ""
+    }
+  }, [])
+
+  // Helper function to get cabin class name from code
+  const getCabinClassName = useCallback((cabinCode: number) => {
+    switch (cabinCode) {
+      case 1: return "economy"
+      case 2: return "business"
+      case 3: return "first"
+      case 4: return "premium"
+      case 5: return "economy"
+      default: return "economy"
+    }
+  }, [])
+
+  // Apply filters function
+  const applyFilters = useCallback((filters: FilterState) => {
+    const filtered = flightData.filter(flight => {
+      // Price filter
+      const price = flight.AirItineraryPricingInfo.ItinTotalFare.TotalFare / 10
+      if (price < filters.priceRange[0] || price > filters.priceRange[1]) {
+        return false
+      }
+
+      // Airline filter
+      if (filters.airlines.length > 0) {
+        const airlineName = getAirlineName(flight.ValidatingAirlineCode)
+        if (!filters.airlines.includes(airlineName)) {
+          return false
+        }
+      }
+
+      // Flight class filter
+      if (filters.flightClasses.length > 0) {
+        const hasMatchingClass = flight.OriginDestinationOptions?.some((option: any) =>
+          option.FlightSegments?.some((segment: any) => {
+            const className = getCabinClassName(segment.CabinClassCode)
+            return filters.flightClasses.includes(className)
+          })
+        )
+        if (!hasMatchingClass) {
+          return false
+        }
+      }
+
+      // Flight time filters
+      let flightTimeValid = true
+      flight.OriginDestinationOptions?.forEach((option: any, index: number) => {
+        const segmentType = index === 0 ? 'origin' : 'destination'
+        if (option.FlightSegments?.length > 0) {
+          const departureTime = option.FlightSegments[0].DepartureDateTime
+          const timeRange = getTimeRange(departureTime)
+          if (filters.flightTimes[segmentType].length > 0 && !filters.flightTimes[segmentType].includes(timeRange)) {
+            flightTimeValid = false
+          }
+        }
+      })
+      if (!flightTimeValid) return false
+
+      // Stops filters
+      let stopsValid = true
+      flight.OriginDestinationOptions?.forEach((option: any, index: number) => {
+        const segmentType = index === 0 ? 'origin' : 'destination'
+        if (option.FlightSegments) {
+          const stopCount = option.FlightSegments.length - 1
+          const stopKey = stopCount === 0 ? "direct" :
+            stopCount === 1 ? "1-stop" : "2-stops+"
+          if (filters.stops[segmentType].length > 0 && !filters.stops[segmentType].includes(stopKey)) {
+            stopsValid = false
+          }
+        }
+      })
+      if (!stopsValid) return false
+
+      // Baggage filters
+      let baggageValid = true
+      flight.OriginDestinationOptions?.forEach((option: any, index: number) => {
+        const segmentType = index === 0 ? 'origin' : 'destination'
+        if (option.FlightSegments) {
+          const hasMatchingBaggage = option.FlightSegments.some((segment: any) => {
+            if (!segment.Baggage) return false
+            return filters.baggage[segmentType].includes(segment.Baggage)
+          })
+          if (filters.baggage[segmentType].length > 0 && !hasMatchingBaggage) {
+            baggageValid = false
+          }
+        }
+      })
+      if (!baggageValid) return false
+
+      // Airport filters
+      let airportValid = true
+      flight.OriginDestinationOptions?.forEach((option: any, index: number) => {
+        const segmentType = index === 0 ? 'origin' : 'destination'
+        if (option.FlightSegments) {
+          const hasMatchingAirport = option.FlightSegments.some((segment: any) => {
+            return filters.airports[segmentType].includes(segment.DepartureAirportLocationCode) ||
+              filters.airports[segmentType].includes(segment.ArrivalAirportLocationCode)
+          })
+          if (filters.airports[segmentType].length > 0 && !hasMatchingAirport) {
+            airportValid = false
+          }
+        }
+      })
+      if (!airportValid) return false
+
+      // Duration filters
+      let durationValid = true
+      flight.OriginDestinationOptions?.forEach((option: any, index: number) => {
+        const segmentType = index === 0 ? 'origin' : 'destination'
+        const totalDuration = option.JourneyDurationPerMinute ||
+          option.FlightSegments?.reduce((sum: number, seg: any) => sum + (seg.JourneyDurationPerMinute || 0), 0) || 0
+
+        if (totalDuration < filters.duration[segmentType][0] || totalDuration > filters.duration[segmentType][1]) {
+          durationValid = false
+        }
+      })
+      if (!durationValid) return false
+
+      return true
+    })
+
+    setFilteredFlights(filtered)
+  }, [flightData, getAirlineName, getCabinClassName, getTimeRange])
+
+  // Update filtered flights when flight data changes
+  useEffect(() => {
+    setFilteredFlights(flightData)
+  }, [flightData])
 
   const clearResults = () => {
     setFlightData([])
+    setFilteredFlights([])
   }
 
   const searchFlights = async (params: any) => {
@@ -351,17 +431,16 @@ export function FlightProvider({ children }: { children: ReactNode }) {
   const searchDomesticFlights = async (params: any) => {
     try {
       setLoading(true)
-      const response = await fetch('/api/flights/search/nira', 
+      const response = await fetch('/api/flights/search/nira',
         {
           method: 'POST',
           headers: {
-            'Content-Type':'application/json'
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify(params)
         }
       )
       const data = await response.json()
-      // // console.log(data)
       if (!response.ok)
         return data
       return data
@@ -370,8 +449,9 @@ export function FlightProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const setFlightsData = (flights:any, area:string, from?:string, to?: string) => {
+  const setFlightsData = (flights: any, area: string, from?: string, to?: string) => {
     setFlightData(flights)
+    setFilteredFlights(flights)
     setArea(area)
     if (from)
       setOrigin(from)
@@ -398,7 +478,8 @@ export function FlightProvider({ children }: { children: ReactNode }) {
       setDomesticFlightRequest,
       domesticFlightRequest,
       searchDomesticFlights,
-      area
+      area,
+      isRoundtrip
     }}>
       {children}
     </FlightContext.Provider>

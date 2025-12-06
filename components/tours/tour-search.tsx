@@ -294,7 +294,7 @@ const TourSearch = () => {
 
         {/* Start Date */}
         <div className="space-y-2 relative">
-          <Label className="text-blue-950 text-right block mb-2">تاریخ ورود</Label>
+          <Label className="text-blue-950 text-right block mb-2">از تاریخ</Label>
 
           <ShamsiDateModal
             calendarId="calendar1"
@@ -314,7 +314,7 @@ const TourSearch = () => {
 
         {/* End Date */}
         <div className="space-y-2 relative">
-          <Label className="text-blue-950 text-right block mb-2">تاریخ خروج</Label>
+          <Label className="text-blue-950 text-right block mb-2">تا تاریخ</Label>
 
           <ShamsiDateModal
             calendarId="calendar2"

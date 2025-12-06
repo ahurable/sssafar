@@ -854,7 +854,16 @@ model Airport {
   airportIata String?
   airportCity String?
 
-  cipService CipService[]
+  cipService        CipService[]
+  airportServeTypes AirportServeType[]
+}
+
+model AirportServeType {
+  id    String @id @default(cuid())
+  title String
+
+  airport   Airport @relation(fields: [airportId], references: [id], onDelete: Cascade)
+  airportId String
 }
 
 model CipService {

@@ -432,7 +432,7 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
   return (
     <div className="container mx-auto p-4 space-y-6">
       {/* Header Section */}
-      <div className="bg-blue-900 p-4 text-white">
+      <div className="bg-blue-900 p-4 text-white rounded-lg">
         <div className="flex justify-between items-start">
           <div className="flex-1">
             <div className="flex items-start justify-between">
@@ -475,30 +475,30 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
       </div>
 
       {/* Images Gallery - New Layout */}
-      <Card>
+      <Card className="border-none">
         <CardContent className="p-0">
           <div className="flex flex-col lg:flex-row h-96">
             {/* Left Side - 4 Small Images */}
-            <div className="lg:w-1/4 flex lg:flex-col gap-2 p-2 overflow-x-auto lg:overflow-y-auto">
-              {hotelImages.slice(0, 4).map((img, index) => (
+            <div className="lg:w-2/5 flex lg:flex-wrap gap-2 lg:p-0 p-2 overflow-x-auto lg:overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
+              {hotelImages.slice().map((img, index) => (
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
-                  className={`relative h-20 lg:h-1/4 w-20 lg:w-full flex-shrink-0 ${selectedImage === index ? 'ring-2 ring-blue-500' : ''
+                  className={`relative h-20 lg:h-2/5 w-20 lg:w-[17vw] ${selectedImage === index ? 'ring-2 ring-blue-500 rounded-lg' : ''
                     }`}
                 >
                   <Image
                     src={img.imageUrl}
                     alt={`${hotelName} ${index + 1}`}
                     fill
-                    className="object-cover"
+                    className="object-cover rounded-lg"
                   />
                 </button>
               ))}
             </div>
 
             {/* Right Side - Big Image */}
-            <div className="lg:w-3/4 relative flex-1">
+            <div className="lg:w-3/5 relative flex-1">
               <button
                 onClick={() => openImageModal(selectedImage)}
                 className="w-full h-full"
@@ -507,7 +507,7 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
                   src={hotelImages[selectedImage]?.imageUrl || '/hotels/hotel-1.jpg'}
                   alt={hotelName}
                   fill
-                  className="object-cover hover:opacity-90 transition-opacity"
+                  className="object-cover hover:opacity-90 transition-opacity rounded-lg"
                 />
               </button>
 
@@ -645,7 +645,7 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
                   return (
                     <div
                       key={`${room.RoomId}-${index}`}
-                      className={`border-2 transition-all duration-200 ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-blue-900 hover:border-blue-900'
+                      className={` transition-all duration-200 ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-blue-900 hover:border-blue-900'
                         }`}
                     >
                       <div className="flex flex-col lg:flex-row">
@@ -789,11 +789,11 @@ export default function HotelDetails({ hotelId, fareSourceCode, checkIn, checkOu
                   <CheckCircle className="h-5 w-5 text-blue-600" />
                   امکانات هتل
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="flex gap-3">
                   {hotelData.Amenities.map((amenity, index) => {
                     const Icon = amenityIcons[amenity]
                     return (
-                      <div key={index} className="flex items-center gap-2 p-2 border border-blue-900">
+                      <div key={index} className="flex items-center gap-2 p-2 shadow">
                         {Icon && <Icon className="h-4 w-4 text-blue-600" />}
                         <span className="text-sm font-medium">{amenity}</span>
                       </div>

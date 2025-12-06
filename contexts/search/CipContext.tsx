@@ -9,12 +9,14 @@ export interface CipSearchData {
   airport: string
   airportId?: string
   date: string
-  passengers: number
-  serviceType: "departure" | "arrival"
+  adults: number
+  children: number
+  infants: number
+  serviceType: string
 }
 
 interface CipContextType {
-  searchData?: CipSearchData 
+  searchData?: CipSearchData
   setSearchData: (data: CipSearchData) => void
   clearSearchData: () => void
 }
@@ -36,15 +38,15 @@ export const CipProvider = ({ children }: CipProviderProps) => {
       ...data,
       date: gregorianDate
     }
-    
+
     setSearchData(searchDataWithGregorianDate)
-    
+
     // Navigate to CIP page
     router.push('/cip')
   }
 
   const clearSearchData = () => {
-    setSearchData(null)
+    setSearchData(undefined)
   }
 
   const value: CipContextType = {

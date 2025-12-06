@@ -5,25 +5,33 @@ import { useRef, useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Search, Plane, Calendar, MapPin, Users, AlertCircle, Loader2 } from "lucide-react"
+import { Search, Plane, Calendar, MapPin, Users, AlertCircle, Loader2, User, Baby, Minus, Plus, Heart } from "lucide-react"
 import ShamsiDateModal from "../flights/ShamsiCalendar"
 import { shamsiToGregorianString } from "@/lib/jalaalil"
 import { useRouter } from "next/navigation"
 import { useCip } from "@/contexts/search/CipContext"
+import { Select } from "../ui/select"
+import { SelectContent, SelectItem, SelectTrigger, SelectValue } from "@radix-ui/react-select"
 
 interface AirportSuggestion {
   id: string,
   name: string,
   airportCity: string,
-  airportIata: string
+  airportIata: string,
+  airportServeTypes: {
+    id: string,
+    title: string
+  }[]
 }
 
 interface CipSearchFormData {
   airport: string;
   airportId?: string;
   date: string;
-  passengers: number;
-  serviceType: "departure" | "arrival";
+  adults: number
+  children: number
+  infants: number
+  serviceType: string;
 }
 
 interface FormErrors {
@@ -38,8 +46,10 @@ const CipSearch = () => {
     airport: "",
     airportId: undefined,
     date: "",
-    passengers: 1,
-    serviceType: "departure"
+    adults: 1,
+    children: 0,
+    infants: 0,
+    serviceType: ""
   })
 
   const [errors, setErrors] = useState<FormErrors>({})
@@ -51,10 +61,15 @@ const CipSearch = () => {
   const [suggestionLoading, setSuggestionLoading] = useState(false)
   const [currentInput, setCurrentInput] = useState("")
   const [isAirportFocused, setIsAirportFocused] = useState(false)
+  const [showPassengers, setShowPassengers] = useState(false)
+  const [airports, setAirports] = useState<AirportSuggestion[]>()
+  const [selectedAirport, setSelectedAirport] = useState<AirportSuggestion>()
+  const [showFavorites, setShowFavorites] = useState(false)
   const router = useRouter()
   const suggestionsRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
+  const passengersRef = useRef<HTMLDivElement>(null)
   const { setSearchData, searchData } = useCip()
 
   // Clear errors when user starts typing
@@ -65,10 +80,7 @@ const CipSearch = () => {
     if (errors.date && cipSearch.date) {
       setErrors(prev => ({ ...prev, date: undefined }))
     }
-    if (errors.passengers && cipSearch.passengers) {
-      setErrors(prev => ({ ...prev, passengers: undefined }))
-    }
-  }, [cipSearch.airport, cipSearch.date, cipSearch.passengers, errors])
+  }, [cipSearch.airport, cipSearch.date, errors])
 
   // Handle click outside for suggestions
   useEffect(() => {
@@ -87,6 +99,17 @@ const CipSearch = () => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
+  }, [])
+
+  useEffect(() => {
+    const fetchAirports = async () => {
+      const response = await fetch('/api/airports')
+      const data = await response.json()
+      console.log(data)
+      if (response.ok)
+        setAirports(data)
+    }
+    fetchAirports()
   }, [])
 
   const fetchSuggestions = async (query: string) => {
@@ -121,6 +144,47 @@ const CipSearch = () => {
     }
   }
 
+  const handlePassengerChange = (type: 'adults' | 'children' | 'infants', operation: 'increment' | 'decrement') => {
+    setCipSearch(prev => {
+      const currentValue = prev[type];
+      let newValue = currentValue;
+
+      if (operation === 'increment') {
+        const maxValues = { adults: 9, children: 8, infants: 4 };
+
+        // Calculate current total using all passenger types from prev state
+        const currentTotal = prev.adults + prev.children + prev.infants;
+
+        // Check if adding one would exceed maximum total of 9
+        if (currentTotal >= 9) {
+          return prev; // Don't allow increment - return previous state unchanged
+        }
+
+        // Special validation for children - they must be less than adults
+        if (type === 'children') {
+          // Children cannot be equal to or greater than adults
+          if (prev.children >= prev.adults) {
+            return prev; // Don't allow increment
+          }
+        } else if (type === 'infants') {
+          // infants cannot be equal to or greater than adults
+          if (prev.infants >= prev.adults) {
+            return prev; // Don't allow increment
+          }
+        }
+
+        newValue = Math.min(currentValue + 1, maxValues[type]);
+      } else {
+        const minValues = { adults: 1, children: 0, infants: 0 };
+        newValue = Math.max(currentValue - 1, minValues[type]);
+      }
+
+      return { ...prev, [type]: newValue };
+    });
+  };
+
+  const totalPassengers = cipSearch.adults + cipSearch.children + cipSearch.infants
+
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {}
 
@@ -134,9 +198,9 @@ const CipSearch = () => {
       newErrors.date = "لطفاً تاریخ را انتخاب کنید"
     }
 
-    if (!cipSearch.passengers || cipSearch.passengers < 1) {
+    if (!totalPassengers || totalPassengers < 1) {
       newErrors.passengers = "تعداد مسافران باید حداقل ۱ باشد"
-    } else if (cipSearch.passengers > 10) {
+    } else if (totalPassengers > 10) {
       newErrors.passengers = "تعداد مسافران نمی‌تواند بیشتر از ۱۰ باشد"
     }
 
@@ -154,8 +218,9 @@ const CipSearch = () => {
       airport: displayValue,
       airportId: suggestion.id
     }))
-
+    setSelectedAirport(suggestion)
     setShowSuggestions(false)
+    setShowFavorites(false)
     setCurrentInput("")
     setIsAirportFocused(false)
 
@@ -174,6 +239,10 @@ const CipSearch = () => {
       setErrors(prev => ({ ...prev, airport: undefined }))
     }
   }
+
+  useEffect(() => {
+    console.log(selectedAirport)
+  }, [selectedAirport])
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!showSuggestions) return
@@ -246,6 +315,101 @@ const CipSearch = () => {
     )
   }
 
+  const renderPassengersSelector = () => {
+    if (!showPassengers) return null
+
+    return (
+      <div
+        ref={passengersRef}
+        className="absolute top-full right-0 left-0 bg-[#fffefe] border border-blue-900 shadow-lg z-50 p-4 mt-1 rounded-md"
+      >
+        <div className="space-y-4">
+          {/* Adults Selector */}
+          <div className="flex items-center justify-between">
+            <div className="text-right">
+              <div className="font-bold text-blue-950">بزرگسالان</div>
+              <div className="text-xs text-gray-600 mt-1">(12 سال به بالا)</div>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => handlePassengerChange('adults', 'decrement')}
+                disabled={cipSearch.adults <= 1}
+                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-blue-950 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
+              >
+                <Minus className="h-4 w-4" />
+              </button>
+              <span className="text-lg font-bold text-blue-950 min-w-6 text-center">
+                {cipSearch.adults}
+              </span>
+              <button
+                onClick={() => handlePassengerChange('adults', 'increment')}
+                disabled={cipSearch.adults >= 9}
+                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-blue-950 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Children Selector */}
+          <div className="flex items-center justify-between">
+            <div className="text-right">
+              <div className="font-bold text-blue-950">کودکان</div>
+              <div className="text-xs text-gray-600 mt-1">(2 تا 12 سال)</div>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => handlePassengerChange('children', 'decrement')}
+                disabled={cipSearch.children <= 0}
+                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-blue-950 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
+              >
+                <Minus className="h-4 w-4" />
+              </button>
+              <span className="text-lg font-bold text-blue-950 min-w-6 text-center">
+                {cipSearch.children}
+              </span>
+              <button
+                onClick={() => handlePassengerChange('children', 'increment')}
+                disabled={cipSearch.children >= 8}
+                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-blue-950 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Infants Selector */}
+          <div className="flex items-center justify-between">
+            <div className="text-right">
+              <div className="font-bold text-blue-950">نوزادان</div>
+              <div className="text-xs text-gray-600 mt-1">(زیر 2 سال)</div>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => handlePassengerChange('infants', 'decrement')}
+                disabled={cipSearch.infants <= 0}
+                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-blue-950 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
+              >
+                <Minus className="h-4 w-4" />
+              </button>
+              <span className="text-lg font-bold text-blue-950 min-w-6 text-center">
+                {cipSearch.infants}
+              </span>
+              <button
+                onClick={() => handlePassengerChange('infants', 'increment')}
+                disabled={cipSearch.infants >= 4}
+                className="flex items-center justify-center w-8 h-8 bg-gray-200 text-blue-950 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded"
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+
   const renderSuggestions = () => {
     if (!showSuggestions || suggestions.length === 0) return null
 
@@ -289,6 +453,62 @@ const CipSearch = () => {
     )
   }
 
+  const handleFavoriteClick = (favorite: AirportSuggestion) => {
+    handleSuggestionClick(favorite)
+  }
+
+  const favoritesRef = useRef(null)
+
+  const renderFavorites = () => {
+    if (!showFavorites || !airports || currentInput.length > 0) return null
+
+    return (
+      <div
+        ref={favoritesRef}
+        className="absolute top-full right-0 left-0 bg-[#fffefe] shadow-lg z-50 max-h-80 overflow-y-auto mt-1 rounded-md"
+      >
+        <div className="p-3 bg-gray-50">
+          <div className="flex items-center gap-2 justify-start">
+            <Heart className="h-4 w-4 text-red-500" />
+            <span className="font-bold text-blue-950">مقاصد محبوب داخلی</span>
+          </div>
+        </div>
+        {airports.map((favorite, index) => (
+          <div
+            key={`${index}`}
+            className="p-3 cursor-pointer last:border-b-0 hover:bg-gray-50"
+            onMouseDown={(e) => {
+              e.preventDefault() // Prevent input blur
+              handleFavoriteClick(favorite)
+            }}
+          >
+            <div className="flex justify-between items-start">
+              <div className="flex-1 text-right">
+                <div className="flex items-center gap-2 justify-start">
+                  <span className="font-bold text-blue-950">
+                    {favorite.name}
+                  </span>
+                  <span className="text-blue-500 font-bold">({favorite.airportCity})</span>
+                </div>
+                <div className="text-sm text-gray-600 mt-1">
+                  {favorite.airportIata}
+                </div>
+                <div className="flex items-center gap-2 mt-1 justify-start">
+                  <span className="text-xs text-gray-500">
+                    ایران
+                  </span>
+                  <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded border border-blue-900">
+                    فرودگاه
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
   return (
     <div style={{ direction: 'rtl' }} className="container mx-auto">
       {/* General Error Display */}
@@ -312,7 +532,7 @@ const CipSearch = () => {
               ref={inputRef}
               id="cip-airport"
               placeholder="فرودگاه بین المللی امام خمینی..."
-              className={`pr-10 h-12 border border-blue-900 bg-[#fffefe] text-blue-950 placeholder-gray-500 ${errors.airport
+              className={`pr-10 h-12 border cursor-pointer border-blue-900 bg-[#fffefe] text-blue-950 placeholder-gray-500 ${errors.airport
                 ? 'border-red-500 bg-red-500'
                 : 'border-blue-900'
                 }`}
@@ -321,7 +541,15 @@ const CipSearch = () => {
               onKeyDown={handleKeyDown}
               onFocus={() => {
                 setIsAirportFocused(true)
+                setShowFavorites(true)
                 setShowSuggestions(suggestions.length > 0)
+              }}
+              onClick={() => {
+                setCipSearch((prev) => ({
+                  ...prev,
+                  airport: ""
+                }))
+                setShowFavorites(true)
               }}
               onBlur={() => {
                 setIsAirportFocused(false)
@@ -330,6 +558,7 @@ const CipSearch = () => {
               autoComplete="off"
             />
             {renderSuggestions()}
+            {renderFavorites()}
             {renderError("airport")}
           </div>
         </div>
@@ -356,51 +585,112 @@ const CipSearch = () => {
         <div className="space-y-2">
           <Label className="text-blue-950 text-right block">نوع سرویس</Label>
           <div className="grid grid-cols-2 gap-2">
-            <Button
-              variant={cipSearch.serviceType === "departure" ? "default" : "outline"}
-              className={`h-12 ${cipSearch.serviceType === "departure"
-                ? 'bg-blue-800 text-white'
-                : 'bg-[#fffefe] text-blue-950 border border-blue-900'
-                }`}
-              onClick={() => setCipSearch(prev => ({ ...prev, serviceType: "departure" }))}
+            <Select
+              value={cipSearch.serviceType || "placeholder"}
+              onValueChange={(value) => {
+                if (value === "placeholder") {
+                  setCipSearch({ ...cipSearch, serviceType: "" });
+                } else {
+                  setCipSearch({ ...cipSearch, serviceType: value });
+                }
+              }}
+              disabled={!selectedAirport}
             >
-              خروج
-            </Button>
-            <Button
-              variant={cipSearch.serviceType === "arrival" ? "default" : "outline"}
-              className={`h-12 ${cipSearch.serviceType === "arrival"
-                ? 'bg-blue-800 text-white'
-                : 'bg-[#fffefe] text-blue-950 border border-blue-900'
-                }`}
-              onClick={() => setCipSearch(prev => ({ ...prev, serviceType: "arrival" }))}
-            >
-              ورود
-            </Button>
+              <SelectTrigger className="h-12 border border-blue-900 rounded-lg col-span-2 text-right px-4 bg-white hover:border-blue-700 transition-colors">
+                <SelectValue>
+                  {cipSearch.serviceType.length > 0 && cipSearch.serviceType || "یک سرویس انتخاب کنید"}
+                </SelectValue>
+              </SelectTrigger>
+
+              <SelectContent className="border border-blue-900 rounded-lg mt-1 shadow-lg bg-white max-h-60 overflow-y-auto">
+                {/* Placeholder option with a unique value */}
+                <SelectItem
+                  value="placeholder"
+                  className="
+                    h-12 
+                    flex 
+                    items-center 
+                    px-4 
+                    text-gray-500
+                    hover:bg-blue-50 
+                    hover:text-blue-800
+                    cursor-pointer
+                    data-[state=checked]:bg-blue-100
+                    data-[state=checked]:text-blue-800
+                    border-b
+                    border-b-gray-100
+                  "
+                >
+                  یک سرویس انتخاب کنید
+                </SelectItem>
+
+                {/* Service options */}
+                {selectedAirport && selectedAirport.airportServeTypes.length > 0 ? (
+                  selectedAirport.airportServeTypes.map((service, index) => (
+                    <SelectItem
+                      key={service.id || index}
+                      value={service.title}
+                      className="
+                        h-12 
+                        flex 
+                        items-center 
+                        px-4 
+                        text-gray-700
+                        bg-white
+                        hover:bg-blue-50 
+                        hover:text-blue-800
+                        cursor-pointer
+                        transition-colors
+                        data-[state=checked]:bg-blue-100
+                        data-[state=checked]:text-blue-800
+                        data-[state=checked]:font-medium
+                        border-t
+                        border-t-gray-100
+                      "
+                    >
+                      {service.title}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem
+                    value="no-service"
+                    disabled
+                    className="h-12 flex items-center px-4 text-gray-400 border-t border-t-gray-100"
+                  >
+                    سرویسی موجود نیست
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
         {/* Passengers */}
-        <div className="space-y-2">
-          <Label htmlFor="cip-passengers" className="text-blue-950 text-right block">تعداد مسافران</Label>
-          <div className="relative">
-            <Users className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
-            <Input
-              type="number"
-              id="cip-passengers"
-              min="1"
-              max="10"
-              className={`pr-10 h-12 border border-blue-900 bg-[#fffefe] text-blue-950 ${errors.passengers
-                ? 'border-red-500 bg-red-500'
-                : 'border-blue-900'
-                }`}
-              value={cipSearch.passengers}
-              onChange={(e) => setCipSearch(prev => ({
-                ...prev,
-                passengers: Math.max(1, Math.min(10, parseInt(e.target.value) || 1))
-              }))}
-            />
-            {renderError("passengers")}
+        {/* Passengers Selector */}
+        <div className="space-y-2 col-span-1 relative">
+          <Label className="text-blue-950 text-right block">مسافران</Label>
+          <div
+            className="passengers-trigger cursor-pointer"
+            onClick={() => setShowPassengers(!showPassengers)}
+          >
+            <div className={`relative h-12 border rounded-lg bg-[#fffefe] hover:border-gray-400 flex items-center justify-between px-3 ${showPassengers ? 'border-blue-500' : 'border-blue-900'
+              }`}>
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-gray-400" />
+                <User className="h-4 w-4 text-gray-400" />
+                <Baby className="h-4 w-4 text-gray-400" />
+              </div>
+              <div className="text-right">
+                <div className="text-blue-950 text-sm font-medium">
+                  {totalPassengers} مسافر
+                </div>
+                <div className="text-gray-500 text-xs">
+                  {cipSearch.adults} بزرگسال, {cipSearch.children} کودک, {cipSearch.infants} نوزاد
+                </div>
+              </div>
+            </div>
           </div>
+          {renderPassengersSelector()}
         </div>
       </div>
 
@@ -413,7 +703,7 @@ const CipSearch = () => {
         <Plane className="ml-2 h-4 w-4" />
         {isLoading ? "در حال جستجو..." : "جستجوی CIP"}
       </Button>
-    </div>
+    </div >
   )
 }
 

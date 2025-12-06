@@ -206,7 +206,7 @@ const HotelSearch = () => {
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {}
 
-    if (!hotelSearch.name || !hotelSearch.city || !hotelSearch.city.trim()) {
+    if (!hotelSearch.name && hotelSearch.city && !hotelSearch.city.trim()) {
       newErrors.city = "لطفاً یک شهر معتبر انتخاب کنید"
     } else if (!hotelSearch.name && !hotelSearch.cityId) {
       newErrors.city = "لطفاً از لیست پیشنهادی یک شهر انتخاب کنید"

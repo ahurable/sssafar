@@ -613,7 +613,7 @@ export function Header() {
                 <div className="h-8 w-8 bg-gray-300 rounded-lg animate-pulse" />
               ) : (
                 <div className="flex py-1 h-max w-max px-1 items-center cursor-pointer justify-center bg-grey-100 border border-blue-900 rounded-lg text-blue-900 text-sm font-bold">
-                  <span className="block me-3 font-normal">{user && ` ${user.firstName ? user.firstName + ' ' + user.lastName : user.email ? user.email : user.phone}`}</span>
+                  <span className="block me-1 font-normal">{user && ` ${user.firstName ? user.firstName + ' ' + user.lastName : user.email ? user.email : user.phone}` || 'حساب کاربری'}</span>
                   <span className="p-1 rounded-full border border-blue-900">
                     <User className="h-4 w-4 text-blue-900" />
                   </span>
