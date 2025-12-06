@@ -881,7 +881,7 @@ const DomesticFlightSearch = () => {
                             type="button"
                             variant="outline"
                             size="icon"
-                            className="h-12 w-12 rounded-full border-2 
+                            className="h-12 w-12 rounded-full border-2  rotate-90 lg:rotate-0
                             border-blue-900 bg-white hover:border-blue-500 
                             hover:bg-blue-50 hover:text-blue-600 transition-all 
                             duration-200 transform md:top-0 md:left-[-31px] md:scale-75 top-[43px] left-0
